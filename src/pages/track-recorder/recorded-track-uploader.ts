@@ -18,7 +18,7 @@ export class RecordedTrackUploader {
         return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise().catch(() => {
             return {
                 ok: false
-            }
+            };
         }).then(resolved => resolved.ok);
     }
 }
