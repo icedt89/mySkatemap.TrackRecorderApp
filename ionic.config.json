@@ -1,0 +1,6 @@
+{
+  "name": "mySkatemap Streckenerfassung",
+  "app_id": "myskatemap-track-recorder",
+  "v2": true,
+  "typescript": true
+}

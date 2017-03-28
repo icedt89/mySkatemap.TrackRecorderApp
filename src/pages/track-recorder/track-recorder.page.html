@@ -1,0 +1,58 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Streckenerfassung</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <ion-refresher [enabled]="canRefresh" (ionRefresh)="refreshLastLocationDisplay($event)">
+        <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Ziehen zum aktualisieren" refreshingSpinner="circles" refreshingText="aktualisieren..."></ion-refresher-content>
+    </ion-refresher>
+    <ion-item>
+        <ion-label stacked color="primary">Letzte Latitude</ion-label>
+        <ion-input disabled [value]="lastLatitude" type="text" placeholder="Keine Latitude vorhanden"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-label stacked color="primary">Letzte Longitude</ion-label>
+        <ion-input disabled [value]="lastLongitude" type="text" placeholder="Keine Longitude vorhanden"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-label stacked color="primary">Anzahl ermittelter Positionen</ion-label>
+        <ion-input disabled [value]="countOfCollectedPositions" placeholder="Keine Positionen ermittelt"></ion-input>
+    </ion-item>
+
+    <map #map></map>
+</ion-content>
+
+<ion-fab middle right>
+    <button ion-fab color="light">
+       <ion-icon name="options"></ion-icon>
+    </button>
+    <ion-fab-list side="top">
+        <button [color]="(!isStopped || !recordedPositions) ? 'default' : 'danger'" [disabled]="!isStopped || !recordedPositions"
+            ion-fab mini (click)="resetRecording()">
+            <ion-icon name="trash"></ion-icon>
+        </button>
+    </ion-fab-list>
+    <ion-fab-list side="left">
+        <button [color]="!isStopped ? 'default' : 'secondary'" [disabled]="!isStopped"
+            ion-fab mini (click)="showTrackRecorderSettings($event)">
+            <ion-icon name="settings"></ion-icon>
+        </button>
+    </ion-fab-list>
+    <ion-fab-list side="bottom">
+        <button [color]="(!isStopped || !recordedPositions) ? 'default' : 'secondary'" [disabled]="!isStopped || !recordedPositions"
+            ion-fab mini (click)="uploadCurrentTrackData()">
+            <ion-icon name="cloud-upload"></ion-icon>
+        </button>
+    </ion-fab-list>
+</ion-fab>
+
+<ion-footer>
+    <ion-toolbar>
+        <button (click)="record()" *ngIf="isStopped" full color="primary" ion-button>Starten</button>
+        <button (click)="stop()" *ngIf="!isStopped" full color="danger" ion-button>Stoppen</button>
+    </ion-toolbar>
+</ion-footer>
