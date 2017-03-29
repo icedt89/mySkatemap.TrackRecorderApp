@@ -13,8 +13,8 @@ export class RecordedTrackUploader {
 
     public uploadRecordedTrack(positions: BackgroundGeolocationResponse[], startedAt: Date): Promise<boolean> {
         const createdRecordedTrackModel = new CreateRecordedTrackModel(startedAt, new Date());
-        createdRecordedTrackModel.RecordedPositions = positions.map(position => {
-            const result = new RecordedTrackPositionModel(position.latitude, position.longitude);
+        createdRecordedTrackModel.RecordedPositions = positions.map((position, order) => {
+            const result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);
             result.Accuracy = position.accuracy;
             result.Bearing = position.bearing;
             result.CapturedAt = position.time;
@@ -45,7 +45,7 @@ class CreateRecordedTrackModel {
 }
 
 class RecordedTrackPositionModel {
-    public constructor(public Latitude: number, public Longitude: number) {
+    public constructor(public Latitude: number, public Longitude: number, public Order: number) {
     }
 
     public Speed: number | null;
