@@ -96,7 +96,7 @@ export class TrackRecorderPage {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private resetRecording(): void {
+    private resetTrackRecording(): void {
         const resetRecordingPrompt = this.alertController.create({
             title: "Strecke löschen",
             message: "Möchten Sie die aufgezeichnete Strecke wirklich löschen?",
@@ -126,7 +126,7 @@ export class TrackRecorderPage {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private uploadCurrentTrackData(): void {
+    private uploadTrackRecording(): void {
         const resetRecordingPrompt = this.alertController.create({
             title: "Strecke übermitteln",
             message: "Möchten Sie die aufgezeichnete Strecke übermitteln?",
@@ -140,7 +140,7 @@ export class TrackRecorderPage {
                     text: "Ja",
                     handler: () => {
                         this.trackRecorder.getPositions().then(positions => {
-                            this.recordedTrackUploader.uploadRecordedTrack(positions).then(successful => {
+                            this.recordedTrackUploader.uploadRecordedTrack(positions, this.trackRecorder.startedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
                                 const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
                                     closeButtonText: "Toll",
                                     message: "Strecke erfolgreich hochgeladen",
@@ -148,6 +148,8 @@ export class TrackRecorderPage {
                                     duration: 3000
                                 });
                                 uploadedSuccessfulToast.present();
+
+                                this.refreshLastLocationDisplay();
                             });
                         });
                     }
@@ -155,6 +157,18 @@ export class TrackRecorderPage {
             ]
         });
         resetRecordingPrompt.present();
+    }
+
+    private get canDeleteTrackRecording(): boolean {
+        return this.trackingIsStopped && this.countOfCollectedPositions > 0;
+    }
+
+    private get canUploadTrackRecording(): boolean {
+        return this.trackingIsStopped && this.countOfCollectedPositions > 0;
+    }
+
+    private get canShowTrackRecorderSettings(): boolean {
+        return this.trackingIsStopped;
     }
 
     private get lastLatitude(): number {

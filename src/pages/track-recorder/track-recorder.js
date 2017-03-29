@@ -20,7 +20,7 @@ var TrackRecorder = (function () {
             stationaryRadius: 5,
             distanceFilter: 5,
             // Android only section
-            locationProvider: 1,
+            locationProvider: 0,
             interval: 3000,
             fastestInterval: 2000,
             activitiesInterval: 5000,
@@ -86,6 +86,13 @@ var TrackRecorder = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(TrackRecorder.prototype, "startedAt", {
+        get: function () {
+            return this.trackingStartedAt;
+        },
+        enumerable: true,
+        configurable: true
+    });
     TrackRecorder.prototype.getPositions = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
@@ -121,6 +128,9 @@ var TrackRecorder = (function () {
         return new Promise(function (resolve, reject) {
             backgroundGeolocation.start(function () {
                 _this.stopped = false;
+                if (!_this.trackingStartedAt) {
+                    _this.trackingStartedAt = new Date();
+                }
                 if (_this.debug) {
                     console.log("TrackRecorder: Started");
                 }
@@ -146,6 +156,7 @@ var TrackRecorder = (function () {
             backgroundGeolocation.deleteAllLocations(function () {
                 _this.lastRecordedPositionLatitude = null;
                 _this.lastRecordedPositionLongitude = null;
+                _this.trackingStartedAt = null;
                 if (_this.debug) {
                     console.log("TrackRecorder: All recordings deleted");
                 }

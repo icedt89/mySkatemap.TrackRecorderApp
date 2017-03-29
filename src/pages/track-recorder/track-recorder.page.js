@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Events, Platform, ViewController } from 'ionic-angular';
+import { Events, Platform, ViewController } from "ionic-angular";
 import { Component, ViewChild } from "@angular/core";
 import { AlertController } from "ionic-angular/components/alert/alert";
 import { LatLng } from "@ionic-native/google-maps";
@@ -84,7 +84,7 @@ var TrackRecorderPage = (function () {
         trackRecorderSettingsModal.present();
     };
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    TrackRecorderPage.prototype.resetRecording = function () {
+    TrackRecorderPage.prototype.resetTrackRecording = function () {
         var _this = this;
         var resetRecordingPrompt = this.alertController.create({
             title: "Strecke löschen",
@@ -113,7 +113,7 @@ var TrackRecorderPage = (function () {
         resetRecordingPrompt.present();
     };
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    TrackRecorderPage.prototype.uploadCurrentTrackData = function () {
+    TrackRecorderPage.prototype.uploadTrackRecording = function () {
         var _this = this;
         var resetRecordingPrompt = this.alertController.create({
             title: "Strecke übermitteln",
@@ -128,7 +128,7 @@ var TrackRecorderPage = (function () {
                     text: "Ja",
                     handler: function () {
                         _this.trackRecorder.getPositions().then(function (positions) {
-                            _this.recordedTrackUploader.uploadRecordedTrack(positions).then(function (successful) {
+                            _this.recordedTrackUploader.uploadRecordedTrack(positions, _this.trackRecorder.startedAt).then(function () { return _this.trackRecorder.deleteAllRecordings(); }).then(function () {
                                 var uploadedSuccessfulToast = _this.toastController.create({
                                     closeButtonText: "Toll",
                                     message: "Strecke erfolgreich hochgeladen",
@@ -136,6 +136,7 @@ var TrackRecorderPage = (function () {
                                     duration: 3000
                                 });
                                 uploadedSuccessfulToast.present();
+                                _this.refreshLastLocationDisplay();
                             });
                         });
                     }
@@ -144,6 +145,27 @@ var TrackRecorderPage = (function () {
         });
         resetRecordingPrompt.present();
     };
+    Object.defineProperty(TrackRecorderPage.prototype, "canDeleteTrackRecording", {
+        get: function () {
+            return this.trackingIsStopped && this.countOfCollectedPositions > 0;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TrackRecorderPage.prototype, "canUploadTrackRecording", {
+        get: function () {
+            return this.trackingIsStopped && this.countOfCollectedPositions > 0;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TrackRecorderPage.prototype, "canShowTrackRecorderSettings", {
+        get: function () {
+            return this.trackingIsStopped;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(TrackRecorderPage.prototype, "lastLatitude", {
         get: function () {
             return this.lastRecordedLatitude;

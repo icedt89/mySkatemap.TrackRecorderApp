@@ -31,20 +31,17 @@
        <ion-icon name="options"></ion-icon>
     </button>
     <ion-fab-list side="top">
-        <button [color]="(!isStopped || !recordedPositions) ? 'default' : 'danger'" [disabled]="!isStopped || !recordedPositions"
-            ion-fab mini (click)="resetRecording()">
+        <button [color]="!canDeleteTrackRecording ? 'default' : 'danger'" [disabled]="!canDeleteTrackRecording" ion-fab mini (click)="resetTrackRecording()">
             <ion-icon name="trash"></ion-icon>
         </button>
     </ion-fab-list>
     <ion-fab-list side="left">
-        <button [color]="!isStopped ? 'default' : 'secondary'" [disabled]="!isStopped"
-            ion-fab mini (click)="showTrackRecorderSettings($event)">
+        <button [color]="!canUploadTrackRecording ? 'default' : 'secondary'" [disabled]="!canUploadTrackRecording" ion-fab mini (click)="showTrackRecorderSettings($event)">
             <ion-icon name="settings"></ion-icon>
         </button>
     </ion-fab-list>
     <ion-fab-list side="bottom">
-        <button [color]="(!isStopped || !recordedPositions) ? 'default' : 'secondary'" [disabled]="!isStopped || !recordedPositions"
-            ion-fab mini (click)="uploadCurrentTrackData()">
+        <button [color]="!canShowTrackRecorderSettings ? 'default' : 'secondary'" [disabled]="!canShowTrackRecorderSettings" ion-fab mini (click)="uploadTrackRecording()">
             <ion-icon name="cloud-upload"></ion-icon>
         </button>
     </ion-fab-list>

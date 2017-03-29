@@ -12,13 +12,14 @@ export class TrackRecorder {
     private lastRecordedPositionLongitude: number | null;
     private stopped = true;
     private debug: boolean = false;
+    private trackingStartedAt: Date;
 
     private configuration = <BackgroundGeolocationConfig>{
         desiredAccuracy: 0, // 0 = GPS + Mobile + Wifi + GSM; 10 = Mobile + Wifi + GSM, 100 = Wifi + GSM; 1000 = GSM
         stationaryRadius: 5,
         distanceFilter: 5,
         // Android only section
-        locationProvider: 1,
+        locationProvider: 0,
         interval: 3000,
         fastestInterval: 2000,
         activitiesInterval: 5000,
@@ -87,6 +88,10 @@ export class TrackRecorder {
         return this.lastRecordedPositionLongitude;
     }
 
+    public get startedAt(): Date {
+        return this.trackingStartedAt;
+    }
+
     public getPositions(): Promise<BackgroundGeolocationResponse[]> {
         return new Promise<BackgroundGeolocationResponse[]>((resolve, reject) => {
             backgroundGeolocation.getValidLocations(positions => {
@@ -123,6 +128,10 @@ export class TrackRecorder {
             backgroundGeolocation.start(() => {
                 this.stopped = false;
 
+                if (!this.trackingStartedAt) {
+                    this.trackingStartedAt = new Date();
+                }
+
                 if (this.debug) {
                     console.log("TrackRecorder: Started");
                 }
@@ -151,6 +160,7 @@ export class TrackRecorder {
             backgroundGeolocation.deleteAllLocations(() => {
                 this.lastRecordedPositionLatitude = null;
                 this.lastRecordedPositionLongitude = null;
+                this.trackingStartedAt = null;
 
                 if (this.debug) {
                     console.log("TrackRecorder: All recordings deleted");

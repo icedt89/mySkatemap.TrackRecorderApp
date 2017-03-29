@@ -7,6 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+import "rxjs/Rx";
 import { Http } from "@angular/http";
 import { Injectable } from "@angular/core";
 var RecordedTrackUploader = (function () {
@@ -14,10 +15,21 @@ var RecordedTrackUploader = (function () {
         this.http = http;
         this.apiEndpoint = "http://myskatemap-api.azurewebsites.net/api/RecordedTrack";
     }
-    RecordedTrackUploader.prototype.uploadRecordedTrack = function (positions) {
-        var createdRecordedTrackModel = new CreateRecordedTrackModel();
-        createdRecordedTrackModel.RecordedPositions = positions.map(function (position) { return new RecordedTrackPositionModel(position.latitude, position.longitude); });
-        return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise().then(function (resolved) { return resolved.ok; });
+    RecordedTrackUploader.prototype.uploadRecordedTrack = function (positions, startedAt) {
+        var createdRecordedTrackModel = new CreateRecordedTrackModel(startedAt, new Date());
+        createdRecordedTrackModel.RecordedPositions = positions.map(function (position) {
+            var result = new RecordedTrackPositionModel(position.latitude, position.longitude);
+            result.Accuracy = position.accuracy;
+            result.Bearing = position.bearing;
+            result.CapturedAt = position.time;
+            result.Speed = position.time;
+            return result;
+        });
+        return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise().catch(function () {
+            return {
+                ok: false
+            };
+        }).then(function (resolved) { return resolved.ok; });
     };
     return RecordedTrackUploader;
 }());
@@ -27,8 +39,10 @@ RecordedTrackUploader = __decorate([
 ], RecordedTrackUploader);
 export { RecordedTrackUploader };
 var CreateRecordedTrackModel = (function () {
-    function CreateRecordedTrackModel() {
+    function CreateRecordedTrackModel(trackingStartedAt, uploadStartedAt) {
         this.RecordedPositions = [];
+        this.TrackingStartedAt = trackingStartedAt.toISOString();
+        this.UploadStartedAt = uploadStartedAt.toISOString();
     }
     return CreateRecordedTrackModel;
 }());

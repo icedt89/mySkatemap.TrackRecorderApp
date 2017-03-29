@@ -15,45 +15,55 @@ import { Observable } from 'rxjs/Rx';
 declare module '*';
 
 export declare class BackgroundGeolocationConfig {
-  activitiesInterval: number;
+  public activitiesInterval: number;
 
-  desiredAccuracy: number;
+  public desiredAccuracy: number;
 
-  distanceFilter: number;
+  public distanceFilter: number;
 
-  fastestInterval: number;
+  public fastestInterval: number;
 
-  interval: number;
+  public interval: number;
 
-  locationProvider: number;
+  public locationProvider: number;
 
-  stationaryRadius: number;
+  public stationaryRadius: number;
 }
 
 export declare class BackgroundGeolocation {
-  start(success: () => void, error: (error: any) => void): void;
+  public start(success: () => void, error: (error: any) => void): void;
 
-  stop(success: () => void, error: (error: any) => void): void;
+  public stop(success: () => void, error: (error: any) => void): void;
 
-  getValidLocations(success: (positions: BackgroundGeolocationResponse[]) => void, error: (error: any) => void): void;
+  public getValidLocations(success: (positions: BackgroundGeolocationResponse[]) => void, error: (error: any) => void): void;
 
-  deleteAllLocations(success: () => void, error: (error: any) => void): void;
+  public deleteAllLocations(success: () => void, error: (error: any) => void): void;
 
-  getConfig(success: (config: BackgroundGeolocationConfig) => void, error: (error: any) => void): void;
+  public getConfig(success: (config: BackgroundGeolocationConfig) => void, error: (error: any) => void): void;
 
-  configure(success: (position: BackgroundGeolocationResponse) => void, error: any, config: BackgroundGeolocationConfig): void;
+  public configure(success: (position: BackgroundGeolocationResponse) => void, error: any, config: BackgroundGeolocationConfig): void;
 
-  isLocationEnabled(success: (enabled: boolean) => void, error: (error: any) => void): void;
+  public isLocationEnabled(success: (enabled: boolean) => void, error: (error: any) => void): void;
 
-  watchLocationMode(success: (enabled: boolean) => void, error: (error: any) => void): void;
+  public watchLocationMode(success: (enabled: boolean) => void, error: (error: any) => void): void;
 
-  stopWatchingLocationMode(): void;
+  public stopWatchingLocationMode(): void;
 
-  showLocationSettings(): void;
+  public showLocationSettings(): void;
 }
 
 export declare class BackgroundGeolocationResponse {
-  latitude: number;
+  public latitude: number;
 
-  longitude: number;
+  public longitude: number;
+
+  public accuracy: number | null;
+
+  public time: number | null;
+
+  public speed: number | null;
+
+  public altitude: number | null;
+
+  public bearing: number | null;
 }
