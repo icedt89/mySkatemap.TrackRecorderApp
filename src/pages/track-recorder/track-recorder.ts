@@ -1,4 +1,5 @@
-import { BackgroundGeolocation, BackgroundGeolocationConfig, BackgroundGeolocationResponse } from "../../declarations";
+import { TrackRecorderStateInfo } from "./track-recorder-state-info";
+import { BackgroundGeolocation, BackgroundGeolocationConfig } from "../../declarations";
 import { Events, Platform } from "ionic-angular";
 
 import { Injectable } from "@angular/core";
@@ -8,11 +9,7 @@ declare var backgroundGeolocation: BackgroundGeolocation;
 
 @Injectable()
 export class TrackRecorder {
-    private lastRecordedPositionLatitude: number | null;
-    private lastRecordedPositionLongitude: number | null;
-    private stopped = true;
     private debug: boolean = false;
-    private trackingStartedAt: Date;
 
     private configuration = <BackgroundGeolocationConfig>{
         desiredAccuracy: 0, // 0 = GPS + Mobile + Wifi + GSM; 10 = Mobile + Wifi + GSM, 100 = Wifi + GSM; 1000 = GSM
@@ -80,43 +77,27 @@ export class TrackRecorder {
         backgroundGeolocation.configure(null, null, this.configuration);
     }
 
-    public get lastRecordedLatitude(): number | null {
-        return this.lastRecordedPositionLatitude;
-    }
-
-    public get lastRecordedLongitude(): number | null {
-        return this.lastRecordedPositionLongitude;
-    }
-
-    public get startedAt(): Date {
-        return this.trackingStartedAt;
-    }
-
-    public getPositions(): Promise<BackgroundGeolocationResponse[]> {
-        return new Promise<BackgroundGeolocationResponse[]>((resolve, reject) => {
+    public getRecorderStateInfo(): Promise<TrackRecorderStateInfo> {
+        return new Promise<TrackRecorderStateInfo>((resolve, reject) => {
             backgroundGeolocation.getValidLocations(positions => {
+                const result = new TrackRecorderStateInfo();
                 if (positions.length) {
                     const lastPosition = positions[positions.length - 1];
 
-                    this.lastRecordedPositionLatitude = lastPosition.latitude;
-                    this.lastRecordedPositionLongitude = lastPosition.longitude;
+                    result.lastLatitude = lastPosition.latitude;
+                    result.lastLongitude = lastPosition.longitude;
+                    result.recordedPositions = positions;
                 }
 
-                resolve(positions);
+                resolve(result);
             }, error => reject(error));
         });
     }
 
     public isLocationEnabled(): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            backgroundGeolocation.isLocationEnabled(enabled => {
-                resolve(enabled);
-            }, error => reject(error));
+            backgroundGeolocation.isLocationEnabled(enabled => resolve(enabled), error => reject(error));
         });
-    }
-
-    public get isStopped(): boolean {
-        return this.stopped;
     }
 
     public showLocationSettings(): void {
@@ -126,12 +107,6 @@ export class TrackRecorder {
     public record(): Promise<any> {
         return new Promise((resolve, reject) => {
             backgroundGeolocation.start(() => {
-                this.stopped = false;
-
-                if (!this.trackingStartedAt) {
-                    this.trackingStartedAt = new Date();
-                }
-
                 if (this.debug) {
                     console.log("TrackRecorder: Started");
                 }
@@ -144,8 +119,6 @@ export class TrackRecorder {
     public stop(): Promise<any> {
         return new Promise((resolve, reject) => {
             backgroundGeolocation.stop(() => {
-                this.stopped = true;
-
                 if (this.debug) {
                     console.log("TrackRecorder: Stopped");
                 }
@@ -158,10 +131,6 @@ export class TrackRecorder {
     public deleteAllRecordings(): Promise<any> {
         return new Promise((resolve, reject) => {
             backgroundGeolocation.deleteAllLocations(() => {
-                this.lastRecordedPositionLatitude = null;
-                this.lastRecordedPositionLongitude = null;
-                this.trackingStartedAt = null;
-
                 if (this.debug) {
                     console.log("TrackRecorder: All recordings deleted");
                 }

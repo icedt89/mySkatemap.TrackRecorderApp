@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { ErrorHandler, NgModule } from "@angular/core";
 import { IonicApp, IonicErrorHandler, IonicModule } from "ionic-angular";
+import { IonicStorageModule } from '@ionic/storage';
 import { MapComponent } from "../components/map/map.component";
 import { MyApp } from "./app.component";
 import { RecordedTrackUploader } from "../pages/track-recorder/recorded-track-uploader";
@@ -22,7 +23,8 @@ var AppModule = (function () {
 AppModule = __decorate([
     NgModule({
         imports: [
-            IonicModule.forRoot(MyApp)
+            IonicModule.forRoot(MyApp),
+            IonicStorageModule.forRoot()
         ],
         declarations: [
             MyApp,

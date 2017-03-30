@@ -7,6 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+import { LoadingController } from "ionic-angular/components/loading/loading";
 import { Events, Platform, ViewController } from "ionic-angular";
 import { Component, ViewChild } from "@angular/core";
 import { AlertController } from "ionic-angular/components/alert/alert";
@@ -16,17 +17,18 @@ import { ModalController } from "ionic-angular/components/modal/modal";
 import { RecordedTrackUploader } from "./recorded-track-uploader";
 import { ToastController } from "ionic-angular/components/toast/toast";
 import { TrackRecorder } from "./track-recorder";
+import { Storage } from "@ionic/storage";
 import { TrackRecorderSettingsComponent } from "../../components/track-recorder-settings/track-recorder-settings.component";
 var TrackRecorderPage = (function () {
-    function TrackRecorderPage(viewController, platform, alertController, trackRecorder, modalController, toastController, recordedTrackUploader, events) {
+    function TrackRecorderPage(viewController, platform, alertController, trackRecorder, modalController, toastController, recordedTrackUploader, loadingController, storage, events) {
         var _this = this;
         this.alertController = alertController;
         this.trackRecorder = trackRecorder;
         this.modalController = modalController;
         this.toastController = toastController;
         this.recordedTrackUploader = recordedTrackUploader;
-        // tslint:disable-next-line:no-unused-variable Used inside template.
-        this.canRefresh = true;
+        this.loadingController = loadingController;
+        this.storage = storage;
         this.trackingIsStopped = true;
         this.trackRecorder.debugging();
         viewController.willLeave.subscribe(function () {
@@ -127,8 +129,13 @@ var TrackRecorderPage = (function () {
                 {
                     text: "Ja",
                     handler: function () {
+                        var uploadTrackRecordingLoading = _this.loadingController.create({
+                            content: "Wird hochgeladen...",
+                        });
+                        uploadTrackRecordingLoading.present();
                         _this.trackRecorder.getPositions().then(function (positions) {
                             _this.recordedTrackUploader.uploadRecordedTrack(positions, _this.trackRecorder.startedAt).then(function () { return _this.trackRecorder.deleteAllRecordings(); }).then(function () {
+                                uploadTrackRecordingLoading.dismiss();
                                 var uploadedSuccessfulToast = _this.toastController.create({
                                     closeButtonText: "Toll",
                                     message: "Strecke erfolgreich hochgeladen",
@@ -136,6 +143,7 @@ var TrackRecorderPage = (function () {
                                     duration: 3000
                                 });
                                 uploadedSuccessfulToast.present();
+                                _this.map.resetTrack();
                                 _this.refreshLastLocationDisplay();
                             });
                         });
@@ -258,6 +266,8 @@ TrackRecorderPage = __decorate([
         ModalController,
         ToastController,
         RecordedTrackUploader,
+        LoadingController,
+        Storage,
         Events])
 ], TrackRecorderPage);
 export { TrackRecorderPage };

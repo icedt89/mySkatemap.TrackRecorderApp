@@ -5,7 +5,7 @@
 </ion-header>
 
 <ion-content>
-    <ion-refresher [enabled]="canRefresh" (ionRefresh)="refreshLastLocationDisplay($event)">
+    <ion-refresher (ionRefresh)="refreshLastLocationDisplay($event)">
         <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Ziehen zum aktualisieren" refreshingSpinner="circles" refreshingText="aktualisieren..."></ion-refresher-content>
     </ion-refresher>
     <ion-item>
@@ -31,17 +31,17 @@
        <ion-icon name="options"></ion-icon>
     </button>
     <ion-fab-list side="top">
-        <button [color]="!canDeleteTrackRecording ? 'default' : 'danger'" [disabled]="!canDeleteTrackRecording" ion-fab mini (click)="resetTrackRecording()">
+        <button [color]="canDeleteTrackRecording ? 'danger' : 'default'" [disabled]="!canDeleteTrackRecording" ion-fab mini (click)="resetTrackRecording()">
             <ion-icon name="trash"></ion-icon>
         </button>
     </ion-fab-list>
     <ion-fab-list side="left">
-        <button [color]="!canUploadTrackRecording ? 'default' : 'secondary'" [disabled]="!canUploadTrackRecording" ion-fab mini (click)="showTrackRecorderSettings($event)">
+        <button [color]="canShowTrackRecorderSettings ? 'secondary' : 'default'" [disabled]="!canShowTrackRecorderSettings" ion-fab mini (click)="showTrackRecorderSettings($event)">
             <ion-icon name="settings"></ion-icon>
         </button>
     </ion-fab-list>
     <ion-fab-list side="bottom">
-        <button [color]="!canShowTrackRecorderSettings ? 'default' : 'secondary'" [disabled]="!canShowTrackRecorderSettings" ion-fab mini (click)="uploadTrackRecording()">
+        <button [color]="canUploadTrackRecording ? 'secondary' : 'default'" [disabled]="!canUploadTrackRecording" ion-fab mini (click)="uploadTrackRecording()">
             <ion-icon name="cloud-upload"></ion-icon>
         </button>
     </ion-fab-list>

@@ -1,4 +1,13 @@
-import { AlertOptions, Events, Platform, Refresher, ToastOptions, ViewController } from "ionic-angular";
+import { LoadingController } from "ionic-angular/components/loading/loading";
+import {
+    AlertOptions,
+    Events,
+    LoadingOptions,
+    Platform,
+    Refresher,
+    ToastOptions,
+    ViewController
+} from "ionic-angular";
 import { Component, ViewChild } from "@angular/core";
 
 import { AlertController } from "ionic-angular/components/alert/alert";
@@ -8,6 +17,7 @@ import { ModalController } from "ionic-angular/components/modal/modal";
 import { RecordedTrackUploader } from "./recorded-track-uploader";
 import { ToastController } from "ionic-angular/components/toast/toast";
 import { TrackRecorder } from "./track-recorder";
+import { Storage } from "@ionic/storage";
 import { TrackRecorderSettings } from "../../app/track-recorder-settings";
 import { TrackRecorderSettingsComponent } from "../../components/track-recorder-settings/track-recorder-settings.component";
 
@@ -16,12 +26,10 @@ import { TrackRecorderSettingsComponent } from "../../components/track-recorder-
     templateUrl: "track-recorder.page.html"
 })
 export class TrackRecorderPage {
-    // tslint:disable-next-line:no-unused-variable Used inside template.
-    private canRefresh = true;
-
     private lastRecordedLatitude: number | null;
     private lastRecordedLongitude: number | null;
     private recordedPositions: number | null;
+    private trackingStartedAt: Date | null;
     private trackingIsStopped = true;
 
     @ViewChild("map") private map: MapComponent;
@@ -33,12 +41,17 @@ export class TrackRecorderPage {
         private modalController: ModalController,
         private toastController: ToastController,
         private recordedTrackUploader: RecordedTrackUploader,
+        private loadingController: LoadingController,
+        private storage: Storage,
         events: Events) {
         this.trackRecorder.debugging();
 
-        viewController.willLeave.subscribe(() => {
-            this.stop();
+        viewController.didEnter.subscribe(() => {
+            this.map.ready.subscribe(() => {
+                storage.ready().then(() => this.loadCurrentState());
+            });
         });
+
         events.subscribe("TrackRecorder-LocationMode", enabled => {
             if (!enabled) {
                 this.stopTrackRecorder().then(() => {
@@ -53,17 +66,53 @@ export class TrackRecorderPage {
         });
     }
 
+    private saveCurrentState(): void {
+        this.storage.set("TrackRecorderPage.lastRecordedLatitude", this.lastRecordedLatitude);
+        this.storage.set("TrackRecorderPage.lastRecordedLongitude", this.lastRecordedLongitude);
+        this.storage.set("TrackRecorderPage.recordedPositions", this.recordedPositions);
+        this.storage.set("TrackRecorderPage.trackingStartedAt", this.trackingStartedAt);
+        this.storage.set("TrackRecorderPage.trackedPath", this.map.getTrack());
+    }
+
+    private loadCurrentState(): void {
+        this.storage.get("TrackRecorderPage.lastRecordedLatitude").then((value: number | null) => {
+            this.lastRecordedLatitude = value;
+        });
+        this.storage.get("TrackRecorderPage.lastRecordedLongitude").then((value: number | null) => {
+            this.lastRecordedLongitude = value;
+        });
+        this.storage.get("TrackRecorderPage.recordedPositions").then((value: number) => {
+            this.recordedPositions = value;
+        });
+        this.storage.get("TrackRecorderPage.trackingStartedAt").then((value: Date | null) => {
+            this.trackingStartedAt = value;
+        });
+        this.storage.get("TrackRecorderPage.trackedPath").then((value: LatLng[] | null) => {
+            if (value) {
+                this.setTrackedPathOnMap(value);
+            }
+        });
+    }
+
+    private setTrackedPathOnMap(trackedPath: LatLng[]): Promise<any> {
+        if (trackedPath.length > 1) {
+            return this.map.setTrack(trackedPath).then(() => this.map.panToTrack());
+        }
+
+        return Promise.resolve(null);
+    }
+
     // tslint:disable-next-line:no-unused-variable Used inside template.
     private refreshLastLocationDisplay(refresher: Refresher | null = null): void {
-        this.trackRecorder.getPositions().then(positions => {
-            this.recordedPositions = positions.length;
-            this.lastRecordedLatitude = this.trackRecorder.lastRecordedLatitude;
-            this.lastRecordedLongitude = this.trackRecorder.lastRecordedLongitude;
+        this.trackRecorder.getRecorderStateInfo().then(positions => {
+            this.recordedPositions = positions.recordedPositions.length;
+            this.lastRecordedLatitude = positions.lastLatitude;
+            this.lastRecordedLongitude = positions.lastLongitude;
 
-            const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
-            if (trackedPath.length > 1) {
-                this.map.setTrack(trackedPath).then(() => this.map.panToTrack());
-            }
+            const trackedPath = positions.recordedPositions.map(position => new LatLng(position.latitude, position.longitude));
+            this.setTrackedPathOnMap(trackedPath).then(() => {
+                this.saveCurrentState();
+            });
 
             if (refresher) {
                 refresher.complete();
@@ -115,7 +164,7 @@ export class TrackRecorderPage {
                             position: "middle"
                         });
                         allRecordingsDeletedToast.present();
-                        this.map.resetTrack();
+                        this.resetView();
 
                         this.refreshLastLocationDisplay();
                     })
@@ -139,8 +188,14 @@ export class TrackRecorderPage {
                 {
                     text: "Ja",
                     handler: () => {
-                        this.trackRecorder.getPositions().then(positions => {
-                            this.recordedTrackUploader.uploadRecordedTrack(positions, this.trackRecorder.startedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
+                        const uploadTrackRecordingLoading = this.loadingController.create(<LoadingOptions>{
+                            content: "Wird hochgeladen...",
+                        });
+                        uploadTrackRecordingLoading.present();
+
+                        this.trackRecorder.getRecorderStateInfo().then(recorderStateInfo => {
+                            this.recordedTrackUploader.uploadRecordedTrack(recorderStateInfo.recordedPositions, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
+                                uploadTrackRecordingLoading.dismiss();
                                 const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
                                     closeButtonText: "Toll",
                                     message: "Strecke erfolgreich hochgeladen",
@@ -148,6 +203,7 @@ export class TrackRecorderPage {
                                     duration: 3000
                                 });
                                 uploadedSuccessfulToast.present();
+                                this.resetView();
 
                                 this.refreshLastLocationDisplay();
                             });
@@ -157,6 +213,16 @@ export class TrackRecorderPage {
             ]
         });
         resetRecordingPrompt.present();
+    }
+
+    private resetView(): void {
+        this.map.resetTrack();
+        this.lastRecordedLatitude = null;
+        this.lastRecordedLongitude = null;
+        this.recordedPositions = 0;
+        this.trackingStartedAt = null;
+
+        this.saveCurrentState();
     }
 
     private get canDeleteTrackRecording(): boolean {
@@ -204,7 +270,15 @@ export class TrackRecorderPage {
     private record(): void {
         this.trackRecorder.isLocationEnabled().then(enabled => {
             if (enabled) {
-                this.trackRecorder.record().then(() => this.trackingIsStopped = false, error => { });
+                this.trackRecorder.record().then(() => {
+                    if (!this.trackingStartedAt) {
+                        this.trackingStartedAt = new Date();
+
+                        this.saveCurrentState();
+                    }
+
+                    this.trackingIsStopped = false;
+                }, error => { });
             } else {
                 const pleaseEnableLocationAlert = this.alertController.create(<AlertOptions>{
                     title: "Standort ist deaktiviert",

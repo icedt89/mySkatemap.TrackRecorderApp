@@ -33,8 +33,8 @@ export class RecordedTrackUploader {
 
 class CreateRecordedTrackModel {
     public constructor(trackingStartedAt: Date, uploadStartedAt: Date) {
-        this.TrackingStartedAt= trackingStartedAt.toISOString();
-        this.UploadStartedAt= uploadStartedAt.toISOString();
+        this.TrackingStartedAt = trackingStartedAt.toISOString();
+        this.UploadStartedAt = uploadStartedAt.toISOString();
     }
 
     public TrackingStartedAt: number | string;

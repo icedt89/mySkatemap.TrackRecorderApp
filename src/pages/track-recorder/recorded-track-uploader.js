@@ -17,8 +17,8 @@ var RecordedTrackUploader = (function () {
     }
     RecordedTrackUploader.prototype.uploadRecordedTrack = function (positions, startedAt) {
         var createdRecordedTrackModel = new CreateRecordedTrackModel(startedAt, new Date());
-        createdRecordedTrackModel.RecordedPositions = positions.map(function (position) {
-            var result = new RecordedTrackPositionModel(position.latitude, position.longitude);
+        createdRecordedTrackModel.RecordedPositions = positions.map(function (position, order) {
+            var result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);
             result.Accuracy = position.accuracy;
             result.Bearing = position.bearing;
             result.CapturedAt = position.time;
@@ -47,9 +47,10 @@ var CreateRecordedTrackModel = (function () {
     return CreateRecordedTrackModel;
 }());
 var RecordedTrackPositionModel = (function () {
-    function RecordedTrackPositionModel(Latitude, Longitude) {
+    function RecordedTrackPositionModel(Latitude, Longitude, Order) {
         this.Latitude = Latitude;
         this.Longitude = Longitude;
+        this.Order = Order;
     }
     return RecordedTrackPositionModel;
 }());

@@ -9,7 +9,7 @@ import {
     Polyline,
     PolylineOptions,
 } from "@ionic-native/google-maps";
-import { Component, ElementRef, ViewChild } from "@angular/core";
+import { Component, ElementRef, EventEmitter, Output, ViewChild } from "@angular/core";
 
 import { Platform } from "ionic-angular";
 
@@ -23,6 +23,8 @@ export class MapComponent {
     private track: Polyline | null;
 
     @ViewChild("map") private mapElement: ElementRef;
+
+    @Output() public ready = new EventEmitter<any>();
 
     public constructor(platform: Platform) {
         platform.ready().then(() => {
@@ -44,6 +46,8 @@ export class MapComponent {
                     zoom: initialMapZoom,
                     target: initialMapCenter
                 });
+
+                this.ready.emit(null);
             });
         });
     }
@@ -71,11 +75,20 @@ export class MapComponent {
         });
     }
 
+    public getTrack(): LatLng[] | null {
+        if (this.track) {
+            return this.track.getPoints();
+        }
+
+        return null;
+    }
+
     public resetTrack(): void {
         if (!this.track) {
             return;
         }
 
+        debugger;
         this.track.remove();
         this.track = null;
     }
