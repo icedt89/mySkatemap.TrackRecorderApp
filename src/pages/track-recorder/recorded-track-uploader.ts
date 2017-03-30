@@ -19,7 +19,7 @@ export class RecordedTrackUploader {
             result.Bearing = position.bearing;
             result.CapturedAt = position.time;
             result.Speed = position.time;
-            
+
             return result;
         });
 

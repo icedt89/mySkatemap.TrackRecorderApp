@@ -88,7 +88,6 @@ export class MapComponent {
             return;
         }
 
-        debugger;
         this.track.remove();
         this.track = null;
     }

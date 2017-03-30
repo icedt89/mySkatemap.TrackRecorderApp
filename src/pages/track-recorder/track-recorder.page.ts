@@ -46,11 +46,7 @@ export class TrackRecorderPage {
         events: Events) {
         this.trackRecorder.debugging();
 
-        viewController.didEnter.subscribe(() => {
-            this.map.ready.subscribe(() => {
-                storage.ready().then(() => this.loadCurrentState());
-            });
-        });
+        viewController.didEnter.subscribe(() => this.map.ready.subscribe(() => storage.ready().then(() => this.loadCurrentState())));
 
         events.subscribe("TrackRecorder-LocationMode", enabled => {
             if (!enabled) {
