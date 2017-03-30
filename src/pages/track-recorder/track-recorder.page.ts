@@ -49,7 +49,7 @@ export class TrackRecorderPage {
         viewController.didEnter.subscribe(() => this.map.ready.subscribe(() => storage.ready().then(() => this.loadCurrentState())));
 
         events.subscribe("TrackRecorder-LocationMode", enabled => {
-            if (!enabled) {
+            if (!enabled && !this.trackingIsStopped) {
                 this.stopTrackRecorder().then(() => {
                     const trackingStoppedTaost = this.toastController.create(<ToastOptions>{
                         message: "Standort wurde deaktiviert. Aufnahme ist pausiert.",

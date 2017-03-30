@@ -66,4 +66,6 @@ export declare class BackgroundGeolocationResponse {
   public altitude: number | null;
 
   public bearing: number | null;
+
+  public provider: string;
 }
