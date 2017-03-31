@@ -1,5 +1,5 @@
 import { TrackRecorderStateInfo } from "./track-recorder-state-info";
-import { BackgroundGeolocation, BackgroundGeolocationConfig, BackgroundGeolocationResponse } from '../../declarations';
+import { BackgroundGeolocation, BackgroundGeolocationConfig } from "../../declarations";
 import { Events, Platform } from "ionic-angular";
 
 import { Injectable } from "@angular/core";

@@ -1,3 +1,4 @@
+import { SplashScreen } from "@ionic-native/splash-screen";
 import { LoadingController } from "ionic-angular/components/loading/loading";
 import {
     AlertOptions,
@@ -28,7 +29,7 @@ import { TrackRecorderSettingsComponent } from "../../components/track-recorder-
 export class TrackRecorderPage {
     private lastRecordedLatitude: number | null;
     private lastRecordedLongitude: number | null;
-    private recordedPositions: number | null;
+    private recordedPositions = 0;
     private trackingStartedAt: Date | null;
     private trackingIsStopped = true;
 
@@ -43,10 +44,11 @@ export class TrackRecorderPage {
         private recordedTrackUploader: RecordedTrackUploader,
         private loadingController: LoadingController,
         private storage: Storage,
+        splashscreen: SplashScreen,
         events: Events) {
         this.trackRecorder.debugging();
 
-        viewController.didEnter.subscribe(() => this.map.ready.subscribe(() => storage.ready().then(() => this.loadCurrentState())));
+        viewController.didEnter.subscribe(() => this.map.ready.subscribe(() => storage.ready().then(() => this.loadCurrentState()).then(() => splashscreen.hide())));
 
         events.subscribe("TrackRecorder-LocationMode", enabled => {
             if (!enabled && !this.trackingIsStopped) {
@@ -77,8 +79,8 @@ export class TrackRecorderPage {
         this.storage.get("TrackRecorderPage.lastRecordedLongitude").then((value: number | null) => {
             this.lastRecordedLongitude = value;
         });
-        this.storage.get("TrackRecorderPage.recordedPositions").then((value: number) => {
-            this.recordedPositions = value;
+        this.storage.get("TrackRecorderPage.recordedPositions").then((value: number | null) => {
+            this.recordedPositions = value || 0;
         });
         this.storage.get("TrackRecorderPage.trackingStartedAt").then((value: Date | null) => {
             this.trackingStartedAt = value;
@@ -132,6 +134,8 @@ export class TrackRecorderPage {
                 message: "Einstellungen akzeptiert",
                 duration: 3000,
                 position: "middle",
+                showCloseButton: true,
+                closeButtonText: "Ok"
             });
             setTrackRecorderSettingsToast.present();
 
@@ -157,7 +161,9 @@ export class TrackRecorderPage {
                         const allRecordingsDeletedToast = this.toastController.create(<ToastOptions>{
                             message: "Strecke gelöscht",
                             duration: 3000,
-                            position: "middle"
+                            position: "middle",
+                            showCloseButton: true,
+                            closeButtonText: "Ok"
                         });
                         allRecordingsDeletedToast.present();
                         this.resetView();
@@ -193,10 +199,11 @@ export class TrackRecorderPage {
                             this.recordedTrackUploader.uploadRecordedTrack(recorderStateInfo.recordedPositions, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
                                 uploadTrackRecordingLoading.dismiss();
                                 const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
-                                    closeButtonText: "Toll",
                                     message: "Strecke erfolgreich hochgeladen",
                                     position: "middle",
-                                    duration: 3000
+                                    duration: 3000,
+                                    showCloseButton: true,
+                                    closeButtonText: "Toll"
                                 });
                                 uploadedSuccessfulToast.present();
                                 this.resetView();
@@ -241,7 +248,7 @@ export class TrackRecorderPage {
         return this.lastRecordedLongitude;
     }
 
-    private get countOfCollectedPositions(): number | null {
+    private get countOfCollectedPositions(): number {
         return this.recordedPositions;
     }
 
@@ -286,9 +293,11 @@ export class TrackRecorderPage {
                             role: "cancel",
                             handler: () => {
                                 const pleaseEnableLocationToast = this.toastController.create(<ToastOptions>{
-                                    message: "Standort aktivieren um Strecke aufzunehmen",
+                                    message: "Bitte Standort aktivieren um Strecke aufzunehmen",
                                     duration: 3000,
-                                    position: "middle"
+                                    position: "middle",
+                                    showCloseButton: true,
+                                    closeButtonText: "Ok"
                                 });
                                 pleaseEnableLocationToast.present();
                             }

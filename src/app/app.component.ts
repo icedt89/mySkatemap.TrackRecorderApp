@@ -1,7 +1,6 @@
 import { AlertController } from "ionic-angular/components/alert/alert";
 import { Component } from "@angular/core";
 import { Platform } from "ionic-angular";
-import { SplashScreen } from "@ionic-native/splash-screen";
 import { StatusBar } from "@ionic-native/status-bar";
 import { TrackRecorderPage } from "../pages/track-recorder/track-recorder.page";
 
@@ -14,7 +13,6 @@ export class MyApp {
 
   public constructor(platform: Platform,
     statusBar: StatusBar,
-    splashScreen: SplashScreen,
     alertController: AlertController) {
     platform.ready().then(() => {
       if (platform.is("ios")) {
@@ -32,7 +30,6 @@ export class MyApp {
         wrongPlatformAlert.present();
       } else {
         statusBar.styleDefault();
-        splashScreen.hide();
       }
     });
   }
