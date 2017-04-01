@@ -1,5 +1,4 @@
 import { BackgroundGeolocation } from "../../declarations";
-import { TrackRecorderStateInfo } from "./track-recorder-state-info";
 import { Events, Platform } from "ionic-angular";
 
 import { Injectable } from "@angular/core";
@@ -77,27 +76,12 @@ export class TrackRecorder {
         backgroundGeolocation.configure(null, null, this.configuration);
     }
 
-    public getRecorderStateInfo(): Promise<TrackRecorderStateInfo> {
-        return new Promise<TrackRecorderStateInfo>((resolve, reject) => {
-            backgroundGeolocation.getValidLocations(positions => {
-                const result = new TrackRecorderStateInfo();
-                if (positions.length) {
-                    const lastPosition = positions[positions.length - 1];
-
-                    result.lastLatitude = lastPosition.latitude;
-                    result.lastLongitude = lastPosition.longitude;
-                    result.recordedPositions = positions;
-                }
-
-                resolve(result);
-            }, error => reject(error));
-        });
+    public getLocations(): Promise<BackgroundGeolocation.BackgroundGeolocationResponse[]> {
+        return new Promise<BackgroundGeolocation.BackgroundGeolocationResponse[]>((resolve, reject) => backgroundGeolocation.getValidLocations(positions => resolve(positions), error => reject(error)));
     }
 
     public isLocationEnabled(): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            backgroundGeolocation.isLocationEnabled(enabled => resolve(enabled), error => reject(error));
-        });
+        return new Promise((resolve, reject) => backgroundGeolocation.isLocationEnabled(enabled => resolve(enabled), error => reject(error)));
     }
 
     public showLocationSettings(): void {

@@ -55,6 +55,7 @@ export class MapComponent {
     public setTrack(positions: LatLng[]): Promise<any> {
         return new Promise((resolve, reject) => {
             if (!this.track) {
+                this.track = <Polyline>{};
                 const trackOptions = <PolylineOptions>{
                     visible: true,
                     geodesic: true,
@@ -84,11 +85,12 @@ export class MapComponent {
     }
 
     public resetTrack(): void {
-        if (!this.track) {
-            return;
+        this.googleMap.clear();
+
+        if (this.track) {
+            this.track.remove();
         }
 
-        this.track.remove();
         this.track = null;
     }
 

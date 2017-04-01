@@ -1,3 +1,4 @@
+import { haversineForPolyline } from "./haversine";
 import { SplashScreen } from "@ionic-native/splash-screen";
 import { LoadingController } from "ionic-angular/components/loading/loading";
 import {
@@ -27,9 +28,9 @@ import { TrackRecorderSettingsComponent } from "../../components/track-recorder-
     templateUrl: "track-recorder.page.html"
 })
 export class TrackRecorderPage {
-    private lastRecordedLatitude: number | null;
-    private lastRecordedLongitude: number | null;
-    private recordedPositions = 0;
+    private lastUserUpdate: string | null;
+    private approximateTrackLength: string | null;
+    private recordedPositions: number | null;
     private trackingStartedAt: Date | null;
     private trackingIsStopped = true;
 
@@ -65,22 +66,22 @@ export class TrackRecorderPage {
     }
 
     private saveCurrentState(): void {
-        this.storage.set("TrackRecorderPage.lastRecordedLatitude", this.lastRecordedLatitude);
-        this.storage.set("TrackRecorderPage.lastRecordedLongitude", this.lastRecordedLongitude);
+        this.storage.set("TrackRecorderPage.lastUserUpdate", this.lastUserUpdate);
+        this.storage.set("TrackRecorderPage.approximateTrackLength", this.approximateTrackLength);
         this.storage.set("TrackRecorderPage.recordedPositions", this.recordedPositions);
         this.storage.set("TrackRecorderPage.trackingStartedAt", this.trackingStartedAt);
         this.storage.set("TrackRecorderPage.trackedPath", this.map.getTrack());
     }
 
     private loadCurrentState(): void {
-        this.storage.get("TrackRecorderPage.lastRecordedLatitude").then((value: number | null) => {
-            this.lastRecordedLatitude = value;
+        this.storage.get("TrackRecorderPage.lastUserUpdate").then((value: string | null) => {
+            this.lastUserUpdate = value;
         });
-        this.storage.get("TrackRecorderPage.lastRecordedLongitude").then((value: number | null) => {
-            this.lastRecordedLongitude = value;
+        this.storage.get("TrackRecorderPage.approximateTrackLength").then((value: string | null) => {
+            this.approximateTrackLength = value;
         });
         this.storage.get("TrackRecorderPage.recordedPositions").then((value: number | null) => {
-            this.recordedPositions = value || 0;
+            this.recordedPositions = value;
         });
         this.storage.get("TrackRecorderPage.trackingStartedAt").then((value: Date | null) => {
             this.trackingStartedAt = value;
@@ -102,15 +103,23 @@ export class TrackRecorderPage {
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
     private refreshLastLocationDisplay(refresher: Refresher | null = null): void {
-        this.trackRecorder.getRecorderStateInfo().then(positions => {
-            this.recordedPositions = positions.recordedPositions.length;
-            this.lastRecordedLatitude = positions.lastLatitude;
-            this.lastRecordedLongitude = positions.lastLongitude;
+        this.trackRecorder.getLocations().then(positions => {
+            if (positions.length) {
+                this.recordedPositions = positions.length;
+                this.lastUserUpdate = new Date().toLocaleString("de");
 
-            const trackedPath = positions.recordedPositions.map(position => new LatLng(position.latitude, position.longitude));
-            this.setTrackedPathOnMap(trackedPath).then(() => {
-                this.saveCurrentState();
-            });
+                const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
+                const computedTracklength = haversineForPolyline(trackedPath);
+                if (computedTracklength > 1000) {
+                    this.approximateTrackLength = `${(+(computedTracklength / 1000).toFixed(3)).toLocaleString("de")} km`;
+                } else {
+                    this.approximateTrackLength = `${(+computedTracklength.toFixed(1)).toLocaleString("de")} m`;
+                }
+
+                this.setTrackedPathOnMap(trackedPath).then(() => this.saveCurrentState());
+            } else {
+                this.resetView();
+            }
 
             if (refresher) {
                 refresher.complete();
@@ -195,8 +204,8 @@ export class TrackRecorderPage {
                         });
                         uploadTrackRecordingLoading.present();
 
-                        this.trackRecorder.getRecorderStateInfo().then(recorderStateInfo => {
-                            this.recordedTrackUploader.uploadRecordedTrack(recorderStateInfo.recordedPositions, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
+                        this.trackRecorder.getLocations().then(positions => {
+                            this.recordedTrackUploader.uploadRecordedTrack(positions, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
                                 uploadTrackRecordingLoading.dismiss();
                                 const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
                                     message: "Strecke erfolgreich hochgeladen",
@@ -220,9 +229,9 @@ export class TrackRecorderPage {
 
     private resetView(): void {
         this.map.resetTrack();
-        this.lastRecordedLatitude = null;
-        this.lastRecordedLongitude = null;
-        this.recordedPositions = 0;
+        this.lastUserUpdate = null;
+        this.approximateTrackLength = null;
+        this.recordedPositions = null;
         this.trackingStartedAt = null;
 
         this.saveCurrentState();
@@ -240,15 +249,15 @@ export class TrackRecorderPage {
         return this.trackingIsStopped;
     }
 
-    private get lastLatitude(): number {
-        return this.lastRecordedLatitude;
+    private get lastUpdate(): string | null {
+        return this.lastUserUpdate;
     }
 
-    private get lastLongitude(): number {
-        return this.lastRecordedLongitude;
+    private get approximateLength(): string | null {
+        return this.approximateTrackLength;
     }
 
-    private get countOfCollectedPositions(): number {
+    private get countOfCollectedPositions(): number | null {
         return this.recordedPositions;
     }
 
