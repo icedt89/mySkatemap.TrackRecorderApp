@@ -11,8 +11,12 @@ log.txt
 *.sublime-workspace
 .vscode/
 npm-debug.log*
-src/**/*.js
-src/**/*.js.map
+src/app/**/*.js
+src/app/**/*.js.map
+src/components/**/*.js
+src/components/**/*.js.map
+src/pages/**/*.js
+src/pages/**/*.js.map
 
 .idea/
 .sass-cache/
