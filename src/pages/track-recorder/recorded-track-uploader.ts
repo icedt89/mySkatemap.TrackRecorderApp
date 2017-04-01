@@ -1,6 +1,6 @@
 import "rxjs/Rx";
 
-import { BackgroundGeolocationResponse } from "../../declarations";
+import { BackgroundGeolocation } from "../../declarations";
 import { Http } from "@angular/http";
 import { Injectable } from "@angular/core";
 
@@ -11,7 +11,7 @@ export class RecordedTrackUploader {
     public constructor(private http: Http) {
     }
 
-    public uploadRecordedTrack(positions: BackgroundGeolocationResponse[], startedAt: Date): Promise<boolean> {
+    public uploadRecordedTrack(positions: BackgroundGeolocation.BackgroundGeolocationResponse[], startedAt: Date): Promise<boolean> {
         const createdRecordedTrackModel = new CreateRecordedTrackModel(startedAt, new Date());
         createdRecordedTrackModel.RecordedPositions = positions.map((position, order) => {
             const result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);

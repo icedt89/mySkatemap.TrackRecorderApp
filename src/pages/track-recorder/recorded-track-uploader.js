@@ -21,8 +21,10 @@ var RecordedTrackUploader = (function () {
             var result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);
             result.Accuracy = position.accuracy;
             result.Bearing = position.bearing;
-            result.CapturedAt = position.time;
-            result.Speed = position.time;
+            result.CapturedAt = position.time ? new Date(position.time).toISOString() : null;
+            result.Speed = position.speed;
+            result.Altitude = position.altitude;
+            result.ProvidedBy = position.provider;
             return result;
         });
         return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise().catch(function () {

@@ -7,15 +7,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+import { TrackRecorderStateInfo } from "./track-recorder-state-info";
 import { Events, Platform } from "ionic-angular";
-import { Storage } from "@ionic/storage";
 import { Injectable } from "@angular/core";
 import { TrackRecorderSettings } from "../../app/track-recorder-settings";
 var TrackRecorder = (function () {
-    function TrackRecorder(platform, events, storage) {
+    function TrackRecorder(platform, events) {
         var _this = this;
-        this.storage = storage;
-        this.stopped = true;
         this.debug = false;
         this.configuration = {
             desiredAccuracy: 0,
@@ -45,28 +43,6 @@ var TrackRecorder = (function () {
             }, null);
         });
     }
-    TrackRecorder.prototype.saveCurrentState = function () {
-        this.storage.set("TrackRecorder.stopped", this.stopped);
-        this.storage.set("TrackRecorder.trackingStartedAt", this.trackingStartedAt);
-        if (this.debug) {
-            console.log("TrackRecorder: State saved");
-        }
-    };
-    TrackRecorder.prototype.loadCurrentState = function () {
-        var _this = this;
-        this.storage.get("TrackRecorder.stopped").then(function (value) {
-            _this.stopped = value;
-            if (_this.debug) {
-                console.log("TrackRecorder: State loaded for stopped: " + value);
-            }
-        });
-        this.storage.get("TrackRecorder.trackingStartedAt").then(function (value) {
-            _this.trackingStartedAt = value;
-            if (_this.debug) {
-                console.log("TrackRecorder: State loaded for trackingStartedAt: " + value.toISOString());
-            }
-        });
-    };
     Object.defineProperty(TrackRecorder.prototype, "settings", {
         get: function () {
             var trackRecorderSettings = new TrackRecorderSettings();
@@ -96,37 +72,17 @@ var TrackRecorder = (function () {
         }
         backgroundGeolocation.configure(null, null, this.configuration);
     };
-    Object.defineProperty(TrackRecorder.prototype, "lastRecordedLatitude", {
-        get: function () {
-            return this.lastRecordedPositionLatitude;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(TrackRecorder.prototype, "lastRecordedLongitude", {
-        get: function () {
-            return this.lastRecordedPositionLongitude;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(TrackRecorder.prototype, "startedAt", {
-        get: function () {
-            return this.trackingStartedAt;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    TrackRecorder.prototype.getPositions = function () {
-        var _this = this;
+    TrackRecorder.prototype.getRecorderStateInfo = function () {
         return new Promise(function (resolve, reject) {
             backgroundGeolocation.getValidLocations(function (positions) {
+                var result = new TrackRecorderStateInfo();
                 if (positions.length) {
                     var lastPosition = positions[positions.length - 1];
-                    _this.lastRecordedPositionLatitude = lastPosition.latitude;
-                    _this.lastRecordedPositionLongitude = lastPosition.longitude;
+                    result.lastLatitude = lastPosition.latitude;
+                    result.lastLongitude = lastPosition.longitude;
+                    result.recordedPositions = positions;
                 }
-                resolve(positions);
+                resolve(result);
             }, function (error) { return reject(error); });
         });
     };
@@ -135,13 +91,6 @@ var TrackRecorder = (function () {
             backgroundGeolocation.isLocationEnabled(function (enabled) { return resolve(enabled); }, function (error) { return reject(error); });
         });
     };
-    Object.defineProperty(TrackRecorder.prototype, "isStopped", {
-        get: function () {
-            return this.stopped;
-        },
-        enumerable: true,
-        configurable: true
-    });
     TrackRecorder.prototype.showLocationSettings = function () {
         backgroundGeolocation.showLocationSettings();
     };
@@ -149,11 +98,6 @@ var TrackRecorder = (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             backgroundGeolocation.start(function () {
-                _this.stopped = false;
-                if (!_this.trackingStartedAt) {
-                    _this.trackingStartedAt = new Date();
-                }
-                _this.saveCurrentState();
                 if (_this.debug) {
                     console.log("TrackRecorder: Started");
                 }
@@ -165,8 +109,6 @@ var TrackRecorder = (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             backgroundGeolocation.stop(function () {
-                _this.stopped = true;
-                _this.saveCurrentState();
                 if (_this.debug) {
                     console.log("TrackRecorder: Stopped");
                 }
@@ -178,10 +120,6 @@ var TrackRecorder = (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             backgroundGeolocation.deleteAllLocations(function () {
-                _this.lastRecordedPositionLatitude = null;
-                _this.lastRecordedPositionLongitude = null;
-                _this.trackingStartedAt = null;
-                _this.saveCurrentState();
                 if (_this.debug) {
                     console.log("TrackRecorder: All recordings deleted");
                 }
@@ -202,8 +140,7 @@ var TrackRecorder = (function () {
 TrackRecorder = __decorate([
     Injectable(),
     __metadata("design:paramtypes", [Platform,
-        Events,
-        Storage])
+        Events])
 ], TrackRecorder);
 export { TrackRecorder };
 //# sourceMappingURL=track-recorder.js.map

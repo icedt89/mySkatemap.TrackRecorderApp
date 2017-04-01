@@ -1,9 +1,9 @@
-import { BackgroundGeolocationResponse } from "../../declarations";
+import { BackgroundGeolocation } from "../../declarations";
 
 export class TrackRecorderStateInfo {
     private trackRecorderStateLastLatitude: number | null;
     private trackRecorderStateLastLongitude: number | null;
-    private trackRecorderStateRecordedPositions: BackgroundGeolocationResponse[] = [];
+    private trackRecorderStateRecordedPositions: BackgroundGeolocation.BackgroundGeolocationResponse[] = [];
 
     public get lastLatitude(): number | null {
         return this.trackRecorderStateLastLatitude;
@@ -13,7 +13,7 @@ export class TrackRecorderStateInfo {
         return this.trackRecorderStateLastLongitude;
     }
 
-    public get recordedPositions(): BackgroundGeolocationResponse[] {
+    public get recordedPositions(): BackgroundGeolocation.BackgroundGeolocationResponse[] {
         return this.trackRecorderStateRecordedPositions;
     }
 
@@ -25,7 +25,7 @@ export class TrackRecorderStateInfo {
         this.trackRecorderStateLastLongitude = value;
     }
 
-    public set recordedPositions(value: BackgroundGeolocationResponse[]) {
+    public set recordedPositions(value: BackgroundGeolocation.BackgroundGeolocationResponse[]) {
         this.trackRecorderStateRecordedPositions = value;
     }
 }

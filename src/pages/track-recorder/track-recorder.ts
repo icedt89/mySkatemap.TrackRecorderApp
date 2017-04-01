@@ -1,17 +1,17 @@
+import { BackgroundGeolocation } from "../../declarations";
 import { TrackRecorderStateInfo } from "./track-recorder-state-info";
-import { BackgroundGeolocation, BackgroundGeolocationConfig } from "../../declarations";
 import { Events, Platform } from "ionic-angular";
 
 import { Injectable } from "@angular/core";
 import { TrackRecorderSettings } from "../../app/track-recorder-settings";
 
-declare var backgroundGeolocation: BackgroundGeolocation;
+declare var backgroundGeolocation: BackgroundGeolocation.BackgroundGeolocation;
 
 @Injectable()
 export class TrackRecorder {
     private debug: boolean = false;
 
-    private configuration = <BackgroundGeolocationConfig>{
+    private configuration = <BackgroundGeolocation.BackgroundGeolocationConfig>{
         desiredAccuracy: 0, // 0 = GPS + Mobile + Wifi + GSM; 10 = Mobile + Wifi + GSM, 100 = Wifi + GSM; 1000 = GSM
         stationaryRadius: 5,
         distanceFilter: 5,

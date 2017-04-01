@@ -10,11 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 import { AlertController } from "ionic-angular/components/alert/alert";
 import { Component } from "@angular/core";
 import { Platform } from "ionic-angular";
-import { SplashScreen } from "@ionic-native/splash-screen";
 import { StatusBar } from "@ionic-native/status-bar";
 import { TrackRecorderPage } from "../pages/track-recorder/track-recorder.page";
 var MyApp = (function () {
-    function MyApp(platform, statusBar, splashScreen, alertController) {
+    function MyApp(platform, statusBar, alertController) {
         // tslint:disable-next-line:no-unused-variable Used inside template.
         this.trackRecorderPage = TrackRecorderPage;
         platform.ready().then(function () {
@@ -33,7 +32,6 @@ var MyApp = (function () {
             }
             else {
                 statusBar.styleDefault();
-                splashScreen.hide();
             }
         });
     }
@@ -45,7 +43,6 @@ MyApp = __decorate([
     }),
     __metadata("design:paramtypes", [Platform,
         StatusBar,
-        SplashScreen,
         AlertController])
 ], MyApp);
 export { MyApp };

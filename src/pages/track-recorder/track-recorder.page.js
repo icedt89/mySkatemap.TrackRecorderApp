@@ -7,6 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+import { SplashScreen } from "@ionic-native/splash-screen";
 import { LoadingController } from "ionic-angular/components/loading/loading";
 import { Events, Platform, ViewController } from "ionic-angular";
 import { Component, ViewChild } from "@angular/core";
@@ -20,7 +21,7 @@ import { TrackRecorder } from "./track-recorder";
 import { Storage } from "@ionic/storage";
 import { TrackRecorderSettingsComponent } from "../../components/track-recorder-settings/track-recorder-settings.component";
 var TrackRecorderPage = (function () {
-    function TrackRecorderPage(viewController, platform, alertController, trackRecorder, modalController, toastController, recordedTrackUploader, loadingController, storage, events) {
+    function TrackRecorderPage(viewController, platform, alertController, trackRecorder, modalController, toastController, recordedTrackUploader, loadingController, storage, splashscreen, events) {
         var _this = this;
         this.alertController = alertController;
         this.trackRecorder = trackRecorder;
@@ -29,13 +30,12 @@ var TrackRecorderPage = (function () {
         this.recordedTrackUploader = recordedTrackUploader;
         this.loadingController = loadingController;
         this.storage = storage;
+        this.recordedPositions = 0;
         this.trackingIsStopped = true;
         this.trackRecorder.debugging();
-        viewController.willLeave.subscribe(function () {
-            _this.stop();
-        });
+        viewController.didEnter.subscribe(function () { return _this.map.ready.subscribe(function () { return storage.ready().then(function () { return _this.loadCurrentState(); }).then(function () { return splashscreen.hide(); }); }); });
         events.subscribe("TrackRecorder-LocationMode", function (enabled) {
-            if (!enabled) {
+            if (!enabled && !_this.trackingIsStopped) {
                 _this.stopTrackRecorder().then(function () {
                     var trackingStoppedTaost = _this.toastController.create({
                         message: "Standort wurde deaktiviert. Aufnahme ist pausiert.",
@@ -47,18 +47,52 @@ var TrackRecorderPage = (function () {
             }
         });
     }
+    TrackRecorderPage.prototype.saveCurrentState = function () {
+        this.storage.set("TrackRecorderPage.lastRecordedLatitude", this.lastRecordedLatitude);
+        this.storage.set("TrackRecorderPage.lastRecordedLongitude", this.lastRecordedLongitude);
+        this.storage.set("TrackRecorderPage.recordedPositions", this.recordedPositions);
+        this.storage.set("TrackRecorderPage.trackingStartedAt", this.trackingStartedAt);
+        this.storage.set("TrackRecorderPage.trackedPath", this.map.getTrack());
+    };
+    TrackRecorderPage.prototype.loadCurrentState = function () {
+        var _this = this;
+        this.storage.get("TrackRecorderPage.lastRecordedLatitude").then(function (value) {
+            _this.lastRecordedLatitude = value;
+        });
+        this.storage.get("TrackRecorderPage.lastRecordedLongitude").then(function (value) {
+            _this.lastRecordedLongitude = value;
+        });
+        this.storage.get("TrackRecorderPage.recordedPositions").then(function (value) {
+            _this.recordedPositions = value || 0;
+        });
+        this.storage.get("TrackRecorderPage.trackingStartedAt").then(function (value) {
+            _this.trackingStartedAt = value;
+        });
+        this.storage.get("TrackRecorderPage.trackedPath").then(function (value) {
+            if (value) {
+                _this.setTrackedPathOnMap(value);
+            }
+        });
+    };
+    TrackRecorderPage.prototype.setTrackedPathOnMap = function (trackedPath) {
+        var _this = this;
+        if (trackedPath.length > 1) {
+            return this.map.setTrack(trackedPath).then(function () { return _this.map.panToTrack(); });
+        }
+        return Promise.resolve(null);
+    };
     // tslint:disable-next-line:no-unused-variable Used inside template.
     TrackRecorderPage.prototype.refreshLastLocationDisplay = function (refresher) {
         var _this = this;
         if (refresher === void 0) { refresher = null; }
-        this.trackRecorder.getPositions().then(function (positions) {
-            _this.recordedPositions = positions.length;
-            _this.lastRecordedLatitude = _this.trackRecorder.lastRecordedLatitude;
-            _this.lastRecordedLongitude = _this.trackRecorder.lastRecordedLongitude;
-            var trackedPath = positions.map(function (position) { return new LatLng(position.latitude, position.longitude); });
-            if (trackedPath.length > 1) {
-                _this.map.setTrack(trackedPath).then(function () { return _this.map.panToTrack(); });
-            }
+        this.trackRecorder.getRecorderStateInfo().then(function (positions) {
+            _this.recordedPositions = positions.recordedPositions.length;
+            _this.lastRecordedLatitude = positions.lastLatitude;
+            _this.lastRecordedLongitude = positions.lastLongitude;
+            var trackedPath = positions.recordedPositions.map(function (position) { return new LatLng(position.latitude, position.longitude); });
+            _this.setTrackedPathOnMap(trackedPath).then(function () {
+                _this.saveCurrentState();
+            });
             if (refresher) {
                 refresher.complete();
             }
@@ -79,6 +113,8 @@ var TrackRecorderPage = (function () {
                 message: "Einstellungen akzeptiert",
                 duration: 3000,
                 position: "middle",
+                showCloseButton: true,
+                closeButtonText: "Ok"
             });
             setTrackRecorderSettingsToast.present();
             _this.trackRecorder.setSettings(data.settings);
@@ -103,10 +139,12 @@ var TrackRecorderPage = (function () {
                         var allRecordingsDeletedToast = _this.toastController.create({
                             message: "Strecke gelöscht",
                             duration: 3000,
-                            position: "middle"
+                            position: "middle",
+                            showCloseButton: true,
+                            closeButtonText: "Ok"
                         });
                         allRecordingsDeletedToast.present();
-                        _this.map.resetTrack();
+                        _this.resetView();
                         _this.refreshLastLocationDisplay();
                     }); }
                 }
@@ -133,17 +171,18 @@ var TrackRecorderPage = (function () {
                             content: "Wird hochgeladen...",
                         });
                         uploadTrackRecordingLoading.present();
-                        _this.trackRecorder.getPositions().then(function (positions) {
-                            _this.recordedTrackUploader.uploadRecordedTrack(positions, _this.trackRecorder.startedAt).then(function () { return _this.trackRecorder.deleteAllRecordings(); }).then(function () {
+                        _this.trackRecorder.getRecorderStateInfo().then(function (recorderStateInfo) {
+                            _this.recordedTrackUploader.uploadRecordedTrack(recorderStateInfo.recordedPositions, _this.trackingStartedAt).then(function () { return _this.trackRecorder.deleteAllRecordings(); }).then(function () {
                                 uploadTrackRecordingLoading.dismiss();
                                 var uploadedSuccessfulToast = _this.toastController.create({
-                                    closeButtonText: "Toll",
                                     message: "Strecke erfolgreich hochgeladen",
                                     position: "middle",
-                                    duration: 3000
+                                    duration: 3000,
+                                    showCloseButton: true,
+                                    closeButtonText: "Toll"
                                 });
                                 uploadedSuccessfulToast.present();
-                                _this.map.resetTrack();
+                                _this.resetView();
                                 _this.refreshLastLocationDisplay();
                             });
                         });
@@ -152,6 +191,14 @@ var TrackRecorderPage = (function () {
             ]
         });
         resetRecordingPrompt.present();
+    };
+    TrackRecorderPage.prototype.resetView = function () {
+        this.map.resetTrack();
+        this.lastRecordedLatitude = null;
+        this.lastRecordedLongitude = null;
+        this.recordedPositions = 0;
+        this.trackingStartedAt = null;
+        this.saveCurrentState();
     };
     Object.defineProperty(TrackRecorderPage.prototype, "canDeleteTrackRecording", {
         get: function () {
@@ -218,7 +265,13 @@ var TrackRecorderPage = (function () {
         var _this = this;
         this.trackRecorder.isLocationEnabled().then(function (enabled) {
             if (enabled) {
-                _this.trackRecorder.record().then(function () { return _this.trackingIsStopped = false; }, function (error) { });
+                _this.trackRecorder.record().then(function () {
+                    if (!_this.trackingStartedAt) {
+                        _this.trackingStartedAt = new Date();
+                        _this.saveCurrentState();
+                    }
+                    _this.trackingIsStopped = false;
+                }, function (error) { });
             }
             else {
                 var pleaseEnableLocationAlert = _this.alertController.create({
@@ -231,9 +284,11 @@ var TrackRecorderPage = (function () {
                             role: "cancel",
                             handler: function () {
                                 var pleaseEnableLocationToast = _this.toastController.create({
-                                    message: "Standort aktivieren um Strecke aufzunehmen",
+                                    message: "Bitte Standort aktivieren um Strecke aufzunehmen",
                                     duration: 3000,
-                                    position: "middle"
+                                    position: "middle",
+                                    showCloseButton: true,
+                                    closeButtonText: "Ok"
                                 });
                                 pleaseEnableLocationToast.present();
                             }
@@ -268,6 +323,7 @@ TrackRecorderPage = __decorate([
         RecordedTrackUploader,
         LoadingController,
         Storage,
+        SplashScreen,
         Events])
 ], TrackRecorderPage);
 export { TrackRecorderPage };

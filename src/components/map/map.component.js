@@ -8,11 +8,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 import { GoogleMaps, GoogleMapsEvent, LatLng, LatLngBounds, } from "@ionic-native/google-maps";
-import { Component, ElementRef, ViewChild } from "@angular/core";
+import { Component, ElementRef, EventEmitter, Output, ViewChild } from "@angular/core";
 import { Platform } from "ionic-angular";
 var MapComponent = (function () {
     function MapComponent(platform) {
         var _this = this;
+        this.ready = new EventEmitter();
         platform.ready().then(function () {
             var initialMapCenter = new LatLng(50.8333, 12.9167);
             var initialMapZoom = 13;
@@ -31,6 +32,7 @@ var MapComponent = (function () {
                     zoom: initialMapZoom,
                     target: initialMapCenter
                 });
+                _this.ready.emit(null);
             });
         });
     }
@@ -55,6 +57,12 @@ var MapComponent = (function () {
             }
         });
     };
+    MapComponent.prototype.getTrack = function () {
+        if (this.track) {
+            return this.track.getPoints();
+        }
+        return null;
+    };
     MapComponent.prototype.resetTrack = function () {
         if (!this.track) {
             return;
@@ -78,6 +86,10 @@ __decorate([
     ViewChild("map"),
     __metadata("design:type", ElementRef)
 ], MapComponent.prototype, "mapElement", void 0);
+__decorate([
+    Output(),
+    __metadata("design:type", Object)
+], MapComponent.prototype, "ready", void 0);
 MapComponent = __decorate([
     Component({
         selector: "map",
