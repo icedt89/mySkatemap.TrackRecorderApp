@@ -105,18 +105,20 @@ export class TrackRecorderPage {
     private refreshLastLocationDisplay(refresher: Refresher | null = null): void {
         this.trackRecorder.getLocations().then(positions => {
             if (positions.length) {
-                this.recordedPositions = positions.length;
-                this.lastUserUpdate = new Date().toLocaleString("de");
+                if (positions.length !== this.recordedPositions) {
+                    this.recordedPositions = positions.length;
+                    this.lastUserUpdate = new Date().toLocaleString("de");
 
-                const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
-                const computedTracklength = haversineForPolyline(trackedPath);
-                if (computedTracklength > 1000) {
-                    this.approximateTrackLength = `${(+(computedTracklength / 1000).toFixed(3)).toLocaleString("de")} km`;
-                } else {
-                    this.approximateTrackLength = `${(+computedTracklength.toFixed(1)).toLocaleString("de")} m`;
+                    const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
+                    const computedTracklength = haversineForPolyline(trackedPath);
+                    if (computedTracklength > 1000) {
+                        this.approximateTrackLength = `${(+(computedTracklength / 1000).toFixed(3)).toLocaleString("de")} km`;
+                    } else {
+                        this.approximateTrackLength = `${(+computedTracklength.toFixed(1)).toLocaleString("de")} m`;
+                    }
+
+                    this.setTrackedPathOnMap(trackedPath).then(() => this.saveCurrentState());
                 }
-
-                this.setTrackedPathOnMap(trackedPath).then(() => this.saveCurrentState());
             } else {
                 this.resetView();
             }
