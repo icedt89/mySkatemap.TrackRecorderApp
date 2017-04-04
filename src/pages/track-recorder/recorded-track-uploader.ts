@@ -6,7 +6,7 @@ import { Injectable } from "@angular/core";
 
 @Injectable()
 export class RecordedTrackUploader {
-    private apiEndpoint = "http://myskatemap-api.azurewebsites.net/api/RecordedTrack";
+    private apiEndpoint = "http://myskatemap-api.azurewebsites.net/api/TrackRecording";
 
     public constructor(private http: Http) {
     }
