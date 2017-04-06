@@ -1,7 +1,6 @@
-import { NavParams, ToastOptions, ViewController } from "ionic-angular";
+import { NavParams, ToastController, ToastOptions, ViewController } from "ionic-angular";
 
 import { Component } from "@angular/core";
-import { ToastController } from "ionic-angular/components/toast/toast";
 import { TrackRecorderSettings } from "../../app/track-recorder-settings";
 
 @Component({

@@ -1,3 +1,5 @@
+import { BrowserModule } from "@angular/platform-browser";
+import { HttpModule } from "@angular/http";
 import { ErrorHandler, NgModule } from "@angular/core";
 import { IonicApp, IonicErrorHandler, IonicModule } from "ionic-angular";
 import { IonicStorageModule } from "@ionic/storage";
@@ -15,6 +17,8 @@ import {
 
 @NgModule({
   imports: [
+    BrowserModule,
+    HttpModule,
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot()
   ],

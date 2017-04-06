@@ -1,6 +1,5 @@
-import { AlertController } from "ionic-angular/components/alert/alert";
 import { Component } from "@angular/core";
-import { Platform } from "ionic-angular";
+import { AlertController, Platform } from "ionic-angular";
 import { StatusBar } from "@ionic-native/status-bar";
 import { TrackRecorderPage } from "../pages/track-recorder/track-recorder.page";
 

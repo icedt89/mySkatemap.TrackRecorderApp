@@ -1,23 +1,23 @@
 import { haversineForPolyline } from "./haversine";
 import { SplashScreen } from "@ionic-native/splash-screen";
-import { LoadingController } from "ionic-angular/components/loading/loading";
 import {
+    AlertController,
     AlertOptions,
     Events,
+    LoadingController,
     LoadingOptions,
+    ModalController,
     Platform,
     Refresher,
+    ToastController,
     ToastOptions,
     ViewController
 } from "ionic-angular";
 import { Component, ViewChild } from "@angular/core";
 
-import { AlertController } from "ionic-angular/components/alert/alert";
 import { LatLng } from "@ionic-native/google-maps";
 import { MapComponent } from "../../components/map/map.component";
-import { ModalController } from "ionic-angular/components/modal/modal";
 import { RecordedTrackUploader } from "./recorded-track-uploader";
-import { ToastController } from "ionic-angular/components/toast/toast";
 import { TrackRecorder } from "./track-recorder";
 import { Storage } from "@ionic/storage";
 import { TrackRecorderSettings } from "../../app/track-recorder-settings";
