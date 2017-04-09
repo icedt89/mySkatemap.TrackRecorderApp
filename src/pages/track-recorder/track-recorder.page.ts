@@ -190,9 +190,17 @@ export class TrackRecorderPage {
     // tslint:disable-next-line:no-unused-variable Used inside template.
     private uploadTrackRecording(): void {
         const resetRecordingPrompt = this.alertController.create({
-            title: "Strecke übermitteln",
-            message: "Möchten Sie die aufgezeichnete Strecke übermitteln?",
+            title: "Strecke erstellen",
+            message: "Möchten Sie die aufgezeichnete Strecke übermitteln? Sie können optional einen Namen vergeben.",
             enableBackdropDismiss: true,
+            inputs: [
+                {
+                    name: "trackName",
+                    value: `Strecke vom ${this.trackingStartedAt}`,
+                    placeholder: "Name der Strecke",
+                    type: "text"
+                }
+            ],
             buttons: [
                 {
                     text: "Abbrechen",
@@ -200,17 +208,17 @@ export class TrackRecorderPage {
                 },
                 {
                     text: "Ja",
-                    handler: () => {
+                    handler: data => {
                         const uploadTrackRecordingLoading = this.loadingController.create(<LoadingOptions>{
-                            content: "Wird hochgeladen...",
+                            content: "Wird erstellt...",
                         });
                         uploadTrackRecordingLoading.present();
 
                         this.trackRecorder.getLocations().then(positions => {
-                            this.recordedTrackUploader.uploadRecordedTrack(positions, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
+                            this.recordedTrackUploader.uploadRecordedTrack(positions, data.trackName, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
                                 uploadTrackRecordingLoading.dismiss();
                                 const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
-                                    message: "Strecke erfolgreich hochgeladen",
+                                    message: "Strecke erfolgreich erstellt",
                                     position: "middle",
                                     duration: 3000,
                                     showCloseButton: true,
