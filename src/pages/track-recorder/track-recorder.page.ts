@@ -49,17 +49,24 @@ export class TrackRecorderPage {
         events: Events) {
         this.trackRecorder.debugging();
 
-        viewController.didEnter.subscribe(() => this.map.ready.subscribe(() => storage.ready().then(() => this.loadCurrentState()).then(() => splashscreen.hide())));
+        viewController.didEnter.subscribe(() => this.map.ready.subscribe(
+            () => storage.ready()
+                .then(() => this.loadCurrentState())
+                .then(() => this.loadTrackRecorderSettings())
+                .then(settings => this.trackRecorder.setSettings(settings))
+                .then(() => splashscreen.hide())));
 
         events.subscribe("TrackRecorder-LocationMode", enabled => {
             if (!enabled && !this.trackingIsStopped) {
                 this.stopTrackRecorder().then(() => {
-                    const trackingStoppedTaost = this.toastController.create(<ToastOptions>{
+                    const trackingStoppedToast = this.toastController.create(<ToastOptions>{
                         message: "Standort wurde deaktiviert. Aufnahme ist pausiert.",
                         duration: 3000,
-                        position: "middle"
+                        position: "middle",
+                        closeButtonText: "Ok",
+                        showCloseButton: true
                     });
-                    trackingStoppedTaost.present();
+                    trackingStoppedToast.present();
                 });
             }
         });
@@ -71,6 +78,16 @@ export class TrackRecorderPage {
         this.storage.set("TrackRecorderPage.recordedPositions", this.recordedPositions);
         this.storage.set("TrackRecorderPage.trackingStartedAt", this.trackingStartedAt);
         this.storage.set("TrackRecorderPage.trackedPath", this.map.getTrack());
+    }
+
+    private saveTrackRecorderSettings(settings: TrackRecorderSettings): void {
+        debugger;
+        this.storage.set("TrackRecorder.Settings", settings);
+    }
+
+    private loadTrackRecorderSettings(): Promise<TrackRecorderSettings> {
+        debugger;
+        return this.storage.get("TrackRecorderPage.lastUserUpdate");
     }
 
     private loadCurrentState(): void {
@@ -150,7 +167,7 @@ export class TrackRecorderPage {
             });
             setTrackRecorderSettingsToast.present();
 
-            this.trackRecorder.setSettings(data.settings);
+            this.trackRecorder.setSettings(data.settings).then(settings => this.saveTrackRecorderSettings(settings));
         });
         trackRecorderSettingsModal.present();
     }

@@ -58,22 +58,26 @@ export class TrackRecorder {
         return trackRecorderSettings;
     }
 
-    public setSettings(settings: TrackRecorderSettings): void {
-        this.configuration.activitiesInterval = settings.activitiesInterval;
-        this.configuration.desiredAccuracy = +settings.desiredAccuracy;
-        this.configuration.distanceFilter = settings.distanceFilter;
-        this.configuration.fastestInterval = settings.fastestInterval;
-        this.configuration.interval = settings.interval;
-        this.configuration.locationProvider = +settings.locationProvider;
-        this.configuration.stationaryRadius = settings.stationaryRadius;
+    public setSettings(settings: TrackRecorderSettings): Promise<TrackRecorderSettings> {
+        return new Promise((resolve, reject) => {
+            this.configuration.activitiesInterval = settings.activitiesInterval;
+            this.configuration.desiredAccuracy = +settings.desiredAccuracy;
+            this.configuration.distanceFilter = settings.distanceFilter;
+            this.configuration.fastestInterval = settings.fastestInterval;
+            this.configuration.interval = settings.interval;
+            this.configuration.locationProvider = +settings.locationProvider;
+            this.configuration.stationaryRadius = settings.stationaryRadius;
 
-        this.configuration = Object.assign(this.configuration, settings);
+            this.configuration = Object.assign(this.configuration, settings);
 
-        if (this.debug) {
-            console.log(`TrackRecorder: Settings changed: ${JSON.stringify(this.configuration)}`);
-        }
+            if (this.debug) {
+                console.log(`TrackRecorder: Settings changed: ${JSON.stringify(this.configuration)}`);
+            }
 
-        backgroundGeolocation.configure(null, null, this.configuration);
+            backgroundGeolocation.configure(null, error => reject(error), this.configuration);
+
+            resolve(settings);
+        });
     }
 
     public getLocations(): Promise<BackgroundGeolocation.BackgroundGeolocationResponse[]> {
