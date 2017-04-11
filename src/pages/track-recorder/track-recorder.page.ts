@@ -53,7 +53,13 @@ export class TrackRecorderPage {
             () => storage.ready()
                 .then(() => this.loadCurrentState())
                 .then(() => this.loadTrackRecorderSettings())
-                .then(settings => this.trackRecorder.setSettings(settings))
+                .then(settings => {
+                    if (!settings) {
+                        return;
+                    }
+
+                    this.trackRecorder.setSettings(settings);
+                })
                 .then(() => splashscreen.hide())));
 
         events.subscribe("TrackRecorder-LocationMode", enabled => {
@@ -81,13 +87,11 @@ export class TrackRecorderPage {
     }
 
     private saveTrackRecorderSettings(settings: TrackRecorderSettings): void {
-        debugger;
         this.storage.set("TrackRecorder.Settings", settings);
     }
 
     private loadTrackRecorderSettings(): Promise<TrackRecorderSettings> {
-        debugger;
-        return this.storage.get("TrackRecorderPage.lastUserUpdate");
+        return this.storage.get("TrackRecorder.Settings").then(settings => Object.assign(new TrackRecorderSettings(), settings));
     }
 
     private loadCurrentState(): void {

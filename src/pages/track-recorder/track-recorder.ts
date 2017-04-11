@@ -47,11 +47,8 @@ export class TrackRecorder {
 
     public get settings(): TrackRecorderSettings {
         const trackRecorderSettings = new TrackRecorderSettings();
-        trackRecorderSettings.activitiesInterval = this.configuration.activitiesInterval;
         trackRecorderSettings.desiredAccuracy = this.configuration.desiredAccuracy.toString();
         trackRecorderSettings.distanceFilter = this.configuration.distanceFilter;
-        trackRecorderSettings.fastestInterval = this.configuration.fastestInterval;
-        trackRecorderSettings.interval = this.configuration.interval;
         trackRecorderSettings.locationProvider = this.configuration.locationProvider.toString();
         trackRecorderSettings.stationaryRadius = this.configuration.stationaryRadius;
 
@@ -60,15 +57,10 @@ export class TrackRecorder {
 
     public setSettings(settings: TrackRecorderSettings): Promise<TrackRecorderSettings> {
         return new Promise((resolve, reject) => {
-            this.configuration.activitiesInterval = settings.activitiesInterval;
             this.configuration.desiredAccuracy = +settings.desiredAccuracy;
             this.configuration.distanceFilter = settings.distanceFilter;
-            this.configuration.fastestInterval = settings.fastestInterval;
-            this.configuration.interval = settings.interval;
             this.configuration.locationProvider = +settings.locationProvider;
             this.configuration.stationaryRadius = settings.stationaryRadius;
-
-            this.configuration = Object.assign(this.configuration, settings);
 
             if (this.debug) {
                 console.log(`TrackRecorder: Settings changed: ${JSON.stringify(this.configuration)}`);
