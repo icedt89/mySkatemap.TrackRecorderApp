@@ -9,7 +9,7 @@ import {
     Polyline,
     PolylineOptions,
 } from "@ionic-native/google-maps";
-import { Component, ElementRef, EventEmitter, Output, ViewChild } from "@angular/core";
+import { Component, ElementRef, ViewChild } from "@angular/core";
 
 import { Platform, ViewController } from "ionic-angular";
 
