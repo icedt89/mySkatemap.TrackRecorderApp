@@ -1,7 +1,6 @@
+import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
 import { NavParams, ToastController, ToastOptions, ViewController } from "ionic-angular";
-
 import { Component } from "@angular/core";
-import { TrackRecorderSettings } from "../../app/track-recorder-settings";
 
 @Component({
     templateUrl: "track-recorder-settings.component.html"

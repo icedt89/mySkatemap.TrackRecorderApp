@@ -36,12 +36,12 @@
         </button>
     </ion-fab-list>
     <ion-fab-list side="left">
-        <button [color]="canShowTrackRecorderSettings ? 'secondary' : 'default'" [disabled]="!canShowTrackRecorderSettings" ion-fab mini (click)="showTrackRecorderSettings($event)">
+        <button [color]="canShowTrackRecorderSettings ? 'primary' : 'default'" [disabled]="!canShowTrackRecorderSettings" ion-fab mini (click)="showTrackRecorderSettings($event)">
             <ion-icon name="settings"></ion-icon>
         </button>
     </ion-fab-list>
     <ion-fab-list side="bottom">
-        <button [color]="canUploadTrackRecording ? 'secondary' : 'default'" [disabled]="!canUploadTrackRecording" ion-fab mini (click)="uploadTrackRecording()">
+        <button [color]="canUploadTrackRecording ? 'primary' : 'default'" [disabled]="!canUploadTrackRecording" ion-fab mini (click)="uploadTrackRecording()">
             <ion-icon name="cloud-upload"></ion-icon>
         </button>
     </ion-fab-list>

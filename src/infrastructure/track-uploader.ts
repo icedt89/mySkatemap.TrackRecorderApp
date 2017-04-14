@@ -1,11 +1,11 @@
 import "rxjs/Rx";
 
-import { BackgroundGeolocation } from "../../declarations";
+import { BackgroundGeolocation } from "../declarations";
 import { Http } from "@angular/http";
 import { Injectable } from "@angular/core";
 
 @Injectable()
-export class RecordedTrackUploader {
+export class TrackUploader {
     private apiEndpoint = "http://myskatemap-api.azurewebsites.net/api/TrackRecording";
 
     public constructor(private http: Http) {

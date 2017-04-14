@@ -9,6 +9,8 @@
         "src/app/**/*.js.map": true,
         "src/components/**/*.js": true,
         "src/components/**/*.js.map": true,
+        "src/infrastructure/**/*.js": true,
+        "src/infrastructure/**/*.js.map": true,
         "src/pages/**/*.js": true,
         "src/pages/**/*.js.map": true
     }

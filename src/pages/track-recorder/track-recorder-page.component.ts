@@ -1,4 +1,6 @@
-import { haversineForPolyline } from "./haversine";
+import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
+import { TrackUploader } from "../../infrastructure/track-uploader";
+import { TrackRecorder } from "../../infrastructure/track-recorder/track-recorder";
 import { SplashScreen } from "@ionic-native/splash-screen";
 import {
     AlertController,
@@ -16,18 +18,17 @@ import {
 import { Component, ViewChild } from "@angular/core";
 
 import { LatLng } from "@ionic-native/google-maps";
+import { GeoHelper } from "../../infrastructure/geo-helper";
 import { MapComponent } from "../../components/map/map.component";
-import { RecordedTrackUploader } from "./recorded-track-uploader";
-import { TrackRecorder } from "./track-recorder";
 import { Storage } from "@ionic/storage";
-import { TrackRecorderSettings } from "../../app/track-recorder-settings";
 import { TrackRecorderSettingsComponent } from "../../components/track-recorder-settings/track-recorder-settings.component";
 
 @Component({
     selector: "track-recorder",
-    templateUrl: "track-recorder.page.html"
+    templateUrl: "track-recorder-page.component.html",
+    styleUrls: ["/track-recorder-page.component.css"]
 })
-export class TrackRecorderPage {
+export class TrackRecorderPageComponent {
     private lastUserUpdate: string | null;
     private approximateTrackLength: string | null;
     private recordedPositions: number | null;
@@ -42,13 +43,11 @@ export class TrackRecorderPage {
         private trackRecorder: TrackRecorder,
         private modalController: ModalController,
         private toastController: ToastController,
-        private recordedTrackUploader: RecordedTrackUploader,
+        private trackUploader: TrackUploader,
         private loadingController: LoadingController,
         private storage: Storage,
         splashscreen: SplashScreen,
         events: Events) {
-        this.trackRecorder.debugging();
-
         viewController.didEnter.subscribe(() => this.map.ready.subscribe(
             () => storage.ready()
                 .then(() => this.loadCurrentState())
@@ -60,7 +59,8 @@ export class TrackRecorderPage {
 
                     this.trackRecorder.setSettings(settings);
                 })
-                .then(() => splashscreen.hide())));
+                .then(() => splashscreen.hide())
+        ));
 
         events.subscribe("TrackRecorder-LocationMode", enabled => {
             if (!enabled && !this.trackingIsStopped) {
@@ -91,7 +91,13 @@ export class TrackRecorderPage {
     }
 
     private loadTrackRecorderSettings(): Promise<TrackRecorderSettings> {
-        return this.storage.get("TrackRecorder.Settings").then(settings => Object.assign(new TrackRecorderSettings(), settings));
+        return this.storage.get("TrackRecorder.Settings").then(settings => {
+            if (settings) {
+                return Object.assign(new TrackRecorderSettings(), settings);
+            }
+
+            return null;
+        });
     }
 
     private loadCurrentState(): void {
@@ -131,7 +137,7 @@ export class TrackRecorderPage {
                     this.lastUserUpdate = new Date().toLocaleString("de");
 
                     const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
-                    const computedTracklength = haversineForPolyline(trackedPath);
+                    const computedTracklength = GeoHelper.Haversine.computeDistance(trackedPath);
                     if (computedTracklength > 1000) {
                         this.approximateTrackLength = `${(+(computedTracklength / 1000).toFixed(3)).toLocaleString("de")} km`;
                     } else {
@@ -217,7 +223,7 @@ export class TrackRecorderPage {
             inputs: [
                 {
                     name: "trackName",
-                    value: `Strecke vom ${this.trackingStartedAt}`,
+                    value: `Strecke vom ${this.trackingStartedAt.toLocaleString("de")}`,
                     placeholder: "Name der Strecke",
                     type: "text"
                 }
@@ -235,22 +241,20 @@ export class TrackRecorderPage {
                         });
                         uploadTrackRecordingLoading.present();
 
-                        this.trackRecorder.getLocations().then(positions => {
-                            this.recordedTrackUploader.uploadRecordedTrack(positions, data.trackName, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
-                                uploadTrackRecordingLoading.dismiss();
-                                const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
-                                    message: "Strecke erfolgreich erstellt",
-                                    position: "middle",
-                                    duration: 3000,
-                                    showCloseButton: true,
-                                    closeButtonText: "Toll"
-                                });
-                                uploadedSuccessfulToast.present();
-                                this.resetView();
-
-                                this.refreshLastLocationDisplay();
+                        this.trackRecorder.getLocations().then(positions => this.trackUploader.uploadRecordedTrack(positions, data.trackName, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
+                            uploadTrackRecordingLoading.dismiss();
+                            const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
+                                message: "Strecke erfolgreich erstellt",
+                                position: "middle",
+                                duration: 3000,
+                                showCloseButton: true,
+                                closeButtonText: "Toll"
                             });
-                        });
+                            uploadedSuccessfulToast.present();
+                            this.resetView();
+
+                            this.refreshLastLocationDisplay();
+                        }));
                     }
                 }
             ]

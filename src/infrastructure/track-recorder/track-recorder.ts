@@ -2,14 +2,12 @@ import { BackgroundGeolocation } from "../../declarations";
 import { Events, Platform } from "ionic-angular";
 
 import { Injectable } from "@angular/core";
-import { TrackRecorderSettings } from "../../app/track-recorder-settings";
+import { TrackRecorderSettings } from "./track-recorder-settings";
 
 declare var backgroundGeolocation: BackgroundGeolocation.BackgroundGeolocation;
 
 @Injectable()
 export class TrackRecorder {
-    private debug: boolean = false;
-
     private configuration = <BackgroundGeolocation.BackgroundGeolocationConfig>{
         desiredAccuracy: 0, // 0 = GPS + Mobile + Wifi + GSM; 10 = Mobile + Wifi + GSM, 100 = Wifi + GSM; 1000 = GSM
         stationaryRadius: 5,
@@ -32,10 +30,6 @@ export class TrackRecorder {
             backgroundGeolocation.configure(null, null, this.configuration);
 
             backgroundGeolocation.watchLocationMode(enabled => {
-                if (this.debug) {
-                    console.log(`TrackRecorder: Received change in OS location mode with value: ${<boolean>enabled}`);
-                }
-
                 if (!enabled) {
                     this.stop();
                 }
@@ -62,10 +56,6 @@ export class TrackRecorder {
             this.configuration.locationProvider = +settings.locationProvider;
             this.configuration.stationaryRadius = settings.stationaryRadius;
 
-            if (this.debug) {
-                console.log(`TrackRecorder: Settings changed: ${JSON.stringify(this.configuration)}`);
-            }
-
             backgroundGeolocation.configure(null, error => reject(error), this.configuration);
 
             resolve(settings);
@@ -85,50 +75,20 @@ export class TrackRecorder {
     }
 
     public record(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            backgroundGeolocation.start(() => {
-                if (this.debug) {
-                    console.log("TrackRecorder: Started");
-                }
-
-                resolve(null);
-            }, error => reject(error));
-        });
+        return new Promise((resolve, reject) => backgroundGeolocation.start(() => resolve(null), error => reject(error)));
     }
 
     public stop(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            backgroundGeolocation.stop(() => {
-                if (this.debug) {
-                    console.log("TrackRecorder: Stopped");
-                }
-
-                resolve(null);
-            }, error => reject(error));
-        });
+        return new Promise((resolve, reject) => backgroundGeolocation.stop(() => resolve(null), error => reject(error)));
     }
 
     public deleteAllRecordings(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            backgroundGeolocation.deleteAllLocations(() => {
-                if (this.debug) {
-                    console.log("TrackRecorder: All recordings deleted");
-                }
-
-                resolve(null);
-            }, error => reject(error));
-        });
+        return new Promise((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(null), error => reject(error)));
     }
 
     public destroy(): void {
         this.stop();
 
         backgroundGeolocation.stopWatchingLocationMode();
-    }
-
-    public debugging(): void {
-        this.debug = true;
-
-        console.log("TrackRecorder: Enabled debugging for TrackRecorder");
     }
 }
