@@ -22,6 +22,7 @@ import { GeoHelper } from "../../infrastructure/geo-helper";
 import { MapComponent } from "../../components/map/map.component";
 import { Storage } from "@ionic/storage";
 import { TrackRecorderSettingsComponent } from "../../components/track-recorder-settings/track-recorder-settings.component";
+import { TrackRecording } from "./track-recording";
 
 @Component({
     selector: "track-recorder",
@@ -29,10 +30,9 @@ import { TrackRecorderSettingsComponent } from "../../components/track-recorder-
     styleUrls: ["/track-recorder-page.component.css"]
 })
 export class TrackRecorderPageComponent {
-    private lastUserUpdate: string | null;
-    private approximateTrackLength: string | null;
-    private recordedPositions: number | null;
-    private trackingStartedAt: Date | null;
+    private _lastUpdate: string | null;
+    private _approximateTrackLength: string | null;
+    private _currentTrackRecording: TrackRecording | null;
     private trackingIsStopped = true;
 
     @ViewChild("map") private map: MapComponent;
@@ -50,7 +50,18 @@ export class TrackRecorderPageComponent {
         events: Events) {
         viewController.didEnter.subscribe(() => this.map.ready.subscribe(
             () => storage.ready()
-                .then(() => this.loadCurrentState())
+                .then(() => this.loadPageState())
+                .then(() => this.loadCurrentTrackRecording())
+                .then(trackRecording => {
+                    if (!trackRecording) {
+                        return;
+                    }
+
+                    this._currentTrackRecording = trackRecording;
+
+                    this.setTrackedPathOnMap(this._currentTrackRecording.trackedPositions);
+                })
+                .then(() => splashscreen.hide())
                 .then(() => this.loadTrackRecorderSettings())
                 .then(settings => {
                     if (!settings) {
@@ -59,7 +70,6 @@ export class TrackRecorderPageComponent {
 
                     this.trackRecorder.setSettings(settings);
                 })
-                .then(() => splashscreen.hide())
         ));
 
         events.subscribe("TrackRecorder-LocationMode", enabled => {
@@ -78,16 +88,35 @@ export class TrackRecorderPageComponent {
         });
     }
 
-    private saveCurrentState(): void {
-        this.storage.set("TrackRecorderPage.lastUserUpdate", this.lastUserUpdate);
-        this.storage.set("TrackRecorderPage.approximateTrackLength", this.approximateTrackLength);
-        this.storage.set("TrackRecorderPage.recordedPositions", this.recordedPositions);
-        this.storage.set("TrackRecorderPage.trackingStartedAt", this.trackingStartedAt);
-        this.storage.set("TrackRecorderPage.trackedPath", this.map.getTrack());
+    private savePageState(): void {
+        if (!this._lastUpdate) {
+            this.storage.remove("TrackRecorderPage.lastUpdate");
+        } else {
+            this.storage.set("TrackRecorderPage.lastUpdate", this._lastUpdate);
+        }
+
+        if (!this._lastUpdate) {
+            this.storage.remove("TrackRecorderPage.approximateTrackLength");
+        } else {
+            this.storage.set("TrackRecorderPage.approximateTrackLength", this._approximateTrackLength);
+        }
+    }
+
+    private loadPageState(): void {
+        this.storage.get("TrackRecorderPage.lastUpdate").then((value: string | null) => {
+            this._lastUpdate = value;
+        });
+        this.storage.get("TrackRecorderPage.approximateTrackLength").then((value: string | null) => {
+            this._approximateTrackLength = value;
+        });
     }
 
     private saveTrackRecorderSettings(settings: TrackRecorderSettings): void {
-        this.storage.set("TrackRecorder.Settings", settings);
+        if (!settings) {
+            this.storage.remove("TrackRecorder.Settings")
+        } else {
+            this.storage.set("TrackRecorder.Settings", settings);
+        }
     }
 
     private loadTrackRecorderSettings(): Promise<TrackRecorderSettings> {
@@ -100,23 +129,21 @@ export class TrackRecorderPageComponent {
         });
     }
 
-    private loadCurrentState(): void {
-        this.storage.get("TrackRecorderPage.lastUserUpdate").then((value: string | null) => {
-            this.lastUserUpdate = value;
-        });
-        this.storage.get("TrackRecorderPage.approximateTrackLength").then((value: string | null) => {
-            this.approximateTrackLength = value;
-        });
-        this.storage.get("TrackRecorderPage.recordedPositions").then((value: number | null) => {
-            this.recordedPositions = value;
-        });
-        this.storage.get("TrackRecorderPage.trackingStartedAt").then((value: Date | null) => {
-            this.trackingStartedAt = value;
-        });
-        this.storage.get("TrackRecorderPage.trackedPath").then((value: LatLng[] | null) => {
-            if (value) {
-                this.setTrackedPathOnMap(value);
+    private saveCurrentTrackRecording(): void {
+        if (!this._currentTrackRecording) {
+            this.storage.remove("TrackRecording.Current")
+        } else {
+            this.storage.set("TrackRecording.Current", this._currentTrackRecording);
+        }
+    }
+
+    private loadCurrentTrackRecording(): Promise<TrackRecording> {
+        return this.storage.get("TrackRecording.Current").then(trackRecording => {
+            if (trackRecording) {
+                return Object.assign(new TrackRecording(), trackRecording);
             }
+
+            return null;
         });
     }
 
@@ -125,35 +152,62 @@ export class TrackRecorderPageComponent {
             return this.map.setTrack(trackedPath).then(() => this.map.panToTrack());
         }
 
-        return Promise.resolve(null);
+        return Promise.resolve();
+    }
+
+    private refreshValues(): Promise<any> {
+        if (!this._currentTrackRecording) {
+            return Promise.resolve();
+        }
+
+        return this.trackRecorder.getLocations().then(positions => {
+            if (!positions.length) {
+                return Promise.resolve();
+            }
+
+            this._lastUpdate = new Date().toLocaleString("de");
+
+            if (positions.length !== this._currentTrackRecording.trackedPositions.length) {
+                const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
+                this._currentTrackRecording.trackedPositions = trackedPath;
+
+                const computedTrackLength = GeoHelper.Haversine.computeDistance(trackedPath);
+
+                const usefulTrackLength = GeoHelper.Length.convertToMoreUsefulUnit(computedTrackLength);
+                const lengthUnitText = GeoHelper.LengthUnitHelper.getUnitTextFromUnit(usefulTrackLength.lengthUnit);
+                switch (usefulTrackLength.lengthUnit) {
+                    case GeoHelper.LengthUnit.Kilometers:
+                        this._approximateTrackLength = `${(+usefulTrackLength.usefulUnit.toFixed(3)).toLocaleString("de")} ${lengthUnitText}`;
+                        break;
+                    case GeoHelper.LengthUnit.Meters:
+                        this._approximateTrackLength = `${(+usefulTrackLength.usefulUnit.toFixed(1)).toLocaleString("de")} ${lengthUnitText}`;
+                        break;
+                }
+
+                return this.setTrackedPathOnMap(trackedPath).then(() => this.savePageState()).then(() => this.saveCurrentTrackRecording());
+            }
+        });
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private refreshLastLocationDisplay(refresher: Refresher | null = null): void {
-        this.trackRecorder.getLocations().then(positions => {
-            if (positions.length) {
-                if (positions.length !== this.recordedPositions) {
-                    this.recordedPositions = positions.length;
-                    this.lastUserUpdate = new Date().toLocaleString("de");
+    private showTrackedPositionsInfo(): void {
+        if (!this._currentTrackRecording || this._currentTrackRecording.trackedPositions.length < 2) {
+            return;
+        }
 
-                    const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
-                    const computedTracklength = GeoHelper.Haversine.computeDistance(trackedPath);
-                    if (computedTracklength > 1000) {
-                        this.approximateTrackLength = `${(+(computedTracklength / 1000).toFixed(3)).toLocaleString("de")} km`;
-                    } else {
-                        this.approximateTrackLength = `${(+computedTracklength.toFixed(1)).toLocaleString("de")} m`;
-                    }
-
-                    this.setTrackedPathOnMap(trackedPath).then(() => this.saveCurrentState());
-                }
-            } else {
-                this.resetView();
-            }
-
-            if (refresher) {
-                refresher.complete();
-            }
+        const trackedPositionsInfoAlert = this.toastController.create(<ToastOptions>{
+            message: `Basierend auf ${this._currentTrackRecording.trackedPositions.length} Positionen`,
+            duration: 3000,
+            position: "middle",
+            closeButtonText: "Ok",
+            showCloseButton: true
         });
+        trackedPositionsInfoAlert.present();
+    }
+
+    // tslint:disable-next-line:no-unused-variable Used inside template.
+    private refreshLastLocationDisplay(refresher: Refresher): void {
+        this.refreshValues().then(() => refresher.complete());
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
@@ -184,7 +238,7 @@ export class TrackRecorderPageComponent {
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
     private resetTrackRecording(): void {
-        const resetRecordingPrompt = this.alertController.create({
+        const resetRecordingPrompt = this.alertController.create(<AlertOptions>{
             title: "Strecke löschen",
             message: "Möchten Sie die aufgezeichnete Strecke wirklich löschen?",
             enableBackdropDismiss: true,
@@ -206,7 +260,7 @@ export class TrackRecorderPageComponent {
                         allRecordingsDeletedToast.present();
                         this.resetView();
 
-                        this.refreshLastLocationDisplay();
+                        this.refreshValues();
                     })
                 }
             ]
@@ -218,16 +272,8 @@ export class TrackRecorderPageComponent {
     private uploadTrackRecording(): void {
         const resetRecordingPrompt = this.alertController.create({
             title: "Strecke erstellen",
-            message: "Möchten Sie die aufgezeichnete Strecke übermitteln? Sie können optional einen Namen vergeben.",
+            message: "Möchten Sie die aufgezeichnete Strecke übermitteln?",
             enableBackdropDismiss: true,
-            inputs: [
-                {
-                    name: "trackName",
-                    value: `Strecke vom ${this.trackingStartedAt.toLocaleString("de")}`,
-                    placeholder: "Name der Strecke",
-                    type: "text"
-                }
-            ],
             buttons: [
                 {
                     text: "Abbrechen",
@@ -235,13 +281,13 @@ export class TrackRecorderPageComponent {
                 },
                 {
                     text: "Ja",
-                    handler: data => {
+                    handler: () => {
                         const uploadTrackRecordingLoading = this.loadingController.create(<LoadingOptions>{
                             content: "Wird erstellt...",
                         });
                         uploadTrackRecordingLoading.present();
 
-                        this.trackRecorder.getLocations().then(positions => this.trackUploader.uploadRecordedTrack(positions, data.trackName, this.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
+                        this.trackRecorder.getLocations().then(positions => this.trackUploader.uploadRecordedTrack(positions, this._currentTrackRecording.trackName, this._currentTrackRecording.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
                             uploadTrackRecordingLoading.dismiss();
                             const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
                                 message: "Strecke erfolgreich erstellt",
@@ -253,7 +299,7 @@ export class TrackRecorderPageComponent {
                             uploadedSuccessfulToast.present();
                             this.resetView();
 
-                            this.refreshLastLocationDisplay();
+                            this.refreshValues();
                         }));
                     }
                 }
@@ -264,20 +310,24 @@ export class TrackRecorderPageComponent {
 
     private resetView(): void {
         this.map.resetTrack();
-        this.lastUserUpdate = null;
-        this.approximateTrackLength = null;
-        this.recordedPositions = null;
-        this.trackingStartedAt = null;
+        this._currentTrackRecording = null;
+        this._lastUpdate = null;
+        this._approximateTrackLength = null;
 
-        this.saveCurrentState();
+        this.savePageState();
+        this.saveCurrentTrackRecording();
+    }
+
+    private get currentTrackRecording(): TrackRecording | null {
+        return this._currentTrackRecording;
     }
 
     private get canDeleteTrackRecording(): boolean {
-        return this.trackingIsStopped && this.countOfCollectedPositions > 0;
+        return this.trackingIsStopped && !!this._currentTrackRecording;
     }
 
     private get canUploadTrackRecording(): boolean {
-        return this.trackingIsStopped && this.countOfCollectedPositions > 0;
+        return this.trackingIsStopped && !!this._currentTrackRecording && this.currentTrackRecording.trackedPositions.length> 1;
     }
 
     private get canShowTrackRecorderSettings(): boolean {
@@ -285,15 +335,11 @@ export class TrackRecorderPageComponent {
     }
 
     private get lastUpdate(): string | null {
-        return this.lastUserUpdate;
+        return this._lastUpdate;
     }
 
     private get approximateLength(): string | null {
-        return this.approximateTrackLength;
-    }
-
-    private get countOfCollectedPositions(): number | null {
-        return this.recordedPositions;
+        return this._approximateTrackLength;
     }
 
     private get isStopped(): boolean {
@@ -304,7 +350,7 @@ export class TrackRecorderPageComponent {
         return this.trackRecorder.stop().then(() => {
             this.trackingIsStopped = true;
 
-            this.refreshLastLocationDisplay();
+            this.refreshValues();
         });
     }
 
@@ -318,10 +364,12 @@ export class TrackRecorderPageComponent {
         this.trackRecorder.isLocationEnabled().then(enabled => {
             if (enabled) {
                 this.trackRecorder.record().then(() => {
-                    if (!this.trackingStartedAt) {
-                        this.trackingStartedAt = new Date();
+                    if (!this._currentTrackRecording) {
+                        this._currentTrackRecording = new TrackRecording();
+                        this._currentTrackRecording.trackingStartedAt = new Date();
+                        this._currentTrackRecording.trackName = `Strecke vom ${this._currentTrackRecording.trackingStartedAt.toLocaleString()}`;
 
-                        this.saveCurrentState();
+                        this.saveCurrentTrackRecording();
                     }
 
                     this.trackingIsStopped = false;

@@ -5,9 +5,15 @@
 </ion-header>
 
 <ion-content>
-    <ion-refresher (ionRefresh)="refreshLastLocationDisplay($event)">
+    <ion-refresher (enabled)="currentTrackRecording" (ionRefresh)="refreshLastLocationDisplay($event)">
         <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Ziehen zum aktualisieren" refreshingSpinner="circles" refreshingText="aktualisieren..."></ion-refresher-content>
     </ion-refresher>
+
+    <ion-item>
+        <ion-label stacked color="primary">Streckenname</ion-label>
+        <ion-input [disabled]="!currentTrackRecording" [value]="currentTrackRecording?.trackName" placeholder="Aufnahme starten..."></ion-input>
+    </ion-item>
+
     <ion-item>
         <ion-label stacked color="primary">Letzte Aktualisierung</ion-label>
         <ion-input disabled [value]="lastUpdate" type="text" placeholder="Keine Daten vorhanden"></ion-input>
@@ -15,12 +21,7 @@
 
     <ion-item>
         <ion-label stacked color="primary">Ungefähre Länge</ion-label>
-        <ion-input disabled [value]="approximateLength" type="text" placeholder="Keine Daten vorhanden"></ion-input>
-    </ion-item>
-
-    <ion-item>
-        <ion-label stacked color="primary">Anzahl ermittelter Positionen</ion-label>
-        <ion-input disabled [value]="countOfCollectedPositions" placeholder="Keine Positionen ermittelt"></ion-input>
+        <ion-input (click)="showTrackedPositionsInfo()" disabled [value]="approximateLength" type="text" placeholder="Keine Daten vorhanden"></ion-input>
     </ion-item>
 
     <map #map></map>

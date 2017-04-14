@@ -1,6 +1,6 @@
 import { LatLng } from "@ionic-native/google-maps";
 
-export class RecordedTrack {
+export class TrackRecording {
     private _trackName: string;
     private _trackingStartedAt: Date;
     private _trackedPositions: LatLng[] = [];

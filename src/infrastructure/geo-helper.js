@@ -1,5 +1,58 @@
+import { Exception } from "./track-recorder-exception";
 export var GeoHelper;
 (function (GeoHelper) {
+    var LengthUnit;
+    (function (LengthUnit) {
+        LengthUnit[LengthUnit["Meters"] = 0] = "Meters";
+        LengthUnit[LengthUnit["Kilometers"] = 1] = "Kilometers";
+    })(LengthUnit = GeoHelper.LengthUnit || (GeoHelper.LengthUnit = {}));
+    var LengthUnitHelper = (function () {
+        function LengthUnitHelper() {
+        }
+        LengthUnitHelper.getUnitTextFromUnit = function (unit) {
+            switch (unit) {
+                case LengthUnit.Meters:
+                    return "m";
+                case LengthUnit.Kilometers:
+                    return "km";
+                default:
+                    throw new Exception("Invalid length unit " + unit + ".");
+            }
+        };
+        LengthUnitHelper.getLengthUnitFromText = function (unit) {
+            switch (unit) {
+                case "km":
+                    return LengthUnit.Kilometers;
+                case "m":
+                    return LengthUnit.Meters;
+                default:
+                    throw new Exception("Invalid length unit " + unit + ".");
+            }
+        };
+        return LengthUnitHelper;
+    }());
+    GeoHelper.LengthUnitHelper = LengthUnitHelper;
+    var UsefulUnitConversion = (function () {
+        function UsefulUnitConversion(meters, usefulUnit, lengthUnit) {
+            this.meters = meters;
+            this.usefulUnit = usefulUnit;
+            this.lengthUnit = lengthUnit;
+        }
+        return UsefulUnitConversion;
+    }());
+    GeoHelper.UsefulUnitConversion = UsefulUnitConversion;
+    var Length = (function () {
+        function Length() {
+        }
+        Length.convertToMoreUsefulUnit = function (meters) {
+            if (meters > 1000) {
+                return new UsefulUnitConversion(meters, +(meters / 1000).toFixed(3), LengthUnit.Kilometers);
+            }
+            return new UsefulUnitConversion(meters, +meters.toFixed(1), LengthUnit.Meters);
+        };
+        return Length;
+    }());
+    GeoHelper.Length = Length;
     var Haversine = (function () {
         function Haversine() {
         }
