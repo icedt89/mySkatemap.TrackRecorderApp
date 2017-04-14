@@ -11,7 +11,7 @@ import {
 } from "@ionic-native/google-maps";
 import { Component, ElementRef, EventEmitter, Output, ViewChild } from "@angular/core";
 
-import { Platform } from "ionic-angular";
+import { Platform, ViewController } from "ionic-angular";
 
 @Component({
     selector: "map",
@@ -24,36 +24,48 @@ export class MapComponent {
 
     @ViewChild("map") private mapElement: ElementRef;
 
-    @Output() public ready = new EventEmitter<any>();
+    private mapReadyResolve: () =>  void;
+    private _mapReady = new Promise<void>(resolve => this.mapReadyResolve = resolve);
 
-    public constructor(platform: Platform) {
-        platform.ready().then(() => {
-            const initialMapCenter = new LatLng(50.8333, 12.9167);
-            const initialMapZoom = 13;
+    public constructor(platform: Platform,
+        viewController: ViewController) {
+        viewController.willEnter.subscribe(() => {
+            platform.ready().then(() => {
+                const initialMapCenter = new LatLng(50.8333, 12.9167);
+                const initialMapZoom = 13;
 
-            this.googleMaps = new GoogleMaps();
-            this.googleMap = this.googleMaps.create(this.mapElement.nativeElement);
-            this.googleMap.on(GoogleMapsEvent.MAP_READY).subscribe(() => {
-                this.googleMap.setAllGesturesEnabled(false);
-                this.googleMap.setClickable(false);
-                this.googleMap.setCompassEnabled(false);
-                this.googleMap.setIndoorEnabled(false);
-                this.googleMap.setMyLocationEnabled(false);
-                this.googleMap.setTrafficEnabled(false);
-                this.googleMap.setZoom(initialMapZoom);
-                this.googleMap.setCenter(initialMapCenter);
-                this.googleMap.moveCamera(<CameraPosition>{
-                    zoom: initialMapZoom,
-                    target: initialMapCenter
+                this.googleMaps = new GoogleMaps();
+                this.googleMap = this.googleMaps.create(this.mapElement.nativeElement);
+                this.googleMap.on(GoogleMapsEvent.MAP_READY).subscribe(() => {
+                    this.googleMap.setAllGesturesEnabled(false);
+                    this.googleMap.setClickable(false);
+                    this.googleMap.setCompassEnabled(false);
+                    this.googleMap.setIndoorEnabled(false);
+                    this.googleMap.setMyLocationEnabled(false);
+                    this.googleMap.setTrafficEnabled(false);
+                    this.googleMap.setZoom(initialMapZoom);
+                    this.googleMap.setCenter(initialMapCenter);
+                    this.googleMap.moveCamera(<CameraPosition>{
+                        zoom: initialMapZoom,
+                        target: initialMapCenter
+                    });
+
+                    this.mapReadyResolve();
                 });
-
-                this.ready.emit(null);
             });
+        });
+
+        viewController.didLeave.subscribe(() => {
+            this.googleMap.remove();
         });
     }
 
-    public setTrack(positions: LatLng[]): Promise<any> {
-        return new Promise((resolve, reject) => {
+    public get mapReady(): Promise<void> {
+        return this._mapReady;
+    }
+
+    public setTrack(positions: LatLng[]): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             if (!this.track) {
                 this.track = <Polyline>{};
                 const trackOptions = <PolylineOptions>{

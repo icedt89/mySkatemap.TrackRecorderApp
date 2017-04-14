@@ -11,6 +11,9 @@ declare var backgroundGeolocation: BackgroundGeolocation.BackgroundGeolocation;
 export class TrackRecorder {
     private locationModeChangedSubject = new Subject<boolean>();
 
+    private readyResolve: () => void;
+    private _ready = new Promise<void>(resolve => this.readyResolve = resolve);
+
     private configuration = <BackgroundGeolocation.BackgroundGeolocationConfig>{
         desiredAccuracy: 0, // 0 = GPS + Mobile + Wifi + GSM; 10 = Mobile + Wifi + GSM, 100 = Wifi + GSM; 1000 = GSM
         stationaryRadius: 5,
@@ -38,7 +41,11 @@ export class TrackRecorder {
 
                 this.locationModeChangedSubject.next(enabled);
             }, error => this.locationModeChangedSubject.error(error));
-        });
+        }).then(() => this.readyResolve());
+    }
+
+    public get ready(): Promise<void> {
+        return this._ready;
     }
 
     public get locationModeChanged(): Observable<boolean> {
@@ -80,16 +87,16 @@ export class TrackRecorder {
         backgroundGeolocation.showLocationSettings();
     }
 
-    public record(): Promise<any> {
-        return new Promise((resolve, reject) => backgroundGeolocation.start(() => resolve(), error => reject(error)));
+    public record(): Promise<void> {
+        return new Promise<void>((resolve, reject) => backgroundGeolocation.start(() => resolve(), error => reject(error)));
     }
 
-    public stop(): Promise<any> {
-        return new Promise((resolve, reject) => backgroundGeolocation.stop(() => resolve(), error => reject(error)));
+    public stop(): Promise<void> {
+        return new Promise<void>((resolve, reject) => backgroundGeolocation.stop(() => resolve(), error => reject(error)));
     }
 
-    public deleteAllRecordings(): Promise<any> {
-        return new Promise((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(), error => reject(error)));
+    public deleteAllRecordings(): Promise<void> {
+        return new Promise<void>((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(), error => reject(error)));
     }
 
     public destroy(): void {

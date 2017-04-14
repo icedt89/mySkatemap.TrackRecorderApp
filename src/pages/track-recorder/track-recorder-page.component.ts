@@ -1,7 +1,6 @@
 import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
 import { TrackUploader } from "../../infrastructure/track-uploader";
 import { TrackRecorder } from "../../infrastructure/track-recorder/track-recorder";
-import { SplashScreen } from "@ionic-native/splash-screen";
 import {
     AlertController,
     AlertOptions,
@@ -42,37 +41,26 @@ export class TrackRecorderPageComponent {
         private toastController: ToastController,
         private trackUploader: TrackUploader,
         private loadingController: LoadingController,
-        private storage: Storage,
-        splashscreen: SplashScreen) {
-        viewController.willLeave.subscribe(() => {
-            debugger;
+        private storage: Storage) {
+        viewController.willEnter.subscribe(() => {
+            this.loadPageState();
+            this.loadTrackRecorderSettings().then(settings => {
+                if (!settings) {
+                    return;
+                }
+
+                this.trackRecorder.ready.then(() => this.trackRecorder.setSettings(settings));
+            });
+            this.loadCurrentTrackRecording().then(trackRecording => {
+                if (!trackRecording) {
+                    return;
+                }
+
+                this._currentTrackRecording = trackRecording;
+
+                this.map.mapReady.then(() => this.setTrackedPathOnMap(this._currentTrackRecording.trackedPositions));
+            });
         });
-        viewController.willUnload.subscribe(() => {
-            debugger;
-        });
-        viewController.didEnter.subscribe(() => this.map.ready.subscribe(
-            () => storage.ready()
-                .then(() => this.loadPageState())
-                .then(() => this.loadCurrentTrackRecording())
-                .then(trackRecording => {
-                    if (!trackRecording) {
-                        return;
-                    }
-
-                    this._currentTrackRecording = trackRecording;
-
-                    this.setTrackedPathOnMap(this._currentTrackRecording.trackedPositions);
-                })
-                .then(() => splashscreen.hide())
-                .then(() => this.loadTrackRecorderSettings())
-                .then(settings => {
-                    if (!settings) {
-                        return;
-                    }
-
-                    this.trackRecorder.setSettings(settings);
-                })
-        ));
 
         this.trackRecorder.locationModeChanged.subscribe(enabled => {
             if (!enabled && !this.trackingIsStopped) {
@@ -149,7 +137,7 @@ export class TrackRecorderPageComponent {
         });
     }
 
-    private setTrackedPathOnMap(trackedPath: LatLng[]): Promise<any> {
+    private setTrackedPathOnMap(trackedPath: LatLng[]): Promise<void> {
         if (trackedPath.length > 1) {
             return this.map.setTrack(trackedPath).then(() => this.map.panToTrack());
         }
@@ -157,7 +145,7 @@ export class TrackRecorderPageComponent {
         return Promise.resolve();
     }
 
-    private refreshValues(): Promise<any> {
+    private refreshValues(): Promise<void> {
         if (!this._currentTrackRecording) {
             return Promise.resolve();
         }
@@ -348,7 +336,7 @@ export class TrackRecorderPageComponent {
         return this.trackingIsStopped;
     }
 
-    private stopTrackRecorder(): Promise<any> {
+    private stopTrackRecorder(): Promise<void> {
         return this.trackRecorder.stop().then(() => {
             this.trackingIsStopped = true;
 
