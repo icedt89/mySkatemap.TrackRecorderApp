@@ -14,4 +14,8 @@ export class DummyPageComponent {
     private goto(): void {
         this.navController.push(TrackRecorderPageComponent);
     }
+
+    private takePicture(): void {
+
+    }
 }
