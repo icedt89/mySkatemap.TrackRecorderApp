@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { AlertController, Platform } from "ionic-angular";
+import { Platform } from "ionic-angular";
 import { StatusBar } from "@ionic-native/status-bar";
 import { TrackRecorderPageComponent } from "../pages/track-recorder/track-recorder-page.component";
 
@@ -8,11 +8,10 @@ import { TrackRecorderPageComponent } from "../pages/track-recorder/track-record
 })
 export class MyApp {
   // tslint:disable-next-line:no-unused-variable Used inside template.
-  private trackRecorderPage = TrackRecorderPageComponent;
+  private root = TrackRecorderPageComponent;
 
   public constructor(platform: Platform,
-    statusBar: StatusBar,
-    alertController: AlertController) {
+    statusBar: StatusBar) {
     platform.ready().then(() => statusBar.styleDefault());
   }
 }

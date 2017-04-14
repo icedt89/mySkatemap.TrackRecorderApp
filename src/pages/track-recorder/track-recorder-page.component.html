@@ -5,7 +5,7 @@
 </ion-header>
 
 <ion-content>
-    <ion-refresher (enabled)="currentTrackRecording" (ionRefresh)="refreshLastLocationDisplay($event)">
+    <ion-refresher [enabled]="currentTrackRecording" (ionRefresh)="refreshLastLocationDisplay($event)">
         <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Ziehen zum aktualisieren" refreshingSpinner="circles" refreshingText="aktualisieren..."></ion-refresher-content>
     </ion-refresher>
 

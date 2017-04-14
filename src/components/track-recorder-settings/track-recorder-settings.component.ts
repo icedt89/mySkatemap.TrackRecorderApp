@@ -23,8 +23,7 @@ export class TrackRecorderSettingsComponent {
         return this.recorderSettings;
     }
 
-    public showDistanceFilterToast(): void {
-
+    private showDistanceFilterToast(): void {
         const distanceFilterToast = this.toastController.create(<ToastOptions>{
             duration: 5000,
             position: "middle",
@@ -35,7 +34,7 @@ export class TrackRecorderSettingsComponent {
         distanceFilterToast.present();
     }
 
-    public showStationaryRadiusToast(): void {
+    private showStationaryRadiusToast(): void {
         const distanceFilterToast = this.toastController.create(<ToastOptions>{
             duration: 5000,
             position: "middle",

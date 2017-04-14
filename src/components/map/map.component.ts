@@ -66,12 +66,12 @@ export class MapComponent {
                 this.googleMap.addPolyline(trackOptions).then((polyline: Polyline) => {
                     this.track = polyline;
 
-                    resolve(null);
+                    resolve();
                 });
             } else {
                 this.track.setPoints(positions);
 
-                resolve(null);
+                resolve();
             }
         });
     }

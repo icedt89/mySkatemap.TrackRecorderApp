@@ -5,11 +5,9 @@ import { SplashScreen } from "@ionic-native/splash-screen";
 import {
     AlertController,
     AlertOptions,
-    Events,
     LoadingController,
     LoadingOptions,
     ModalController,
-    Platform,
     Refresher,
     ToastController,
     ToastOptions,
@@ -38,7 +36,6 @@ export class TrackRecorderPageComponent {
     @ViewChild("map") private map: MapComponent;
 
     public constructor(viewController: ViewController,
-        platform: Platform,
         private alertController: AlertController,
         private trackRecorder: TrackRecorder,
         private modalController: ModalController,
@@ -46,8 +43,13 @@ export class TrackRecorderPageComponent {
         private trackUploader: TrackUploader,
         private loadingController: LoadingController,
         private storage: Storage,
-        splashscreen: SplashScreen,
-        events: Events) {
+        splashscreen: SplashScreen) {
+        viewController.willLeave.subscribe(() => {
+            debugger;
+        });
+        viewController.willUnload.subscribe(() => {
+            debugger;
+        });
         viewController.didEnter.subscribe(() => this.map.ready.subscribe(
             () => storage.ready()
                 .then(() => this.loadPageState())
@@ -72,7 +74,7 @@ export class TrackRecorderPageComponent {
                 })
         ));
 
-        events.subscribe("TrackRecorder-LocationMode", enabled => {
+        this.trackRecorder.locationModeChanged.subscribe(enabled => {
             if (!enabled && !this.trackingIsStopped) {
                 this.stopTrackRecorder().then(() => {
                     const trackingStoppedToast = this.toastController.create(<ToastOptions>{
@@ -90,30 +92,30 @@ export class TrackRecorderPageComponent {
 
     private savePageState(): void {
         if (!this._lastUpdate) {
-            this.storage.remove("TrackRecorderPage.lastUpdate");
+            this.storage.remove("TrackRecorderPage.LastUpdate");
         } else {
-            this.storage.set("TrackRecorderPage.lastUpdate", this._lastUpdate);
+            this.storage.set("TrackRecorderPage.LastUpdate", this._lastUpdate);
         }
 
-        if (!this._lastUpdate) {
-            this.storage.remove("TrackRecorderPage.approximateTrackLength");
+        if (!this._approximateTrackLength) {
+            this.storage.remove("TrackRecorderPage.ApproximateTrackLength");
         } else {
-            this.storage.set("TrackRecorderPage.approximateTrackLength", this._approximateTrackLength);
+            this.storage.set("TrackRecorderPage.ApproximateTrackLength", this._approximateTrackLength);
         }
     }
 
     private loadPageState(): void {
-        this.storage.get("TrackRecorderPage.lastUpdate").then((value: string | null) => {
+        this.storage.get("TrackRecorderPage.LastUpdate").then((value: string | null) => {
             this._lastUpdate = value;
         });
-        this.storage.get("TrackRecorderPage.approximateTrackLength").then((value: string | null) => {
+        this.storage.get("TrackRecorderPage.ApproximateTrackLength").then((value: string | null) => {
             this._approximateTrackLength = value;
         });
     }
 
     private saveTrackRecorderSettings(settings: TrackRecorderSettings): void {
         if (!settings) {
-            this.storage.remove("TrackRecorder.Settings")
+            this.storage.remove("TrackRecorder.Settings");
         } else {
             this.storage.set("TrackRecorder.Settings", settings);
         }
@@ -131,7 +133,7 @@ export class TrackRecorderPageComponent {
 
     private saveCurrentTrackRecording(): void {
         if (!this._currentTrackRecording) {
-            this.storage.remove("TrackRecording.Current")
+            this.storage.remove("TrackRecording.Current");
         } else {
             this.storage.set("TrackRecording.Current", this._currentTrackRecording);
         }
@@ -327,7 +329,7 @@ export class TrackRecorderPageComponent {
     }
 
     private get canUploadTrackRecording(): boolean {
-        return this.trackingIsStopped && !!this._currentTrackRecording && this.currentTrackRecording.trackedPositions.length> 1;
+        return this.trackingIsStopped && !!this._currentTrackRecording && this.currentTrackRecording.trackedPositions.length > 1;
     }
 
     private get canShowTrackRecorderSettings(): boolean {

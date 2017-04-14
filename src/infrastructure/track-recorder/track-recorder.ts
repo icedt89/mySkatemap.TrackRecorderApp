@@ -1,5 +1,6 @@
+import { Observable, Subject } from "rxjs/Rx";
 import { BackgroundGeolocation } from "../../declarations";
-import { Events, Platform } from "ionic-angular";
+import { Platform } from "ionic-angular";
 
 import { Injectable } from "@angular/core";
 import { TrackRecorderSettings } from "./track-recorder-settings";
@@ -8,6 +9,8 @@ declare var backgroundGeolocation: BackgroundGeolocation.BackgroundGeolocation;
 
 @Injectable()
 export class TrackRecorder {
+    private locationModeChangedSubject = new Subject<boolean>();
+
     private configuration = <BackgroundGeolocation.BackgroundGeolocationConfig>{
         desiredAccuracy: 0, // 0 = GPS + Mobile + Wifi + GSM; 10 = Mobile + Wifi + GSM, 100 = Wifi + GSM; 1000 = GSM
         stationaryRadius: 5,
@@ -24,8 +27,7 @@ export class TrackRecorder {
         notificationIconColor: "#009688"
     };
 
-    public constructor(platform: Platform,
-        events: Events) {
+    public constructor(platform: Platform) {
         platform.ready().then(() => {
             backgroundGeolocation.configure(null, null, this.configuration);
 
@@ -34,9 +36,13 @@ export class TrackRecorder {
                     this.stop();
                 }
 
-                events.publish("TrackRecorder-LocationMode", enabled);
-            }, null);
+                this.locationModeChangedSubject.next(enabled);
+            }, error => this.locationModeChangedSubject.error(error));
         });
+    }
+
+    public get locationModeChanged(): Observable<boolean> {
+        return this.locationModeChangedSubject;
     }
 
     public get settings(): TrackRecorderSettings {
@@ -75,15 +81,15 @@ export class TrackRecorder {
     }
 
     public record(): Promise<any> {
-        return new Promise((resolve, reject) => backgroundGeolocation.start(() => resolve(null), error => reject(error)));
+        return new Promise((resolve, reject) => backgroundGeolocation.start(() => resolve(), error => reject(error)));
     }
 
     public stop(): Promise<any> {
-        return new Promise((resolve, reject) => backgroundGeolocation.stop(() => resolve(null), error => reject(error)));
+        return new Promise((resolve, reject) => backgroundGeolocation.stop(() => resolve(), error => reject(error)));
     }
 
     public deleteAllRecordings(): Promise<any> {
-        return new Promise((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(null), error => reject(error)));
+        return new Promise((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(), error => reject(error)));
     }
 
     public destroy(): void {
