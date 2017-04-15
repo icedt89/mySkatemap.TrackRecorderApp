@@ -15,7 +15,7 @@ export class TrackUploader {
     public uploadRecordedTrack(positions: BackgroundGeolocation.BackgroundGeolocationResponse[], trackRecording: TrackRecording): Promise<boolean> {
         const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, new Date());
 
-        createdRecordedTrackModel.trackAttachments = trackRecording.trackAttachments.map(trackAttachment => trackAttachment.imageDataUrl);
+        createdRecordedTrackModel.TrackAttachments = trackRecording.trackAttachments.map(trackAttachment => trackAttachment.imageDataUrl);
         createdRecordedTrackModel.RecordedPositions = positions.map((position, order) => {
             const result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);
             result.Accuracy = position.accuracy;
@@ -51,7 +51,7 @@ class CreateRecordedTrackModel {
 
     public RecordedPositions: RecordedTrackPositionModel[] = [];
 
-    public trackAttachments: string[] = [];
+    public TrackAttachments: string[] = [];
 }
 
 class RecordedTrackPositionModel {
