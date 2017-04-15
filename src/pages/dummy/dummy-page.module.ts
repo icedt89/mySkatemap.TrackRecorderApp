@@ -1,15 +1,14 @@
-import { MediaCapturer } from "../../infrastructure/media-capturer";
+import { MediaCapturer } from "../../infrastructure/media-capture/media-capturer";
 import { IonicModule } from "ionic-angular";
 import { DummyPageComponent } from "./dummy-page.component";
 import { NgModule } from "@angular/core";
-import { MediaCapture } from "@ionic-native/media-capture";
-import { File } from "@ionic-native/file";
+import { Camera } from "@ionic-native/camera";
 
 @NgModule({
     imports: [IonicModule],
     declarations: [DummyPageComponent],
     exports: [DummyPageComponent],
     entryComponents: [DummyPageComponent],
-    providers: [MediaCapture, File, MediaCapturer]
+    providers: [ MediaCapturer, Camera]
 })
 export class DummyPageModule { }

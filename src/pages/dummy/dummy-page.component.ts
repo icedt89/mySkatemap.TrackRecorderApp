@@ -1,4 +1,4 @@
-import { MediaCapturer } from "../../infrastructure/media-capturer";
+import { MediaCapturer } from "../../infrastructure/media-capture/media-capturer";
 import { TrackRecorderPageComponent } from "../track-recorder/track-recorder-page.component";
 import { NavController } from "ionic-angular";
 import { ViewController } from "ionic-angular";
@@ -20,10 +20,8 @@ export class DummyPageComponent {
     }
 
     private takePicture(): void {
-        this.imageCapturer.captureImage().then(dataUrls => {
-            if (dataUrls.length) {
-                this.mediaFilePath = dataUrls[0];
-            }
+        this.imageCapturer.selectLibraryImage().then(result => {
+             this.mediaFilePath = result.dataUrl;
         });
     }
 }

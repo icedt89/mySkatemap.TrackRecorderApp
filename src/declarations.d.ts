@@ -43,7 +43,7 @@ export declare namespace BackgroundGeolocation {
 
     getConfig(success: (config: BackgroundGeolocationConfig) => void, error: (error: any) => void): void;
 
-    configure(success: (position: BackgroundGeolocationResponse) => void, error: any, config: BackgroundGeolocationConfig): void;
+    configure(success: ((position: BackgroundGeolocationResponse) => void) | null, error: any, config: BackgroundGeolocationConfig): void;
 
     isLocationEnabled(success: (enabled: boolean) => void, error: (error: any) => void): void;
 

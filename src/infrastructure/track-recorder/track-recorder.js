@@ -7,12 +7,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Events, Platform } from "ionic-angular";
+import { Subject } from "rxjs/Rx";
+import { Platform } from "ionic-angular";
 import { Injectable } from "@angular/core";
 import { TrackRecorderSettings } from "./track-recorder-settings";
 var TrackRecorder = (function () {
-    function TrackRecorder(platform, events) {
+    function TrackRecorder(platform) {
         var _this = this;
+        this.locationModeChangedSubject = new Subject();
+        this._ready = new Promise(function (resolve) { return _this.readyResolve = resolve; });
         this.configuration = {
             desiredAccuracy: 0,
             stationaryRadius: 5,
@@ -34,10 +37,24 @@ var TrackRecorder = (function () {
                 if (!enabled) {
                     _this.stop();
                 }
-                events.publish("TrackRecorder-LocationMode", enabled);
-            }, null);
-        });
+                _this.locationModeChangedSubject.next(enabled);
+            }, function (error) { return _this.locationModeChangedSubject.error(error); });
+        }).then(function () { return _this.readyResolve(); });
     }
+    Object.defineProperty(TrackRecorder.prototype, "ready", {
+        get: function () {
+            return this._ready;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TrackRecorder.prototype, "locationModeChanged", {
+        get: function () {
+            return this.locationModeChangedSubject;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(TrackRecorder.prototype, "settings", {
         get: function () {
             var trackRecorderSettings = new TrackRecorderSettings();
@@ -71,13 +88,13 @@ var TrackRecorder = (function () {
         backgroundGeolocation.showLocationSettings();
     };
     TrackRecorder.prototype.record = function () {
-        return new Promise(function (resolve, reject) { return backgroundGeolocation.start(function () { return resolve(null); }, function (error) { return reject(error); }); });
+        return new Promise(function (resolve, reject) { return backgroundGeolocation.start(function () { return resolve(); }, function (error) { return reject(error); }); });
     };
     TrackRecorder.prototype.stop = function () {
-        return new Promise(function (resolve, reject) { return backgroundGeolocation.stop(function () { return resolve(null); }, function (error) { return reject(error); }); });
+        return new Promise(function (resolve, reject) { return backgroundGeolocation.stop(function () { return resolve(); }, function (error) { return reject(error); }); });
     };
     TrackRecorder.prototype.deleteAllRecordings = function () {
-        return new Promise(function (resolve, reject) { return backgroundGeolocation.deleteAllLocations(function () { return resolve(null); }, function (error) { return reject(error); }); });
+        return new Promise(function (resolve, reject) { return backgroundGeolocation.deleteAllLocations(function () { return resolve(); }, function (error) { return reject(error); }); });
     };
     TrackRecorder.prototype.destroy = function () {
         this.stop();
@@ -87,8 +104,7 @@ var TrackRecorder = (function () {
 }());
 TrackRecorder = __decorate([
     Injectable(),
-    __metadata("design:paramtypes", [Platform,
-        Events])
+    __metadata("design:paramtypes", [Platform])
 ], TrackRecorder);
 export { TrackRecorder };
 //# sourceMappingURL=track-recorder.js.map

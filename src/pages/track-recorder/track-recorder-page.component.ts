@@ -62,6 +62,11 @@ export class TrackRecorderPageComponent {
             });
         });
 
+        viewController.willLeave.subscribe(() => {
+            this.savePageState();
+            this.saveCurrentTrackRecording();
+        });
+
         this.trackRecorder.locationModeChanged.subscribe(enabled => {
             if (!enabled && !this.trackingIsStopped) {
                 this.stopTrackRecorder().then(() => {
@@ -174,7 +179,9 @@ export class TrackRecorderPageComponent {
                         break;
                 }
 
-                return this.setTrackedPathOnMap(trackedPath).then(() => this.savePageState()).then(() => this.saveCurrentTrackRecording());
+                this.savePageState();
+
+                return this.setTrackedPathOnMap(trackedPath).then(() => this.saveCurrentTrackRecording());
             }
         });
     }
@@ -317,7 +324,7 @@ export class TrackRecorderPageComponent {
     }
 
     private get canUploadTrackRecording(): boolean {
-        return this.trackingIsStopped && !!this._currentTrackRecording && this.currentTrackRecording.trackedPositions.length > 1;
+        return this.trackingIsStopped && !!this._currentTrackRecording && this._currentTrackRecording.trackedPositions.length > 1;
     }
 
     private get canShowTrackRecorderSettings(): boolean {
