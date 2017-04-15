@@ -1,10 +1,15 @@
 <ion-header>
     <ion-navbar>
         <ion-title>Streckenerfassung</ion-title>
+        <ion-buttons end>
+            <button ion-button icon-only *ngIf="currentTrackRecording" (click)="showTrackAttachments()">
+                <ion-icon name="create"></ion-icon>
+            </button>
+        </ion-buttons>
     </ion-navbar>
 </ion-header>
 
-<ion-content>
+<ion-content #content>
     <ion-refresher [enabled]="currentTrackRecording" (ionRefresh)="refreshLastLocationDisplay($event)">
         <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Ziehen zum aktualisieren" refreshingSpinner="circles" refreshingText="aktualisieren..."></ion-refresher-content>
     </ion-refresher>

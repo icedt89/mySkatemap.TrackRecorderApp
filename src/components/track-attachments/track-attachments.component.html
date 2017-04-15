@@ -1,0 +1,39 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Anhänge</ion-title>
+        <ion-buttons end>
+            <button padding-left ion-button color="primary" icon-only (click)="apply()">
+                <ion-icon name="checkmark"></ion-icon>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <ion-list>
+        <ion-item *ngFor="let trackAttachment of trackAttachmentsModel.attachments">
+            <ion-thumbnail item-left>
+                <img src="{{trackAttachment.imageDataUrl}}">
+            </ion-thumbnail>
+            <ion-label stacked color="primary">Hinzugefügt am</ion-label>
+            <ion-input disabled [value]="trackAttachment.comment" type="text"></ion-input>
+            <button color="danger" ion-button clear item-right icon-only (click)="trackAttachmentsModel.removeAttachment(trackAttachment)">
+                <ion-icon name="trash"></ion-icon>
+            </button>
+        </ion-item>
+    </ion-list>
+</ion-content>
+
+<ion-fab bottom right>
+    <button ion-fab color="primary">
+       <ion-icon name="add"></ion-icon>
+    </button>
+    <ion-fab-list side="top">
+        <button ion-fab mini icon-only (click)="selectLibraryImage()">
+            <ion-icon name="images"></ion-icon>
+        </button>
+        <button ion-fab mini icon-only (click)="captureCameraImage()">
+            <ion-icon name="camera"></ion-icon>
+        </button>
+    </ion-fab-list>
+</ion-fab>

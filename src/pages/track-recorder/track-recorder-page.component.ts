@@ -1,3 +1,5 @@
+import { TrackAttachmentsModel } from "../../components/track-attachments/track-attachments-model";
+import { TrackAttachmentsComponent } from "../../components/track-attachments/track-attachments.component";
 import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
 import { TrackUploader } from "../../infrastructure/track-uploader";
 import { TrackRecorder } from "../../infrastructure/track-recorder/track-recorder";
@@ -208,6 +210,23 @@ export class TrackRecorderPageComponent {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
+    private showTrackAttachments(event: Event): void {
+        const trackAttachmentsModal = this.modalController.create(TrackAttachmentsComponent, {
+            trackAttachments: new TrackAttachmentsModel(this._currentTrackRecording.trackAttachments)
+        });
+        trackAttachmentsModal.onDidDismiss((data: { model: TrackAttachmentsModel } | null) => {
+            if (!data) {
+                return;
+            }
+
+            this._currentTrackRecording.trackAttachments = data.model.attachments;
+
+            this.saveCurrentTrackRecording();
+        });
+        trackAttachmentsModal.present();
+    }
+
+    // tslint:disable-next-line:no-unused-variable Used inside template.
     private showTrackRecorderSettings(event: Event): void {
         const recorderSettings = this.trackRecorder.settings;
 
@@ -284,7 +303,7 @@ export class TrackRecorderPageComponent {
                         });
                         uploadTrackRecordingLoading.present();
 
-                        this.trackRecorder.getLocations().then(positions => this.trackUploader.uploadRecordedTrack(positions, this._currentTrackRecording.trackName, this._currentTrackRecording.trackingStartedAt).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
+                        this.trackRecorder.getLocations().then(positions => this.trackUploader.uploadRecordedTrack(positions, this._currentTrackRecording).then(() => this.trackRecorder.deleteAllRecordings()).then(() => {
                             uploadTrackRecordingLoading.dismiss();
                             const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
                                 message: "Strecke erfolgreich erstellt",

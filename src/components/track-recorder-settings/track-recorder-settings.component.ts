@@ -23,6 +23,7 @@ export class TrackRecorderSettingsComponent {
         return this.recorderSettings;
     }
 
+     // tslint:disable-next-line:no-unused-variable Used inside template
     private showDistanceFilterToast(): void {
         const distanceFilterToast = this.toastController.create(<ToastOptions>{
             duration: 5000,
@@ -34,6 +35,7 @@ export class TrackRecorderSettingsComponent {
         distanceFilterToast.present();
     }
 
+     // tslint:disable-next-line:no-unused-variable Used inside template
     private showStationaryRadiusToast(): void {
         const distanceFilterToast = this.toastController.create(<ToastOptions>{
             duration: 5000,

@@ -17,7 +17,8 @@ export class MediaCapturer {
     public selectLibraryImage(): Promise<CapturedMediaResult> {
         return this.camera.getPicture(<CameraOptions>{
             destinationType: 0,
-            sourceType: 0
+            sourceType: 0,
+            correctOrientation: true
         }).then((result: string) => new CapturedMediaResult(result));
     }
 }

@@ -1,6 +1,11 @@
 <ion-header>
     <ion-navbar>
         <ion-title>Einstellungen</ion-title>
+        <ion-buttons end>
+            <button ion-button color="primary" icon-only (click)="apply()">
+                <ion-icon name="checkmark"></ion-icon>
+            </button>
+        </ion-buttons>
     </ion-navbar>
 </ion-header>
 
@@ -32,9 +37,3 @@
         <ion-label range-right>100</ion-label>
     </ion-range>
 </ion-content>
-
-<ion-footer>
-    <ion-toolbar>
-        <button (click)="apply()" full color="primary" ion-button>Anwenden</button>
-    </ion-toolbar>
-</ion-footer>

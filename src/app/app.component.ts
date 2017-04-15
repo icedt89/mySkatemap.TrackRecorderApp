@@ -1,5 +1,4 @@
 import { SplashScreen } from "@ionic-native/splash-screen";
-import { DummyPageComponent } from "../pages/dummy/dummy-page.component";
 import { Component } from "@angular/core";
 import { Platform } from "ionic-angular";
 import { StatusBar } from "@ionic-native/status-bar";
@@ -10,7 +9,7 @@ import { TrackRecorderPageComponent } from "../pages/track-recorder/track-record
 })
 export class MyApp {
   // tslint:disable-next-line:no-unused-variable Used inside template.
-  private root = DummyPageComponent;
+  private root = TrackRecorderPageComponent;
 
   public constructor(platform: Platform,
     statusBar: StatusBar,

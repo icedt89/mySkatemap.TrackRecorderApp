@@ -1,3 +1,4 @@
+import { TrackRecording } from "../pages/track-recorder/track-recording";
 import "rxjs/Rx";
 
 import { BackgroundGeolocation } from "../declarations";
@@ -11,8 +12,10 @@ export class TrackUploader {
     public constructor(private http: Http) {
     }
 
-    public uploadRecordedTrack(positions: BackgroundGeolocation.BackgroundGeolocationResponse[], trackName: string, startedAt: Date): Promise<boolean> {
-        const createdRecordedTrackModel = new CreateRecordedTrackModel(trackName, startedAt, new Date());
+    public uploadRecordedTrack(positions: BackgroundGeolocation.BackgroundGeolocationResponse[], trackRecording: TrackRecording): Promise<boolean> {
+        const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, new Date());
+
+        createdRecordedTrackModel.trackAttachments = trackRecording.trackAttachments.map(trackAttachment => trackAttachment.imageDataUrl);
         createdRecordedTrackModel.RecordedPositions = positions.map((position, order) => {
             const result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);
             result.Accuracy = position.accuracy;
@@ -47,6 +50,8 @@ class CreateRecordedTrackModel {
     public TrackName: string;
 
     public RecordedPositions: RecordedTrackPositionModel[] = [];
+
+    public trackAttachments: string[] = [];
 }
 
 class RecordedTrackPositionModel {
