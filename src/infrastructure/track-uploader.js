@@ -15,8 +15,9 @@ var TrackUploader = (function () {
         this.http = http;
         this.apiEndpoint = "http://myskatemap-api.azurewebsites.net/api/TrackRecording";
     }
-    TrackUploader.prototype.uploadRecordedTrack = function (positions, trackName, startedAt) {
-        var createdRecordedTrackModel = new CreateRecordedTrackModel(trackName, startedAt, new Date());
+    TrackUploader.prototype.uploadRecordedTrack = function (positions, trackRecording) {
+        var createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, new Date());
+        createdRecordedTrackModel.TrackAttachments = trackRecording.trackAttachments.map(function (trackAttachment) { return trackAttachment.imageDataUrl; });
         createdRecordedTrackModel.RecordedPositions = positions.map(function (position, order) {
             var result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);
             result.Accuracy = position.accuracy;
@@ -43,6 +44,7 @@ export { TrackUploader };
 var CreateRecordedTrackModel = (function () {
     function CreateRecordedTrackModel(trackName, trackingStartedAt, uploadStartedAt) {
         this.RecordedPositions = [];
+        this.TrackAttachments = [];
         this.TrackName = trackName;
         this.TrackingStartedAt = trackingStartedAt.toISOString();
         this.UploadStartedAt = uploadStartedAt.toISOString();

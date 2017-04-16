@@ -1,4 +1,3 @@
-import { DummyPageModule } from "../pages/dummy/dummy-page.module";
 import { TrackRecorderPageModule } from "../pages/track-recorder/track-recorder-page.module";
 import { BrowserModule } from "@angular/platform-browser";
 import { ErrorHandler, NgModule } from "@angular/core";
@@ -12,7 +11,6 @@ import { StatusBar } from "@ionic-native/status-bar";
   imports: [
     BrowserModule,
     TrackRecorderPageModule,
-    DummyPageModule,
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot(),
   ],
