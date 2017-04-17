@@ -1,11 +1,11 @@
 import { Observable, Subject } from "rxjs/Rx";
-import { BackgroundGeolocation } from "../../declarations";
+import { BackgroundGeolocation, BackgroundGeolocationResponse, BackgroundGeolocationConfig } from "../../declarations";
 import { Platform } from "ionic-angular";
 
 import { Injectable } from "@angular/core";
 import { TrackRecorderSettings } from "./track-recorder-settings";
 
-declare var backgroundGeolocation: BackgroundGeolocation.BackgroundGeolocation;
+declare var backgroundGeolocation: BackgroundGeolocation;
 
 @Injectable()
 export class TrackRecorder {
@@ -14,7 +14,7 @@ export class TrackRecorder {
     private readyResolve: () => void;
     private _ready = new Promise<void>(resolve => this.readyResolve = resolve);
 
-    private configuration = <BackgroundGeolocation.BackgroundGeolocationConfig>{
+    private configuration = <BackgroundGeolocationConfig>{
         desiredAccuracy: 0, // 0 = GPS + Mobile + Wifi + GSM; 10 = Mobile + Wifi + GSM, 100 = Wifi + GSM; 1000 = GSM
         stationaryRadius: 5,
         distanceFilter: 5,
@@ -75,8 +75,8 @@ export class TrackRecorder {
         });
     }
 
-    public getLocations(): Promise<BackgroundGeolocation.BackgroundGeolocationResponse[]> {
-        return new Promise<BackgroundGeolocation.BackgroundGeolocationResponse[]>((resolve, reject) => backgroundGeolocation.getValidLocations(positions => resolve(positions), error => reject(error)));
+    public getLocations(): Promise<BackgroundGeolocationResponse[]> {
+        return new Promise<BackgroundGeolocationResponse[]>((resolve, reject) => backgroundGeolocation.getValidLocations(positions => resolve(positions), error => reject(error)));
     }
 
     public isLocationEnabled(): Promise<boolean> {

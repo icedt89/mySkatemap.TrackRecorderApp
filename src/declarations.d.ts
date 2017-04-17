@@ -14,61 +14,58 @@ import { Observable } from 'rxjs/Rx';
 */
 declare module '*';
 
-export declare namespace BackgroundGeolocation {
+export interface BackgroundGeolocationConfig {
+  activitiesInterval: number;
 
-  export interface BackgroundGeolocationConfig {
-    activitiesInterval: number;
+  desiredAccuracy: number;
 
-    desiredAccuracy: number;
+  distanceFilter: number;
 
-    distanceFilter: number;
+  fastestInterval: number;
 
-    fastestInterval: number;
+  interval: number;
 
-    interval: number;
+  locationProvider: number;
 
-    locationProvider: number;
+  stationaryRadius: number;
+}
 
-    stationaryRadius: number;
-  }
+export interface BackgroundGeolocation {
+  start(success: () => void, error: (error: any) => void): void;
 
-  export interface BackgroundGeolocation {
-    start(success: () => void, error: (error: any) => void): void;
+  stop(success: () => void, error: (error: any) => void): void;
 
-    stop(success: () => void, error: (error: any) => void): void;
+  getValidLocations(success: (positions: BackgroundGeolocationResponse[]) => void, error: (error: any) => void): void;
 
-    getValidLocations(success: (positions: BackgroundGeolocationResponse[]) => void, error: (error: any) => void): void;
+  deleteAllLocations(success: () => void, error: (error: any) => void): void;
 
-    deleteAllLocations(success: () => void, error: (error: any) => void): void;
+  getConfig(success: (config: BackgroundGeolocationConfig) => void, error: (error: any) => void): void;
 
-    getConfig(success: (config: BackgroundGeolocationConfig) => void, error: (error: any) => void): void;
+  configure(success: ((position: BackgroundGeolocationResponse) => void) | null, error: any, config: BackgroundGeolocationConfig): void;
 
-    configure(success: ((position: BackgroundGeolocationResponse) => void) | null, error: any, config: BackgroundGeolocationConfig): void;
+  isLocationEnabled(success: (enabled: boolean) => void, error: (error: any) => void): void;
 
-    isLocationEnabled(success: (enabled: boolean) => void, error: (error: any) => void): void;
+  watchLocationMode(success: (enabled: boolean) => void, error: (error: any) => void): void;
 
-    watchLocationMode(success: (enabled: boolean) => void, error: (error: any) => void): void;
+  stopWatchingLocationMode(): void;
 
-    stopWatchingLocationMode(): void;
+  showLocationSettings(): void;
+}
 
-    showLocationSettings(): void;
-  }
+export interface BackgroundGeolocationResponse {
+  latitude: number;
 
-  export interface BackgroundGeolocationResponse {
-    latitude: number;
+  longitude: number;
 
-    longitude: number;
+  accuracy: number | null;
 
-    accuracy: number | null;
+  time: number | null;
 
-    time: number | null;
+  speed: number | null;
 
-    speed: number | null;
+  altitude: number | null;
 
-    altitude: number | null;
+  bearing: number | null;
 
-    bearing: number | null;
-
-    provider: string;
-  }
+  provider: string;
 }

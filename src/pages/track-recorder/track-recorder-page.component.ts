@@ -1,3 +1,7 @@
+import { LengthUnit } from "../../infrastructure/length-unit";
+import { Length } from "../../infrastructure/length";
+import { LengthUnitHelper } from "../../infrastructure/lenght-unit-helper";
+import { Haversine } from "../../infrastructure/haversine";
 import { TrackAttachmentsModel } from "../../components/track-attachments/track-attachments-model";
 import { TrackAttachmentsComponent } from "../../components/track-attachments/track-attachments.component";
 import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
@@ -17,7 +21,6 @@ import {
 import { Component, ViewChild } from "@angular/core";
 
 import { LatLng } from "@ionic-native/google-maps";
-import { GeoHelper } from "../../infrastructure/geo-helper";
 import { MapComponent } from "../../components/map/map.component";
 import { Storage } from "@ionic/storage";
 import { TrackRecorderSettingsComponent } from "../../components/track-recorder-settings/track-recorder-settings.component";
@@ -168,15 +171,15 @@ export class TrackRecorderPageComponent {
                 const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
                 this._currentTrackRecording.trackedPositions = trackedPath;
 
-                const computedTrackLength = GeoHelper.Haversine.computeDistance(trackedPath);
+                const computedTrackLength = Haversine.computeDistance(trackedPath);
 
-                const usefulTrackLength = GeoHelper.Length.convertToMoreUsefulUnit(computedTrackLength);
-                const lengthUnitText = GeoHelper.LengthUnitHelper.getUnitTextFromUnit(usefulTrackLength.lengthUnit);
+                const usefulTrackLength = Length.convertToMoreUsefulUnit(computedTrackLength);
+                const lengthUnitText = LengthUnitHelper.getUnitTextFromUnit(usefulTrackLength.lengthUnit);
                 switch (usefulTrackLength.lengthUnit) {
-                    case GeoHelper.LengthUnit.Kilometers:
+                    case LengthUnit.Kilometers:
                         this._approximateTrackLength = `${(+usefulTrackLength.usefulUnit.toFixed(3)).toLocaleString("de")} ${lengthUnitText}`;
                         break;
-                    case GeoHelper.LengthUnit.Meters:
+                    case LengthUnit.Meters:
                         this._approximateTrackLength = `${(+usefulTrackLength.usefulUnit.toFixed(1)).toLocaleString("de")} ${lengthUnitText}`;
                         break;
                 }

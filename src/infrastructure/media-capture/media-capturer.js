@@ -16,14 +16,17 @@ var MediaCapturer = (function () {
     }
     MediaCapturer.prototype.captureCameraImage = function () {
         return this.camera.getPicture({
-            destinationType: 0,
+            destinationType: this.camera.DestinationType.DATA_URL,
+            allowEdit: false,
+            quality: 100,
             correctOrientation: true
         }).then(function (result) { return new CapturedMediaResult(result); });
     };
     MediaCapturer.prototype.selectLibraryImage = function () {
         return this.camera.getPicture({
-            destinationType: 0,
-            sourceType: 0,
+            destinationType: this.camera.DestinationType.DATA_URL,
+            allowEdit: false,
+            sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
             correctOrientation: true
         }).then(function (result) { return new CapturedMediaResult(result); });
     };
