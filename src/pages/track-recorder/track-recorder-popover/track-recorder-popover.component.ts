@@ -10,7 +10,6 @@ import {
     ModalController,
     NavParams,
     ToastController,
-    ToastOptions,
     ViewController
 } from "ionic-angular";
 import { Component } from "@angular/core";
