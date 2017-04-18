@@ -1,5 +1,12 @@
+<ion-menu [content]="content">...</ion-menu>
+
 <ion-header>
-    <ion-navbar>
+    <ion-navbar color="primary">
+        <ion-buttons left>
+            <button menuToggle icon-only ion-button>
+                <ion-icon name="menu"></ion-icon>
+            </button>
+        </ion-buttons>
         <ion-title>Streckenerfassung</ion-title>
         <ion-buttons end>
             <button ion-button icon-only *ngIf="currentTrackRecording" (click)="showTrackAttachments()">
@@ -9,23 +16,23 @@
     </ion-navbar>
 </ion-header>
 
-<ion-content #content>
+<ion-content #content fixed>
     <ion-refresher [enabled]="currentTrackRecording" (ionRefresh)="refreshLastLocationDisplay($event)">
         <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Ziehen zum aktualisieren" refreshingSpinner="circles" refreshingText="aktualisieren..."></ion-refresher-content>
     </ion-refresher>
 
     <ion-item>
-        <ion-label stacked color="primary">Streckenname</ion-label>
+        <ion-label stacked>Streckenname</ion-label>
         <ion-input [disabled]="!currentTrackRecording" [value]="currentTrackRecording?.trackName" placeholder="Aufnahme starten..."></ion-input>
     </ion-item>
 
     <ion-item>
-        <ion-label stacked color="primary">Letzte Aktualisierung</ion-label>
+        <ion-label stacked>Letzte Aktualisierung</ion-label>
         <ion-input disabled [value]="lastUpdate" type="text" placeholder="Keine Daten vorhanden"></ion-input>
     </ion-item>
 
     <ion-item>
-        <ion-label stacked color="primary">Ungefähre Länge</ion-label>
+        <ion-label stacked>Ungefähre Länge</ion-label>
         <ion-input (click)="showTrackedPositionsInfo()" disabled [value]="approximateLength" type="text" placeholder="Keine Daten vorhanden"></ion-input>
     </ion-item>
 
@@ -33,7 +40,7 @@
 </ion-content>
 
 <ion-fab middle right>
-    <button ion-fab color="light">
+    <button ion-fab>
        <ion-icon name="options"></ion-icon>
     </button>
     <ion-fab-list side="top">
@@ -47,15 +54,20 @@
         </button>
     </ion-fab-list>
     <ion-fab-list side="bottom">
-        <button [color]="canUploadTrackRecording ? 'primary' : 'default'" [disabled]="!canUploadTrackRecording" ion-fab mini (click)="uploadTrackRecording()">
+        <button [disabled]="!canUploadTrackRecording" ion-fab mini (click)="uploadTrackRecording()">
             <ion-icon name="cloud-upload"></ion-icon>
         </button>
     </ion-fab-list>
 </ion-fab>
 
-<ion-footer>
-    <ion-toolbar>
-        <button (click)="record()" *ngIf="isStopped" full color="primary" ion-button>Starten</button>
-        <button (click)="stop()" *ngIf="!isStopped" full color="danger" ion-button>Stoppen</button>
-    </ion-toolbar>
-</ion-footer>
+<ion-fab bottom center *ngIf="isPaused">
+    <button ion-fab (click)="record()">
+       <ion-icon name="recording"></ion-icon>
+    </button>
+</ion-fab>
+
+<ion-fab bottom center *ngIf="!isPaused">
+    <button ion-fab color="danger" (click)="pause()">
+       <ion-icon name="pause"></ion-icon>
+    </button>
+</ion-fab>

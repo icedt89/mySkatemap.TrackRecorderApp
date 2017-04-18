@@ -30,7 +30,7 @@ export class TrackRecorderSettingsComponent {
             position: "middle",
             showCloseButton: true,
             closeButtonText: "Danke",
-            message: "Mindestbewegung in Metern die erfolgen muss damit die Position erfasst wird"
+            message: "Mindestbewegung in Metern die erfolgen muss, damit die Position erfasst wird"
         });
         distanceFilterToast.present();
     }
@@ -42,7 +42,7 @@ export class TrackRecorderSettingsComponent {
             position: "middle",
             showCloseButton: true,
             closeButtonText: "Danke",
-            message: "Mindestbewegung in Metern die erfolgen muss damit die Aufzeichnung wieder beginnt"
+            message: "Mindestbewegung in Metern die erfolgen muss, damit die Aufzeichnung fortgesetzt wird"
         });
         distanceFilterToast.present();
     }

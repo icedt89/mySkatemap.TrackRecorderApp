@@ -1,8 +1,8 @@
 <ion-header>
-    <ion-navbar>
+    <ion-navbar color="primary">
         <ion-title>Einstellungen</ion-title>
         <ion-buttons end>
-            <button ion-button color="primary" icon-only (click)="apply()">
+            <button ion-button icon-only (click)="apply()">
                 <ion-icon name="checkmark"></ion-icon>
             </button>
         </ion-buttons>
@@ -10,26 +10,26 @@
 </ion-header>
 
 <ion-content padding>
-    <ion-label color="primary">Genauigkeit</ion-label>
-    <ion-segment color="secondary" [(ngModel)]="settings.desiredAccuracy">
+    <ion-label>Genauigkeit</ion-label>
+    <ion-segment [(ngModel)]="settings.desiredAccuracy">
         <ion-segment-button value="0">Hoch</ion-segment-button>
         <ion-segment-button value="10">Moderat</ion-segment-button>
         <ion-segment-button value="100">Niedrig</ion-segment-button>
         <ion-segment-button value="1000">Ungenau</ion-segment-button>
     </ion-segment>
-    <ion-label color="primary">Optimierung</ion-label>
-    <ion-segment color="secondary" [(ngModel)]="settings.locationProvider">
+    <ion-label>Optimierung</ion-label>
+    <ion-segment [(ngModel)]="settings.locationProvider">
         <ion-segment-button value="0">Hintergrund</ion-segment-button>
         <ion-segment-button value="1">Vordergrund</ion-segment-button>
     </ion-segment>
-    <ion-label color="primary" style="overflow: hidden" (click)="showStationaryRadiusToast()">Bewegungsaktivierung nach metern
+    <ion-label style="overflow: hidden" (click)="showStationaryRadiusToast()">Bewegungsaktivierung nach metern
         <ion-badge style="float: right">{{settings.stationaryRadius}}</ion-badge>
     </ion-label>
     <ion-range [(ngModel)]="settings.stationaryRadius">
         <ion-label range-left>1</ion-label>
         <ion-label range-right>100</ion-label>
     </ion-range>
-    <ion-label color="primary" style="overflow: hidden" (click)="showDistanceFilterToast()">Bewegungsaufzeichnung nach Metern
+    <ion-label style="overflow: hidden" (click)="showDistanceFilterToast()">Bewegungsaufzeichnung nach Metern
         <ion-badge style="float: right">{{settings.distanceFilter}}</ion-badge>
     </ion-label>
     <ion-range min="1" max="100" [(ngModel)]="settings.distanceFilter">

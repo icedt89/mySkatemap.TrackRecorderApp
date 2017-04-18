@@ -35,7 +35,7 @@ export class TrackRecorderPageComponent {
     private _lastUpdate: string | null;
     private _approximateTrackLength: string | null;
     private _currentTrackRecording: TrackRecording | null;
-    private trackingIsStopped = true;
+    private trackingIsPaused = true;
 
     @ViewChild("map") private map: MapComponent;
 
@@ -73,12 +73,12 @@ export class TrackRecorderPageComponent {
         });
 
         this.trackRecorder.locationModeChanged.subscribe(enabled => {
-            if (!enabled && !this.trackingIsStopped) {
-                this.stopTrackRecorder().then(() => {
+            if (!enabled && !this.trackingIsPaused) {
+                this.pauseTrackRecorder().then(() => {
                     const trackingStoppedToast = this.toastController.create(<ToastOptions>{
                         message: "Standort wurde deaktiviert. Aufnahme ist pausiert.",
                         duration: 3000,
-                        position: "middle",
+                        position: "bottom",
                         closeButtonText: "Ok",
                         showCloseButton: true
                     });
@@ -244,7 +244,7 @@ export class TrackRecorderPageComponent {
             const setTrackRecorderSettingsToast = this.toastController.create(<ToastOptions>{
                 message: "Einstellungen akzeptiert",
                 duration: 3000,
-                position: "middle",
+                position: "bottom",
                 showCloseButton: true,
                 closeButtonText: "Ok"
             });
@@ -272,7 +272,7 @@ export class TrackRecorderPageComponent {
                         const allRecordingsDeletedToast = this.toastController.create(<ToastOptions>{
                             message: "Strecke gelöscht",
                             duration: 3000,
-                            position: "middle",
+                            position: "bottom",
                             showCloseButton: true,
                             closeButtonText: "Ok"
                         });
@@ -310,7 +310,7 @@ export class TrackRecorderPageComponent {
                             uploadTrackRecordingLoading.dismiss();
                             const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
                                 message: "Strecke erfolgreich erstellt",
-                                position: "middle",
+                                position: "bottom",
                                 duration: 3000,
                                 showCloseButton: true,
                                 closeButtonText: "Toll"
@@ -342,15 +342,15 @@ export class TrackRecorderPageComponent {
     }
 
     private get canDeleteTrackRecording(): boolean {
-        return this.trackingIsStopped && !!this._currentTrackRecording;
+        return this.trackingIsPaused && !!this._currentTrackRecording;
     }
 
     private get canUploadTrackRecording(): boolean {
-        return this.trackingIsStopped && !!this._currentTrackRecording && this._currentTrackRecording.trackedPositions.length > 1;
+        return this.trackingIsPaused && !!this._currentTrackRecording && this._currentTrackRecording.trackedPositions.length > 1;
     }
 
     private get canShowTrackRecorderSettings(): boolean {
-        return this.trackingIsStopped;
+        return this.trackingIsPaused;
     }
 
     private get lastUpdate(): string | null {
@@ -361,21 +361,21 @@ export class TrackRecorderPageComponent {
         return this._approximateTrackLength;
     }
 
-    private get isStopped(): boolean {
-        return this.trackingIsStopped;
+    private get isPaused(): boolean {
+        return this.trackingIsPaused;
     }
 
-    private stopTrackRecorder(): Promise<void> {
-        return this.trackRecorder.stop().then(() => {
-            this.trackingIsStopped = true;
+    private pauseTrackRecorder(): Promise<void> {
+        return this.trackRecorder.pause().then(() => {
+            this.trackingIsPaused = true;
 
             this.refreshValues();
         });
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private stop(): void {
-        this.stopTrackRecorder();
+    private pause(): void {
+        this.pauseTrackRecorder();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
@@ -391,7 +391,7 @@ export class TrackRecorderPageComponent {
                         this.saveCurrentTrackRecording();
                     }
 
-                    this.trackingIsStopped = false;
+                    this.trackingIsPaused = false;
                 }, error => { });
             } else {
                 const pleaseEnableLocationAlert = this.alertController.create(<AlertOptions>{
@@ -406,7 +406,7 @@ export class TrackRecorderPageComponent {
                                 const pleaseEnableLocationToast = this.toastController.create(<ToastOptions>{
                                     message: "Bitte Standort aktivieren um Strecke aufzunehmen",
                                     duration: 3000,
-                                    position: "middle",
+                                    position: "bottom",
                                     showCloseButton: true,
                                     closeButtonText: "Ok"
                                 });

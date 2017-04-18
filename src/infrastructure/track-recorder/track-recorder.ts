@@ -36,7 +36,7 @@ export class TrackRecorder {
 
             backgroundGeolocation.watchLocationMode(enabled => {
                 if (!enabled) {
-                    this.stop();
+                    this.pause();
                 }
 
                 this.locationModeChangedSubject.next(enabled);
@@ -91,7 +91,7 @@ export class TrackRecorder {
         return new Promise<void>((resolve, reject) => backgroundGeolocation.start(() => resolve(), error => reject(error)));
     }
 
-    public stop(): Promise<void> {
+    public pause(): Promise<void> {
         return new Promise<void>((resolve, reject) => backgroundGeolocation.stop(() => resolve(), error => reject(error)));
     }
 
@@ -100,7 +100,7 @@ export class TrackRecorder {
     }
 
     public destroy(): void {
-        this.stop();
+        this.pause();
 
         backgroundGeolocation.stopWatchingLocationMode();
     }
