@@ -1,4 +1,4 @@
-import { Exception } from "./track-recorder-exception";
+import { Exception } from "./exception";
 import { LengthUnit } from "./length-unit";
 
 export class LengthUnitHelper {

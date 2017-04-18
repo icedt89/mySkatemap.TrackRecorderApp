@@ -24,40 +24,36 @@ export class MapComponent {
 
     @ViewChild("map") private mapElement: ElementRef;
 
-    private mapReadyResolve: () =>  void;
+    private mapReadyResolve: () => void;
     private _mapReady = new Promise<void>(resolve => this.mapReadyResolve = resolve);
 
     public constructor(platform: Platform,
         viewController: ViewController) {
-        viewController.willEnter.subscribe(() => {
-            platform.ready().then(() => {
-                const initialMapCenter = new LatLng(50.8333, 12.9167);
-                const initialMapZoom = 13;
+        viewController.willEnter.subscribe(() => platform.ready().then(() => {
+            const initialMapCenter = new LatLng(50.8333, 12.9167);
+            const initialMapZoom = 13;
 
-                this.googleMaps = new GoogleMaps();
-                this.googleMap = this.googleMaps.create(this.mapElement.nativeElement);
-                this.googleMap.on(GoogleMapsEvent.MAP_READY).subscribe(() => {
-                    this.googleMap.setAllGesturesEnabled(false);
-                    this.googleMap.setClickable(false);
-                    this.googleMap.setCompassEnabled(false);
-                    this.googleMap.setIndoorEnabled(false);
-                    this.googleMap.setMyLocationEnabled(false);
-                    this.googleMap.setTrafficEnabled(false);
-                    this.googleMap.setZoom(initialMapZoom);
-                    this.googleMap.setCenter(initialMapCenter);
-                    this.googleMap.moveCamera(<CameraPosition>{
-                        zoom: initialMapZoom,
-                        target: initialMapCenter
-                    });
-
-                    this.mapReadyResolve();
+            this.googleMaps = new GoogleMaps();
+            this.googleMap = this.googleMaps.create(this.mapElement.nativeElement);
+            this.googleMap.on(GoogleMapsEvent.MAP_READY).subscribe(() => {
+                this.googleMap.setAllGesturesEnabled(false);
+                this.googleMap.setClickable(false);
+                this.googleMap.setCompassEnabled(false);
+                this.googleMap.setIndoorEnabled(false);
+                this.googleMap.setMyLocationEnabled(false);
+                this.googleMap.setTrafficEnabled(false);
+                this.googleMap.setZoom(initialMapZoom);
+                this.googleMap.setCenter(initialMapCenter);
+                this.googleMap.moveCamera(<CameraPosition>{
+                    zoom: initialMapZoom,
+                    target: initialMapCenter
                 });
-            });
-        });
 
-        viewController.didLeave.subscribe(() => {
-            this.googleMap.remove();
-        });
+                this.mapReadyResolve();
+            });
+        }));
+
+        viewController.didLeave.subscribe(() => this.googleMap.remove());
     }
 
     public get mapReady(): Promise<void> {

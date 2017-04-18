@@ -1,0 +1,14 @@
+import { TrackRecording } from "../track-recording";
+
+export class TrackRecorderPopoverModel {
+    public constructor(private _trackRecording: TrackRecording | null, private _isPaused: boolean) {
+    }
+
+    public get trackRecording(): TrackRecording {
+        return this._trackRecording;
+    }
+
+    public get isPaused(): boolean {
+        return this._isPaused;
+    }
+}

@@ -1,4 +1,4 @@
-import { Exception } from "../track-recorder-exception";
+import { Exception } from "../exception";
 
 export class CapturedMediaResult {
     public constructor(public result: string, public isBase64DataUrl = true) {
