@@ -2,7 +2,7 @@ import { TrackRecording } from "../pages/track-recorder/track-recording";
 import "rxjs/Rx";
 
 import { BackgroundGeolocationResponse } from "../declarations";
-import { Http } from "@angular/http";
+import { Http, Response } from "@angular/http";
 import { Injectable } from "@angular/core";
 
 @Injectable()
@@ -12,7 +12,7 @@ export class TrackUploader {
     public constructor(private http: Http) {
     }
 
-    public uploadRecordedTrack(positions: BackgroundGeolocationResponse[], trackRecording: TrackRecording): Promise<boolean> {
+    public uploadRecordedTrack(positions: BackgroundGeolocationResponse[], trackRecording: TrackRecording): Promise<Response> {
         const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, new Date());
 
         createdRecordedTrackModel.TrackAttachments = trackRecording.trackAttachments.map(trackAttachment => trackAttachment.imageDataUrl);
@@ -28,11 +28,7 @@ export class TrackUploader {
             return result;
         });
 
-        return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise().catch(() => {
-            return {
-                ok: false
-            };
-        }).then(resolved => resolved.ok);
+        return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise();
     }
 }
 

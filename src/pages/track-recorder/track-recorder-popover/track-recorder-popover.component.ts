@@ -105,14 +105,8 @@ export class TrackRecorderPopoverComponent {
                         uploadTrackRecordingLoading.present()
                             .then(() => this.trackRecorder.getLocations())
                             .then(positions => this.trackUploader.uploadRecordedTrack(positions, this.model.trackRecording))
-                            .then(uploaded => {
-                                if (uploaded) {
-                                    return this.trackRecorder.deleteAllRecordings()
-                                        .then(() => this.events.publish("track-recordings-uploaded-success"));
-                                }
-
-                                return this.events.publish("track-recordings-uploaded-failed");
-                            })
+                            .catch(() => this.events.publish("track-recordings-uploaded-failed"))
+                            .then(() => this.events.publish("track-recordings-uploaded-success"))
                             .then(() => uploadTrackRecordingLoading.dismiss());
                     }
                 }

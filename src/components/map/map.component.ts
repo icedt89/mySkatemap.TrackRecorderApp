@@ -61,27 +61,21 @@ export class MapComponent {
     }
 
     public setTrack(positions: LatLng[]): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            if (!this.track) {
-                this.track = <Polyline>{};
-                const trackOptions = <PolylineOptions>{
-                    visible: true,
-                    geodesic: true,
-                    color: "#FF0000",
-                    points: positions
-                };
+        if (!this.track) {
+            this.track = <Polyline>{};
+            const trackOptions = <PolylineOptions>{
+                visible: true,
+                geodesic: true,
+                color: "#FF0000",
+                points: positions
+            };
 
-                this.googleMap.addPolyline(trackOptions).then((polyline: Polyline) => {
-                    this.track = polyline;
+            return this.googleMap.addPolyline(trackOptions).then((polyline: Polyline) => this.track = polyline);
+        }
 
-                    resolve();
-                });
-            } else {
-                this.track.setPoints(positions);
+        this.track.setPoints(positions);
 
-                resolve();
-            }
-        });
+        return Promise.resolve();
     }
 
     public getTrack(): LatLng[] | null {
@@ -102,7 +96,7 @@ export class MapComponent {
         this.track = null;
     }
 
-    public panToTrack(): void {
+    public panToTrack(): Promise<void> {
         if (!this.track) {
             return;
         }
@@ -110,7 +104,7 @@ export class MapComponent {
         const bounds = new LatLngBounds([]);
         this.track.getPoints().forEach((item: LatLng) => bounds.extend(item));
 
-        this.googleMap.animateCamera(<AnimateCameraOptions>{
+        return this.googleMap.animateCamera(<AnimateCameraOptions>{
             target: bounds
         });
     }

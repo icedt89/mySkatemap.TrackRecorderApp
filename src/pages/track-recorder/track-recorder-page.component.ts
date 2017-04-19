@@ -75,16 +75,18 @@ export class TrackRecorderPageComponent {
             });
         });
         events.subscribe("track-recordings-uploaded-success", (attachments: TrackAttachment[]) => {
-            this.resetView().then(() => {
-                const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
-                    message: "Strecke erfolgreich hochgeladen",
-                    position: "bottom",
-                    duration: 3000,
-                    showCloseButton: true,
-                    closeButtonText: "Toll"
+            this.trackRecorder.deleteAllRecordings()
+                .then(() => this.resetView())
+                .then(() => {
+                    const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
+                        message: "Strecke erfolgreich hochgeladen",
+                        position: "bottom",
+                        duration: 3000,
+                        showCloseButton: true,
+                        closeButtonText: "Toll"
+                    });
+                    return uploadedSuccessfulToast.present();
                 });
-                return uploadedSuccessfulToast.present();
-            });
         });
         events.subscribe("track-recordings-uploaded-failed", (attachments: TrackAttachment[]) => {
             const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
