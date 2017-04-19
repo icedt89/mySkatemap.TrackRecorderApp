@@ -17,6 +17,8 @@ src/components/**/*.js
 src/components/**/*.js.map
 src/pages/**/*.js
 src/pages/**/*.js.map
+src/infrastructure/**/*.js
+src/infrastructure/**/*.js.map
 !.vscode
 
 .idea/
