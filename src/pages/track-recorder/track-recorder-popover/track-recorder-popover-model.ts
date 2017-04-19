@@ -4,7 +4,7 @@ export class TrackRecorderPopoverModel {
     public constructor(private _trackRecording: TrackRecording | null, private _isPaused: boolean) {
     }
 
-    public get trackRecording(): TrackRecording {
+    public get trackRecording(): TrackRecording | null {
         return this._trackRecording;
     }
 

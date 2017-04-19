@@ -9,7 +9,7 @@ export class LengthUnitHelper {
             case LengthUnit.Kilometers:
                 return "km";
             default:
-                throw new Exception(`Invalid length unit ${unit}.`);
+                throw new Exception(`Invalid length unit '${unit}'.`);
         }
     }
 
@@ -20,7 +20,7 @@ export class LengthUnitHelper {
             case "m":
                 return LengthUnit.Meters;
             default:
-                throw new Exception(`Invalid length unit ${unit}.`);
+                throw new Exception(`Invalid length unit '${unit}'.`);
         }
     }
 }

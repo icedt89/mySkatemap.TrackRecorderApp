@@ -1,15 +1,15 @@
 import { CapturedMediaResult } from "../../infrastructure/media-capture/captured-media-result";
 import { TrackAttachment } from "../../infrastructure/track-attachment";
-import { TrackAttachmentsModel } from "./track-attachments-model";
+import { TrackAttachmentsModalModel } from "./track-attachments-modal-model";
 import { MediaCapturer } from "../../infrastructure/media-capture/media-capturer";
 import { NavParams, ViewController } from "ionic-angular";
 import { Component } from "@angular/core";
 
 @Component({
-    templateUrl: "track-attachments.component.html"
+    templateUrl: "track-attachments-modal.component.html"
 })
-export class TrackAttachmentsComponent {
-    private trackAttachmentsModel: TrackAttachmentsModel;
+export class TrackAttachmentsModalComponent {
+    private trackAttachmentsModel: TrackAttachmentsModalModel;
 
     public constructor(private viewController: ViewController,
         navigationParameters: NavParams,

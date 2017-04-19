@@ -3,9 +3,9 @@ import { NavParams, ToastController, ToastOptions, ViewController } from "ionic-
 import { Component } from "@angular/core";
 
 @Component({
-    templateUrl: "track-recorder-settings.component.html"
+    templateUrl: "track-recorder-settings-modal.component.html"
 })
-export class TrackRecorderSettingsComponent {
+export class TrackRecorderSettingsModalComponent {
     private recorderSettings: TrackRecorderSettings;
 
     public constructor(private viewController: ViewController, navigationParameters: NavParams, private toastController: ToastController) {

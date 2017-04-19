@@ -1,7 +1,7 @@
 import { TrackUploader } from "../../../infrastructure/track-uploader";
 import { Events, LoadingController } from "ionic-angular";
 import { TrackRecorder } from "../../../infrastructure/track-recorder/track-recorder";
-import { TrackAttachmentsModel } from "../../../components/track-attachments/track-attachments-model";
+import { TrackAttachmentsModalModel } from "../../../components/track-attachments-modal/track-attachments-modal-model";
 import { TrackRecorderPopoverModel } from "./track-recorder-popover-model";
 import {
     AlertController,
@@ -13,7 +13,7 @@ import {
     ViewController
 } from "ionic-angular";
 import { Component } from "@angular/core";
-import { TrackAttachmentsComponent } from "../../../components/track-attachments/track-attachments.component";
+import { TrackAttachmentsModalComponent } from "../../../components/track-attachments-modal/track-attachments-modal.component";
 
 @Component({
     templateUrl: "track-recorder-popover.component.html"
@@ -49,10 +49,10 @@ export class TrackRecorderPopoverComponent {
     private showTrackAttachments(): void {
         // Close popover (makes back button working again Oo, too)
         this.viewController.dismiss().then(() => {
-            const trackAttachmentsModal = this.modalController.create(TrackAttachmentsComponent, {
-                trackAttachments: new TrackAttachmentsModel(this.model.trackRecording.trackAttachments.map(_ => _))
+            const trackAttachmentsModal = this.modalController.create(TrackAttachmentsModalComponent, {
+                trackAttachments: new TrackAttachmentsModalModel(this.model.trackRecording.trackAttachments.map(_ => _))
             });
-            trackAttachmentsModal.onDidDismiss((data: { model: TrackAttachmentsModel } | null) => {
+            trackAttachmentsModal.onDidDismiss((data: { model: TrackAttachmentsModalModel } | null) => {
                 if (!data) {
                     return;
                 }

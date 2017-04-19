@@ -23,7 +23,7 @@ import { Component, ViewChild } from "@angular/core";
 import { LatLng } from "@ionic-native/google-maps";
 import { MapComponent } from "../../components/map/map.component";
 import { Storage } from "@ionic/storage";
-import { TrackRecorderSettingsComponent } from "../../components/track-recorder-settings/track-recorder-settings.component";
+import { TrackRecorderSettingsModalComponent } from "../../components/track-recorder-settings-modal/track-recorder-settings-modal.component";
 import { TrackRecording } from "./track-recording";
 
 @Component({
@@ -289,7 +289,7 @@ export class TrackRecorderPageComponent {
     private showTrackRecorderSettings(event: Event): void {
         const recorderSettings = this.trackRecorder.settings;
 
-        const trackRecorderSettingsModal = this.modalController.create(TrackRecorderSettingsComponent, {
+        const trackRecorderSettingsModal = this.modalController.create(TrackRecorderSettingsModalComponent, {
             settings: recorderSettings
         });
         trackRecorderSettingsModal.onDidDismiss((data: { settings: TrackRecorderSettings } | null) => {

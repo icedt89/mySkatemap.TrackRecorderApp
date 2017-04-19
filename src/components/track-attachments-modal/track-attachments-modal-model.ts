@@ -1,6 +1,6 @@
 import { TrackAttachment } from "../../infrastructure/track-attachment";
 
-export class TrackAttachmentsModel {
+export class TrackAttachmentsModalModel {
     public constructor(public attachments: TrackAttachment[] = []) {
     }
 
