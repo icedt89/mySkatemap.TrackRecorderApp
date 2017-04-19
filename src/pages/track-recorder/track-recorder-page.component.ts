@@ -75,6 +75,7 @@ export class TrackRecorderPageComponent {
             });
         });
         events.subscribe("track-recordings-uploaded-success", (attachments: TrackAttachment[]) => {
+            debugger;
             this.trackRecorder.deleteAllRecordings()
                 .then(() => this.resetView())
                 .then(() => {
@@ -89,6 +90,7 @@ export class TrackRecorderPageComponent {
                 });
         });
         events.subscribe("track-recordings-uploaded-failed", (attachments: TrackAttachment[]) => {
+            debugger;
             const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
                 message: "Fehler beim hochladen",
                 position: "bottom",
@@ -361,11 +363,11 @@ export class TrackRecorderPageComponent {
                         this._currentTrackRecording.trackingStartedAt = new Date();
                         this._currentTrackRecording.trackName = `Strecke vom ${this._currentTrackRecording.trackingStartedAt.toLocaleString()}`;
 
-                        return this.saveCurrentTrackRecording();
+                        return this.saveCurrentTrackRecording().then(() => this._isPaused = false);
                     }
 
                     this._isPaused = false;
-                }, error => { });
+                }).catch(() => { });
             } else {
                 const pleaseEnableLocationAlert = this.alertController.create(<AlertOptions>{
                     title: "Standort ist deaktiviert",

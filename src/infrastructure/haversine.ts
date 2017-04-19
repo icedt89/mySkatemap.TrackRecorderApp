@@ -1,5 +1,8 @@
 import { LatLng } from "@ionic-native/google-maps";
 
+/*
+ *  I have not written this, also i do not understand it =D
+ */
 export class Haversine {
     public static toRad(val: number): number {
         return (val * Math.PI) / 180;
