@@ -297,6 +297,7 @@ export class TrackRecorderPageComponent {
     }
 
     private refreshValues(): Promise<void> {
+        debugger;
         if (!this._currentTrackRecording) {
             return Promise.resolve();
         }

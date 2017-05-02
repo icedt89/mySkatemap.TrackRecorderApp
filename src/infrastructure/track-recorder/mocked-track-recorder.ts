@@ -31,23 +31,9 @@ export class MockedTrackRecorder implements ITrackRecorder {
     }
 
     public getLocations(): Promise<BackgroundGeolocationResponse[]> {
-        const locationSamples: BackgroundGeolocationResponse[] = [];
+        this.samplePosition();
 
-        for (let i = 0; i < 5; i++) {
-            const randomLatitude = Math.random() + 50;
-            const randomLongitude = Math.random() + 50;
-
-            const locationSample = <BackgroundGeolocationResponse>{
-                latitude: randomLatitude,
-                longitude: randomLongitude
-            };
-
-            locationSamples.push(locationSample);
-        }
-
-        this.positions.push(...locationSamples);
-
-        return Promise.resolve(this.positions);
+        return Promise.resolve(this.positions.map(_ => _));
     }
 
     public isLocationEnabled(): Promise<boolean> {
@@ -58,10 +44,14 @@ export class MockedTrackRecorder implements ITrackRecorder {
     }
 
     public record(): Promise<void> {
+        this.samplePosition();
+
         return Promise.resolve();
     }
 
     public pause(): Promise<void> {
+        this.samplePosition();
+
         return Promise.resolve();
     }
 
@@ -69,5 +59,23 @@ export class MockedTrackRecorder implements ITrackRecorder {
         this.positions = [];
 
         return Promise.resolve();
+    }
+
+    private samplePosition(): void {
+        const locationSamples: BackgroundGeolocationResponse[] = [];
+
+        for (let i = 1; i <= 5; i++) {
+            const randomLatitude = (Math.random() * i) + (50 + i);
+            const randomLongitude = (Math.random() * i) + (50 + i);
+
+            const locationSample = <BackgroundGeolocationResponse>{
+                latitude: randomLatitude,
+                longitude: randomLongitude
+            };
+
+            locationSamples.push(locationSample);
+        }
+
+        this.positions.push(...locationSamples);
     }
 }
