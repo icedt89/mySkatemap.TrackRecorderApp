@@ -206,15 +206,10 @@ export class TrackRecorderPageComponent {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private removeArchivedTrackRecording(track: ArchivedTrackRecording | TrackRecording): void {
-        let message = "Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.";
-        if (track instanceof TrackRecording) {
-            message = "Sie haben die Strecke noch nicht hochgeladen!<br /><br />Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.";
-        }
-
-        const resetRecordingPrompt = this.alertController.create(<AlertOptions>{
+    private removeTrackRecording(track: TrackRecording): void {
+        const removeTrackPrompt = this.alertController.create(<AlertOptions>{
             title: "Strecke löschen",
-            message: message,
+            message: "Sie haben die Strecke noch nicht hochgeladen!<br /><br />Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.",
             enableBackdropDismiss: true,
             buttons: [
                 {
@@ -223,18 +218,33 @@ export class TrackRecorderPageComponent {
                 },
                 {
                     text: "Ja",
-                    handler: () => {
-                        if (track instanceof TrackRecording) {
-                            this.trackRecordingStore.deleteStoredTrack(track);
-                        } else {
-                            this.archivedTrackRecordingStore.deleteStoredTrack(track);
-                        }
-                    }
+                    handler: () => this.trackRecordingStore.deleteStoredTrack(track)
                 }
             ]
         });
         // Close popover (makes back button working again Oo, too)
-        resetRecordingPrompt.present();
+        removeTrackPrompt.present();
+    }
+
+    // tslint:disable-next-line:no-unused-variable Used inside template.
+    private removeArchivedTrackRecording(track: ArchivedTrackRecording): void {
+        const removeTrackPrompt = this.alertController.create(<AlertOptions>{
+            title: "Strecke löschen",
+            message: "Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.",
+            enableBackdropDismiss: true,
+            buttons: [
+                {
+                    text: "Abbrechen",
+                    role: "cancel"
+                },
+                {
+                    text: "Ja",
+                    handler: () => this.archivedTrackRecordingStore.deleteStoredTrack(track)
+                }
+            ]
+        });
+        // Close popover (makes back button working again Oo, too)
+        removeTrackPrompt.present();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
@@ -401,7 +411,6 @@ export class TrackRecorderPageComponent {
             });
             trackRecorderSettingsModal.present();
         });
-
     }
 
     private resetView(): Promise<void> {
@@ -415,6 +424,10 @@ export class TrackRecorderPageComponent {
 
     private get currentTrackRecording(): TrackRecording | null {
         return this._currentTrackRecording;
+    }
+
+    private get trackRecordings(): TrackRecording[] {
+        return this._trackRecordings;
     }
 
     private get archivedTrackRecordings(): ArchivedTrackRecording[] {
