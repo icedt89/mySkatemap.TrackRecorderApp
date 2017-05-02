@@ -1,14 +1,27 @@
+import { ITrackUploader } from "../../infrastructure/track-uploader/itrack-uploader";
+import { Inject } from "@angular/core";
+import { ITrackRecorder } from "../../infrastructure/track-recorder/itrack-recorder";
+import { ArchivedTrackRecording } from "../../infrastructure/archived-track-recording";
+import { TrackRecordingStore } from "../../infrastructure/track-store/track-recording-store";
+import { ArchivedTrackRecordingStore } from "../../infrastructure/track-store/archived-track-recording-store";
+import { TrackRecording } from "../../infrastructure/track-recording";
+import { Exception } from "../../infrastructure/exception";
 import { TrackAttachment } from "../../infrastructure/track-attachment";
 import { TrackRecorderPopoverModel } from "./track-recorder-popover/track-recorder-popover-model";
 import { TrackRecorderPopoverComponent } from "./track-recorder-popover/track-recorder-popover.component";
-import { Events, NavOptions, PopoverController } from "ionic-angular";
+import {
+    Events,
+    LoadingController,
+    LoadingOptions,
+    MenuController,
+    NavOptions,
+    PopoverController
+} from "ionic-angular";
 import { LengthUnit } from "../../infrastructure/length-unit";
 import { Length } from "../../infrastructure/length";
 import { LengthUnitHelper } from "../../infrastructure/lenght-unit-helper";
 import { Haversine } from "../../infrastructure/haversine";
 import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
-import { TrackUploader } from "../../infrastructure/track-uploader";
-import { TrackRecorder } from "../../infrastructure/track-recorder/track-recorder";
 import {
     AlertController,
     AlertOptions,
@@ -24,7 +37,6 @@ import { LatLng } from "@ionic-native/google-maps";
 import { MapComponent } from "../../components/map/map.component";
 import { Storage } from "@ionic/storage";
 import { TrackRecorderSettingsModalComponent } from "../../components/track-recorder-settings-modal/track-recorder-settings-modal.component";
-import { TrackRecording } from "./track-recording";
 
 @Component({
     selector: "track-recorder",
@@ -36,19 +48,31 @@ export class TrackRecorderPageComponent {
     private _approximateTrackLength: string | null;
     private _currentTrackRecording: TrackRecording | null;
     private _isPaused = true;
+    private _archivedTrackRecordings: ArchivedTrackRecording[] = [];
+    private _trackRecordings: TrackRecording[] = [];
 
     @ViewChild("map") private map: MapComponent;
 
     public constructor(viewController: ViewController,
         private alertController: AlertController,
-        private trackRecorder: TrackRecorder,
+        @Inject("TrackRecorder") private trackRecorder: ITrackRecorder,
         private modalController: ModalController,
         private toastController: ToastController,
-        private trackUploader: TrackUploader,
+        @Inject("TrackUploader") private trackUploader: ITrackUploader,
         private popoverController: PopoverController,
+        private menuController: MenuController,
+        private loadingController: LoadingController,
+        private archivedTrackRecordingStore: ArchivedTrackRecordingStore,
+        private trackRecordingStore: TrackRecordingStore,
         private storage: Storage,
         events: Events) {
+        archivedTrackRecordingStore.tracksChanged.subscribe(recordings => this._archivedTrackRecordings = recordings);
+        trackRecordingStore.tracksChanged.subscribe(recordings => this._trackRecordings = recordings);
         events.subscribe("track-attachments-changed", (attachments: TrackAttachment[]) => {
+            if (!this._currentTrackRecording) {
+                return;
+            }
+
             this._currentTrackRecording.trackAttachments = attachments;
 
             this.saveCurrentTrackRecording().then(() => {
@@ -62,7 +86,7 @@ export class TrackRecorderPageComponent {
                 return attachmentsSavedToast.present();
             });
         });
-        events.subscribe("track-recordings-reset", (attachments: TrackAttachment[]) => {
+        events.subscribe("track-recording-reset", (attachments: TrackAttachment[]) => {
             this.resetView().then(() => {
                 const allRecordingsDeletedToast = this.toastController.create(<ToastOptions>{
                     message: "Strecke gelöscht",
@@ -74,33 +98,20 @@ export class TrackRecorderPageComponent {
                 return allRecordingsDeletedToast.present();
             });
         });
-        events.subscribe("track-recordings-uploaded-success", (attachments: TrackAttachment[]) => {
-            debugger;
-            this.trackRecorder.deleteAllRecordings()
-                .then(() => this.resetView())
-                .then(() => {
-                    const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
-                        message: "Strecke erfolgreich hochgeladen",
-                        position: "bottom",
-                        duration: 3000,
-                        showCloseButton: true,
-                        closeButtonText: "Toll"
-                    });
-                    return uploadedSuccessfulToast.present();
-                });
-        });
-        events.subscribe("track-recordings-uploaded-failed", (attachments: TrackAttachment[]) => {
-            debugger;
-            const uploadedSuccessfulToast = this.toastController.create(<ToastOptions>{
-                message: "Fehler beim hochladen",
+        events.subscribe("track-recording-archived", () => {
+            const archivingSuccessfulToast = this.toastController.create(<ToastOptions>{
+                message: "Strecke gespeichert",
                 position: "bottom",
                 duration: 3000,
                 showCloseButton: true,
-                closeButtonText: "Verdammt"
+                closeButtonText: "Ok"
             });
-            return uploadedSuccessfulToast.present();
+            return archivingSuccessfulToast.present();
         });
         viewController.willEnter.subscribe(() => {
+            this.archivedTrackRecordingStore.getTracks().then(tracks => this._archivedTrackRecordings = tracks);
+            this.trackRecordingStore.getTracks().then(tracks => this._trackRecordings = tracks);
+
             this.loadPageState();
             this.loadTrackRecorderSettings().then(settings => {
                 if (!settings) {
@@ -116,7 +127,7 @@ export class TrackRecorderPageComponent {
 
                 this._currentTrackRecording = trackRecording;
 
-                this.map.mapReady.then(() => this.setTrackedPathOnMap(this._currentTrackRecording.trackedPositions));
+                this.map.mapReady.then(() => this.setTrackedPathOnMap(trackRecording.trackedPositions.map(position => new LatLng(position.latitude, position.longitude))));
             });
         });
 
@@ -183,11 +194,80 @@ export class TrackRecorderPageComponent {
     private loadTrackRecorderSettings(): Promise<TrackRecorderSettings> {
         return this.storage.get("TrackRecorder.Settings").then(settings => {
             if (settings) {
-                return Object.assign(new TrackRecorderSettings(), settings);
+                TrackRecorderSettings.fromLike(settings);
             }
 
             return null;
         });
+    }
+
+    // tslint:disable-next-line:no-unused-variable Used inside template.
+    private removeArchivedTrackRecording(track: ArchivedTrackRecording | TrackRecording): void {
+        let message = "Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.";
+        if (track instanceof TrackRecording) {
+            message = "Sie haben die Strecke noch nicht hochgeladen!<br /><br />Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.";
+        }
+
+        const resetRecordingPrompt = this.alertController.create(<AlertOptions>{
+            title: "Strecke löschen",
+            message: message,
+            enableBackdropDismiss: true,
+            buttons: [
+                {
+                    text: "Abbrechen",
+                    role: "cancel"
+                },
+                {
+                    text: "Ja",
+                    handler: () => {
+                        if (track instanceof TrackRecording) {
+                            this.trackRecordingStore.deleteStoredTrack(track);
+                        } else {
+                            this.archivedTrackRecordingStore.deleteStoredTrack(track);
+                        }
+                    }
+                }
+            ]
+        });
+        // Close popover (makes back button working again Oo, too)
+        resetRecordingPrompt.present();
+    }
+
+    // tslint:disable-next-line:no-unused-variable Used inside template.
+    private uploadTrackRecording(archivedTrackRecording: ArchivedTrackRecording): void {
+        const uploadRecordingPrompt = this.alertController.create({
+            title: "Strecke hochladen",
+            message: "Möchten Sie die aufgezeichnete Strecke hochladen?",
+            enableBackdropDismiss: true,
+            buttons: [
+                {
+                    text: "Abbrechen",
+                    role: "cancel"
+                },
+                {
+                    text: "Ja",
+                    handler: () => {
+                        const uploadTrackRecordingLoading = this.loadingController.create(<LoadingOptions>{
+                            content: "Wird hochgeladen...",
+                        });
+                        // TODO: Recorded-Track muss BackgroundGeolocationResponse[] speichern anstatt lediglich LatLng[]!
+                        // TODO: Ist die Archivierte Strecke hochgeladen => LatLng[] ansonsten BackgroundGeolocationResponse[]!
+                        // TOOD: TrackUploader => signature für uploadRecordedTrack => ...(RecordedTrack)!
+                        uploadTrackRecordingLoading.present()
+                            .then(() => this.trackRecorder.getLocations())
+                            /* .then(positions => {
+                                return this.trackUploader.uploadRecordedTrack(positions, archivedTrackRecording.trackRecording)
+                                    .then(
+                                    () => this.events.publish("track-recording-uploaded-success"),
+                                    () => this.events.publish("track-recording-uploaded-failed")
+                                    );
+                            }) */
+                            .then(() => uploadTrackRecordingLoading.dismiss());
+                    }
+                }
+            ]
+        });
+        uploadRecordingPrompt.present();
     }
 
     private saveCurrentTrackRecording(): Promise<any> {
@@ -201,7 +281,7 @@ export class TrackRecorderPageComponent {
     private loadCurrentTrackRecording(): Promise<TrackRecording> {
         return this.storage.get("TrackRecording.Current").then(trackRecording => {
             if (trackRecording) {
-                return Object.assign(new TrackRecording(), trackRecording);
+                return TrackRecording.fromLike(trackRecording);
             }
 
             return null;
@@ -226,12 +306,16 @@ export class TrackRecorderPageComponent {
                 return Promise.resolve();
             }
 
+            if (!this._currentTrackRecording) {
+                throw new Exception("No current track recording.");
+            }
+
             this._lastUpdate = new Date().toLocaleString("de");
 
             if (positions.length !== this._currentTrackRecording.trackedPositions.length) {
-                const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
-                this._currentTrackRecording.trackedPositions = trackedPath;
+                this._currentTrackRecording.trackedPositions = positions;
 
+                const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
                 const computedTrackLength = Haversine.computeDistance(trackedPath);
 
                 const usefulTrackLength = Length.convertToMoreUsefulUnit(computedTrackLength);
@@ -245,10 +329,12 @@ export class TrackRecorderPageComponent {
                         break;
                 }
 
-                this.savePageState();
+                this.setTrackedPathOnMap(trackedPath);
 
-                return this.setTrackedPathOnMap(trackedPath).then(() => this.saveCurrentTrackRecording());
+                return <Promise<void>>this.savePageState().then(() => this.saveCurrentTrackRecording());
             }
+
+            return Promise.resolve();
         });
     }
 
@@ -286,29 +372,32 @@ export class TrackRecorderPageComponent {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private showTrackRecorderSettings(event: Event): void {
-        const recorderSettings = this.trackRecorder.settings;
+    private showTrackRecorderSettings(): void {
+        this.menuController.close().then(() => {
+            const recorderSettings = this.trackRecorder.settings;
 
-        const trackRecorderSettingsModal = this.modalController.create(TrackRecorderSettingsModalComponent, {
-            settings: recorderSettings
-        });
-        trackRecorderSettingsModal.onDidDismiss((data: { settings: TrackRecorderSettings } | null) => {
-            if (!data) {
-                return;
-            }
-
-            const setTrackRecorderSettingsToast = this.toastController.create(<ToastOptions>{
-                message: "Einstellungen akzeptiert",
-                duration: 3000,
-                position: "bottom",
-                showCloseButton: true,
-                closeButtonText: "Ok"
+            const trackRecorderSettingsModal = this.modalController.create(TrackRecorderSettingsModalComponent, {
+                settings: recorderSettings
             });
-            setTrackRecorderSettingsToast.present();
+            trackRecorderSettingsModal.onDidDismiss((data: { settings: TrackRecorderSettings } | null) => {
+                if (!data) {
+                    return;
+                }
 
-            this.trackRecorder.setSettings(data.settings).then(settings => this.saveTrackRecorderSettings(settings));
+                const setTrackRecorderSettingsToast = this.toastController.create(<ToastOptions>{
+                    message: "Einstellungen akzeptiert",
+                    duration: 3000,
+                    position: "bottom",
+                    showCloseButton: true,
+                    closeButtonText: "Ok"
+                });
+                setTrackRecorderSettingsToast.present();
+
+                this.trackRecorder.setSettings(data.settings).then(settings => this.saveTrackRecorderSettings(settings));
+            });
+            trackRecorderSettingsModal.present();
         });
-        trackRecorderSettingsModal.present();
+
     }
 
     private resetView(): Promise<void> {
@@ -322,6 +411,10 @@ export class TrackRecorderPageComponent {
 
     private get currentTrackRecording(): TrackRecording | null {
         return this._currentTrackRecording;
+    }
+
+    private get archivedTrackRecordings(): ArchivedTrackRecording[] {
+        return this._archivedTrackRecordings;
     }
 
     private get canShowTrackRecorderSettings(): boolean {

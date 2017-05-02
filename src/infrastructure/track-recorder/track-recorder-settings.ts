@@ -1,4 +1,8 @@
 export class TrackRecorderSettings {
+    public static fromLike(trackRecorderSettingsLike: TrackRecorderSettings): TrackRecorderSettings {
+        return Object.assign(new TrackRecorderSettings(), trackRecorderSettingsLike);
+    }
+
     private _desiredAccuracy: string;
     private _locationProvider: string;
     private _stationaryRadius: number;

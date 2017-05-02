@@ -1,14 +1,11 @@
 <ion-list>
     <button [disabled]="!canShowTrackAttachments" ion-item (click)="showTrackAttachments()">
-        <ion-icon name="attach"></ion-icon>
         Anhänge
     </button>
-    <button [disabled]="!canUploadTrackRecording" ion-item (click)="uploadTrackRecording()">
-        <ion-icon name="cloud-upload"></ion-icon>
-        Hochladen
+    <button [disabled]="!canFinishTrackRecording" ion-item (click)="finishTrackRecording()">
+        Abschließen
     </button>
     <button [disabled]="!canDeleteTrackRecording" ion-item (click)="resetTrackRecording()">
-        <ion-icon color="danger" name="trash"></ion-icon>
         Löschen
     </button>
 </ion-list>

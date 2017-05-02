@@ -1,10 +1,17 @@
-import { TrackAttachment } from "../../infrastructure/track-attachment";
-import { LatLng } from "@ionic-native/google-maps";
+import { TrackAttachment } from "./track-attachment";
+import { BackgroundGeolocationResponse } from "../declarations";
 
 export class TrackRecording {
+    public static fromLike(trackRecordingLike: TrackRecording): TrackRecording {
+        const result = <TrackRecording>Object.assign(new TrackRecording(), trackRecordingLike);
+        result._trackAttachments = trackRecordingLike._trackAttachments.map(_ => TrackAttachment.fromLike(_));
+
+        return result;
+    }
+
     private _trackName: string;
     private _trackingStartedAt: Date;
-    private _trackedPositions: LatLng[] = [];
+    private _trackedPositions: BackgroundGeolocationResponse[] = [];
     private _trackAttachments: TrackAttachment[] = [];
 
     public get trackName(): string {
@@ -23,11 +30,11 @@ export class TrackRecording {
         this._trackingStartedAt = value;
     }
 
-    public get trackedPositions(): LatLng[] {
+    public get trackedPositions(): BackgroundGeolocationResponse[] {
         return this._trackedPositions;
     }
 
-    public set trackedPositions(value: LatLng[]) {
+    public set trackedPositions(value: BackgroundGeolocationResponse[]) {
         this._trackedPositions = value;
     }
 
@@ -41,7 +48,7 @@ export class TrackRecording {
                 return _;
             }
 
-              return Object.assign(new TrackAttachment(), _);
+            return TrackAttachment.fromLike(_);
         });
     }
 }

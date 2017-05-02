@@ -70,7 +70,10 @@ export class MapComponent {
                 points: positions
             };
 
-            return this.googleMap.addPolyline(trackOptions).then((polyline: Polyline) => this.track = polyline);
+            return this.googleMap.addPolyline(trackOptions)
+                .then((polyline: Polyline) => {
+                    this.track = polyline;
+                });
         }
 
         this.track.setPoints(positions);
@@ -98,7 +101,7 @@ export class MapComponent {
 
     public panToTrack(): Promise<void> {
         if (!this.track) {
-            return;
+            return Promise.resolve();
         }
 
         const bounds = new LatLngBounds([]);

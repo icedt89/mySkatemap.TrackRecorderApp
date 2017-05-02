@@ -1,14 +1,14 @@
+import { ITrackRecorder } from "./itrack-recorder";
 import { Observable, Subject } from "rxjs/Rx";
 import { BackgroundGeolocation, BackgroundGeolocationResponse, BackgroundGeolocationConfig } from "../../declarations";
 import { Platform } from "ionic-angular";
-
 import { Injectable } from "@angular/core";
 import { TrackRecorderSettings } from "./track-recorder-settings";
 
 declare var backgroundGeolocation: BackgroundGeolocation;
 
 @Injectable()
-export class TrackRecorder {
+export class TrackRecorder implements ITrackRecorder {
     private locationModeChangedSubject = new Subject<boolean>();
 
     private readyResolve: () => void;
@@ -97,11 +97,5 @@ export class TrackRecorder {
 
     public deleteAllRecordings(): Promise<void> {
         return new Promise<void>((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(), error => reject(error)));
-    }
-
-    public destroy(): void {
-        this.pause();
-
-        backgroundGeolocation.stopWatchingLocationMode();
     }
 }

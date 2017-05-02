@@ -1,12 +1,14 @@
-import { TrackUploader } from "../../../infrastructure/track-uploader";
+import { ITrackUploader } from "../../../infrastructure/track-uploader/itrack-uploader";
+import { Inject } from "@angular/core";
+import { ITrackRecorder } from "../../../infrastructure/track-recorder/itrack-recorder";
+import { TrackRecordingStore } from "../../../infrastructure/track-store/track-recording-store";
+import { Exception } from "../../../infrastructure/exception";
 import { Events, LoadingController } from "ionic-angular";
-import { TrackRecorder } from "../../../infrastructure/track-recorder/track-recorder";
 import { TrackAttachmentsModalModel } from "../../../components/track-attachments-modal/track-attachments-modal-model";
 import { TrackRecorderPopoverModel } from "./track-recorder-popover-model";
 import {
     AlertController,
     AlertOptions,
-    LoadingOptions,
     ModalController,
     NavParams,
     ToastController,
@@ -25,10 +27,11 @@ export class TrackRecorderPopoverComponent {
         private modalController: ModalController,
         private viewController: ViewController,
         private alertController: AlertController,
-        private trackRecorder: TrackRecorder,
+        @Inject("TrackRecorder") private trackRecorder: ITrackRecorder,
         private loadingController: LoadingController,
-        private trackUploader: TrackUploader,
+        @Inject("TrackUploader") private trackUploader: ITrackUploader,
         private toastController: ToastController,
+        private trackRecordingStore: TrackRecordingStore,
         private events: Events) {
         this.model = navigationParameters.get("model");
     }
@@ -37,18 +40,22 @@ export class TrackRecorderPopoverComponent {
         return this.model.isPaused && !!this.model.trackRecording;
     }
 
-    private get canUploadTrackRecording(): boolean {
-        return this.model.isPaused && !!this.model.trackRecording && this.model.trackRecording.trackedPositions.length > 1;
-    }
-
     private get canShowTrackAttachments(): boolean {
         return this.model.isPaused && !!this.model.trackRecording;
+    }
+
+    private get canFinishTrackRecording(): boolean {
+        return this.model.isPaused && !!this.model.trackRecording && this.model.trackRecording.trackedPositions.length > 1;
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
     private showTrackAttachments(): void {
         // Close popover (makes back button working again Oo, too)
         this.viewController.dismiss().then(() => {
+            if (!this.model.trackRecording) {
+                throw new Exception("No current track recording.");
+            }
+
             const trackAttachmentsModal = this.modalController.create(TrackAttachmentsModalComponent, {
                 trackAttachments: new TrackAttachmentsModalModel(this.model.trackRecording.trackAttachments.map(_ => _))
             });
@@ -76,7 +83,7 @@ export class TrackRecorderPopoverComponent {
                 },
                 {
                     text: "Ja",
-                    handler: () => this.trackRecorder.deleteAllRecordings().then(() => this.events.publish("track-recordings-reset"))
+                    handler: () => this.trackRecorder.deleteAllRecordings().then(() => this.events.publish("track-recording-reset"))
                 }
             ]
         });
@@ -85,10 +92,14 @@ export class TrackRecorderPopoverComponent {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private uploadTrackRecording(): void {
-        const resetRecordingPrompt = this.alertController.create({
-            title: "Strecke hochladen",
-            message: "Möchten Sie die aufgezeichnete Strecke hochladen?",
+    private finishTrackRecording(): void {
+        if (!this.model.trackRecording) {
+            throw new Exception("No current track recording.");
+        }
+
+        const archiveRecordingPrompt = this.alertController.create({
+            title: "Strecke abschließen",
+            message: "Die Strecke kann dann nur noch hochgeladen werden.",
             enableBackdropDismiss: true,
             buttons: [
                 {
@@ -98,19 +109,12 @@ export class TrackRecorderPopoverComponent {
                 {
                     text: "Ja",
                     handler: () => {
-                        const uploadTrackRecordingLoading = this.loadingController.create(<LoadingOptions>{
-                            content: "Wird hochgeladen...",
-                        });
-
-                        uploadTrackRecordingLoading.present()
-                            .then(() => this.trackRecorder.getLocations())
-                            .then(positions => this.trackUploader.uploadRecordedTrack(positions, this.model.trackRecording).then(() => this.events.publish("track-recordings-uploaded-success"), () => this.events.publish("track-recordings-uploaded-failed")))
-                            .then(() => uploadTrackRecordingLoading.dismiss());
+                        this.trackRecordingStore.storeTrack(this.model.trackRecording).then(() => this.events.publish("track-recording-archived"));
                     }
                 }
             ]
         });
         // Close popover (makes back button working again Oo, too)
-        resetRecordingPrompt.present().then(() => this.viewController.dismiss());
+        archiveRecordingPrompt.present().then(() => this.viewController.dismiss());
     }
 }

@@ -1,4 +1,35 @@
-<ion-menu [content]="content">...</ion-menu>
+<ion-menu [content]="content">
+    <ion-header>
+        <ion-navbar color="primary">
+            <ion-title>Streckenerfassung</ion-title>
+        </ion-navbar>
+    </ion-header>
+    <ion-content>
+        <ion-list>
+            <ion-list-header>
+                Allgemein
+            </ion-list-header>
+            <button [disabled]="!isPaused" ion-item (click)="showTrackRecorderSettings()">
+                Aufnahmeeinstellungen
+                <ion-icon small item-right name="arrow-right"></ion-icon>
+            </button>
+        </ion-list>
+        <ion-list>
+            <ion-list-header>
+                Verlauf
+            </ion-list-header>
+            <button ion-item *ngFor="let archivedTrackRecording of archivedTrackRecordings">
+                {{archivedTrackRecording.trackRecording.trackName}}
+                <button clear ion-button icon-only item-right (click)="removeArchivedTrackRecording(archivedTrackRecording)">
+                    <ion-icon name="trash"></ion-icon>
+                </button>
+            <button *ngIf="!archivedTrackRecording.isUploaded" clear ion-button icon-only item-right (click)="uploadTrackRecording(archivedTrackRecording)">
+                    <ion-icon name="cloud-upload"></ion-icon>                
+                </button>
+            </button>
+        </ion-list>
+    </ion-content>
+</ion-menu>
 
 <ion-header>
     <ion-navbar color="primary">

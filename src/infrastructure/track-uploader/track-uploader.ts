@@ -1,12 +1,11 @@
-import { TrackRecording } from "../pages/track-recorder/track-recording";
-import "rxjs/Rx";
-
-import { BackgroundGeolocationResponse } from "../declarations";
+import { ITrackUploader } from "./itrack-uploader";
+import { TrackRecording } from "../track-recording";
+import { BackgroundGeolocationResponse } from "../../declarations";
 import { Http, Response } from "@angular/http";
 import { Injectable } from "@angular/core";
 
 @Injectable()
-export class TrackUploader {
+export class TrackUploader implements ITrackUploader {
     private apiEndpoint = "http://myskatemap-api.azurewebsites.net/api/TrackRecording";
 
     public constructor(private http: Http) {
@@ -15,7 +14,9 @@ export class TrackUploader {
     public uploadRecordedTrack(positions: BackgroundGeolocationResponse[], trackRecording: TrackRecording): Promise<Response> {
         const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, new Date());
 
-        createdRecordedTrackModel.TrackAttachments = trackRecording.trackAttachments.map(trackAttachment => trackAttachment.imageDataUrl);
+        createdRecordedTrackModel.TrackAttachments = trackRecording.trackAttachments
+            .map(trackAttachment => <string>trackAttachment.imageDataUrl)
+            .filter(_ => !!_);
         createdRecordedTrackModel.RecordedPositions = positions.map((position, order) => {
             const result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);
             result.Accuracy = position.accuracy;
