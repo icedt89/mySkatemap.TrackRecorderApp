@@ -1,3 +1,4 @@
+import { MockedMapComponentAccessor } from "../../components/map/mocked-map-component-accessor";
 import { MockedTrackUploader } from "../../infrastructure/track-uploader/mocked-track-uploader";
 import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-track-recorder";
 import { TrackRecordingStore } from "../../infrastructure/track-store/track-recording-store";
@@ -16,12 +17,18 @@ import { NgModule } from "@angular/core";
     declarations: [TrackRecorderPageComponent, TrackRecorderPopoverComponent],
     entryComponents: [TrackRecorderPageComponent, TrackRecorderPopoverComponent],
     exports: [TrackRecorderPageComponent],
-    providers: [ArchivedTrackRecordingStore, TrackRecordingStore, {
-        provide: "TrackRecorder",
-        useClass: MockedTrackRecorder
-    }, {
-        provide: "TrackUploader",
-        useClass: MockedTrackUploader
-    }]
+    providers: [ArchivedTrackRecordingStore, TrackRecordingStore,
+        {
+            provide: "TrackRecorder",
+            useClass: MockedTrackRecorder
+        },
+        {
+            provide: "TrackUploader",
+            useClass: MockedTrackUploader
+        },
+        {
+            provide: "MapComponentAccessor",
+            useClass: MockedMapComponentAccessor
+        }]
 })
 export class TrackRecorderPageModule { }

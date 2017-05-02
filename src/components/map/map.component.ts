@@ -81,14 +81,6 @@ export class MapComponent {
         return Promise.resolve();
     }
 
-    public getTrack(): LatLng[] | null {
-        if (this.track) {
-            return this.track.getPoints();
-        }
-
-        return null;
-    }
-
     public resetTrack(): void {
         this.googleMap.clear();
 

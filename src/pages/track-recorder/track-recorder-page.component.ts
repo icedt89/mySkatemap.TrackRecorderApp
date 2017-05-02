@@ -1,3 +1,4 @@
+import { IMapComponentAccessor } from "../../components/map/imap-component-accessor";
 import { ITrackUploader } from "../../infrastructure/track-uploader/itrack-uploader";
 import { Inject } from "@angular/core";
 import { ITrackRecorder } from "../../infrastructure/track-recorder/itrack-recorder";
@@ -59,6 +60,7 @@ export class TrackRecorderPageComponent {
         private modalController: ModalController,
         private toastController: ToastController,
         @Inject("TrackUploader") private trackUploader: ITrackUploader,
+        @Inject("MapComponentAccessor") private mapComponentAccessor: IMapComponentAccessor,
         private popoverController: PopoverController,
         private menuController: MenuController,
         private loadingController: LoadingController,
@@ -109,6 +111,8 @@ export class TrackRecorderPageComponent {
             return archivingSuccessfulToast.present();
         });
         viewController.willEnter.subscribe(() => {
+            this.mapComponentAccessor.bindMapComponent(this.map);
+
             this.archivedTrackRecordingStore.getTracks().then(tracks => this._archivedTrackRecordings = tracks);
             this.trackRecordingStore.getTracks().then(tracks => this._trackRecordings = tracks);
 
@@ -127,7 +131,7 @@ export class TrackRecorderPageComponent {
 
                 this._currentTrackRecording = trackRecording;
 
-                this.map.mapReady.then(() => this.setTrackedPathOnMap(trackRecording.trackedPositions.map(position => new LatLng(position.latitude, position.longitude))));
+                this.mapComponentAccessor.mapReady.then(() => this.setTrackedPathOnMap(trackRecording.trackedPositions.map(position => new LatLng(position.latitude, position.longitude))));
             });
         });
 
@@ -290,14 +294,13 @@ export class TrackRecorderPageComponent {
 
     private setTrackedPathOnMap(trackedPath: LatLng[]): Promise<void> {
         if (trackedPath.length > 1) {
-            return this.map.setTrack(trackedPath).then(() => this.map.panToTrack());
+            return this.mapComponentAccessor.setTrack(trackedPath).then(() => this.mapComponentAccessor.panToTrack());
         }
 
         return Promise.resolve();
     }
 
     private refreshValues(): Promise<void> {
-        debugger;
         if (!this._currentTrackRecording) {
             return Promise.resolve();
         }
@@ -402,7 +405,7 @@ export class TrackRecorderPageComponent {
     }
 
     private resetView(): Promise<void> {
-        this.map.resetTrack();
+        this.mapComponentAccessor.resetTrack();
         this._currentTrackRecording = null;
         this._lastUpdate = null;
         this._approximateTrackLength = null;

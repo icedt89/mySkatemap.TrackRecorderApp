@@ -19,7 +19,7 @@ export class ArchivedTrackRecording {
 
     private _trackName: string;
     private _trackingStartedAt: Date;
-    private _trackedPositions: LatLng[] = []
+    private _trackedPositions: LatLng[] = [];
     private _numberOfUploadedAttachments: number;
 
     public get numberOfUploadedAttachments(): number {
