@@ -23,6 +23,7 @@ import { Length } from "../../infrastructure/length";
 import { LengthUnitHelper } from "../../infrastructure/lenght-unit-helper";
 import { Haversine } from "../../infrastructure/haversine";
 import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
+import * as moment from "moment";
 import {
     AlertController,
     AlertOptions,
@@ -471,7 +472,14 @@ export class TrackRecorderPageComponent {
                     if (!this._currentTrackRecording) {
                         this._currentTrackRecording = new TrackRecording();
                         this._currentTrackRecording.trackingStartedAt = new Date();
-                        this._currentTrackRecording.trackName = `Strecke vom ${this._currentTrackRecording.trackingStartedAt.toLocaleString()}`;
+
+/*
+                        debugger;
+                        let m = moment(this._currentTrackRecording.trackingStartedAt);
+                        let mm = m.format("LLL");
+*/
+
+                        this._currentTrackRecording.trackName = `Strecke vom ${this._currentTrackRecording.trackingStartedAt.toLocaleString("de")}`;
 
                         return this.saveCurrentTrackRecording().then(() => this._isPaused = false);
                     }
