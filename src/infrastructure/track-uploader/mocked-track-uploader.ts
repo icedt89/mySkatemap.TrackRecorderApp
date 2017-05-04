@@ -7,12 +7,15 @@ import { ITrackUploader } from "./itrack-uploader";
 
 @Injectable()
 export class MockedTrackUploader implements ITrackUploader {
-    public uploadRecordedTrack(positions: BackgroundGeolocationResponse[], trackRecording: TrackRecording): Promise<Response> {
-        const responseOptions = new ResponseOptions();
-        responseOptions.status = 200;
+    private willFailUpload = true;
 
-        const response = new Response(responseOptions);
+    public uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
+        console.log("MockedTrackUploader: Track uploaded");
 
-        return Promise.resolve(response);
+        if (this.willFailUpload) {
+            return Promise.reject(null);
+        }
+
+        return Promise.resolve(new Date());
     }
 }

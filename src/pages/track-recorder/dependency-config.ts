@@ -6,9 +6,10 @@ import { TrackRecorder } from "../../infrastructure/track-recorder/track-recorde
 import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-track-recorder";
 
 export class DependencyConfig {
-    private static mockTrackRecorder = true;
-    private static mockTrackUploader = true;
-    private static mockMapComponentAccessor = true;
+    private static mockAll = false;
+    private static mockTrackRecorder = DependencyConfig.mockAll ? true : true;
+    private static mockTrackUploader = DependencyConfig.mockAll ? true : true;
+    private static mockMapComponentAccessor = DependencyConfig.mockAll ? true : false;
 
     public static useTrackRecorder = DependencyConfig.mockTrackRecorder ? MockedTrackRecorder : TrackRecorder;
 

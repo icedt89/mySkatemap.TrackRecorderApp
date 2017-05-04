@@ -3,5 +3,5 @@ import { Response } from "@angular/http";
 import { BackgroundGeolocationResponse } from "../../declarations";
 
 export interface ITrackUploader {
-    uploadRecordedTrack(positions: BackgroundGeolocationResponse[], trackRecording: TrackRecording): Promise<Response>;
+    uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date>;
 }

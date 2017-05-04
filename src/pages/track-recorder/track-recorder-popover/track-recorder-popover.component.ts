@@ -109,7 +109,7 @@ export class TrackRecorderPopoverComponent {
                 {
                     text: "Ja",
                     handler: () => {
-                        this.trackRecordingStore.storeTrack(this.model.trackRecording).then(() => this.events.publish("track-recording-archived"));
+                        this.trackRecordingStore.storeTrack(this.model.trackRecording).then(() => this.events.publish("track-recording-finished"));
                     }
                 }
             ]

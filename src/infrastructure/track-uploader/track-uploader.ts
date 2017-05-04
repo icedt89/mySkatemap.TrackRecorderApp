@@ -1,7 +1,6 @@
 import { ITrackUploader } from "./itrack-uploader";
 import { TrackRecording } from "../track-recording";
-import { BackgroundGeolocationResponse } from "../../declarations";
-import { Http, Response } from "@angular/http";
+import { Http } from "@angular/http";
 import { Injectable } from "@angular/core";
 
 @Injectable()
@@ -11,14 +10,16 @@ export class TrackUploader implements ITrackUploader {
     public constructor(private http: Http) {
     }
 
-    public uploadRecordedTrack(positions: BackgroundGeolocationResponse[], trackRecording: TrackRecording): Promise<Response> {
-        const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, new Date());
+    public uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
+        const trackUploadedAt = new Date();
+        const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, trackUploadedAt);
 
         createdRecordedTrackModel.TrackAttachments = trackRecording.trackAttachments
             .map(trackAttachment => <string>trackAttachment.imageDataUrl)
             .filter(_ => !!_);
-        createdRecordedTrackModel.RecordedPositions = positions.map((position, order) => {
+        createdRecordedTrackModel.RecordedPositions = trackRecording.trackedPositions.map((position, order) => {
             const result = new RecordedTrackPositionModel(position.latitude, position.longitude, order);
+
             result.Accuracy = position.accuracy;
             result.Bearing = position.bearing;
             result.CapturedAt = position.time ? new Date(position.time).toISOString() : null;
@@ -29,7 +30,7 @@ export class TrackUploader implements ITrackUploader {
             return result;
         });
 
-        return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise();
+        return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise().then(() => trackUploadedAt);
     }
 }
 
