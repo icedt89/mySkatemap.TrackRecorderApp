@@ -5,14 +5,12 @@ import { LatLng } from "@ionic-native/google-maps";
 
 @Injectable()
 export class MockedMapComponentAccessor implements IMapComponentAccessor {
-    public bindMapComponent(mapComponent: MapComponent): void {
-        console.log("MockedMapComponentAccessor: Map bound");
+    public constructor() {
+        console.warn("Using MockedMapComponentAccessor for IMapComponentAccessor");
     }
 
-    public get mapReady(): Promise<void> {
-        console.log("MockedMapComponentAccessor: Map ready");
-
-        return Promise.resolve();
+    public bindMapComponent(mapComponent: MapComponent): void {
+        console.log("MockedMapComponentAccessor: Map bound");
     }
 
     public setTrack(positions: LatLng[]): Promise<void> {

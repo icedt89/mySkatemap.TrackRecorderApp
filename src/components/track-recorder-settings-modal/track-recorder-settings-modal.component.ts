@@ -1,4 +1,4 @@
-import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
+import { TrackRecorderSettingsModalModel } from "./track-recorder-settings-modal-model";
 import { NavParams, ToastController, ToastOptions, ViewController } from "ionic-angular";
 import { Component } from "@angular/core";
 
@@ -6,21 +6,17 @@ import { Component } from "@angular/core";
     templateUrl: "track-recorder-settings-modal.component.html"
 })
 export class TrackRecorderSettingsModalComponent {
-    private recorderSettings: TrackRecorderSettings;
+    private model: TrackRecorderSettingsModalModel;
 
     public constructor(private viewController: ViewController, navigationParameters: NavParams, private toastController: ToastController) {
-        this.recorderSettings = navigationParameters.get("settings");
+        this.model = navigationParameters.get("model");
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template
     private apply(): void {
         this.viewController.dismiss({
-            settings: this.recorderSettings
+            model: this.model
         });
-    }
-
-    private get settings(): TrackRecorderSettings {
-        return this.recorderSettings;
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template

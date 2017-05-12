@@ -9,18 +9,18 @@ import { Component } from "@angular/core";
     templateUrl: "track-attachments-modal.component.html"
 })
 export class TrackAttachmentsModalComponent {
-    private trackAttachmentsModel: TrackAttachmentsModalModel;
+    private model: TrackAttachmentsModalModel;
 
     public constructor(private viewController: ViewController,
         navigationParameters: NavParams,
         private mediaCapturer: MediaCapturer) {
-        this.trackAttachmentsModel = navigationParameters.get("trackAttachments");
+        this.model = navigationParameters.get("model");
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template
     private apply(): void {
         this.viewController.dismiss({
-            model: this.trackAttachmentsModel
+            model: this.model
         });
     }
 
@@ -39,7 +39,7 @@ export class TrackAttachmentsModalComponent {
             const trackAttachment = new TrackAttachment(result.dataUrl);
             trackAttachment.comment = new Date().toLocaleString();
 
-            this.trackAttachmentsModel.attachments.push(trackAttachment);
+            this.model.attachments.push(trackAttachment);
         }
     }
 }

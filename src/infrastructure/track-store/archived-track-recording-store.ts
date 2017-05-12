@@ -7,6 +7,8 @@ import { Storage } from "@ionic/storage";
 export class ArchivedTrackRecordingStore extends TrackStore<ArchivedTrackRecording> {
     public constructor(storage: Storage) {
         super(storage, "TrackStore.ArchivedTrackRecordings");
+
+        console.warn("ArchivedTrackRecordingStore constructed");
     }
 
     protected buildTrackInstance(TTrackLike: any): ArchivedTrackRecording {

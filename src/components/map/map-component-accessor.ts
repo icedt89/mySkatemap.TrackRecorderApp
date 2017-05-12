@@ -11,10 +11,6 @@ export class MapComponentAccessor implements IMapComponentAccessor {
         this.mapComponent = mapComponent;
     }
 
-    public get mapReady(): Promise<void> {
-        return this.mapComponent.mapReady;
-    }
-
     public setTrack(positions: LatLng[]): Promise<void> {
         return this.mapComponent.setTrack(positions);
     }

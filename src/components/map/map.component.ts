@@ -56,51 +56,51 @@ export class MapComponent {
         viewController.didLeave.subscribe(() => this.googleMap.remove());
     }
 
-    public get mapReady(): Promise<void> {
-        return this._mapReady;
-    }
-
     public setTrack(positions: LatLng[]): Promise<void> {
-        if (!this.track) {
-            this.track = <Polyline>{};
-            const trackOptions = <PolylineOptions>{
-                visible: true,
-                geodesic: true,
-                color: "#FF0000",
-                points: positions
-            };
+        return this._mapReady.then(() => {
+            if (!this.track) {
+                this.track = <Polyline>{};
+                const trackOptions = <PolylineOptions>{
+                    visible: true,
+                    geodesic: true,
+                    color: "#FF0000",
+                    points: positions
+                };
 
-            return this.googleMap.addPolyline(trackOptions)
-                .then((polyline: Polyline) => {
-                    this.track = polyline;
-                });
-        }
+                return this.googleMap.addPolyline(trackOptions)
+                    .then((polyline: Polyline) => {
+                        this.track = polyline;
+                    });
+            }
 
-        this.track.setPoints(positions);
-
-        return Promise.resolve();
+            this.track.setPoints(positions);
+        });
     }
 
-    public resetTrack(): void {
-        this.googleMap.clear();
+    public resetTrack(): Promise<void> {
+        return this._mapReady.then(() => {
+            this.googleMap.clear();
 
-        if (this.track) {
-            this.track.remove();
-        }
+            if (this.track) {
+                this.track.remove();
+            }
 
-        this.track = null;
+            this.track = null;
+        });
     }
 
     public panToTrack(): Promise<void> {
-        if (!this.track) {
-            return Promise.resolve();
-        }
+        return this._mapReady.then(() => {
+            if (!this.track) {
+                return;
+            }
 
-        const bounds = new LatLngBounds([]);
-        this.track.getPoints().forEach((item: LatLng) => bounds.extend(item));
+            const bounds = new LatLngBounds([]);
+            this.track.getPoints().forEach((item: LatLng) => bounds.extend(item));
 
-        return this.googleMap.animateCamera(<AnimateCameraOptions>{
-            target: bounds
+            return this.googleMap.animateCamera(<AnimateCameraOptions>{
+                target: bounds
+            });
         });
     }
 }

@@ -1,3 +1,4 @@
+import { ILocalizationService } from "../../../infrastructure/localization/ilocalization-service";
 import { ITrackUploader } from "../../../infrastructure/track-uploader/itrack-uploader";
 import { Inject } from "@angular/core";
 import { ITrackRecorder } from "../../../infrastructure/track-recorder/itrack-recorder";
@@ -57,7 +58,7 @@ export class TrackRecorderPopoverComponent {
             }
 
             const trackAttachmentsModal = this.modalController.create(TrackAttachmentsModalComponent, {
-                trackAttachments: new TrackAttachmentsModalModel(this.model.trackRecording.trackAttachments.map(_ => _))
+                model: new TrackAttachmentsModalModel(this.model.trackRecording.trackAttachments.map(_ => _))
             });
             trackAttachmentsModal.onDidDismiss((data: { model: TrackAttachmentsModalModel } | null) => {
                 if (!data) {
@@ -71,8 +72,8 @@ export class TrackRecorderPopoverComponent {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private resetTrackRecording(): void {
-        const resetRecordingPrompt = this.alertController.create(<AlertOptions>{
+    private deleteTrackRecording(): void {
+        const deleteRecordingPrompt = this.alertController.create(<AlertOptions>{
             title: "Strecke löschen",
             message: "Möchten Sie die aufgezeichnete Strecke wirklich löschen?",
             enableBackdropDismiss: true,
@@ -83,12 +84,12 @@ export class TrackRecorderPopoverComponent {
                 },
                 {
                     text: "Ja",
-                    handler: () => this.trackRecorder.deleteAllRecordings().then(() => this.events.publish("track-recording-reset"))
+                    handler: () => this.trackRecorder.deleteAllRecordings().then(() => this.events.publish("track-recording-deleted"))
                 }
             ]
         });
         // Close popover (makes back button working again Oo, too)
-        resetRecordingPrompt.present().then(() => this.viewController.dismiss());
+        deleteRecordingPrompt.present().then(() => this.viewController.dismiss());
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.

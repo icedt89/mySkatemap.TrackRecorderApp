@@ -1,11 +1,12 @@
 <ion-list>
     <button [disabled]="!canShowTrackAttachments" ion-item (click)="showTrackAttachments()">
         Anhänge
+        <!--{{this.localizationService.localize("track-attachments-button-text") | databindableasync:'track-attachments-button-text'}}-->
     </button>
     <button [disabled]="!canFinishTrackRecording" ion-item (click)="finishTrackRecording()">
         Abschließen
     </button>
-    <button [disabled]="!canDeleteTrackRecording" ion-item (click)="resetTrackRecording()">
+    <button [disabled]="!canDeleteTrackRecording" ion-item (click)="deleteTrackRecording()">
         Löschen
     </button>
 </ion-list>

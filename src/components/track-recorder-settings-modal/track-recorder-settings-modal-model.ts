@@ -1,18 +1,16 @@
-export class TrackRecorderSettings {
-    public static fromLike(trackRecorderSettingsLike: TrackRecorderSettings): TrackRecorderSettings {
-        return Object.assign(new TrackRecorderSettings(), trackRecorderSettingsLike);
-    }
+import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
 
+export class TrackRecorderSettingsModalModel {
     private _desiredAccuracy: string;
     private _locationProvider: string;
     private _stationaryRadius: number;
     private _recorderDistanceFilter: number;
 
-    public constructor() {
-        this._desiredAccuracy = "0";
-        this._locationProvider = "0";
-        this._stationaryRadius = 5;
-        this._recorderDistanceFilter = 5;
+    public constructor(trackRecorderSettings: TrackRecorderSettings) {
+        this._desiredAccuracy = trackRecorderSettings.desiredAccuracy;
+        this._locationProvider = trackRecorderSettings.locationProvider;
+        this._recorderDistanceFilter = trackRecorderSettings.distanceFilter;
+        this._stationaryRadius = trackRecorderSettings.stationaryRadius;
     }
 
     public get desiredAccuracy(): string {

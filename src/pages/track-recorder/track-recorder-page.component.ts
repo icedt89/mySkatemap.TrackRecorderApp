@@ -1,3 +1,7 @@
+import { IonicPage } from "ionic-angular/";
+import {
+    TrackRecorderSettingsModalModel
+} from "../../components/track-recorder-settings-modal/track-recorder-settings-modal-model";
 import { IMapComponentAccessor } from "../../components/map/imap-component-accessor";
 import { ITrackUploader } from "../../infrastructure/track-uploader/itrack-uploader";
 import { Inject } from "@angular/core";
@@ -23,7 +27,6 @@ import { Length } from "../../infrastructure/length";
 import { LengthUnitHelper } from "../../infrastructure/lenght-unit-helper";
 import { Haversine } from "../../infrastructure/haversine";
 import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
-import * as moment from "moment";
 import {
     AlertController,
     AlertOptions,
@@ -89,7 +92,7 @@ export class TrackRecorderPageComponent {
                 return attachmentsSavedToast.present();
             });
         });
-        events.subscribe("track-recording-reset", () => {
+        events.subscribe("track-recording-deleted", () => {
             this.resetView().then(() => {
                 const allRecordingsDeletedToast = this.toastController.create(<ToastOptions>{
                     message: "Strecke gelöscht",
@@ -125,7 +128,7 @@ export class TrackRecorderPageComponent {
                     return;
                 }
 
-                this.trackRecorder.ready.then(() => this.trackRecorder.setSettings(settings));
+                this.trackRecorder.setSettings(settings);
             });
             this.loadCurrentTrackRecording().then(trackRecording => {
                 if (!trackRecording) {
@@ -134,7 +137,7 @@ export class TrackRecorderPageComponent {
 
                 this._currentTrackRecording = trackRecording;
 
-                this.mapComponentAccessor.mapReady.then(() => this.setTrackedPathOnMap(trackRecording.trackedPositions.map(position => new LatLng(position.latitude, position.longitude))));
+                this.setTrackedPathOnMap(trackRecording.trackedPositions.map(position => new LatLng(position.latitude, position.longitude)));
             });
         });
 
@@ -264,40 +267,6 @@ export class TrackRecorderPageComponent {
 
             return trackDeletedToast.present();
         });
-        /*
-        const removeTrackPrompt = this.alertController.create(<AlertOptions>{
-            title: "Strecke löschen",
-            message: "Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.",
-            enableBackdropDismiss: true,
-            buttons: [
-                {
-                    text: "Abbrechen",
-                    role: "cancel"
-                },
-                {
-                    text: "Ja",
-                    handler: () => this.archivedTrackRecordingStore.deleteStoredTrack(track).then(() => {
-                        const trackDeletedToast = this.toastController.create({
-                            message: "Strecke gelöscht",
-                            duration: 3000,
-                            position: "bottom",
-                            closeButtonText: "Rückgängig",
-                            showCloseButton: true
-                        });
-                        trackDeletedToast.onDidDismiss((_, initiator) => {
-                            if (initiator === "close") {
-                                this.archivedTrackRecordingStore.storeTrack(track);
-                            }
-                        });
-
-                        return trackDeletedToast.present();
-                    })
-                }
-            ]
-        });
-        // Close popover (makes back button working again Oo, too)
-        removeTrackPrompt.present();
-        */
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
@@ -344,6 +313,7 @@ export class TrackRecorderPageComponent {
                             });
                             trackRecordingUploadFailedToast.onDidDismiss((_, initiator) => {
                                 if (initiator === "close") {
+                                    // TODO: RETRY!
                                     debugger;
                                 }
                             });
@@ -450,7 +420,7 @@ export class TrackRecorderPageComponent {
     private showTrackRecorderPopover(event: Event): void {
         const model = new TrackRecorderPopoverModel(this._currentTrackRecording, this._isPaused);
 
-        let popover = this.popoverController.create(TrackRecorderPopoverComponent, {
+        const popover = this.popoverController.create(TrackRecorderPopoverComponent, {
             model: model
         });
         popover.present(<NavOptions>{
@@ -464,9 +434,9 @@ export class TrackRecorderPageComponent {
             const recorderSettings = this.trackRecorder.settings;
 
             const trackRecorderSettingsModal = this.modalController.create(TrackRecorderSettingsModalComponent, {
-                settings: recorderSettings
+                model: new TrackRecorderSettingsModalModel(recorderSettings)
             });
-            trackRecorderSettingsModal.onDidDismiss((data: { settings: TrackRecorderSettings } | null) => {
+            trackRecorderSettingsModal.onDidDismiss((data: { model: TrackRecorderSettingsModalModel } | null) => {
                 if (!data) {
                     return;
                 }
@@ -480,7 +450,13 @@ export class TrackRecorderPageComponent {
                 });
                 setTrackRecorderSettingsToast.present();
 
-                this.trackRecorder.setSettings(data.settings).then(settings => this.saveTrackRecorderSettings(settings));
+                const trackRecorderSettings = new TrackRecorderSettings();
+                trackRecorderSettings.desiredAccuracy = data.model.desiredAccuracy;
+                trackRecorderSettings.distanceFilter = data.model.distanceFilter;
+                trackRecorderSettings.locationProvider = data.model.locationProvider;
+                trackRecorderSettings.stationaryRadius = data.model.stationaryRadius;
+
+                this.trackRecorder.setSettings(trackRecorderSettings).then(settings => this.saveTrackRecorderSettings(settings));
             });
             trackRecorderSettingsModal.present();
         });

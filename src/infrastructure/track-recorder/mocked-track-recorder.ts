@@ -12,8 +12,8 @@ export class MockedTrackRecorder implements ITrackRecorder {
 
     private locationModeChangedSubject = new Subject<boolean>();
 
-    public get ready(): Promise<void> {
-        return Promise.resolve();
+    public constructor() {
+        console.warn("Using MockedTrackRecorder for ITrackRecorder");
     }
 
     public get locationModeChanged(): Observable<boolean> {

@@ -11,9 +11,6 @@ declare var backgroundGeolocation: BackgroundGeolocation;
 export class TrackRecorder implements ITrackRecorder {
     private locationModeChangedSubject = new Subject<boolean>();
 
-    private readyResolve: () => void;
-    private _ready = new Promise<void>(resolve => this.readyResolve = resolve);
-
     private configuration = <BackgroundGeolocationConfig>{
         desiredAccuracy: 0, // 0 = GPS + Mobile + Wifi + GSM; 10 = Mobile + Wifi + GSM, 100 = Wifi + GSM; 1000 = GSM
         stationaryRadius: 5,
@@ -30,7 +27,7 @@ export class TrackRecorder implements ITrackRecorder {
         notificationIconColor: "#009688"
     };
 
-    public constructor(platform: Platform) {
+    public constructor(private platform: Platform) {
         platform.ready().then(() => {
             backgroundGeolocation.configure(null, null, this.configuration);
 
@@ -41,11 +38,7 @@ export class TrackRecorder implements ITrackRecorder {
 
                 this.locationModeChangedSubject.next(enabled);
             }, error => this.locationModeChangedSubject.error(error));
-        }).then(() => this.readyResolve());
-    }
-
-    public get ready(): Promise<void> {
-        return this._ready;
+        });
     }
 
     public get locationModeChanged(): Observable<boolean> {
@@ -63,7 +56,7 @@ export class TrackRecorder implements ITrackRecorder {
     }
 
     public setSettings(settings: TrackRecorderSettings): Promise<TrackRecorderSettings> {
-        return new Promise((resolve, reject) => {
+        return this.platform.ready().then(() => new Promise<TrackRecorderSettings>((resolve, reject) => {
             this.configuration.desiredAccuracy = +settings.desiredAccuracy;
             this.configuration.distanceFilter = settings.distanceFilter;
             this.configuration.locationProvider = +settings.locationProvider;
@@ -72,30 +65,42 @@ export class TrackRecorder implements ITrackRecorder {
             backgroundGeolocation.configure(null, error => reject(error), this.configuration);
 
             resolve(settings);
-        });
+        }));
     }
 
     public getLocations(): Promise<BackgroundGeolocationResponse[]> {
-        return new Promise<BackgroundGeolocationResponse[]>((resolve, reject) => backgroundGeolocation.getValidLocations(positions => resolve(positions), error => reject(error)));
+        return this.platform.ready().then(() =>
+            new Promise<BackgroundGeolocationResponse[]>((resolve, reject) => backgroundGeolocation.getValidLocations(positions => resolve(positions), error => reject(error)))
+        );
     }
 
     public isLocationEnabled(): Promise<boolean> {
-        return new Promise((resolve, reject) => backgroundGeolocation.isLocationEnabled(enabled => resolve(enabled), error => reject(error)));
+        return this.platform.ready().then(() =>
+            new Promise<boolean>((resolve, reject) => backgroundGeolocation.isLocationEnabled(enabled => resolve(enabled), error => reject(error)))
+        );
     }
 
     public showLocationSettings(): void {
-        backgroundGeolocation.showLocationSettings();
+        this.platform.ready().then(() =>
+            backgroundGeolocation.showLocationSettings()
+        );
     }
 
     public record(): Promise<void> {
-        return new Promise<void>((resolve, reject) => backgroundGeolocation.start(() => resolve(), error => reject(error)));
+        return this.platform.ready().then(() =>
+            new Promise<void>((resolve, reject) => backgroundGeolocation.start(() => resolve(), error => reject(error)))
+        );
     }
 
     public pause(): Promise<void> {
-        return new Promise<void>((resolve, reject) => backgroundGeolocation.stop(() => resolve(), error => reject(error)));
+        return this.platform.ready().then(() =>
+            new Promise<void>((resolve, reject) => backgroundGeolocation.stop(() => resolve(), error => reject(error)))
+        );
     }
 
     public deleteAllRecordings(): Promise<void> {
-        return new Promise<void>((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(), error => reject(error)));
+        return this.platform.ready().then(() =>
+            new Promise<void>((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(), error => reject(error)))
+        );
     }
 }

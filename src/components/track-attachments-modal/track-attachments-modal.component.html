@@ -10,17 +10,17 @@
 </ion-header>
 
 <ion-content padding>
-    <div text-center *ngIf="!trackAttachmentsModel.attachments.length">
+    <div text-center *ngIf="!model.attachments.length">
         Bisher haben Sie noch keine Anhänge hinzugefügt. Sie können Anhänge über die "+"-Schaltfläche hinzufügen.
     </div>
     <ion-list>
-        <ion-item *ngFor="let trackAttachment of trackAttachmentsModel.attachments">
+        <ion-item *ngFor="let trackAttachment of model.attachments">
             <ion-thumbnail item-left>
                 <img src="{{trackAttachment.imageDataUrl}}">
             </ion-thumbnail>
             <ion-label stacked>Hinzugefügt am</ion-label>
             <ion-input disabled [value]="trackAttachment.comment" type="text"></ion-input>
-            <button color="danger" ion-button clear item-right icon-only (click)="trackAttachmentsModel.removeAttachment(trackAttachment)">
+            <button color="danger" ion-button clear item-right icon-only (click)="model.removeAttachment(trackAttachment)">
                 <ion-icon name="trash"></ion-icon>
             </button>
         </ion-item>

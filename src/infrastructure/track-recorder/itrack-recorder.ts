@@ -3,8 +3,6 @@ import { TrackRecorderSettings } from "./track-recorder-settings";
 import { Observable } from "rxjs/Rx";
 
 export interface ITrackRecorder {
-    ready: Promise<void>;
-
     locationModeChanged: Observable<boolean>;
 
     settings: TrackRecorderSettings;
