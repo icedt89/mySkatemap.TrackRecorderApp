@@ -10,7 +10,7 @@ export class TrackUploader implements ITrackUploader {
     public constructor(private http: Http) {
     }
 
-    public uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
+    public async uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
         const trackUploadedAt = new Date();
         const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, trackUploadedAt);
 
@@ -30,7 +30,9 @@ export class TrackUploader implements ITrackUploader {
             return result;
         });
 
-        return this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise().then(() => trackUploadedAt);
+        await this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise();
+
+        return trackUploadedAt;
     }
 }
 

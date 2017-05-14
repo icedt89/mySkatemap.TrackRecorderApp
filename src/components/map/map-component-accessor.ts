@@ -11,15 +11,15 @@ export class MapComponentAccessor implements IMapComponentAccessor {
         this.mapComponent = mapComponent;
     }
 
-    public setTrack(positions: LatLng[]): Promise<void> {
-        return this.mapComponent.setTrack(positions);
+    public async setTrack(positions: LatLng[]): Promise<void> {
+        await this.mapComponent.setTrack(positions);
     }
 
     public resetTrack(): void {
         this.mapComponent.resetTrack();
     }
 
-    public panToTrack(): Promise<void> {
-        return this.mapComponent.panToTrack();
+    public async panToTrack(): Promise<void> {
+        await this.mapComponent.panToTrack();
     }
 }

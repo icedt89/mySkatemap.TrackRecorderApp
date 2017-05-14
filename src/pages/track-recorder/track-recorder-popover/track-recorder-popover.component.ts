@@ -1,4 +1,3 @@
-import { ILocalizationService } from "../../../infrastructure/localization/ilocalization-service";
 import { ITrackUploader } from "../../../infrastructure/track-uploader/itrack-uploader";
 import { Inject } from "@angular/core";
 import { ITrackRecorder } from "../../../infrastructure/track-recorder/itrack-recorder";
@@ -50,25 +49,27 @@ export class TrackRecorderPopoverComponent {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private showTrackAttachments(): void {
+    private async showTrackAttachments(): Promise<void> {
         // Close popover (makes back button working again Oo, too)
-        this.viewController.dismiss().then(() => {
-            if (!this.model.trackRecording) {
-                throw new Exception("No current track recording.");
+        this.viewController.dismiss();
+
+        if (!this.model.trackRecording) {
+            throw new Exception("No current track recording.");
+        }
+
+        const trackAttachmentsModal = this.modalController.create(TrackAttachmentsModalComponent, {
+            model: new TrackAttachmentsModalModel(this.model.trackRecording.trackAttachments.map(_ => _))
+        });
+
+        trackAttachmentsModal.onDidDismiss((data: { model: TrackAttachmentsModalModel } | null) => {
+            if (!data) {
+                // Modal was not successfully dismissed (user, used back button...).
+                return;
             }
 
-            const trackAttachmentsModal = this.modalController.create(TrackAttachmentsModalComponent, {
-                model: new TrackAttachmentsModalModel(this.model.trackRecording.trackAttachments.map(_ => _))
-            });
-            trackAttachmentsModal.onDidDismiss((data: { model: TrackAttachmentsModalModel } | null) => {
-                if (!data) {
-                    return;
-                }
-
-                this.events.publish("track-attachments-changed", data.model.attachments);
-            });
-            trackAttachmentsModal.present();
+            this.events.publish("track-attachments-changed", data.model.attachments);
         });
+        trackAttachmentsModal.present();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
@@ -84,12 +85,17 @@ export class TrackRecorderPopoverComponent {
                 },
                 {
                     text: "Ja",
-                    handler: () => this.trackRecorder.deleteAllRecordings().then(() => this.events.publish("track-recording-deleted"))
+                    handler: async () => {
+                        await this.trackRecorder.deleteAllRecordings();
+
+                        this.events.publish("track-recording-deleted");
+                    }
                 }
             ]
         });
         // Close popover (makes back button working again Oo, too)
-        deleteRecordingPrompt.present().then(() => this.viewController.dismiss());
+        deleteRecordingPrompt.present();
+        this.viewController.dismiss();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
@@ -98,7 +104,7 @@ export class TrackRecorderPopoverComponent {
             throw new Exception("No current track recording.");
         }
 
-        const archiveRecordingPrompt = this.alertController.create({
+        const archiveRecordingPrompt = this.alertController.create(<AlertOptions>{
             title: "Strecke abschließen",
             message: "Die Strecke kann dann nur noch hochgeladen werden.",
             enableBackdropDismiss: true,
@@ -109,13 +115,16 @@ export class TrackRecorderPopoverComponent {
                 },
                 {
                     text: "Ja",
-                    handler: () => {
-                        this.trackRecordingStore.storeTrack(this.model.trackRecording).then(() => this.events.publish("track-recording-finished"));
+                    handler: async () => {
+                        await this.trackRecordingStore.storeTrack(this.model.trackRecording);
+
+                        this.events.publish("track-recording-finished");
                     }
                 }
             ]
         });
         // Close popover (makes back button working again Oo, too)
-        archiveRecordingPrompt.present().then(() => this.viewController.dismiss());
+        archiveRecordingPrompt.present();
+        this.viewController.dismiss();
     }
 }

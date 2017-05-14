@@ -11,4 +11,4 @@ export const localization = {
         "de-de": "Löschen",
         "en": "Delete"
     }
-}
+};

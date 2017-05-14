@@ -25,13 +25,21 @@ export class TrackAttachmentsModalComponent {
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template
-    private captureCameraImage(): void {
-        this.mediaCapturer.captureCameraImage().then(result => this.handleCapturedMediaResult(result)).catch(() => { });
+    private async captureCameraImage(): Promise<void> {
+        const result = await this.mediaCapturer.captureCameraImage();
+
+        try {
+            this.handleCapturedMediaResult(result);
+        } catch (any) { }
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template
-    private selectLibraryImage(): void {
-        this.mediaCapturer.selectLibraryImage().then(result => this.handleCapturedMediaResult(result)).catch(() => { });
+    private async selectLibraryImage(): Promise<void> {
+        const result = await this.mediaCapturer.selectLibraryImage();
+
+        try {
+            this.handleCapturedMediaResult(result);
+        } catch (any) { }
     }
 
     private handleCapturedMediaResult(result: CapturedMediaResult): void {

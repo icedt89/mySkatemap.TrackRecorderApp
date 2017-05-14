@@ -1,27 +1,31 @@
+import { MapComponentAccessor } from "../../components/map/map-component-accessor";
+import { MockedMapComponentAccessor } from "../../components/map/mocked-map-component-accessor";
+import { TrackRecorder } from "../../infrastructure/track-recorder/track-recorder";
+import { MockedTrackUploader } from "../../infrastructure/track-uploader/mocked-track-uploader";
+import { TrackUploader } from "../../infrastructure/track-uploader/track-uploader";
+import { TrackRecorderPopoverModule } from "./track-recorder-popover/track-recorder-popover.module";
 import { TrackRecordingStore } from "../../infrastructure/track-store/track-recording-store";
 import { ArchivedTrackRecordingStore } from "../../infrastructure/track-store/archived-track-recording-store";
-import { TrackRecorderPopoverComponent } from "./track-recorder-popover/track-recorder-popover.component";
 import { TrackAttachmentsModalModule } from "../../components/track-attachments-modal/track-attachments-modal.module";
 import { MapModule } from "../../components/map/map.module";
-import { TrackRecorderSettingsModalModule } from "../../components/track-recorder-settings-modal/track-recorder-settings-modal.module";
 import { IonicModule } from "ionic-angular";
 import { TrackRecorderPageComponent } from "./track-recorder-page.component";
 import { NgModule } from "@angular/core";
-import { DependencyConfiguration } from "../../infrastructure/dependency-configuration";
+import { TrackRecorderSettingsModalModule } from "./track-recorder-settings-modal/track-recorder-settings-modal.module";
+import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-track-recorder";
 
 @NgModule({
     imports: [
         TrackRecorderSettingsModalModule,
         TrackAttachmentsModalModule,
+        TrackRecorderPopoverModule,
         MapModule,
         IonicModule
     ],
     declarations: [
         TrackRecorderPageComponent,
-        TrackRecorderPopoverComponent
     ],
     entryComponents: [
-        TrackRecorderPopoverComponent,
         TrackRecorderPageComponent
     ],
     providers: [
@@ -29,15 +33,18 @@ import { DependencyConfiguration } from "../../infrastructure/dependency-configu
         TrackRecordingStore,
         {
             provide: "TrackRecorder",
-            useClass: DependencyConfiguration.useTrackRecorder
+            useClass: MockedTrackRecorder
+            // useClass: TrackRecorder
         },
         {
             provide: "TrackUploader",
-            useClass: DependencyConfiguration.useTrackUploader
+            useClass: MockedTrackUploader
+            // useClass: TrackUploader
         },
         {
             provide: "MapComponentAccessor",
-            useClass: DependencyConfiguration.useMapComponentAccessor
+            // useClass: MockedMapComponentAccessor
+            useClass: MapComponentAccessor
         }]
 })
 export class TrackRecorderPageModule { }

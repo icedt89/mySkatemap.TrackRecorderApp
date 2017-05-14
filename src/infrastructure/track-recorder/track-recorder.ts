@@ -5,7 +5,7 @@ import { Platform } from "ionic-angular";
 import { Injectable } from "@angular/core";
 import { TrackRecorderSettings } from "./track-recorder-settings";
 
-declare var backgroundGeolocation: BackgroundGeolocation;
+declare const backgroundGeolocation: BackgroundGeolocation;
 
 @Injectable()
 export class TrackRecorder implements ITrackRecorder {
@@ -28,17 +28,21 @@ export class TrackRecorder implements ITrackRecorder {
     };
 
     public constructor(private platform: Platform) {
-        platform.ready().then(() => {
-            backgroundGeolocation.configure(null, null, this.configuration);
+        this.initialize();
+    }
 
-            backgroundGeolocation.watchLocationMode(enabled => {
-                if (!enabled) {
-                    this.pause();
-                }
+    private async initialize(): Promise<void> {
+        await this.platform.ready();
 
-                this.locationModeChangedSubject.next(enabled);
-            }, error => this.locationModeChangedSubject.error(error));
-        });
+        backgroundGeolocation.configure(null, null, this.configuration);
+
+        backgroundGeolocation.watchLocationMode(enabled => {
+            if (!enabled) {
+                this.pause();
+            }
+
+            this.locationModeChangedSubject.next(enabled);
+        }, error => this.locationModeChangedSubject.error(error));
     }
 
     public get locationModeChanged(): Observable<boolean> {
@@ -55,8 +59,10 @@ export class TrackRecorder implements ITrackRecorder {
         return trackRecorderSettings;
     }
 
-    public setSettings(settings: TrackRecorderSettings): Promise<TrackRecorderSettings> {
-        return this.platform.ready().then(() => new Promise<TrackRecorderSettings>((resolve, reject) => {
+    public async setSettings(settings: TrackRecorderSettings): Promise<TrackRecorderSettings> {
+        await this.platform.ready();
+
+        return await new Promise<TrackRecorderSettings>((resolve, reject) => {
             this.configuration.desiredAccuracy = +settings.desiredAccuracy;
             this.configuration.distanceFilter = settings.distanceFilter;
             this.configuration.locationProvider = +settings.locationProvider;
@@ -65,42 +71,42 @@ export class TrackRecorder implements ITrackRecorder {
             backgroundGeolocation.configure(null, error => reject(error), this.configuration);
 
             resolve(settings);
-        }));
+        });
     }
 
-    public getLocations(): Promise<BackgroundGeolocationResponse[]> {
-        return this.platform.ready().then(() =>
-            new Promise<BackgroundGeolocationResponse[]>((resolve, reject) => backgroundGeolocation.getValidLocations(positions => resolve(positions), error => reject(error)))
-        );
+    public async getLocations(): Promise<BackgroundGeolocationResponse[]> {
+        await this.platform.ready();
+
+        return await new Promise<BackgroundGeolocationResponse[]>((resolve, reject) => backgroundGeolocation.getValidLocations(positions => resolve(positions), error => reject(error)));
     }
 
-    public isLocationEnabled(): Promise<boolean> {
-        return this.platform.ready().then(() =>
-            new Promise<boolean>((resolve, reject) => backgroundGeolocation.isLocationEnabled(enabled => resolve(enabled), error => reject(error)))
-        );
+    public async isLocationEnabled(): Promise<boolean> {
+        await this.platform.ready();
+
+        return await new Promise<boolean>((resolve, reject) => backgroundGeolocation.isLocationEnabled(enabled => resolve(enabled), error => reject(error)));
     }
 
-    public showLocationSettings(): void {
-        this.platform.ready().then(() =>
-            backgroundGeolocation.showLocationSettings()
-        );
+    public async showLocationSettings(): Promise<void> {
+        await this.platform.ready();
+
+        backgroundGeolocation.showLocationSettings();
     }
 
-    public record(): Promise<void> {
-        return this.platform.ready().then(() =>
-            new Promise<void>((resolve, reject) => backgroundGeolocation.start(() => resolve(), error => reject(error)))
-        );
+    public async record(): Promise<void> {
+        await this.platform.ready();
+
+        return await new Promise<void>((resolve, reject) => backgroundGeolocation.start(() => resolve(), error => reject(error)));
     }
 
-    public pause(): Promise<void> {
-        return this.platform.ready().then(() =>
-            new Promise<void>((resolve, reject) => backgroundGeolocation.stop(() => resolve(), error => reject(error)))
-        );
+    public async pause(): Promise<void> {
+        await this.platform.ready();
+
+        return await new Promise<void>((resolve, reject) => backgroundGeolocation.stop(() => resolve(), error => reject(error)));
     }
 
-    public deleteAllRecordings(): Promise<void> {
-        return this.platform.ready().then(() =>
-            new Promise<void>((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(), error => reject(error)))
-        );
+    public async deleteAllRecordings(): Promise<void> {
+        await this.platform.ready();
+
+        return await new Promise<void>((resolve, reject) => backgroundGeolocation.deleteAllLocations(() => resolve(), error => reject(error)));
     }
 }

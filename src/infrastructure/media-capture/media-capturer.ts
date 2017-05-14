@@ -7,21 +7,25 @@ export class MediaCapturer {
     public constructor(private camera: Camera) {
     }
 
-    public captureCameraImage(): Promise<CapturedMediaResult> {
-        return this.camera.getPicture(<CameraOptions>{
+    public async captureCameraImage(): Promise<CapturedMediaResult> {
+        const result = <string>await this.camera.getPicture(<CameraOptions>{
             destinationType: this.camera.DestinationType.DATA_URL,
             allowEdit: false,
             quality: 100,
             correctOrientation: true
-        }).then((result: string) => new CapturedMediaResult(result));
+        });
+
+        return new CapturedMediaResult(result);
     }
 
-    public selectLibraryImage(): Promise<CapturedMediaResult> {
-        return this.camera.getPicture(<CameraOptions>{
+    public async selectLibraryImage(): Promise<CapturedMediaResult> {
+        const result = <string>await this.camera.getPicture(<CameraOptions>{
             destinationType: this.camera.DestinationType.DATA_URL,
             allowEdit: false,
             sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
             correctOrientation: true
-        }).then((result: string) => new CapturedMediaResult(result));
+        });
+
+        return new CapturedMediaResult(result);
     }
 }

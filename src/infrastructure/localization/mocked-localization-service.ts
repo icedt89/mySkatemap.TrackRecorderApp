@@ -1,4 +1,3 @@
-import { DatabindablePromise } from "../databindable-promise";
 import { Exception } from "../exception";
 import { Injectable } from "@angular/core";
 import { ILocalizationService } from "./ilocalization-service";
@@ -15,7 +14,7 @@ export class MockedLocalizationService implements ILocalizationService {
         return result;
     }
 
-    public localize(key: string): Promise<string> {
+    public async localize(key: string): Promise<string> {
         const keyPair = this.lookup[key];
         if (!keyPair) {
             throw new Exception(`Key '${key}' not found.`);
@@ -26,6 +25,6 @@ export class MockedLocalizationService implements ILocalizationService {
             throw new Exception(`Language '${this.language}' not found on key '${key}'.`);
         }
 
-        return Promise.resolve(value);
+        return value;
     }
 }

@@ -13,19 +13,15 @@ export class MockedMapComponentAccessor implements IMapComponentAccessor {
         console.log("MockedMapComponentAccessor: Map bound");
     }
 
-    public setTrack(positions: LatLng[]): Promise<void> {
+    public async setTrack(positions: LatLng[]): Promise<void> {
         console.log(`MockedMapComponentAccessor: Track with ${positions.length} positions set`);
-
-        return Promise.resolve();
     }
 
     public resetTrack(): void {
         console.log("MockedMapComponentAccessor: Track reset");
     }
 
-    public panToTrack(): Promise<void> {
+    public async panToTrack(): Promise<void> {
         console.log("MockedMapComponentAccessor: Track focused");
-
-        return Promise.resolve();
     }
 }

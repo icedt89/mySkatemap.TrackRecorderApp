@@ -1,3 +1,4 @@
+import { Exception } from "../../infrastructure/exception";
 import { TrackAttachment } from "../../infrastructure/track-attachment";
 
 export class TrackAttachmentsModalModel {
@@ -7,7 +8,7 @@ export class TrackAttachmentsModalModel {
     public removeAttachment(attachment: TrackAttachment): void {
         const index = this.attachments.indexOf(attachment);
         if (index === -1) {
-            return;
+            throw new Exception("Attachment not found.");
         }
 
         this.attachments.splice(index, 1);

@@ -1,4 +1,3 @@
-import { DatabindablePromise } from "../databindable-promise";
 import { ILocalizationService } from "./ilocalization-service";
 import { Injectable } from "@angular/core";
 import { Platform } from "ionic-angular";
@@ -12,7 +11,14 @@ export class LocalizationService implements ILocalizationService {
     private language = "de-de";
 
     public constructor(private platform: Platform, private globalization: Globalization) {
-        this.platform.ready().then(() => this.globalization.getPreferredLanguage().then(_ => this.language = _.value));
+        this.initialize();
+    }
+
+    private async initialize(): Promise<void> {
+        await this.platform.ready();
+
+        const _ = await this.globalization.getPreferredLanguage();
+        this.language = _.value;
     }
 
     public newWithContext(lookup: any): ILocalizationService {
@@ -22,24 +28,24 @@ export class LocalizationService implements ILocalizationService {
         return result;
     }
 
-    public localize(key: string): Promise<string> {
-        return this.platform.ready().then(() => {
-            const keyPair = this.lookup[key];
-            if (!keyPair) {
-                throw new Exception(`Key '${key}' not found.`);
-            }
+    public async localize(key: string): Promise<string> {
+        await this.platform.ready();
 
-            let value = keyPair[this.language];
+        const keyPair = this.lookup[key];
+        if (!keyPair) {
+            throw new Exception(`Key '${key}' not found.`);
+        }
+
+        let value = keyPair[this.language];
+        if (!value) {
+            console.warn(`Language '${this.language}' not found on key '${key}'.`);
+
+            value = keyPair[this.ultimateFallbackLanguage];
             if (!value) {
-                console.warn(`Language '${this.language}' not found on key '${key}'.`);
-
-                value = keyPair[this.ultimateFallbackLanguage];
-                if (!value) {
-                    throw new Exception(`Fallback language '${this.language}' not found on key '${key}'.`);
-                }
+                throw new Exception(`Fallback language '${this.language}' not found on key '${key}'.`);
             }
+        }
 
-            return value;
-        });
+        return value;
     }
 }

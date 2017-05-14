@@ -11,9 +11,14 @@ export class MyApp {
   // tslint:disable-next-line:no-unused-variable Used inside template.
   private root = TrackRecorderPageComponent;
 
-  public constructor(platform: Platform,
-    statusBar: StatusBar,
-    splashScreen: SplashScreen) {
-    platform.ready().then(() => statusBar.styleDefault()).then(() => splashScreen.hide());
+  public constructor(private platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+    this.initialize();
+  }
+
+  private async initialize(): Promise<void> {
+    await this.platform.ready();
+
+    this.statusBar.styleDefault();
+    this.splashScreen.hide();
   }
 }

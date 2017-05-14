@@ -1,3 +1,4 @@
+import { Exception } from "../exception";
 import { Injectable } from "@angular/core";
 import { TrackRecording } from "../track-recording";
 import { ITrackUploader } from "./itrack-uploader";
@@ -10,13 +11,13 @@ export class MockedTrackUploader implements ITrackUploader {
         console.warn("Using MockedTrackUploader for ITrackUploader");
     }
 
-    public uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
+    public async uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
         console.log("MockedTrackUploader: Track uploaded");
 
         if (this.willFailUpload) {
-            return Promise.reject(null);
+            throw new Exception("MockedTrackUploader: Track upload failed");
         }
 
-        return Promise.resolve(new Date());
+        return new Date();
     }
 }

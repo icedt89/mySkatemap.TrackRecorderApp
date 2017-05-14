@@ -1,3 +1,5 @@
+import { MockedLocalizationService } from "../infrastructure/localization/mocked-localization-service";
+import { LocalizationService } from "../infrastructure/localization/localization-service";
 import { DatabindableAsyncPipe } from "../infrastructure/databindable-async.pipe";
 import { TrackRecorderPageModule } from "../pages/track-recorder/track-recorder-page.module";
 import { HttpModule } from "@angular/http";
@@ -9,7 +11,6 @@ import { IonicStorageModule } from "@ionic/storage";
 import { MyApp } from "./app.component";
 import { SplashScreen } from "@ionic-native/splash-screen";
 import { StatusBar } from "@ionic-native/status-bar";
-// import { DependencyConfiguration } from "../infrastructure/dependency-configuration";
 
 @NgModule({
   imports: [
@@ -34,11 +35,12 @@ import { StatusBar } from "@ionic-native/status-bar";
     {
       provide: ErrorHandler,
       useClass: IonicErrorHandler
-    }/*,
+    },
     {
       provide: "LocalizationService",
-      useClass: DependencyConfiguration.useLocalizationService
-    }*/
+      // useClass: MockedLocalizationService
+      useClass: LocalizationService
+    }
   ]
 })
 export class AppModule { }

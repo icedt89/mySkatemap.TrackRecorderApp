@@ -1,3 +1,4 @@
+import { Exception } from "../../infrastructure/exception";
 import {
     AnimateCameraOptions,
     CameraPosition,
@@ -29,7 +30,9 @@ export class MapComponent {
 
     public constructor(platform: Platform,
         viewController: ViewController) {
-        viewController.willEnter.subscribe(() => platform.ready().then(() => {
+        viewController.willEnter.subscribe(async () => {
+            await platform.ready();
+
             const initialMapCenter = new LatLng(50.8333, 12.9167);
             const initialMapZoom = 13;
 
@@ -51,56 +54,54 @@ export class MapComponent {
 
                 this.mapReadyResolve();
             });
-        }));
+        });
 
         viewController.didLeave.subscribe(() => this.googleMap.remove());
     }
 
-    public setTrack(positions: LatLng[]): Promise<void> {
-        return this._mapReady.then(() => {
-            if (!this.track) {
-                this.track = <Polyline>{};
-                const trackOptions = <PolylineOptions>{
-                    visible: true,
-                    geodesic: true,
-                    color: "#FF0000",
-                    points: positions
-                };
+    public async setTrack(positions: LatLng[]): Promise<void> {
+        await this._mapReady;
 
-                return this.googleMap.addPolyline(trackOptions)
-                    .then((polyline: Polyline) => {
-                        this.track = polyline;
-                    });
-            }
+        if (!this.track) {
+            this.track = <Polyline>{};
+            const trackOptions = <PolylineOptions>{
+                visible: true,
+                geodesic: true,
+                color: "#FF0000",
+                points: positions
+            };
 
-            this.track.setPoints(positions);
-        });
+            const polyline = await this.googleMap.addPolyline(trackOptions);
+            this.track = polyline;
+        }
+
+        this.track.setPoints(positions);
     }
 
-    public resetTrack(): Promise<void> {
-        return this._mapReady.then(() => {
-            this.googleMap.clear();
+    public async resetTrack(): Promise<void> {
+        await this._mapReady;
 
-            if (this.track) {
-                this.track.remove();
-            }
+        this.googleMap.clear();
 
-            this.track = null;
-        });
+        if (this.track) {
+            this.track.remove();
+        }
+
+        this.track = null;
     }
 
-    public panToTrack(): Promise<void> {
-        return this._mapReady.then(() => {
-            if (!this.track) {
-                return;
-            }
+    public async panToTrack(): Promise<void> {
+        await this._mapReady;
 
-            const bounds = new LatLngBounds([]);
-            this.track.getPoints().forEach((item: LatLng) => bounds.extend(item));
+        if (!this.track) {
+            throw new Exception("No track set.");
+        }
 
-            return this.googleMap.animateCamera(<AnimateCameraOptions>{
-                target: bounds
-            });
+        const bounds = new LatLngBounds([]);
+        this.track.getPoints().forEach((item: LatLng) => bounds.extend(item));
+
+        this.googleMap.animateCamera(<AnimateCameraOptions>{
+            target: bounds
         });
     }
 }

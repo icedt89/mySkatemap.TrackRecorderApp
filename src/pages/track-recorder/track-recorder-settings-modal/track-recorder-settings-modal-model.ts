@@ -1,4 +1,4 @@
-import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
+import { TrackRecorderSettings } from "../../../infrastructure/track-recorder/track-recorder-settings";
 
 export class TrackRecorderSettingsModalModel {
     private _desiredAccuracy: string;
