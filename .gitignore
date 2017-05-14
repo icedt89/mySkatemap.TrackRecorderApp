@@ -11,14 +11,15 @@ log.txt
 *.sublime-workspace
 .vscode/
 npm-debug.log*
+src/**/*.js.map
 src/app/**/*.js
-src/app/**/*.js.map
 src/components/**/*.js
-src/components/**/*.js.map
 src/pages/**/*.js
-src/pages/**/*.js.map
 src/infrastructure/**/*.js
-src/infrastructure/**/*.js.map
+platforms/
+plugins/
+plugins/android.json
+plugins/ios.json
 !.vscode
 
 .idea/
@@ -31,10 +32,6 @@ node_modules/
 tmp/
 temp/
 hooks/
-platforms/
-plugins/
-plugins/android.json
-plugins/ios.json
 www/
 $RECYCLE.BIN/
 
