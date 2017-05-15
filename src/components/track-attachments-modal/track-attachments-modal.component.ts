@@ -47,7 +47,7 @@ export class TrackAttachmentsModalComponent {
             const trackAttachment = new TrackAttachment(result.dataUrl);
             trackAttachment.comment = new Date().toLocaleString();
 
-            this.model.attachments.push(trackAttachment);
+            this.model.addAttachment(trackAttachment);
         }
     }
 }

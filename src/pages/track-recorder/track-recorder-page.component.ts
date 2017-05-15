@@ -74,9 +74,9 @@ export class TrackRecorderPageComponent {
         private trackRecordingStore: TrackRecordingStore,
         private storage: Storage,
         events: Events) {
-        archivedTrackRecordingStore.tracksChanged.subscribe(recordings => this._archivedTrackRecordings = recordings);
-        trackRecordingStore.tracksChanged.subscribe(recordings => this._trackRecordings = recordings);
-        events.subscribe("track-attachments-changed", async (attachments: TrackAttachment[]) => {
+        archivedTrackRecordingStore.tracksChanged.subscribe(recordings => this._archivedTrackRecordings = recordings.sort((a, b) => <any>b.trackingStartedAt - <any>a.trackingStartedAt));
+        trackRecordingStore.tracksChanged.subscribe(recordings => this._trackRecordings = recordings.sort((a, b) => <any>b.trackingStartedAt - <any>a.trackingStartedAt));
+        events.subscribe("current-track-recording-attachments-changed", async (attachments: TrackAttachment[]) => {
             if (!this._currentTrackRecording) {
                 throw new Exception("No current track recording.");
             }
@@ -94,11 +94,11 @@ export class TrackRecorderPageComponent {
             });
             attachmentsSavedToast.present();
         });
-        events.subscribe("track-recording-deleted", async () => {
+        events.subscribe("current-track-recording-discarded", async () => {
             await this.resetView();
 
             const allRecordingsDeletedToast = this.toastController.create(<ToastOptions>{
-                message: "Strecke gelöscht",
+                message: "Strecke verworfen",
                 duration: 3000,
                 position: "bottom",
                 showCloseButton: true,
@@ -106,7 +106,7 @@ export class TrackRecorderPageComponent {
             });
             allRecordingsDeletedToast.present();
         });
-        events.subscribe("track-recording-finished", async () => {
+        events.subscribe("current-track-recording-finished", async () => {
             await this.resetView();
 
             const archivingSuccessfulToast = this.toastController.create(<ToastOptions>{
@@ -117,13 +117,15 @@ export class TrackRecorderPageComponent {
                 closeButtonText: "Ok"
             });
             archivingSuccessfulToast.present();
+
+            this.menuController.open();
         });
         viewController.willEnter.subscribe(async () => {
             this.mapComponentAccessor.bindMapComponent(this.map);
 
             await Promise.all([
-                this.archivedTrackRecordingStore.getTracks().then(_ => this._archivedTrackRecordings = _),
-                this.trackRecordingStore.getTracks().then(_ => this._trackRecordings = _)
+                this.archivedTrackRecordingStore.getTracks().then(_ => this._archivedTrackRecordings = _.sort((a, b) => <any>b.trackingStartedAt - <any>a.trackingStartedAt)),
+                this.trackRecordingStore.getTracks().then(_ => this._trackRecordings = _.sort((a, b) => <any>b.trackingStartedAt - <any>a.trackingStartedAt))
             ]);
 
             const settings = await this.loadTrackRecorderSettings();

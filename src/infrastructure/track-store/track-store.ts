@@ -17,13 +17,11 @@ export abstract class TrackStore<TTrack> {
         await this.storage.ready();
 
         const trackRecordingIndex = this.tracks.indexOf(track);
-        if (trackRecordingIndex > -1) {
-            this.tracks[trackRecordingIndex] = track;
-        } else {
+        if (trackRecordingIndex === -1) {
             this.tracks.push(track);
-        }
 
-        await this.saveStore();
+            await this.saveStore();
+        }
     }
 
     public async deleteStoredTrack(track: TTrack): Promise<void> {

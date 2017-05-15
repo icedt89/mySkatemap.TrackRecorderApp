@@ -2,6 +2,10 @@ import { TrackAttachment } from "./track-attachment";
 import { BackgroundGeolocationResponse } from "../declarations";
 
 export class TrackRecording {
+   /* public static orderByTrackingStartedAtDesc = (a: TrackRecording, b: TrackRecording) => {
+        return a._trackingStartedAt    - b._trackingStartedAt
+    };
+*/
     public static fromLike(trackRecordingLike: TrackRecording): TrackRecording {
         const result = <TrackRecording>Object.assign(new TrackRecording(), trackRecordingLike);
         result._trackAttachments = trackRecordingLike._trackAttachments.map(_ => TrackAttachment.fromLike(_));
@@ -11,6 +15,7 @@ export class TrackRecording {
 
     private _trackName: string;
     private _trackingStartedAt: Date;
+    private _trackingFinishedAt: Date;
     private _trackedPositions: BackgroundGeolocationResponse[] = [];
     private _trackAttachments: TrackAttachment[] = [];
 
@@ -20,6 +25,14 @@ export class TrackRecording {
 
     public set trackName(value: string) {
         this._trackName = value;
+    }
+
+    public get trackingFinishedAt(): Date {
+        return this._trackingFinishedAt;
+    }
+
+    public set trackingFinishedAt(value: Date) {
+        this._trackingFinishedAt = value;
     }
 
     public get trackingStartedAt(): Date {

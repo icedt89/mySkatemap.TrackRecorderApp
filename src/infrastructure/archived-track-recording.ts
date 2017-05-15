@@ -13,6 +13,7 @@ export class ArchivedTrackRecording {
         result._numberOfUploadedAttachments = trackRecording.trackAttachments.length;
         result._trackedPositions = trackRecording.trackedPositions.map(position => new LatLng(position.latitude, position.longitude));
         result._trackingStartedAt = trackRecording.trackingStartedAt;
+        result._trackingFinishedAt = trackRecording.trackingFinishedAt;
         result._trackUploadedAt = trackUploadedAt;
 
         return result;
@@ -20,6 +21,7 @@ export class ArchivedTrackRecording {
 
     private _trackName: string;
     private _trackingStartedAt: Date;
+    private _trackingFinishedAt: Date;
     private _trackedPositions: LatLng[] = [];
     private _trackUploadedAt: Date;
     private _numberOfUploadedAttachments: number;
@@ -30,6 +32,10 @@ export class ArchivedTrackRecording {
 
     public get trackingStartedAt(): Date {
         return this._trackingStartedAt;
+    }
+
+    public get trackingFinishedAt(): Date {
+        return this._trackingFinishedAt;
     }
 
     public get trackUploadedAt(): Date {

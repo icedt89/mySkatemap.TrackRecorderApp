@@ -43,8 +43,8 @@ import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-
         },
         {
             provide: "MapComponentAccessor",
-            // useClass: MockedMapComponentAccessor
-            useClass: MapComponentAccessor
+            useClass: MockedMapComponentAccessor
+            // useClass: MapComponentAccessor
         }]
 })
 export class TrackRecorderPageModule { }

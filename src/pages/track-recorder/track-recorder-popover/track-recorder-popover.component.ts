@@ -34,49 +34,58 @@ export class TrackRecorderPopoverComponent {
         private trackRecordingStore: TrackRecordingStore,
         private events: Events) {
         this.model = navigationParameters.get("model");
+
+        if (!this.model) {
+            throw new Exception("No model supplied.");
+        }
     }
 
-    private get canDeleteTrackRecording(): boolean {
+    private get canDiscardCurrentTrackRecording(): boolean {
         return this.model.isPaused && !!this.model.trackRecording;
     }
 
-    private get canShowTrackAttachments(): boolean {
+    private get canShowCurrentTrackRecordingAttachments(): boolean {
         return this.model.isPaused && !!this.model.trackRecording;
     }
 
-    private get canFinishTrackRecording(): boolean {
+    private get canFinishCurrentTrackRecording(): boolean {
         return this.model.isPaused && !!this.model.trackRecording && this.model.trackRecording.trackedPositions.length > 1;
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private async showTrackAttachments(): Promise<void> {
-        // Close popover (makes back button working again Oo, too)
-        this.viewController.dismiss();
-
+    private async showCurrentTrackRecordingAttachments(): Promise<void> {
         if (!this.model.trackRecording) {
             throw new Exception("No current track recording.");
         }
 
-        const trackAttachmentsModal = this.modalController.create(TrackAttachmentsModalComponent, {
+        const showCurrentTrackRecordingAttachmentsModal = this.modalController.create(TrackAttachmentsModalComponent, {
             model: new TrackAttachmentsModalModel(this.model.trackRecording.trackAttachments.map(_ => _))
         });
 
-        trackAttachmentsModal.onDidDismiss((data: { model: TrackAttachmentsModalModel } | null) => {
+        showCurrentTrackRecordingAttachmentsModal.onDidDismiss((data: { model: TrackAttachmentsModalModel } | null) => {
             if (!data) {
                 // Modal was not successfully dismissed (user, used back button...).
                 return;
             }
 
-            this.events.publish("track-attachments-changed", data.model.attachments);
+            if (data.model.attachmentsChanged) {
+                this.events.publish("current-track-recording-attachments-changed", data.model.attachments);
+            }
         });
-        trackAttachmentsModal.present();
+        showCurrentTrackRecordingAttachmentsModal.present();
+        // Close popover (makes back button working again Oo, too)
+        this.viewController.dismiss();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private deleteTrackRecording(): void {
-        const deleteRecordingPrompt = this.alertController.create(<AlertOptions>{
-            title: "Strecke löschen",
-            message: "Möchten Sie die aufgezeichnete Strecke wirklich löschen?",
+    private discardCurrentTrackRecording(): void {
+        if (!this.model.trackRecording) {
+            throw new Exception("No current track recording.");
+        }
+
+        const discardCurrentRecordingPrompt = this.alertController.create(<AlertOptions>{
+            title: "Strecke verwerfen",
+            message: "Möchten Sie die aufgezeichnete Strecke wirklich verwerfen?",
             enableBackdropDismiss: true,
             buttons: [
                 {
@@ -88,23 +97,23 @@ export class TrackRecorderPopoverComponent {
                     handler: async () => {
                         await this.trackRecorder.deleteAllRecordings();
 
-                        this.events.publish("track-recording-deleted");
+                        this.events.publish("current-track-recording-discarded");
                     }
                 }
             ]
         });
+        discardCurrentRecordingPrompt.present();
         // Close popover (makes back button working again Oo, too)
-        deleteRecordingPrompt.present();
         this.viewController.dismiss();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
-    private finishTrackRecording(): void {
+    private finishCurrentTrackRecording(): void {
         if (!this.model.trackRecording) {
             throw new Exception("No current track recording.");
         }
 
-        const archiveRecordingPrompt = this.alertController.create(<AlertOptions>{
+        const finishCurrentRecordingPrompt = this.alertController.create(<AlertOptions>{
             title: "Strecke abschließen",
             message: "Die Strecke kann dann nur noch hochgeladen werden.",
             enableBackdropDismiss: true,
@@ -116,15 +125,17 @@ export class TrackRecorderPopoverComponent {
                 {
                     text: "Ja",
                     handler: async () => {
+                        this.model.trackRecording.trackingFinishedAt = new Date();
+
                         await this.trackRecordingStore.storeTrack(this.model.trackRecording);
 
-                        this.events.publish("track-recording-finished");
+                        this.events.publish("current-track-recording-finished");
                     }
                 }
             ]
         });
+        finishCurrentRecordingPrompt.present();
         // Close popover (makes back button working again Oo, too)
-        archiveRecordingPrompt.present();
         this.viewController.dismiss();
     }
 }
