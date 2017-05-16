@@ -24,7 +24,6 @@
         "@angular/platform-server": "^4.1.2",
         "@ionic-native/camera": "^3.8.1",
         "@ionic-native/core": "^3.8.1",
-        "@ionic-native/globalization": "^3.8.1",
         "@ionic-native/google-maps": "^3.8.1",
         "@ionic-native/splash-screen": "^3.8.1",
         "@ionic-native/status-bar": "^3.8.1",
@@ -51,8 +50,7 @@
         "ionic-plugin-keyboard",
         "cordova-plugin-mauron85-background-geolocation",
         "cordova-plugin-camera",
-        "cordova-plugin-googlemaps",
-        "cordova-plugin-globalization"
+        "cordova-plugin-googlemaps"
     ],
     "cordovaPlatforms": [
         "android"

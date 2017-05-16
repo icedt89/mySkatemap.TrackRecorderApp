@@ -1,3 +1,9 @@
+import {
+    ShowSavedTrackRecordingModalModel
+} from "./show-saved-track-recording-modal/show-saved-track-recording-modal-model";
+import {
+    ShowSavedTrackRecordingModalComponent
+} from "./show-saved-track-recording-modal/show-saved-track-recording-modal.component";
 import { MockedTrackUploader } from "../../infrastructure/track-uploader/mocked-track-uploader";
 import { MockedMapComponentAccessor } from "../../components/map/mocked-map-component-accessor";
 import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-track-recorder";
@@ -367,6 +373,16 @@ export class TrackRecorderPageComponent {
         popover.present(<NavOptions>{
             ev: event
         });
+    }
+
+     // tslint:disable-next-line:no-unused-variable Used inside template.
+    private showSavedTrackRecording(trackRecording: ArchivedTrackRecording | TrackRecording): void {
+        this.menuController.close();
+
+        const showSavedTrackRecordingModal = this.modalController.create(ShowSavedTrackRecordingModalComponent, {
+            model: new ShowSavedTrackRecordingModalModel(trackRecording)
+        });
+        showSavedTrackRecordingModal.present();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.

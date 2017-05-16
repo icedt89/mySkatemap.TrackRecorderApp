@@ -3,7 +3,6 @@ import { LocalizationService } from "../infrastructure/localization/localization
 import { DatabindableAsyncPipe } from "../infrastructure/databindable-async.pipe";
 import { TrackRecorderPageModule } from "../pages/track-recorder/track-recorder-page.module";
 import { HttpModule } from "@angular/http";
-import { Globalization } from "@ionic-native/globalization";
 import { BrowserModule } from "@angular/platform-browser";
 import { ErrorHandler, NgModule } from "@angular/core";
 import { IonicApp, IonicErrorHandler, IonicModule } from "ionic-angular";
@@ -30,7 +29,7 @@ import { StatusBar } from "@ionic-native/status-bar";
   ],
   providers: [
     StatusBar,
-    Globalization,
+    // Globalization,
     SplashScreen,
     {
       provide: ErrorHandler,
@@ -38,8 +37,8 @@ import { StatusBar } from "@ionic-native/status-bar";
     },
     {
       provide: "LocalizationService",
-      // useClass: MockedLocalizationService
-      useClass: LocalizationService
+      useClass: MockedLocalizationService
+      // useClass: LocalizationService
     }
   ]
 })

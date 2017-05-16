@@ -1,7 +1,7 @@
 import { ILocalizationService } from "./ilocalization-service";
 import { Injectable } from "@angular/core";
 import { Platform } from "ionic-angular";
-import { Globalization } from "@ionic-native/globalization";
+// import { Globalization } from "@ionic-native/globalization";
 import { Exception } from "../exception";
 
 @Injectable()
@@ -10,7 +10,7 @@ export class LocalizationService implements ILocalizationService {
     private lookup: any;
     private language = "de-de";
 
-    public constructor(private platform: Platform, private globalization: Globalization) {
+    public constructor(private platform: Platform, private globalization: any/*Globalization*/) {
         this.initialize();
     }
 

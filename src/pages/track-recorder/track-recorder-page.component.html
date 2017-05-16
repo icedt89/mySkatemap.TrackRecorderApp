@@ -18,7 +18,7 @@
             <ion-list-header>
                 Bereit zum hochladen
             </ion-list-header>
-            <button ion-item *ngFor="let trackRecording of trackRecordings">
+            <button (click)="showSavedTrackRecording(trackRecording)" ion-item *ngFor="let trackRecording of trackRecordings">
                 {{trackRecording.trackName}}
                 <button clear ion-button icon-only item-right (click)="deleteTrackRecording(trackRecording)">
                     <ion-icon name="trash"></ion-icon>
@@ -32,7 +32,7 @@
             <ion-list-header>
                 Verlauf
             </ion-list-header>
-            <button ion-item *ngFor="let archivedTrackRecording of archivedTrackRecordings">
+            <button (click)="showSavedTrackRecording(archivedTrackRecording)" ion-item *ngFor="let archivedTrackRecording of archivedTrackRecordings">
                 {{archivedTrackRecording.trackName}}
                 <button clear ion-button icon-only item-right (click)="deleteArchivedTrackRecording(archivedTrackRecording)">
                     <ion-icon name="trash"></ion-icon>

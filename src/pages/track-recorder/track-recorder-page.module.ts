@@ -1,3 +1,6 @@
+import {
+    ShowSavedTrackRecordingModalModule
+} from "./show-saved-track-recording-modal/show-saved-track-recording-modal.module";
 import { MapComponentAccessor } from "../../components/map/map-component-accessor";
 import { MockedMapComponentAccessor } from "../../components/map/mocked-map-component-accessor";
 import { TrackRecorder } from "../../infrastructure/track-recorder/track-recorder";
@@ -19,6 +22,7 @@ import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-
         TrackRecorderSettingsModalModule,
         TrackAttachmentsModalModule,
         TrackRecorderPopoverModule,
+        ShowSavedTrackRecordingModalModule,
         MapModule,
         IonicModule
     ],
@@ -43,8 +47,8 @@ import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-
         },
         {
             provide: "MapComponentAccessor",
-            useClass: MockedMapComponentAccessor
-            // useClass: MapComponentAccessor
+            // useClass: MockedMapComponentAccessor
+            useClass: MapComponentAccessor
         }]
 })
 export class TrackRecorderPageModule { }
