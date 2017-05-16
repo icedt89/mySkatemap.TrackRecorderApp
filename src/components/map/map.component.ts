@@ -38,22 +38,23 @@ export class MapComponent {
 
             this.googleMaps = new GoogleMaps();
             this.googleMap = this.googleMaps.create(this.mapElement.nativeElement);
-            this.googleMap.on(GoogleMapsEvent.MAP_READY).subscribe(() => {
-                this.googleMap.setAllGesturesEnabled(false);
-                this.googleMap.setClickable(false);
-                this.googleMap.setCompassEnabled(false);
-                this.googleMap.setIndoorEnabled(false);
-                this.googleMap.setMyLocationEnabled(false);
-                this.googleMap.setTrafficEnabled(false);
-                this.googleMap.setZoom(initialMapZoom);
-                this.googleMap.setCenter(initialMapCenter);
-                this.googleMap.moveCamera(<CameraPosition>{
-                    zoom: initialMapZoom,
-                    target: initialMapCenter
-                });
 
-                this.mapReadyResolve();
+            await this.googleMap.one(GoogleMapsEvent.MAP_READY);
+
+            this.googleMap.setAllGesturesEnabled(false);
+            this.googleMap.setClickable(false);
+            this.googleMap.setCompassEnabled(false);
+            this.googleMap.setIndoorEnabled(false);
+            this.googleMap.setMyLocationEnabled(false);
+            this.googleMap.setTrafficEnabled(false);
+            this.googleMap.setZoom(initialMapZoom);
+            this.googleMap.setCenter(initialMapCenter);
+            this.googleMap.moveCamera(<CameraPosition>{
+                zoom: initialMapZoom,
+                target: initialMapCenter
             });
+
+            this.mapReadyResolve();
         });
 
         viewController.didLeave.subscribe(() => this.googleMap.remove());
