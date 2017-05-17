@@ -10,7 +10,7 @@ export class ShowSavedTrackRecordingModalModel {
     private _trackedPositions: LatLng[] = [];
     private _trackUploadedAt: Date | null;
     private _numberOfAttachments = 0;
-    private _attachments: string | null;
+    private _attachments: TrackAttachment[] | null;
 
     public constructor(trackRecording: ArchivedTrackRecording | TrackRecording) {
         this._trackName = trackRecording.trackName;
@@ -22,8 +22,8 @@ export class ShowSavedTrackRecordingModalModel {
             this._numberOfAttachments = trackRecording.numberOfUploadedAttachments;
             this._trackUploadedAt = trackRecording.trackUploadedAt;
         } else {
-            this._attachments = trackRecording.trackAttachments.map(_ => _.comment).join("; ");
-            this._numberOfAttachments = (this._attachments || []).length;
+            this._attachments = trackRecording.trackAttachments;
+            this._numberOfAttachments = this._attachments.length;
             this._trackedPositions = trackRecording.trackedPositions.map(_ => new LatLng(_.latitude, _.longitude));
         }
     }
@@ -48,7 +48,7 @@ export class ShowSavedTrackRecordingModalModel {
         return this._trackUploadedAt;
     }
 
-    public get attachments(): string | null {
+    public get attachments(): TrackAttachment[] | null {
         return this._attachments;
     }
 

@@ -20,14 +20,14 @@
             </ion-thumbnail>
             <ion-label stacked>Hinzugefügt am</ion-label>
             <ion-input disabled [value]="trackAttachment.comment" type="text"></ion-input>
-            <button color="danger" ion-button clear item-right icon-only (click)="model.removeAttachment(trackAttachment)">
+            <button *ngIf="!model.isReadonly" color="danger" ion-button clear item-right icon-only (click)="model.removeAttachment(trackAttachment)">
                 <ion-icon name="trash"></ion-icon>
             </button>
         </ion-item>
     </ion-list>
 </ion-content>
 
-<ion-fab bottom right>
+<ion-fab bottom right *ngIf="!model.isReadonly">
     <button ion-fab>
        <ion-icon name="add"></ion-icon>
     </button>

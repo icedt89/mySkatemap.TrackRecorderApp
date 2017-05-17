@@ -5,7 +5,7 @@ import { ITrackUploader } from "./itrack-uploader";
 
 @Injectable()
 export class MockedTrackUploader implements ITrackUploader {
-    private willFailUpload = true;
+    private willFailUpload = false;
 
     public constructor() {
         console.warn("Using MockedTrackUploader for ITrackUploader");

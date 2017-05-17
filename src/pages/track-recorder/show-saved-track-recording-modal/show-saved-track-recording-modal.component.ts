@@ -1,7 +1,12 @@
+import { Exception } from '../../../infrastructure/exception';
+import { TrackAttachmentsModalModel } from "../../../components/track-attachments-modal/track-attachments-modal-model";
+import {
+    TrackAttachmentsModalComponent
+} from "../../../components/track-attachments-modal/track-attachments-modal.component";
 import { ViewChild } from "@angular/core";
 import { MapComponent } from "../../../components/map/map.component";
 import { ShowSavedTrackRecordingModalModel } from "./show-saved-track-recording-modal-model";
-import { NavParams, ViewController } from "ionic-angular";
+import { ModalController, NavParams, ViewController } from "ionic-angular";
 import { Component } from "@angular/core";
 
 @Component({
@@ -10,14 +15,20 @@ import { Component } from "@angular/core";
 export class ShowSavedTrackRecordingModalComponent {
     private model: ShowSavedTrackRecordingModalModel;
 
-    @ViewChild("map") private map: MapComponent;
-
-    public constructor(viewController: ViewController, navigationParameters: NavParams) {
+    public constructor(viewController: ViewController, navigationParameters: NavParams, private modalController: ModalController) {
         this.model = navigationParameters.get("model");
+    }
 
-        viewController.willEnter.subscribe(async () => {
-            await this.map.setTrack(this.model.trackedPositions);
-            await this.map.panToTrack();
+    // tslint:disable-next-line:no-unused-variable Used inside template.
+    private showTrackRecordingAttachments(): void {
+        if (!this.model.attachments || !this.model.attachments.length) {
+            throw new Exception("No attachments to display.")
+        }
+
+        const showCurrentTrackRecordingAttachmentsModal = this.modalController.create(TrackAttachmentsModalComponent, {
+            model: new TrackAttachmentsModalModel(this.model.attachments.map(_ => _), true)
         });
+
+        showCurrentTrackRecordingAttachmentsModal.present();
     }
 }

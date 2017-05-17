@@ -11,22 +11,25 @@
             </ion-list-header>
             <button [disabled]="!isPaused" ion-item (click)="showTrackRecorderSettings()">
                 Aufnahmeeinstellungen
-                <ion-icon small item-right name="arrow-forward"></ion-icon>
+                <ion-icon item-right name="arrow-forward"></ion-icon>
             </button>
         </ion-list>
         <ion-list *ngIf="trackRecordings.length">
             <ion-list-header>
                 Bereit zum hochladen
             </ion-list-header>
-            <button (click)="showSavedTrackRecording(trackRecording)" ion-item *ngFor="let trackRecording of trackRecordings">
+            <div ion-item *ngFor="let trackRecording of trackRecordings">
                 {{trackRecording.trackName}}
                 <button clear ion-button icon-only item-right (click)="deleteTrackRecording(trackRecording)">
                     <ion-icon name="trash"></ion-icon>
                 </button>
-            <button clear ion-button icon-only item-right (click)="uploadTrackRecording(trackRecording)">
+                <button clear ion-button icon-only item-right (click)="uploadTrackRecording(trackRecording)">
                     <ion-icon name="cloud-upload"></ion-icon>                
                 </button>
-            </button>
+                <button clear ion-button icon-only item-right (click)="showSavedTrackRecording(trackRecording)">
+                    <ion-icon name="arrow-forward"></ion-icon>                
+                </button>
+            </div>
         </ion-list>
         <ion-list *ngIf="archivedTrackRecordings.length">
             <ion-list-header>

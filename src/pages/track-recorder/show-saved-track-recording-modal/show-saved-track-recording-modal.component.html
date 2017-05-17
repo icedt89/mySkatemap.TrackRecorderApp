@@ -20,19 +20,17 @@
         <ion-input disabled [value]="model.trackUploadedAt ? model.trackUploadedAt.toLocaleString('de-de') : 'Noch nicht hochgeladen'" type="text"></ion-input>
     </ion-item>
 
-    <div *ngIf="!model._trackUploadedAt">
+    <div *ngIf="!model.trackUploadedAt">
         <ion-item>
             <ion-label stacked>Anhänge ({{model.numberOfAttachments}})</ion-label>
-            <ion-input disabled [value]="model.attachments ? model.attachments : 'Keine Anhänge hinzugefügt'" type="text"></ion-input>
+            <ion-input (click)="showTrackRecordingAttachments()" disabled [value]="model.attachments ? 'Anhänge anzeigen' : 'Keine Anhänge hinzugefügt'" type="text"></ion-input>
         </ion-item>
     </div>
 
-    <div *ngIf="model._trackUploadedAt">
+    <div *ngIf="model.trackUploadedAt">
         <ion-item>
             <ion-label stacked>Anhänge ({{model.numberOfAttachments}})</ion-label>
             <ion-input disabled [value]="'Hochgeladene Anhänge wurden gelöscht'" type="text"></ion-input>
         </ion-item>
     </div>
-
-    <map #map></map>
 </ion-content>
