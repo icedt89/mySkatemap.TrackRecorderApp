@@ -12,7 +12,7 @@ export class TrackUploader implements ITrackUploader {
 
     public async uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
         const trackUploadedAt = new Date();
-        const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, trackUploadedAt);
+        const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, trackRecording.trackingFinishedAt, trackUploadedAt);
 
         createdRecordedTrackModel.TrackAttachments = trackRecording.trackAttachments
             .map(trackAttachment => <string>trackAttachment.imageDataUrl)
@@ -37,15 +37,18 @@ export class TrackUploader implements ITrackUploader {
 }
 
 class CreateRecordedTrackModel {
-    public constructor(trackName: string, trackingStartedAt: Date, uploadStartedAt: Date) {
+    public constructor(trackName: string, trackingStartedAt: Date, trackingFinishedAt: Date, trackUploadedAt: Date) {
         this.TrackName = trackName;
+        this.TrackingFinishedAt = trackingFinishedAt.toISOString();
         this.TrackingStartedAt = trackingStartedAt.toISOString();
-        this.UploadStartedAt = uploadStartedAt.toISOString();
+        this.TrackUploadedAt = trackUploadedAt.toISOString();
     }
 
     public TrackingStartedAt: string;
 
-    public UploadStartedAt: string;
+    public TrackingFinishedAt: string;
+
+    public TrackUploadedAt: string;
 
     public TrackName: string;
 
