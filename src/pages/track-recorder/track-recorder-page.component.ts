@@ -322,38 +322,10 @@ export class TrackRecorderPageComponent {
             this._currentTrackRecording.trackedPositions = positions;
 
             const trackedPath = positions.map(position => new LatLng(position.latitude, position.longitude));
-            const computedTrackLength = Haversine.computeDistance(trackedPath);
-
-            const usefulTrackLength = Length.convertToMoreUsefulUnit(computedTrackLength);
-            const lengthUnitText = LengthUnitHelper.getUnitTextFromUnit(usefulTrackLength.lengthUnit);
-            switch (usefulTrackLength.lengthUnit) {
-                case LengthUnit.Kilometers:
-                    this._approximateTrackLength = `${(+usefulTrackLength.usefulUnit.toFixed(3)).toLocaleString("de")} ${lengthUnitText}`;
-                    break;
-                case LengthUnit.Meters:
-                    this._approximateTrackLength = `${(+usefulTrackLength.usefulUnit.toFixed(1)).toLocaleString("de")} ${lengthUnitText}`;
-                    break;
-            }
+            this._approximateTrackLength = LengthUnitHelper.formatTrackLength(trackedPath);
 
             await Promise.all([this.savePageState(), this.saveCurrentTrackRecording(), this.setTrackedPathOnMap(trackedPath)]);
         }
-    }
-
-    // tslint:disable-next-line:no-unused-variable Used inside template.
-    private showTrackedPositionsInfo(): void {
-        if (!this._currentTrackRecording || this._currentTrackRecording.trackedPositions.length < 2) {
-            // No useful data available to display.
-            return;
-        }
-
-        const trackedPositionsInfoAlert = this.toastController.create(<ToastOptions>{
-            message: `Basierend auf ${this._currentTrackRecording.trackedPositions.length} Positionen`,
-            duration: 3000,
-            position: "middle",
-            closeButtonText: "Ok",
-            showCloseButton: true
-        });
-        trackedPositionsInfoAlert.present();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.

@@ -1,3 +1,4 @@
+import { LengthUnitHelper } from "../../../infrastructure/lenght-unit-helper";
 import { TrackRecording } from "../../../infrastructure/track-recording";
 import { ArchivedTrackRecording } from "../../../infrastructure/archived-track-recording";
 import { TrackAttachment } from "../../../infrastructure/track-attachment";
@@ -11,6 +12,7 @@ export class ShowSavedTrackRecordingModalModel {
     private _trackUploadedAt: Date | null;
     private _numberOfAttachments = 0;
     private _attachments: TrackAttachment[] | null;
+    private _trackLength: string;
 
     public constructor(trackRecording: ArchivedTrackRecording | TrackRecording) {
         this._trackName = trackRecording.trackName;
@@ -26,6 +28,8 @@ export class ShowSavedTrackRecordingModalModel {
             this._numberOfAttachments = this._attachments.length;
             this._trackedPositions = trackRecording.trackedPositions.map(_ => new LatLng(_.latitude, _.longitude));
         }
+
+        this._trackLength = LengthUnitHelper.formatTrackLength(this._trackedPositions);
     }
 
     public get trackedPositions(): LatLng[] {
@@ -54,5 +58,9 @@ export class ShowSavedTrackRecordingModalModel {
 
     public get numberOfAttachments(): number | null {
         return this._numberOfAttachments;
+    }
+
+    public get trackLength(): string {
+        return this._trackLength;
     }
 }

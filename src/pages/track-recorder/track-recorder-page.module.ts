@@ -37,13 +37,13 @@ import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-
         TrackRecordingStore,
         {
             provide: "TrackRecorder",
-            useClass: MockedTrackRecorder
-            // useClass: TrackRecorder
+            // useClass: MockedTrackRecorder
+            useClass: TrackRecorder
         },
         {
             provide: "TrackUploader",
-            useClass: MockedTrackUploader
-            // useClass: TrackUploader
+            // useClass: MockedTrackUploader
+            useClass: TrackUploader
         },
         {
             provide: "MapComponentAccessor",

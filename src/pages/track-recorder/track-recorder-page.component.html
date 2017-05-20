@@ -77,8 +77,8 @@
     </ion-item>
 
     <ion-item>
-        <ion-label stacked>Ungefähre Länge</ion-label>
-        <ion-input (click)="showTrackedPositionsInfo()" disabled [value]="approximateLength" type="text" placeholder="Keine Daten vorhanden"></ion-input>
+        <ion-label stacked>Länge (Positionen: {{currentTrackRecording ? currentTrackRecording._trackedPositions.length : 'Keine Daten vorhanden'}})</ion-label>
+        <ion-input disabled [value]="approximateLength" type="text" placeholder="Keine Daten vorhanden"></ion-input>
     </ion-item>
 
     <map #map></map>

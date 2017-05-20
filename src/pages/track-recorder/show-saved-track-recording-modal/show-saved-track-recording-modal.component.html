@@ -33,4 +33,9 @@
             <ion-input disabled [value]="'Hochgeladene Anhänge wurden gelöscht'" type="text"></ion-input>
         </ion-item>
     </div>
+
+    <ion-item>
+        <ion-label stacked>Länge (Positionen: {{model.trackedPositions.length}})</ion-label>
+        <ion-input disabled [value]="model.trackLength" type="text"></ion-input>
+    </ion-item>
 </ion-content>
