@@ -1,3 +1,5 @@
+import { Inject } from "@angular/core";
+import { ILogger } from "../logging/ilogger";
 import { Injectable } from "@angular/core/";
 import { BackgroundGeolocationResponse } from "../../declarations";
 import { TrackRecorderSettings } from "./track-recorder-settings";
@@ -12,8 +14,8 @@ export class MockedTrackRecorder implements ITrackRecorder {
 
     private locationModeChangedSubject = new Subject<boolean>();
 
-    public constructor() {
-        console.warn("Using MockedTrackRecorder for ITrackRecorder");
+    public constructor(@Inject("Logger") private logger: ILogger) {
+        this.logger.warn("Using MockedTrackRecorder for ITrackRecorder");
     }
 
     public get locationModeChanged(): Observable<boolean> {
@@ -27,7 +29,7 @@ export class MockedTrackRecorder implements ITrackRecorder {
     public async setSettings(settings: TrackRecorderSettings): Promise<TrackRecorderSettings> {
         this.trackRecorderSettings = settings;
 
-        console.log("MockedTrackRecorder: Settings updated");
+        this.logger.log("MockedTrackRecorder: Settings updated");
 
         return this.trackRecorderSettings;
     }
@@ -46,19 +48,19 @@ export class MockedTrackRecorder implements ITrackRecorder {
     }
 
     public async record(): Promise<void> {
-        console.log("MockedTrackRecorder: Recording started");
+        this.logger.log("MockedTrackRecorder: Recording started");
 
         this.samplePosition();
     }
 
     public async pause(): Promise<void> {
-        console.log("MockedTrackRecorder: Recording paused");
+        this.logger.log("MockedTrackRecorder: Recording paused");
 
         this.samplePosition();
     }
 
     public async deleteAllRecordings(): Promise<void> {
-        console.log("TrackRecorder: All records deleted");
+        this.logger.log("TrackRecorder: All records deleted");
 
         this.positions = [];
     }
@@ -80,6 +82,6 @@ export class MockedTrackRecorder implements ITrackRecorder {
 
         this.positions.push(...locationSamples);
 
-        console.log(`MockedTrackRecorder: Sampling positions complete (${this.positions.length})`);
+        this.logger.log(`MockedTrackRecorder: Sampling positions complete (${this.positions.length})`);
     }
 }

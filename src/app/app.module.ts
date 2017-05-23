@@ -1,3 +1,6 @@
+import {
+    ObservableLoggerViewerModalModule
+} from "../components/observable-logger-viewer-modal/observable-logger-viewer-modal.module";
 import { MockedLocalizationService } from "../infrastructure/localization/mocked-localization-service";
 import { LocalizationService } from "../infrastructure/localization/localization-service";
 import { DatabindableAsyncPipe } from "../infrastructure/databindable-async.pipe";
@@ -16,6 +19,7 @@ import { StatusBar } from "@ionic-native/status-bar";
     BrowserModule,
     HttpModule,
     TrackRecorderPageModule,
+    ObservableLoggerViewerModalModule,
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot(),
   ],

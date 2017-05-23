@@ -1,4 +1,9 @@
 import {
+    ObservableLoggerViewerModalComponent
+} from '../../components/observable-logger-viewer-modal/observable-logger-viewer-modal.component';
+import { ObservableLogger } from '../../infrastructure/logging/observable-logger';
+import { ILogger } from "../../infrastructure/logging/ilogger";
+import {
     ShowSavedTrackRecordingModalModel
 } from "./show-saved-track-recording-modal/show-saved-track-recording-modal-model";
 import {
@@ -79,7 +84,8 @@ export class TrackRecorderPageComponent {
         private archivedTrackRecordingStore: ArchivedTrackRecordingStore,
         private trackRecordingStore: TrackRecordingStore,
         private storage: Storage,
-        events: Events) {
+        events: Events,
+        @Inject("Logger") private logger: ILogger) {
         archivedTrackRecordingStore.tracksChanged.subscribe(recordings => this._archivedTrackRecordings = recordings.sort((a, b) => <any>b.trackingStartedAt - <any>a.trackingStartedAt));
         trackRecordingStore.tracksChanged.subscribe(recordings => this._trackRecordings = recordings.sort((a, b) => <any>b.trackingStartedAt - <any>a.trackingStartedAt));
         events.subscribe("current-track-recording-attachments-changed", async (attachments: TrackAttachment[]) => {
@@ -113,6 +119,7 @@ export class TrackRecorderPageComponent {
             allRecordingsDeletedToast.present();
         });
         events.subscribe("current-track-recording-finished", async () => {
+            await this.trackRecorder.deleteAllRecordings();
             await this.resetView();
 
             const archivingSuccessfulToast = this.toastController.create(<ToastOptions>{
@@ -258,6 +265,8 @@ export class TrackRecorderPageComponent {
             await uploadTrackRecordingLoading.dismiss();
             trackRecordingUploadedToast.present();
         } catch (e) {
+            this.logger.error(e);
+
             const trackRecordingUploadFailedToast = this.toastController.create(<ToastOptions>{
                 message: "Hochladen fehlgeschlagen",
                 duration: 3000,
@@ -347,7 +356,7 @@ export class TrackRecorderPageComponent {
         });
     }
 
-     // tslint:disable-next-line:no-unused-variable Used inside template.
+    // tslint:disable-next-line:no-unused-variable Used inside template.
     private showSavedTrackRecording(trackRecording: ArchivedTrackRecording | TrackRecording): void {
         this.menuController.close();
 
@@ -355,6 +364,15 @@ export class TrackRecorderPageComponent {
             model: new ShowSavedTrackRecordingModalModel(trackRecording)
         });
         showSavedTrackRecordingModal.present();
+    }
+
+    // tslint:disable-next-line:no-unused-variable Used inside template.
+    private showObservableLoggerViewer(): void {
+        this.menuController.close();
+
+        const observableLoggerViewModal = this.modalController.create(ObservableLoggerViewerModalComponent);
+
+        observableLoggerViewModal.present();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
@@ -409,6 +427,10 @@ export class TrackRecorderPageComponent {
 
     private get archivedTrackRecordings(): ArchivedTrackRecording[] {
         return this._archivedTrackRecordings;
+    }
+
+    private get isLoggerObservable(): boolean {
+        return this.logger instanceof ObservableLogger;
     }
 
     private get canShowTrackRecorderSettings(): boolean {

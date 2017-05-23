@@ -13,6 +13,10 @@
                 Aufnahmeeinstellungen
                 <ion-icon item-right name="arrow-forward"></ion-icon>
             </button>
+            <button *ngIf="isLoggerObservable" ion-item (click)="showObservableLoggerViewer()">
+                Ablaufverfolgung
+                <ion-icon item-right name="arrow-forward"></ion-icon>
+            </button>
         </ion-list>
         <ion-list *ngIf="trackRecordings.length">
             <ion-list-header>
@@ -35,12 +39,12 @@
             <ion-list-header>
                 Verlauf
             </ion-list-header>
-            <button (click)="showSavedTrackRecording(archivedTrackRecording)" ion-item *ngFor="let archivedTrackRecording of archivedTrackRecordings">
+            <div ion-item *ngFor="let archivedTrackRecording of archivedTrackRecordings">
                 {{archivedTrackRecording.trackName}}
                 <button clear ion-button icon-only item-right (click)="deleteArchivedTrackRecording(archivedTrackRecording)">
                     <ion-icon name="trash"></ion-icon>
                 </button>
-            </button>
+            </div>
         </ion-list>
     </ion-content>
 </ion-menu>

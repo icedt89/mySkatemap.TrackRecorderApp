@@ -1,3 +1,5 @@
+import { ObservableLogger } from "../../infrastructure/logging/observable-logger";
+import { DefaultLogger } from "../../infrastructure/logging/default-logger";
 import {
     ShowSavedTrackRecordingModalModule
 } from "./show-saved-track-recording-modal/show-saved-track-recording-modal.module";
@@ -49,6 +51,11 @@ import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-
             provide: "MapComponentAccessor",
             // useClass: MockedMapComponentAccessor
             useClass: MapComponentAccessor
+        },
+        {
+            provide: "Logger",
+            useClass: ObservableLogger
+            // useClass: DefaultLogger
         }]
 })
 export class TrackRecorderPageModule { }

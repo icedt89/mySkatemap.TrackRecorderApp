@@ -1,3 +1,5 @@
+import { Inject } from "@angular/core";
+import { ILogger } from "../logging/ilogger";
 import { ILocalizationService } from "./ilocalization-service";
 import { Injectable } from "@angular/core";
 import { Platform } from "ionic-angular";
@@ -10,7 +12,7 @@ export class LocalizationService implements ILocalizationService {
     private lookup: any;
     private language = "de-de";
 
-    public constructor(private platform: Platform, private globalization: any/*Globalization*/) {
+    public constructor(private platform: Platform, private globalization: any/*Globalization*/, @Inject("Logger") private logger: ILogger) {
         this.initialize();
     }
 
@@ -22,7 +24,7 @@ export class LocalizationService implements ILocalizationService {
     }
 
     public newWithContext(lookup: any): ILocalizationService {
-        const result = new LocalizationService(this.platform, this.globalization);
+        const result = new LocalizationService(this.platform, this.globalization, this.logger);
         result.lookup = lookup;
 
         return result;
@@ -38,7 +40,7 @@ export class LocalizationService implements ILocalizationService {
 
         let value = keyPair[this.language];
         if (!value) {
-            console.warn(`Language '${this.language}' not found on key '${key}'.`);
+            this.logger.warn(`Language '${this.language}' not found on key '${key}'.`);
 
             value = keyPair[this.ultimateFallbackLanguage];
             if (!value) {

@@ -1,3 +1,5 @@
+import { ILogger } from "../logging/ilogger";
+import { Inject } from "@angular/core";
 import { ITrackUploader } from "./itrack-uploader";
 import { TrackRecording } from "../track-recording";
 import { Http } from "@angular/http";
@@ -30,6 +32,7 @@ export class TrackUploader implements ITrackUploader {
             return result;
         });
 
+        // TODO: Remove catch clause if api works as expected.
         await this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise();
 
         return trackUploadedAt;
