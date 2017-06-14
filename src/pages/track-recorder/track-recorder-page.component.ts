@@ -1,7 +1,7 @@
 import {
     ObservableLoggerViewerModalComponent
-} from '../../components/observable-logger-viewer-modal/observable-logger-viewer-modal.component';
-import { ObservableLogger } from '../../infrastructure/logging/observable-logger';
+} from "../../components/observable-logger-viewer-modal/observable-logger-viewer-modal.component";
+import { ObservableLogger } from "../../infrastructure/logging/observable-logger";
 import { ILogger } from "../../infrastructure/logging/ilogger";
 import {
     ShowSavedTrackRecordingModalModel
