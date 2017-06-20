@@ -73,9 +73,14 @@
         <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Ziehen zum aktualisieren" refreshingSpinner="circles" refreshingText="aktualisieren..."></ion-refresher-content>
     </ion-refresher>
 
-    <ion-item>
+    <ion-item *ngIf="!currentTrackRecording">
         <ion-label stacked>Streckenname</ion-label>
-        <ion-input [disabled]="!currentTrackRecording" [value]="currentTrackRecording?.trackName" placeholder="Aufnahme starten..."></ion-input>
+        <ion-input disabled type="text" placeholder="Aufnahme starten..."></ion-input>
+    </ion-item>
+
+    <ion-item *ngIf="currentTrackRecording">
+        <ion-label stacked>Streckenname</ion-label>
+        <ion-input required type="text" [(ngModel)]="currentTrackRecording.trackName"></ion-input>
     </ion-item>
 
     <ion-item>

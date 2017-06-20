@@ -35,10 +35,7 @@ import {
     NavOptions,
     PopoverController
 } from "ionic-angular";
-import { LengthUnit } from "../../infrastructure/length-unit";
-import { Length } from "../../infrastructure/length";
 import { LengthUnitHelper } from "../../infrastructure/lenght-unit-helper";
-import { Haversine } from "../../infrastructure/haversine";
 import { TrackRecorderSettings } from "../../infrastructure/track-recorder/track-recorder-settings";
 import {
     AlertController,

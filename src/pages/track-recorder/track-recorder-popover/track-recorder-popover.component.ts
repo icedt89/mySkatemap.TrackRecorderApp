@@ -113,29 +113,46 @@ export class TrackRecorderPopoverComponent {
             throw new Exception("No current track recording.");
         }
 
-        const finishCurrentRecordingPrompt = this.alertController.create(<AlertOptions>{
-            title: "Strecke abschließen",
-            message: "Die Strecke kann dann nur noch hochgeladen werden.",
-            enableBackdropDismiss: true,
-            buttons: [
-                {
-                    text: "Abbrechen",
-                    role: "cancel"
-                },
-                {
-                    text: "Ja",
-                    handler: async () => {
-                        this.model.trackRecording.trackingFinishedAt = new Date();
-
-                        await this.trackRecordingStore.storeTrack(this.model.trackRecording);
-
-                        this.events.publish("current-track-recording-finished");
+        if (this.model.trackRecording.isInvalid) {
+            const informAboutInvalidTrackRecording = this.alertController.create(<AlertOptions>{
+                title: "Strecke unvollständig",
+                message: "Bitte gib der Strecke einen Namen.",
+                enableBackdropDismiss: true,
+                buttons: [
+                    {
+                        text: "Mach ich",
+                        role: "cancel"
                     }
-                }
-            ]
-        });
-        finishCurrentRecordingPrompt.present();
-        // Close popover (makes back button working again Oo, too)
-        this.viewController.dismiss();
+                ]
+            });
+            informAboutInvalidTrackRecording.present();
+            // Close popover (makes back button working again Oo, too)
+            this.viewController.dismiss();
+        } else {
+            const finishCurrentRecordingPrompt = this.alertController.create(<AlertOptions>{
+                title: "Strecke abschließen",
+                message: "Die Strecke kann dann nur noch hochgeladen werden.",
+                enableBackdropDismiss: true,
+                buttons: [
+                    {
+                        text: "Abbrechen",
+                        role: "cancel"
+                    },
+                    {
+                        text: "Ja",
+                        handler: async () => {
+                            this.model.trackRecording.trackingFinishedAt = new Date();
+
+                            await this.trackRecordingStore.storeTrack(this.model.trackRecording);
+
+                            this.events.publish("current-track-recording-finished");
+                        }
+                    }
+                ]
+            });
+            finishCurrentRecordingPrompt.present();
+            // Close popover (makes back button working again Oo, too)
+            this.viewController.dismiss();
+        }
     }
 }

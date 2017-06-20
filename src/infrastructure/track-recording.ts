@@ -64,4 +64,8 @@ export class TrackRecording {
             return TrackAttachment.fromLike(_);
         });
     }
+
+    public get isInvalid(): boolean {
+        return !this._trackName;
+    }
 }
