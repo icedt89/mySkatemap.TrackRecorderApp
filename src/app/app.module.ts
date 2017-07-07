@@ -13,6 +13,9 @@ import { IonicStorageModule } from "@ionic/storage";
 import { MyApp } from "./app.component";
 import { SplashScreen } from "@ionic-native/splash-screen";
 import { StatusBar } from "@ionic-native/status-bar";
+import { IdentityService } from "../infrastructure/identity/identity-service";
+import { AuthenticationHandler } from "../infrastructure/authentication-handler";
+import { StorageAccessor } from "../infrastructure/storage-accessor";
 
 @NgModule({
   imports: [
@@ -35,6 +38,9 @@ import { StatusBar } from "@ionic-native/status-bar";
     StatusBar,
     // Globalization,
     SplashScreen,
+    IdentityService,
+    AuthenticationHandler,
+    StorageAccessor,
     {
       provide: ErrorHandler,
       useClass: IonicErrorHandler

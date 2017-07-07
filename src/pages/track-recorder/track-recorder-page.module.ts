@@ -18,6 +18,7 @@ import { TrackRecorderPageComponent } from "./track-recorder-page.component";
 import { NgModule } from "@angular/core";
 import { TrackRecorderSettingsModalModule } from "./track-recorder-settings-modal/track-recorder-settings-modal.module";
 import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-track-recorder";
+import { LoginModalModule } from "../../components/login-modal/login-modal.module";
 
 @NgModule({
     imports: [
@@ -26,7 +27,8 @@ import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-
         TrackRecorderPopoverModule,
         ShowSavedTrackRecordingModalModule,
         MapModule,
-        IonicModule
+        IonicModule,
+        LoginModalModule
     ],
     declarations: [
         TrackRecorderPageComponent,

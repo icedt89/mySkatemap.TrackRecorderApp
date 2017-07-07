@@ -52,6 +52,7 @@ import { LatLng } from "@ionic-native/google-maps";
 import { MapComponent } from "../../components/map/map.component";
 import { Storage } from "@ionic/storage";
 import { TrackRecorderSettingsModalComponent } from "./track-recorder-settings-modal/track-recorder-settings-modal.component";
+import { LoginModalComponent } from "../../components/login-modal/login-modal.component";
 
 @Component({
     selector: "track-recorder",
@@ -175,6 +176,13 @@ export class TrackRecorderPageComponent {
                 trackingStoppedToast.present();
             }
         });
+    }
+
+    // tslint:disable-next-line:no-unused-variable Used inside template.
+    private async showLogin(): Promise<void> {
+        const showLoginModal = this.modalController.create(LoginModalComponent);
+
+        showLoginModal.present();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
