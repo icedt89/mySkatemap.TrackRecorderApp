@@ -11,3 +11,7 @@ map {
 ion-menu[type=overlay] {
     z-index: 1000;
 }
+
+ion-thumbnail img {
+    border-radius: 50%;
+}

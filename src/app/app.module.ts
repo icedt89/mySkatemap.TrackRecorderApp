@@ -1,5 +1,5 @@
 import {
-    ObservableLoggerViewerModalModule
+  ObservableLoggerViewerModalModule
 } from "../components/observable-logger-viewer-modal/observable-logger-viewer-modal.module";
 import { MockedLocalizationService } from "../infrastructure/localization/mocked-localization-service";
 import { LocalizationService } from "../infrastructure/localization/localization-service";
@@ -18,6 +18,9 @@ import { AuthenticationHandler } from "../infrastructure/authentication-handler"
 import { StorageAccessor } from "../infrastructure/storage-accessor";
 import { UserProfileService } from "../infrastructure/user-profile/user-profile-service";
 import { AuthenticationStore } from "../infrastructure/authentication-store";
+import { ObservableLogger } from "../infrastructure/logging/observable-logger";
+import { DefaultLogger } from "../infrastructure/logging/default-logger";
+import { ObservableIonicErrorHandler } from "./observable-ionic-error-handler";
 
 @NgModule({
   imports: [
@@ -47,12 +50,18 @@ import { AuthenticationStore } from "../infrastructure/authentication-store";
     StorageAccessor,
     {
       provide: ErrorHandler,
-      useClass: IonicErrorHandler
+      // useClass: IonicErrorHandler
+      useClass: ObservableIonicErrorHandler
     },
     {
       provide: "LocalizationService",
       useClass: MockedLocalizationService
       // useClass: LocalizationService
+    },
+    {
+      provide: "Logger",
+      useClass: ObservableLogger
+      // useClass: DefaultLogger
     }
   ]
 })

@@ -1,11 +1,12 @@
-import { Http, Response, Headers, RequestOptionsArgs } from "@angular/http";
+import { Headers, Http, RequestOptionsArgs, Response } from "@angular/http";
+import { Events } from "ionic-angular";
 import { AuthenticationStore } from "./authentication-store";
 import { Exception } from "./exception";
 
 export abstract class ApiService {
     protected baseUri = "http://myskatemap-api.azurewebsites.net/api";
 
-    public constructor(private http: Http, protected authenticationStore: AuthenticationStore) {
+    public constructor(private http: Http, protected authenticationStore: AuthenticationStore, private events: Events) {
     }
 
     protected setAuthorizationHeader(requestOptionsArgs: RequestOptionsArgs) {
@@ -87,7 +88,7 @@ export abstract class ApiService {
 
             // Unauthorized (token invalidated!)
             if (error.status === 401) {
-                // [Jan] TODO: ApplicationEvents.instance.fireUnauthorizedReceived();
+                this.events.publish("unauthorized-received");
             }
 
             throw error;

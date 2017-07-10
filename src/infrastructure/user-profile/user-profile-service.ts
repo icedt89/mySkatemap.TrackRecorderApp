@@ -1,6 +1,7 @@
 import { AuthenticationStore } from "../authentication-store";
-import { Http } from "@angular/http";
 import { Injectable } from "@angular/core";
+import { Http } from "@angular/http";
+import { Events } from "ionic-angular";
 import { ApiService } from "../api-service";
 import { UserProfileInfo } from "./user-profile-info";
 
@@ -8,8 +9,8 @@ import { UserProfileInfo } from "./user-profile-info";
 export class UserProfileService extends ApiService {
     private resource = "UserProfile";
 
-    public constructor(http: Http, authenticationStore: AuthenticationStore) {
-        super(http, authenticationStore);
+    public constructor(http: Http, authenticationStore: AuthenticationStore, events: Events) {
+        super(http, authenticationStore, events);
     }
 
     public async getUserProfileInfo(): Promise<UserProfileInfo> {

@@ -1,6 +1,4 @@
 // http://ionicframework.com/docs/v2/theming/
-
-
 // App Global Sass
 // --------------------------------------------------
 // Put style rules here that you want to apply globally. These
@@ -16,4 +14,14 @@
 // automatically applied to the <body> element in the app.
 h2 {
     text-align: center;
+}
+
+.item ion-thumbnail {
+    min-width: 60px;
+    min-height: 60px;
+}
+
+.item ion-thumbnail img {
+    width: 60px;
+    height: 60px;
 }

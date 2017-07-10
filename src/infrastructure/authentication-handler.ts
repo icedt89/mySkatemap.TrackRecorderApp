@@ -1,6 +1,7 @@
 import { AuthenticationStore } from "./authentication-store";
 import { IdentityService } from "./identity/identity-service";
 import { Injectable } from "@angular/core";
+import { Events } from "ionic-angular";
 import { Observable, Subject } from "rxjs/Rx";
 import { LoginModel } from "./identity/login-model";
 
@@ -11,7 +12,9 @@ export class AuthenticationHandler {
 
     public constructor(
         private authenticationStore: AuthenticationStore,
-        private identityService: IdentityService) {
+        private identityService: IdentityService,
+        events: Events) {
+        events.subscribe("unauthorized-received", () => this.signOut());
         this.updateCurrentAuthenticationState(!!this.authenticationStore.getAccessToken());
     }
 

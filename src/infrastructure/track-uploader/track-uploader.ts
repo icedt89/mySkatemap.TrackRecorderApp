@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
+import { Events } from "ionic-angular";
 import { ITrackUploader } from "./itrack-uploader";
 import { ApiService } from "../api-service";
 import { AuthenticationStore } from "../authentication-store";
@@ -9,8 +10,8 @@ import { TrackRecording } from "../track-recording";
 export class TrackUploader extends ApiService implements ITrackUploader {
     private resource = "TrackRecording";
 
-    public constructor(http: Http, authenticationStore: AuthenticationStore) {
-        super(http, authenticationStore);
+    public constructor(http: Http, authenticationStore: AuthenticationStore, events: Events) {
+        super(http, authenticationStore, events);
     }
 
     public async uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
