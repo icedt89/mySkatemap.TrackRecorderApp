@@ -6,7 +6,7 @@ import { ApiService } from "../api-service";
 
 @Injectable()
 export class IdentityService extends ApiService {
-     private resource = "Identity";
+    private resource = "Identity";
 
     public constructor(http: Http, authenticationStore: AuthenticationStore) {
         super(http, authenticationStore);

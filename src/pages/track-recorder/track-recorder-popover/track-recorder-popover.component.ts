@@ -1,9 +1,8 @@
-import { ITrackUploader } from "../../../infrastructure/track-uploader/itrack-uploader";
 import { Inject } from "@angular/core";
 import { ITrackRecorder } from "../../../infrastructure/track-recorder/itrack-recorder";
 import { TrackRecordingStore } from "../../../infrastructure/track-store/track-recording-store";
 import { Exception } from "../../../infrastructure/exception";
-import { Events, LoadingController } from "ionic-angular";
+import { Events } from "ionic-angular";
 import { TrackAttachmentsModalModel } from "../../../components/track-attachments-modal/track-attachments-modal-model";
 import { TrackRecorderPopoverModel } from "./track-recorder-popover-model";
 import {
@@ -11,7 +10,6 @@ import {
     AlertOptions,
     ModalController,
     NavParams,
-    ToastController,
     ViewController
 } from "ionic-angular";
 import { Component } from "@angular/core";
@@ -28,9 +26,6 @@ export class TrackRecorderPopoverComponent {
         private viewController: ViewController,
         private alertController: AlertController,
         @Inject("TrackRecorder") private trackRecorder: ITrackRecorder,
-        private loadingController: LoadingController,
-        @Inject("TrackUploader") private trackUploader: ITrackUploader,
-        private toastController: ToastController,
         private trackRecordingStore: TrackRecordingStore,
         private events: Events) {
         this.model = navigationParameters.get("model");
@@ -73,6 +68,7 @@ export class TrackRecorderPopoverComponent {
             }
         });
         showCurrentTrackRecordingAttachmentsModal.present();
+
         // Close popover (makes back button working again Oo, too)
         this.viewController.dismiss();
     }
@@ -102,9 +98,8 @@ export class TrackRecorderPopoverComponent {
                 }
             ]
         });
+
         discardCurrentRecordingPrompt.present();
-        // Close popover (makes back button working again Oo, too)
-        this.viewController.dismiss();
     }
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
@@ -126,8 +121,6 @@ export class TrackRecorderPopoverComponent {
                 ]
             });
             informAboutInvalidTrackRecording.present();
-            // Close popover (makes back button working again Oo, too)
-            this.viewController.dismiss();
         } else {
             const finishCurrentRecordingPrompt = this.alertController.create(<AlertOptions>{
                 title: "Strecke abschließen",
@@ -151,8 +144,6 @@ export class TrackRecorderPopoverComponent {
                 ]
             });
             finishCurrentRecordingPrompt.present();
-            // Close popover (makes back button working again Oo, too)
-            this.viewController.dismiss();
         }
     }
 }

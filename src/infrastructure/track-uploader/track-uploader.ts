@@ -1,18 +1,20 @@
-import { ILogger } from "../logging/ilogger";
-import { Inject } from "@angular/core";
-import { ITrackUploader } from "./itrack-uploader";
-import { TrackRecording } from "../track-recording";
-import { Http } from "@angular/http";
 import { Injectable } from "@angular/core";
+import { Http } from "@angular/http";
+import { ITrackUploader } from "./itrack-uploader";
+import { ApiService } from "../api-service";
+import { AuthenticationStore } from "../authentication-store";
+import { TrackRecording } from "../track-recording";
 
 @Injectable()
-export class TrackUploader implements ITrackUploader {
-    private apiEndpoint = "http://myskatemap-api.azurewebsites.net/api/TrackRecording";
+export class TrackUploader extends ApiService implements ITrackUploader {
+    private resource = "TrackRecording";
 
-    public constructor(private http: Http) {
+    public constructor(http: Http, authenticationStore: AuthenticationStore) {
+        super(http, authenticationStore);
     }
 
     public async uploadRecordedTrack(trackRecording: TrackRecording): Promise<Date> {
+        const fullUri = super.buildFullUri(`/${this.resource}/Login`);
         const trackUploadedAt = new Date();
         const createdRecordedTrackModel = new CreateRecordedTrackModel(trackRecording.trackName, trackRecording.trackingStartedAt, trackRecording.trackingFinishedAt, trackUploadedAt);
 
@@ -33,7 +35,7 @@ export class TrackUploader implements ITrackUploader {
         });
 
         // TODO: Remove catch clause if api works as expected.
-        await this.http.post(this.apiEndpoint, createdRecordedTrackModel).toPromise();
+        await super.post(fullUri, createdRecordedTrackModel);
 
         return trackUploadedAt;
     }

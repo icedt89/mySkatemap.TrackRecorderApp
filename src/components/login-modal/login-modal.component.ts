@@ -15,14 +15,14 @@ export class LoginModalComponent {
         private authenticationHandler: AuthenticationHandler) {
     }
 
+    // tslint:disable-next-line:no-unused-variable Used inside template.
     private async login(): Promise<void> {
-        debugger;
-
         const loginModel = new LoginModel();
         loginModel.EmailAddress = this.model.emailAddress;
         loginModel.Password = this.model.password;
 
-        const accessToken = await this.authenticationHandler.login(loginModel);
+        await this.authenticationHandler.login(loginModel);
 
+        this.viewController.dismiss();
     }
 }

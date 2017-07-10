@@ -8,11 +8,11 @@
     <form (ngSubmit)="login()">
         <ion-item>
             <ion-label stacked>E-Mail Adresse</ion-label>
-            <ion-input required type="text" [(ngModel)]="model.emailAddress"></ion-input>
+            <ion-input required type="text" name="login.emailAddress" [(ngModel)]="model.emailAddress"></ion-input>
         </ion-item>
         <ion-item>
             <ion-label stacked>Passwort</ion-label>
-            <ion-input required type="password" [(ngModel)]="model.password"></ion-input>
+            <ion-input required type="password" name="login.password" [(ngModel)]="model.password"></ion-input>
         </ion-item>
         <ion-item>
             <button type="submit" ion-item>

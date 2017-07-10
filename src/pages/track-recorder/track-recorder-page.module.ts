@@ -41,8 +41,8 @@ import { LoginModalModule } from "../../components/login-modal/login-modal.modul
         TrackRecordingStore,
         {
             provide: "TrackRecorder",
-            // useClass: MockedTrackRecorder
-            useClass: TrackRecorder
+            useClass: MockedTrackRecorder
+            // useClass: TrackRecorder
         },
         {
             provide: "TrackUploader",

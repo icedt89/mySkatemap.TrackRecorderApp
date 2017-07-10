@@ -1,13 +1,11 @@
-import { Exception } from '../../../infrastructure/exception';
 import { TrackAttachmentsModalModel } from "../../../components/track-attachments-modal/track-attachments-modal-model";
 import {
     TrackAttachmentsModalComponent
 } from "../../../components/track-attachments-modal/track-attachments-modal.component";
-import { ViewChild } from "@angular/core";
-import { MapComponent } from "../../../components/map/map.component";
 import { ShowSavedTrackRecordingModalModel } from "./show-saved-track-recording-modal-model";
 import { ModalController, NavParams, ViewController } from "ionic-angular";
 import { Component } from "@angular/core";
+import { Exception } from "../../../infrastructure/exception";
 
 @Component({
     templateUrl: "show-saved-track-recording-modal.component.html"

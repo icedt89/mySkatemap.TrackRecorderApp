@@ -10,6 +10,7 @@
     <allow-navigation href="http://172.30.3.18:8100" />
     <allow-navigation href="http://172.30.3.16:8100" />
     <allow-navigation href="http://192.168.8.206:8100" />
+    <allow-navigation href="http://192.168.0.101:8100" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="geo:*" />

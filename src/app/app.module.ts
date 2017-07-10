@@ -16,6 +16,8 @@ import { StatusBar } from "@ionic-native/status-bar";
 import { IdentityService } from "../infrastructure/identity/identity-service";
 import { AuthenticationHandler } from "../infrastructure/authentication-handler";
 import { StorageAccessor } from "../infrastructure/storage-accessor";
+import { UserProfileService } from "../infrastructure/user-profile/user-profile-service";
+import { AuthenticationStore } from "../infrastructure/authentication-store";
 
 @NgModule({
   imports: [
@@ -40,6 +42,8 @@ import { StorageAccessor } from "../infrastructure/storage-accessor";
     SplashScreen,
     IdentityService,
     AuthenticationHandler,
+    UserProfileService,
+    AuthenticationStore,
     StorageAccessor,
     {
       provide: ErrorHandler,

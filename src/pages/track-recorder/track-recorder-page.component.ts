@@ -53,6 +53,9 @@ import { MapComponent } from "../../components/map/map.component";
 import { Storage } from "@ionic/storage";
 import { TrackRecorderSettingsModalComponent } from "./track-recorder-settings-modal/track-recorder-settings-modal.component";
 import { LoginModalComponent } from "../../components/login-modal/login-modal.component";
+import { UserProfileService } from "../../infrastructure/user-profile/user-profile-service";
+import { AuthenticationHandler } from "../../infrastructure/authentication-handler";
+import { UserProfileInfo } from "../../infrastructure/user-profile/user-profile-info";
 
 @Component({
     selector: "track-recorder",
@@ -66,6 +69,7 @@ export class TrackRecorderPageComponent {
     private _isPaused = true;
     private _archivedTrackRecordings: ArchivedTrackRecording[] = [];
     private _trackRecordings: TrackRecording[] = [];
+    private _userProfileInfo: UserProfileInfo | null;
 
     @ViewChild("map") private map: MapComponent;
 
@@ -81,9 +85,23 @@ export class TrackRecorderPageComponent {
         private loadingController: LoadingController,
         private archivedTrackRecordingStore: ArchivedTrackRecordingStore,
         private trackRecordingStore: TrackRecordingStore,
+        private authenticationHandler: AuthenticationHandler,
+        private userProfileService: UserProfileService,
         private storage: Storage,
         events: Events,
         @Inject("Logger") private logger: ILogger) {
+        this.authenticationHandler.authenticationState.subscribe(async isLoggedIn => {
+            if (isLoggedIn) {
+                try {
+                    this._userProfileInfo = await this.userProfileService.getUserProfileInfo();
+                } catch (error) {
+                    // TODO: Keine Internetverbindung abfangen!
+                    this._userProfileInfo = null;
+                }
+            } else {
+                this._userProfileInfo = null;
+            }
+        });
         archivedTrackRecordingStore.tracksChanged.subscribe(recordings => this._archivedTrackRecordings = recordings.sort((a, b) => <any>b.trackingStartedAt - <any>a.trackingStartedAt));
         trackRecordingStore.tracksChanged.subscribe(recordings => this._trackRecordings = recordings.sort((a, b) => <any>b.trackingStartedAt - <any>a.trackingStartedAt));
         events.subscribe("current-track-recording-attachments-changed", async (attachments: TrackAttachment[]) => {
@@ -132,6 +150,13 @@ export class TrackRecorderPageComponent {
             this.menuController.open();
         });
         viewController.willEnter.subscribe(async () => {
+            try {
+                this._userProfileInfo = await this.userProfileService.getUserProfileInfo();
+            } catch (error) {
+                // TODO: Keine Internetverbindung abfangen!
+                this._userProfileInfo = null;
+            }
+
             this.mapComponentAccessor.bindMapComponent(this.map);
 
             await Promise.all([
@@ -180,6 +205,8 @@ export class TrackRecorderPageComponent {
 
     // tslint:disable-next-line:no-unused-variable Used inside template.
     private async showLogin(): Promise<void> {
+        this.menuController.close();
+
         const showLoginModal = this.modalController.create(LoginModalComponent);
 
         showLoginModal.present();
@@ -428,6 +455,10 @@ export class TrackRecorderPageComponent {
 
     private get trackRecordings(): TrackRecording[] {
         return this._trackRecordings;
+    }
+
+    private get userProfileInfo(): UserProfileInfo {
+        return this._userProfileInfo;
     }
 
     private get archivedTrackRecordings(): ArchivedTrackRecording[] {

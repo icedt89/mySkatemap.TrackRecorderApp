@@ -7,6 +7,20 @@
     <ion-content>
         <ion-list>
             <ion-list-header>
+                Konto
+            </ion-list-header>
+            <button *ngIf="!userProfileInfo" [disabled]="!isPaused" ion-item (click)="showLogin()">
+                Anmelden
+                <ion-icon item-right name="arrow-forward"></ion-icon>
+            </button>
+            <ion-item *ngIf="userProfileInfo">
+                <ion-label>
+                    {{userProfileInfo.DisplayName}}
+                </ion-label>
+            </ion-item>
+        </ion-list>
+        <ion-list>
+            <ion-list-header>
                 Allgemein
             </ion-list-header>
             <button [disabled]="!isPaused" ion-item (click)="showTrackRecorderSettings()">

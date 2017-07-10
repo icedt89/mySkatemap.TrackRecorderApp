@@ -1,7 +1,7 @@
 export class DatabindablePromise<T> implements Promise<T> {
     private static promiseCache = {};
 
-    public static databindable<T>(key: string, promise: Promise<T>): Promise<T> {
+    public static databindable<TType>(key: string, promise: Promise<TType>): Promise<TType> {
         let cachedPromise = this.promiseCache[key];
         if (!cachedPromise) {
             cachedPromise = new DatabindablePromise(promise);
@@ -12,7 +12,7 @@ export class DatabindablePromise<T> implements Promise<T> {
         return cachedPromise;
     }
 
-    public static resolve<T>(key: string | null, value: T): Promise<T> {
+    public static resolve<TType>(key: string | null, value: TType): Promise<TType> {
         key = key || JSON.stringify(value);
 
         return DatabindablePromise.databindable(key, Promise.resolve(value));

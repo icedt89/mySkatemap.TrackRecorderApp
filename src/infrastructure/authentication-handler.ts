@@ -1,13 +1,12 @@
 import { AuthenticationStore } from "./authentication-store";
 import { IdentityService } from "./identity/identity-service";
 import { Injectable } from "@angular/core";
-import { Observable, Subject, Subscription } from "rxjs/Rx";
+import { Observable, Subject } from "rxjs/Rx";
 import { LoginModel } from "./identity/login-model";
 
 @Injectable()
 export class AuthenticationHandler {
     private authenticationStateSubject = new Subject<boolean>();
-    private routerEventsSubscription: Subscription;
     private _currentAuthenticationState = false;
 
     public constructor(
