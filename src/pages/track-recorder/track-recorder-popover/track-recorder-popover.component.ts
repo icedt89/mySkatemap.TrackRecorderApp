@@ -81,7 +81,7 @@ export class TrackRecorderPopoverComponent {
 
         const discardCurrentRecordingPrompt = this.alertController.create(<AlertOptions>{
             title: "Strecke verwerfen",
-            message: "Möchten Sie die aufgezeichnete Strecke wirklich verwerfen?",
+            message: "Möchtest du die aufgezeichnete Strecke wirklich verwerfen?",
             enableBackdropDismiss: true,
             buttons: [
                 {

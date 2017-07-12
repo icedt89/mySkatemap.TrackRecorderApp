@@ -216,7 +216,7 @@ export class TrackRecorderPageComponent {
     private deleteTrackRecording(track: TrackRecording): void {
         const removeTrackPrompt = this.alertController.create(<AlertOptions>{
             title: "Strecke löschen",
-            message: "Sie haben die Strecke noch nicht hochgeladen!<br /><br />Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.",
+            message: "Du hast die Strecke noch nicht hochgeladen!<br /><br />Alle aufgezeichneten Daten sowie Anhänge zur Strecke gehen verloren.",
             enableBackdropDismiss: true,
             buttons: [
                 {
@@ -322,7 +322,7 @@ export class TrackRecorderPageComponent {
     private uploadTrackRecording(trackRecording: TrackRecording): void {
         const uploadRecordingPrompt = this.alertController.create(<AlertOptions>{
             title: "Strecke hochladen",
-            message: "Möchten Sie die aufgezeichnete Strecke hochladen?",
+            message: "Möchtst du die aufgezeichnete Strecke hochladen?",
             enableBackdropDismiss: true,
             buttons: [
                 {
@@ -518,7 +518,7 @@ export class TrackRecorderPageComponent {
         } else {
             const pleaseEnableLocationAlert = this.alertController.create(<AlertOptions>{
                 title: "Standort ist deaktiviert",
-                message: "Möchten Sie die Standorteinstellungen öffnen?",
+                message: "Möchtest du die Standorteinstellungen öffnen?",
                 enableBackdropDismiss: true,
                 buttons: [
                     {
