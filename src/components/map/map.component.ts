@@ -47,8 +47,8 @@ export class MapComponent {
             this.googleMap.setIndoorEnabled(false);
             this.googleMap.setMyLocationEnabled(false);
             this.googleMap.setTrafficEnabled(false);
-            this.googleMap.setZoom(initialMapZoom);
-            this.googleMap.setCenter(initialMapCenter);
+            this.googleMap.setCameraZoom(initialMapZoom);
+            this.googleMap.setCameraTarget(initialMapCenter);
             this.googleMap.moveCamera(<CameraPosition>{
                 zoom: initialMapZoom,
                 target: initialMapCenter
