@@ -13,13 +13,23 @@ AND/OR
 cordova.system.library.1=com.google.android.gms:play-services-maps:+
 cordova.system.library.2=com.google.android.gms:play-services-location:+
 
+#Run
+Run the following command to run the app locally:
+```
+> ionic serve
+```
+
+Run the following command to run the app on the, via usb, attached device:
+```
+> ionic cordova run android
+
 #Build
-Run the following command to build the app using the Ionic CLI as **unoptimized debug** build:
+Run the following command to build the app as **unoptimized debug** build:
 ```
 > ionic cordova build android
 ```
 
-Run the following command to build the app using the Ionic CLI as **optimized release** build:
+Run the following command to build the app as **optimized release** build:
 ```
 > ionic cordova build android --release --device --production
 ```
