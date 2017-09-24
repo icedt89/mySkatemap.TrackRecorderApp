@@ -1,6 +1,5 @@
 import { Exception } from "../../infrastructure/exception";
 import {
-    AnimateCameraOptions,
     CameraPosition,
     GoogleMap,
     GoogleMaps,
@@ -49,7 +48,7 @@ export class MapComponent {
             this.googleMap.setTrafficEnabled(false);
             this.googleMap.setCameraZoom(initialMapZoom);
             this.googleMap.setCameraTarget(initialMapCenter);
-            this.googleMap.moveCamera(<CameraPosition>{
+            this.googleMap.moveCamera(<CameraPosition<LatLng>>{
                 zoom: initialMapZoom,
                 target: initialMapCenter
             });
@@ -101,7 +100,7 @@ export class MapComponent {
         const bounds = new LatLngBounds([]);
         this.track.getPoints().forEach((item: LatLng) => bounds.extend(item));
 
-        this.googleMap.animateCamera(<AnimateCameraOptions>{
+        this.googleMap.animateCamera(<CameraPosition<LatLngBounds>>{
             target: bounds
         });
     }

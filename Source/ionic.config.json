@@ -1,5 +1,8 @@
 {
   "name": "mySkatemap Streckenerfassung",
   "app_id": "myskatemap-track-recorder",
-  "type": "ionic-angular"
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
 }

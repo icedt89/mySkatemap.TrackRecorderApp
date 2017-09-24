@@ -1,6 +1,6 @@
 #Getting Started
 1. npm install
-2. ionic state reset
+2. ionic cordova prepare
 3. cordova plugin add https://github.com/mapsplugin/cordova-plugin-googlemaps-sdk --nofetch
 4. cordova plugin add https://github.com/mapsplugin/cordova-plugin-googlemaps#multiple_maps --save --variable API_KEY_FOR_ANDROID="%APIKEY%"
 5. Change...
