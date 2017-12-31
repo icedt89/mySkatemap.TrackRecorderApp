@@ -1,5 +1,5 @@
 import { TrackAttachment } from "./track-attachment";
-import { BackgroundGeolocationResponse } from "../declarations";
+import { BackgroundGeolocationResponse } from "@ionic-native/background-geolocation";
 
 export class TrackRecording {
    /* public static orderByTrackingStartedAtDesc = (a: TrackRecording, b: TrackRecording) => {

@@ -16,17 +16,6 @@ export class LengthUnitHelper {
         }
     }
 
-    private static getLengthUnitFromText(unit: string): LengthUnit {
-        switch (unit) {
-            case "km":
-                return LengthUnit.Kilometers;
-            case "m":
-                return LengthUnit.Meters;
-            default:
-                throw new Exception(`Invalid length unit '${unit}'.`);
-        }
-    }
-
     public static formatTrackLength(trackedPath: LatLng[]): string {
         const computedTrackLength = Haversine.computeDistance(trackedPath);
 

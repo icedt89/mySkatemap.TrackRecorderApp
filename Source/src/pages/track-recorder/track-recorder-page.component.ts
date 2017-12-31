@@ -9,9 +9,6 @@ import {
 import {
     ShowSavedTrackRecordingModalComponent
 } from "./show-saved-track-recording-modal/show-saved-track-recording-modal.component";
-import { MockedTrackUploader } from "../../infrastructure/track-uploader/mocked-track-uploader";
-import { MockedMapComponentAccessor } from "../../components/map/mocked-map-component-accessor";
-import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-track-recorder";
 import {
     TrackRecorderSettingsModalModel
 } from "./track-recorder-settings-modal/track-recorder-settings-modal-model";
@@ -59,8 +56,7 @@ import { UserProfileInfo } from "../../infrastructure/user-profile/user-profile-
 
 @Component({
     selector: "track-recorder",
-    templateUrl: "track-recorder-page.component.html",
-    styleUrls: ["/track-recorder-page.component.css"]
+    templateUrl: "track-recorder-page.component.html"
 })
 export class TrackRecorderPageComponent {
     private _lastUpdate: string | null;

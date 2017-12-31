@@ -1,10 +1,10 @@
 import { Inject } from "@angular/core";
 import { ILogger } from "../logging/ilogger";
 import { Injectable } from "@angular/core/";
-import { BackgroundGeolocationResponse } from "../../declarations";
 import { TrackRecorderSettings } from "./track-recorder-settings";
 import { Observable, Subject } from "rxjs/Rx";
 import { ITrackRecorder } from "./itrack-recorder";
+import { BackgroundGeolocationResponse } from "@ionic-native/background-geolocation";
 
 @Injectable()
 export class MockedTrackRecorder implements ITrackRecorder {

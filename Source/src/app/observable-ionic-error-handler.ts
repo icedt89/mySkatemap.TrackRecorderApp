@@ -1,4 +1,4 @@
-import { ErrorHandler, Inject } from "@angular/core";
+import { Inject } from "@angular/core";
 import { IonicErrorHandler } from "ionic-angular";
 import { ILogger } from "../infrastructure/logging/ilogger";
 

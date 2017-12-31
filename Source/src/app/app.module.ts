@@ -1,3 +1,4 @@
+import { ILogger } from "./../infrastructure/logging/ilogger";
 import {
   ObservableLoggerViewerModalModule
 } from "../components/observable-logger-viewer-modal/observable-logger-viewer-modal.module";
@@ -8,7 +9,7 @@ import { TrackRecorderPageModule } from "../pages/track-recorder/track-recorder-
 import { HttpModule } from "@angular/http";
 import { BrowserModule } from "@angular/platform-browser";
 import { ErrorHandler, NgModule } from "@angular/core";
-import { IonicApp, IonicErrorHandler, IonicModule } from "ionic-angular";
+import { IonicApp, IonicErrorHandler, IonicModule, Platform } from "ionic-angular";
 import { IonicStorageModule } from "@ionic/storage";
 import { MyApp } from "./app.component";
 import { SplashScreen } from "@ionic-native/splash-screen";
@@ -21,6 +22,12 @@ import { AuthenticationStore } from "../infrastructure/authentication-store";
 import { ObservableLogger } from "../infrastructure/logging/observable-logger";
 import { DefaultLogger } from "../infrastructure/logging/default-logger";
 import { ObservableIonicErrorHandler } from "./observable-ionic-error-handler";
+
+const dependencyInjectionSettings = {
+  useObservableIonicErrorHandler: true,
+  useMockedLocalizationService: true,
+  useObservableLogger: true
+};
 
 @NgModule({
   imports: [
@@ -41,7 +48,6 @@ import { ObservableIonicErrorHandler } from "./observable-ionic-error-handler";
   ],
   providers: [
     StatusBar,
-    // Globalization,
     SplashScreen,
     IdentityService,
     AuthenticationHandler,
@@ -50,18 +56,41 @@ import { ObservableIonicErrorHandler } from "./observable-ionic-error-handler";
     StorageAccessor,
     {
       provide: ErrorHandler,
-      // useClass: IonicErrorHandler
-      useClass: ObservableIonicErrorHandler
+      deps: ["Logger"],
+      useFactory: (logger: ILogger) => {
+        if (dependencyInjectionSettings.useObservableIonicErrorHandler) {
+            return new ObservableIonicErrorHandler(logger);
+        }
+
+        return new IonicErrorHandler();
+      }
     },
     {
       provide: "LocalizationService",
-      useClass: MockedLocalizationService
-      // useClass: LocalizationService
+      deps: [Platform, "Logger"],
+      useFactory: (platform: Platform, logger: ILogger) => {
+        if (dependencyInjectionSettings.useMockedLocalizationService) {
+          return new MockedLocalizationService();
+        }
+
+        return new LocalizationService(platform, {
+          getPreferredLanguage: () => {
+            return {
+              value: "de"
+            }
+          }
+        }, logger);
+      }
     },
     {
       provide: "Logger",
-      useClass: ObservableLogger
-      // useClass: DefaultLogger
+      useFactory: () => {
+        if (dependencyInjectionSettings.useObservableLogger) {
+          return new ObservableLogger();
+        }
+
+        return new DefaultLogger();
+      }
     }
   ]
 })

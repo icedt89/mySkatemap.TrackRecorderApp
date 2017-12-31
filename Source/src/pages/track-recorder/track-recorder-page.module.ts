@@ -1,3 +1,5 @@
+import { Http } from "@angular/http";
+import { ILogger } from "./../../infrastructure/logging/ilogger";
 import {
     ShowSavedTrackRecordingModalModule
 } from "./show-saved-track-recording-modal/show-saved-track-recording-modal.module";
@@ -11,12 +13,21 @@ import { TrackRecordingStore } from "../../infrastructure/track-store/track-reco
 import { ArchivedTrackRecordingStore } from "../../infrastructure/track-store/archived-track-recording-store";
 import { TrackAttachmentsModalModule } from "../../components/track-attachments-modal/track-attachments-modal.module";
 import { MapModule } from "../../components/map/map.module";
-import { IonicModule } from "ionic-angular";
+import { IonicModule, Events } from "ionic-angular";
 import { TrackRecorderPageComponent } from "./track-recorder-page.component";
 import { NgModule } from "@angular/core";
 import { TrackRecorderSettingsModalModule } from "./track-recorder-settings-modal/track-recorder-settings-modal.module";
 import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-track-recorder";
 import { LoginModalModule } from "../../components/login-modal/login-modal.module";
+import { Platform } from "ionic-angular";
+import { AuthenticationStore } from "../../infrastructure/authentication-store";
+import { BackgroundGeolocation  } from "@ionic-native/background-geolocation";
+
+const dependencyInjectionSettings = {
+    useMockedMapComponentAccessor: false,
+    useMockedTrackRecorder: false,
+    useMockedTrackUploader: true
+};
 
 @NgModule({
     imports: [
@@ -39,18 +50,36 @@ import { LoginModalModule } from "../../components/login-modal/login-modal.modul
         TrackRecordingStore,
         {
             provide: "TrackRecorder",
-            useClass: MockedTrackRecorder
-            // useClass: TrackRecorder
+            deps: ["Logger", Platform],
+            useFactory: (logger: ILogger, platform: Platform) => {
+                if (dependencyInjectionSettings.useMockedTrackRecorder) {
+                    return new MockedTrackRecorder(logger);
+                }
+
+                return new TrackRecorder(platform, backgroundGeolocation);
+            }
         },
         {
             provide: "TrackUploader",
-            // useClass: MockedTrackUploader
-            useClass: TrackUploader
+            deps: ["Logger", Http, Events, AuthenticationStore],
+            useFactory: (logger: ILogger, http: Http, events: Events, authenticationStore: AuthenticationStore) => {
+                if (dependencyInjectionSettings.useMockedTrackUploader) {
+                    return new MockedTrackUploader(logger);
+                }
+
+                return new TrackUploader(http, authenticationStore, events);
+            }
         },
         {
             provide: "MapComponentAccessor",
-            // useClass: MockedMapComponentAccessor
-            useClass: MapComponentAccessor
+            deps: ["Logger"],
+            useFactory: (logger: ILogger) => {
+                if (dependencyInjectionSettings.useMockedMapComponentAccessor) {
+                    return new MockedMapComponentAccessor(logger);
+                }
+
+                return new MapComponentAccessor();
+            }
         }]
 })
 export class TrackRecorderPageModule { }

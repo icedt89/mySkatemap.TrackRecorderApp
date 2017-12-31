@@ -1,6 +1,6 @@
-import { BackgroundGeolocationResponse } from "../../declarations";
 import { TrackRecorderSettings } from "./track-recorder-settings";
 import { Observable } from "rxjs/Rx";
+import { BackgroundGeolocationResponse } from "@ionic-native/background-geolocation";
 
 export interface ITrackRecorder {
     locationModeChanged: Observable<boolean>;
