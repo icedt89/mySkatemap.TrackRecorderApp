@@ -26,7 +26,6 @@ export class TrackRecorder implements ITrackRecorder {
     };
 
     public constructor(private platform: Platform, private backgroundGeolocation: BackgroundGeolocation) {
-        debugger;
         this.initialize();
     }
 

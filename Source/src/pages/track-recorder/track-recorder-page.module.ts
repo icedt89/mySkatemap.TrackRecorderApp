@@ -21,7 +21,7 @@ import { MockedTrackRecorder } from "../../infrastructure/track-recorder/mocked-
 import { LoginModalModule } from "../../components/login-modal/login-modal.module";
 import { Platform } from "ionic-angular";
 import { AuthenticationStore } from "../../infrastructure/authentication-store";
-import { BackgroundGeolocation  } from "@ionic-native/background-geolocation";
+import * as  BGL from "@ionic-native/background-geolocation";
 
 const dependencyInjectionSettings = {
     useMockedMapComponentAccessor: false,
@@ -56,7 +56,9 @@ const dependencyInjectionSettings = {
                     return new MockedTrackRecorder(logger);
                 }
 
-                return new TrackRecorder(platform, backgroundGeolocation);
+                debugger;
+
+                return new TrackRecorder(platform, new BGL.BackgroundGeolocation());
             }
         },
         {

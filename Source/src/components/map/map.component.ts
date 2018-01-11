@@ -18,7 +18,6 @@ import { Platform, ViewController } from "ionic-angular";
     templateUrl: "map.component.html"
 })
 export class MapComponent {
-    private googleMaps: GoogleMaps;
     private googleMap: GoogleMap;
     private track: Polyline | null;
 
@@ -35,8 +34,7 @@ export class MapComponent {
             const initialMapCenter = new LatLng(50.8333, 12.9167);
             const initialMapZoom = 13;
 
-            this.googleMaps = new GoogleMaps();
-            this.googleMap = this.googleMaps.create(this.mapElement.nativeElement);
+            this.googleMap = GoogleMaps.create(this.mapElement.nativeElement);
 
             await this.googleMap.one(GoogleMapsEvent.MAP_READY);
 
