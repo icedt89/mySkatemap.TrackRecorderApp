@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/trackrecorderactivity_toolbar_refresh"
+        app:showAsAction="never"
+        android:title="@string/trackrecorderactivity_toolbar_refresh_text"/>
+    <item android:id="@+id/trackrecorderactivity_toolbar_attachments"
+        android:title="@string/trackrecorderactivity_toolbar_attachments_text"
+        app:showAsAction="never"/>
+    <item android:id="@+id/trackrecorderactivity_toolbar_finish"
+        android:title="@string/trackrecorderactivity_toolbar_finish_text"
+        app:showAsAction="never"/>
+    <item android:id="@+id/trackrecorderactivity_toolbar_discard"
+        android:title="@string/trackrecorderactivity_toolbar_discard_text"
+        app:showAsAction="never"/>
+</menu>
