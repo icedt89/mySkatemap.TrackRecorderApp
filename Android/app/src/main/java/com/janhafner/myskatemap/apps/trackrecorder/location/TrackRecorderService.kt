@@ -4,112 +4,253 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.FixedObservable
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableSubscription
+import com.janhafner.myskatemap.apps.trackrecorder.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.CurrentTrackRecordingStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.IDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimerState
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import java.util.*
+import io.reactivex.subjects.BehaviorSubject
+import org.joda.time.Duration
 
-internal final class TrackRecorderService : Service, ITrackRecorderService, Observer {
-    private final val binder: IBinder;
+internal final class TrackRecorderService : Service(), ITrackRecorderService {
+    private lateinit var locationProvider : ILocationProvider
 
-    private final val LOGTAG: String;
+    private lateinit var trackRecordingStore : IDataStore<TrackRecording>
 
-    private final val savedLocations: ArrayList<Location>;
+    private val durationTimer : ObservableTimer = ObservableTimer()
 
-    private final var locationProvider: ILocationProvider?;
+    private var recordingNotification : TrackRecorderServiceNotification? = null
 
-    private final var locationUpdateSubscription: ObservableSubscription?;
+    private lateinit var locationsSubscription : Disposable
 
-    private final var locationsSubscription: Disposable?;
+    private lateinit var recordingDurationSubscription : Disposable
 
-    private final val isActiveObservable: FixedObservable;
+    private var currentTrackRecording : TrackRecording? = null
 
-    public constructor() {
-        this.binder = TrackRecorderServiceBinder(this);
-        this.LOGTAG = TrackRecorderService::class.java.simpleName;
-        this.savedLocations = java.util.ArrayList<Location>();
-        this.locationProvider = null;
-        this.locationUpdateSubscription = null;
-        this.locationsSubscription = null;
-        this.isActiveObservable = FixedObservable();
+    public override lateinit var locations : Observable<Location>
+        get
+        private set
+
+    private val stateChangedSubject : BehaviorSubject<TrackRecorderServiceState> =  BehaviorSubject.createDefault<TrackRecorderServiceState>(TrackRecorderServiceState.Initializing)
+    public override val stateChanged : Observable<TrackRecorderServiceState>
+        get() = this.stateChangedSubject
+
+    public override val state : TrackRecorderServiceState
+        get() = this.stateChangedSubject.value
+
+    public override lateinit var recordingDuration : Observable<Duration>
+        get
+        private set
+
+    private val trackLengthSubject : BehaviorSubject<Float> = BehaviorSubject.createDefault<Float>(0f)
+    public override val trackLength : Observable<Float>
+        get() = this.trackLengthSubject
+
+    private fun createDurationObservable(duration : Duration) : Observable<Duration> {
+        var result : Observable<Duration> = this.durationTimer.secondElapsed
+
+        if(duration != Duration.ZERO && duration.standardSeconds > 0) {
+            result = result.startWith(duration)
+        }
+
+        return result.share()
     }
 
-    public final override fun startLocationTracking() {
-        this.locationProvider!!.startLocationUpdates();
+    private fun initializeDurationObservable(duration : Duration) {
+        this.recordingDuration = this.createDurationObservable(duration)
 
-        if(this.locationProvider!!.hasRequestedLocationUpdates) {
-            this.isActiveObservable.notifyObservers(true);
+        // Subscribe with a non/or debug emitting subscriber to force the replay subject to work instantly as expected
+        this.recordingDurationSubscription = this.recordingDuration.subscribe {
+            duration ->
+                this.currentTrackRecording?.duration = duration
+
+                Log.v("TrackRecorderService", "Elapsed: ${duration}")
         }
     }
 
-    public final override fun stopLocationTracking() {
-        this.locationProvider!!.stopLocationUpdates();
+    private fun createLocationsObservable(emittingSource : Observable<Location>, locations : Iterable<Location>? = null) : Observable<Location> {
+        // replay()         = remember all emitted locations
+        // autoConnect()    = start emitting/remembering emitted locations if at least one subscriber is attached
+        var result : Observable<Location> = emittingSource.replay().autoConnect()
 
-        if(!this.locationProvider!!.hasRequestedLocationUpdates) {
-            this.isActiveObservable.notifyObservers(false);
+        if(locations != null && locations.any()) {
+        // startWith()      = emit the supplied restored locations to each new subscriber
+            result = result.startWith(locations)
+        }
+
+        // share()          = seriously, i don`t have really understood if i need this, but it doesnt hurt to append it...
+        return result.share()
+    }
+
+
+    private fun initializeLocationObservable(locations : Iterable<Location>?) {
+        this.locations = this.createLocationsObservable(this.locationProvider.locations, locations)
+
+        // Subscribe with a non/or debug emitting subscriber to force the replay subject to work instantly as expected
+        this.locationsSubscription = this.locations.subscribe {
+            location ->
+                this.currentTrackRecording?.locations?.add(location)
+
+                Log.v("TrackRecorderService", "${location} handled")
         }
     }
 
-    public final override fun deleteAllLocations() {
-        this.savedLocations.clear();
+    public override fun resumeTracking() {
+        if(this.state != TrackRecorderServiceState.Ready && this.state != TrackRecorderServiceState.Paused) {
+            throw IllegalStateException()
+        }
+
+        this.changeState(com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState.Running)
+
+        this.durationTimer.start()
+
+        this.locationProvider.startLocationUpdates()
     }
 
-    public final override val locations: Iterable<Location>
-        get() = this.savedLocations;
+    public override fun pauseTracking() {
+        if(this.state != TrackRecorderServiceState.Running) {
+            return
+        }
 
-    public override fun onBind(intent: Intent?): IBinder {
-        return this.binder;
+        this.durationTimer.stop()
+
+        this.locationProvider.stopLocationUpdates()
+
+        this.saveTracking()
+
+        this.changeState(TrackRecorderServiceState.Paused)
     }
 
-    public final override fun onCreate() {
-        super.onCreate();
+    public override fun discardTracking() {
+        if(this.state == TrackRecorderServiceState.Running) {
+            throw IllegalStateException()
+        }
 
-        this.locationProvider = FusedLocationProvider(this);
+        this.trackRecordingStore.delete()
 
-        this.locationUpdateSubscription = this.locationProvider!!.addLocationUpdateObserver(this);
-        this.locationsSubscription = this.locationProvider!!.locations.subscribe({location: Location? -> {
-            if(location == null) {
-                throw IllegalArgumentException("arg");
+        this.currentTrackRecording = null
+    }
+
+    public override fun finishTracking() : TrackRecording {
+        // TODO: Check other states to provide meaningful exception messages
+        if(this.state == TrackRecorderServiceState.Running) {
+            throw IllegalStateException()
+        }
+
+        val finishedTrackRecording  = this.currentTrackRecording!!
+
+        this.saveTracking()
+
+        this.discardTracking()
+
+        return finishedTrackRecording
+    }
+
+    public override fun useTrackRecording(name: String) {
+        this.currentTrackRecording = TrackRecording(name)
+
+        this.saveTracking()
+
+        this.changeState(TrackRecorderServiceState.Ready)
+    }
+
+    public override fun useTrackRecording(trackRecording : TrackRecording) {
+        if(trackRecording.isFinished) {
+            throw IllegalStateException()
+        }
+
+        var locations : Iterable<Location>? = null
+        var duration : Duration = Duration.ZERO
+
+        if(trackRecording.locations.any()) {
+            locations = trackRecording.locations.sortedBy { location -> location.sequenceNumber }
+            val lastLocation = locations.lastOrNull()
+            var sequenceNumberOverride = -1
+            if(lastLocation != null) {
+                sequenceNumberOverride = lastLocation?.sequenceNumber
             }
 
-            Log.i(this.LOGTAG, String.format("New location received: %s", location));
-
-            this.savedLocations.add(location);
-        } })
-    }
-
-    public final override fun onDestroy() {
-        this.locationUpdateSubscription!!.remove();
-        this.locationsSubscription!!.dispose();
-
-        this.isActiveObservable.deleteObservers();
-
-        super.onDestroy()
-    }
-
-    override fun addIsActiveObserver(observer: Observer) : ObservableSubscription {
-        if(observer == null) {
-            throw IllegalArgumentException("observer");
+            this.locationProvider.overrideSequenceNumber(sequenceNumberOverride)
         }
 
-        this.isActiveObservable.addObserver(observer);
+        if(trackRecording.duration != null) {
+            duration = trackRecording.duration!!
 
-        return ObservableSubscription(this.isActiveObservable, observer);
-    }
-
-    public final override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return START_STICKY;
-    }
-
-    public final override fun update(o: Observable?, arg: Any?) {
-        if(arg == null) {
-            throw IllegalArgumentException("arg");
+            this.durationTimer.reset(duration.standardSeconds)
         }
 
-        val location = arg as Location;
+        this.initializeDurationObservable(duration)
 
-        Log.i(this.LOGTAG, String.format("New location received: %s", location));
+        this.initializeLocationObservable(locations)
 
-        this.savedLocations.add(location);
+        this.currentTrackRecording = trackRecording
+
+        this.changeState(TrackRecorderServiceState.Paused)
+    }
+
+    public override fun saveTracking() {
+        if(this.currentTrackRecording == null) {
+            throw IllegalStateException()
+        }
+
+        this.trackRecordingStore.save(this.currentTrackRecording!!)
+    }
+
+    private fun changeState(newState : TrackRecorderServiceState) {
+        this.stateChangedSubject.onNext(newState)
+
+        if(newState == TrackRecorderServiceState.Initializing) {
+            return
+        }
+
+        // TODO: Supply duration of recording and length of track
+        if(this.recordingNotification == null) {
+            this.recordingNotification = TrackRecorderServiceNotification.showNew(this, newState, null, null)
+        } else {
+            this.recordingNotification?.update(newState, this.currentTrackRecording?.duration, this.trackLengthSubject.value)
+        }
+    }
+
+    public override fun onBind(intent: Intent?) : IBinder {
+        return TrackRecorderServiceBinder(this)
+    }
+
+    public override fun onStartCommand(intent: Intent?, flags: Int, startId: Int) : Int {
+        return START_STICKY
+    }
+
+    public override fun onCreate() {
+        this.trackRecordingStore = CurrentTrackRecordingStore(this)
+        this.locationProvider = this.createLocationProvider(true)
+    }
+
+    private fun createLocationProvider(useEmulatedLocationProvider : Boolean) : ILocationProvider {
+        if (useEmulatedLocationProvider) {
+            val initialLocation : Location = Location(-1)
+
+            initialLocation.bearing = 1.0f
+            initialLocation.latitude = 50.8333
+            initialLocation.longitude = 12.9167
+
+            return TestLocationProvider(initialLocation, delay = 2500, interval = 500)
+        } else {
+            return FusedLocationProvider(this)
+        }
+    }
+
+    public override fun onDestroy() {
+        if(this.locationProvider.isActive) {
+            this.locationProvider.stopLocationUpdates()
+        }
+
+        if(this.durationTimer.state == ObservableTimerState.Running) {
+            this.durationTimer.stop()
+        }
+
+        this.durationTimer.reset()
+
+        this.recordingNotification?.close()
     }
 }

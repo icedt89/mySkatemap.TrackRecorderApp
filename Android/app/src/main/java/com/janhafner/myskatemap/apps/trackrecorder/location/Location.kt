@@ -1,37 +1,32 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
-import android.location.Location
 import org.joda.time.DateTime
-import java.util.*
 
-internal final class Location {
-    public constructor() {
-        this.bearing = null;
-        this.altitude = null;
-        this.latitude = 0.0;
-        this.longitude = 0.0;
-        this.speed = null;
-        this.provider = "";
-        this.capturedAt = DateTime.now();
-    }
+internal final class Location(public val sequenceNumber : Int) {
+    public var bearing: Float? = null
 
-    public var bearing: Float?;
+    public var altitude: Double? = null
 
-    public var altitude: Double?;
+    public var latitude: Double = 0.0
 
-    public var latitude: Double;
+    public var longitude: Double = 0.0
 
-    public var longitude: Double;
+    public var speed: Float? = null
 
-    public var speed: Float?;
+    public var provider: String = ""
 
-    public var provider: String;
-
-    public var capturedAt: DateTime;
+    public var capturedAt: DateTime = DateTime.now()
 
     // SDK-Level: 26 required
-    // public var bearingAccuracyDegrees: Float = 0.0f;
-    // public var accuracy: Float = 0.0f;
-    // public var speedAccuracyMetersPerSecond: Float = 0.0f;
-    // public var verticalAccuracyMeters: Float = 0.0f;
+    public var bearingAccuracyDegrees: Float? = null
+
+    public var accuracy: Float? = null
+
+    public var speedAccuracyMetersPerSecond: Float? = null
+
+    public var verticalAccuracyMeters: Float? = null
+
+    override fun toString(): String {
+        return "Location(#${this.sequenceNumber}; lat: ${this.latitude}; lon: ${this.longitude})"
+    }
 }

@@ -1,16 +1,31 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableSubscription
-import java.util.*
+import com.janhafner.myskatemap.apps.trackrecorder.TrackRecording
+import io.reactivex.Observable
+import org.joda.time.Duration
 
 internal interface ITrackRecorderService {
-    fun startLocationTracking();
+    val locations : Observable<Location>
 
-    fun stopLocationTracking();
+    val stateChanged : Observable<TrackRecorderServiceState>
 
-    fun deleteAllLocations();
+    val state : TrackRecorderServiceState
 
-    val locations: Iterable<Location>;
+    val recordingDuration: Observable<Duration>
 
-    fun addIsActiveObserver(observer: Observer) : ObservableSubscription;
+    val trackLength: Observable<Float>
+
+    fun resumeTracking()
+
+    fun pauseTracking()
+
+    fun discardTracking()
+
+    fun saveTracking()
+
+    fun finishTracking() : TrackRecording
+
+    fun useTrackRecording(trackRecording : TrackRecording)
+
+    fun useTrackRecording(name : String)
 }

@@ -1,7 +1,16 @@
 <resources>
     <string name="app_name">mySkatemap Track Recorder</string>
-    <string name="trackrecorderactivity_toolbar_attachments_text">Attachments</string>
-    <string name="trackrecorderactivity_toolbar_finish_text">Finish</string>
-    <string name="trackrecorderactivity_toolbar_discard_text">Discard</string>
-    <string name="trackrecorderactivity_toolbar_refresh_text">Refresh</string>
+    <string name="trackrecorderactivity_toolbar_attachments_currenttrackrecording_menuitem_text">Attachments</string>
+    <string name="trackrecorderactivity_toolbar_finish_currenttrackrecording_menuitem_text">Finish</string>
+    <string name="trackrecorderactivity_toolbar_discard_currenttrackrecording_menuitem_text">Discard</string>
+    <string name="trackrecorderactivity_toolbar_refresh_view_menuitem_text">Refresh</string>
+    <string name="trackrecorderactivityviewmodel_default_new_trackrecording_name_template">Track %s</string>
+    <string name="trackrecorderservice_notification_title">mySkatemap Track Recorder</string>
+    <string name="trackrecorderservice_notification_status_paused">Paused</string>
+    <string name="trackrecorderservice_notification_status_runnning">Running</string>
+    <string name="trackrecorderservice_notification_status_ready">Ready</string>
+    <string name="trackrecorderservice_notification_action_resume">Resume</string>
+    <string name="trackrecorderservice_notification_action_pause">Pause</string>
+    <string name="trackrecorderservice_notification_recordingduration_template">HH:mm:ss</string>
+    <string name="trackrecorderservice_notification_tracklength_template">~%f m</string>
 </resources>

@@ -1,16 +1,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/trackrecorderactivity_toolbar_refresh"
+        android:id="@+id/trackrecorderactivity_toolbar_refresh_view_menuitem"
         app:showAsAction="never"
-        android:title="@string/trackrecorderactivity_toolbar_refresh_text"/>
-    <item android:id="@+id/trackrecorderactivity_toolbar_attachments"
-        android:title="@string/trackrecorderactivity_toolbar_attachments_text"
+        android:title="@string/trackrecorderactivity_toolbar_refresh_view_menuitem_text"/>
+    <item android:id="@+id/trackrecorderactivity_toolbar_attachments_currenttrackrecording_menuitem"
+        android:title="@string/trackrecorderactivity_toolbar_attachments_currenttrackrecording_menuitem_text"
         app:showAsAction="never"/>
-    <item android:id="@+id/trackrecorderactivity_toolbar_finish"
-        android:title="@string/trackrecorderactivity_toolbar_finish_text"
+    <item android:id="@+id/trackrecorderactivity_toolbar_finish_currenttrackrecording_menuitem"
+        android:title="@string/trackrecorderactivity_toolbar_finish_currenttrackrecording_menuitem_text"
         app:showAsAction="never"/>
-    <item android:id="@+id/trackrecorderactivity_toolbar_discard"
-        android:title="@string/trackrecorderactivity_toolbar_discard_text"
+    <item android:id="@+id/trackrecorderactivity_toolbar_discard_currenttrackrecording_menuitem"
+        android:title="@string/trackrecorderactivity_toolbar_discard_currenttrackrecording_menuitem_text"
         app:showAsAction="never"/>
 </menu>

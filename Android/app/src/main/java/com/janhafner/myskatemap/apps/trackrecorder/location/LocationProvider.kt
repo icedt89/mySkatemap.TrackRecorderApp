@@ -1,42 +1,44 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.FixedObservable
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableSubscription
 import io.reactivex.subjects.PublishSubject
-import java.util.*
+import io.reactivex.subjects.Subject
 
 internal abstract class LocationProvider : ILocationProvider {
-    private final val locationUpdates: Observable;
+    protected var currentSequenceNumber : Int = -1
+        private set
 
-    private final val locationObservable: PublishSubject<Location>;
+    private val locationObservable: Subject<Location> = PublishSubject.create<Location>()
+    public final override val locations: io.reactivex.Observable<Location>
+        get() = this.locationObservable
 
-    protected constructor() {
-        this.locationUpdates = FixedObservable();
+    override var isActive: Boolean = false
+        protected set
 
-        this.locationObservable = PublishSubject.create<Location>();
+    protected fun postLocationUpdate(location: Location) {
+        this.locationObservable.onNext(location)
     }
 
-    protected final fun PostLocationUpdate(location: Location) {
-        if (location == null) {
-            throw IllegalArgumentException("location");
+    protected fun generateSequenceNumber(): Int {
+        return this.currentSequenceNumber++
+    }
+
+    public override fun resetSequenceNumber() {
+        if(this.isActive) {
+            throw IllegalStateException()
         }
 
-        this.locationUpdates.notifyObservers(location);
-        this.locationObservable.onNext(location);
+        this.currentSequenceNumber = -1
     }
 
-    public final override fun addLocationUpdateObserver(observer: Observer) : ObservableSubscription {
-        if (observer == null) {
-            throw IllegalArgumentException("observer");
+    public override fun overrideSequenceNumber(sequenceNumber : Int) {
+        if(this.isActive) {
+            throw IllegalStateException()
         }
 
-        this.locationUpdates.addObserver(observer);
+        if(sequenceNumber < -1) {
+            throw IllegalStateException()
+        }
 
-        return ObservableSubscription(this.locationUpdates, observer);
+        this.currentSequenceNumber = sequenceNumber
     }
-
-    public override final val locations: io.reactivex.Observable<Location>
-        get() = this.locationObservable;
-
-    public final override var hasRequestedLocationUpdates: Boolean = false;
 }

@@ -1,17 +1,17 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableSubscription
 import io.reactivex.Observable
-import java.util.*
 
 internal interface ILocationProvider {
-    fun startLocationUpdates();
+    fun startLocationUpdates()
 
-    fun stopLocationUpdates();
+    fun stopLocationUpdates()
 
-    val hasRequestedLocationUpdates: Boolean;
+    fun resetSequenceNumber()
 
-    fun addLocationUpdateObserver(observer: Observer) : ObservableSubscription;
+    fun overrideSequenceNumber(sequenceNumber : Int)
 
-    val locations: Observable<Location>;
+    val isActive: Boolean
+
+    val locations: Observable<Location>
 }

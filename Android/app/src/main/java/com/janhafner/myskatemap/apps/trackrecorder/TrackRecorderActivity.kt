@@ -1,81 +1,59 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.Manifest
-import android.content.ComponentName
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
-import android.view.View
-import android.widget.Toast
+import android.view.MenuItem
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapFragment
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.CurrentTrackRecordingStore
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.IDataStore
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableSubscription
-import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecorderService
-import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderService
-import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceBinder
+import com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout
+import com.jakewharton.rxbinding2.view.RxMenuItem
+import com.jakewharton.rxbinding2.view.RxView
+import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
+import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMap
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
-import io.reactivex.functions.Consumer
-import io.reactivex.subjects.PublishSubject
-import java.util.*
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 
-internal final class TrackRecorderActivity : AppCompatActivity, OnMapReadyCallback, Observer {
-    private final var trackRecorderMap: ITrackRecorderMap?;
+internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCallback {
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    private final var trackRecorderRecordButton: FloatingActionButton?;
+    private val optionsMenuSubscriptions: CompositeDisposable = CompositeDisposable()
 
-    private final var trackRecorderStopButton: FloatingActionButton?;
+    private var foregroundTrackRecorderMapLocationSubscription : Disposable? = null
 
-    private final var currentTrackRecordingStore: IDataStore<CurrentTrackRecording>?;
+    private var viewModelReadySubscription : Disposable? = null
 
-    private final var currentTrackRecording: CurrentTrackRecording?;
+    private var viewModel: TrackRecorderActivityViewModel? = null
 
-    private final var trackRecorderServiceSubscription: ObservableSubscription?;
+    private var trackRecorderMap: ITrackRecorderMap? = null
 
-    private final val trackRecorderServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            this@TrackRecorderActivity.trackRecorderService = (service as TrackRecorderServiceBinder).service;
+    private var finishCurrentTrackRecordingMenuItem: MenuItem? = null
 
-            this@TrackRecorderActivity.trackRecorderServiceSubscription = this@TrackRecorderActivity.trackRecorderService!!.addIsActiveObserver(this@TrackRecorderActivity);
-        }
+    private var discardCurrentTrackRecordingMenuItem : MenuItem? = null
 
-        override fun onServiceDisconnected(name: ComponentName) {
-            this@TrackRecorderActivity.trackRecorderService = null;
+    private var refreshViewMenuItem : MenuItem? = null
 
-            this@TrackRecorderActivity!!.trackRecorderServiceSubscription!!.remove();
-        }
-    }
+    private var showCurrentTrackRecordingAttachments: MenuItem? = null
 
-    private var trackRecorderService: ITrackRecorderService? = null;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    public constructor() : super(){
-        this.trackRecorderMap = null;
-        this.trackRecorderRecordButton = null;
-        this.trackRecorderStopButton = null;
-        this.currentTrackRecordingStore = null;
-        this.currentTrackRecording = null;
-        this.trackRecorderServiceSubscription = null;
-    }
-
-    override final fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState);
-
-        this.setContentView(R.layout.activity_track_recorder);
+        this.setContentView(R.layout.activity_track_recorder)
 
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -92,136 +70,144 @@ internal final class TrackRecorderActivity : AppCompatActivity, OnMapReadyCallba
 
                     }
                 })
-                .check();
+                .onSameThread()
+                .check()
 
-        this.bindToTrackRecorderService();
+        val trackRecorderToolbar = this.findViewById<Toolbar>(R.id.trackrecorderactivity_toolbar)
+        this.setSupportActionBar(trackRecorderToolbar)
 
-        val trackRecorderToolbar = this.findViewById<Toolbar>(R.id.trackRecorderToolbar);
-        this.setSupportActionBar(trackRecorderToolbar);
+        this.initializeGoogleMap()
 
-        this.trackRecorderRecordButton = this.findViewById<FloatingActionButton>(R.id.trackRecorderRecordButton);
-        this.trackRecorderRecordButton!!.setOnClickListener({
-            this.trackRecorderService!!.startLocationTracking()
-        });
-
-        this.trackRecorderStopButton = this.findViewById<FloatingActionButton>(R.id.trackRecorderStopButton);
-        this.trackRecorderStopButton!!.setOnClickListener({
-            this.trackRecorderService!!.stopLocationTracking()
-        });
-
-        val recordedTrackSwipeRefresher = this.findViewById<SwipeRefreshLayout>(R.id.recordedTrackSwipeRefresher);
-        recordedTrackSwipeRefresher.setOnRefreshListener ({
-            this.refreshTrackPathOnMap();
-
-            recordedTrackSwipeRefresher.isRefreshing = false;
-        });
-
-        this.initializeGoogleMap();
-
-        this.currentTrackRecordingStore = CurrentTrackRecordingStore(this);
+        this.viewModel = TrackRecorderActivityViewModel(this)
     }
 
-    override final fun onCreateOptionsMenu(menu: Menu): Boolean {
-        this.menuInflater.inflate(R.menu.track_recorder_activity_toolbar_menu, menu);
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        this.menuInflater.inflate(R.menu.track_recorder_activity_toolbar_menu, menu)
 
-        menu.findItem(R.id.trackrecorderactivity_toolbar_refresh).setOnMenuItemClickListener({
-            this.refreshTrackPathOnMap();
+        this.refreshViewMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_refresh_view_menuitem)
+        this.showCurrentTrackRecordingAttachments = menu.findItem(R.id.trackrecorderactivity_toolbar_attachments_currenttrackrecording_menuitem)
+        this.discardCurrentTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_discard_currenttrackrecording_menuitem)
+        this.finishCurrentTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_finish_currenttrackrecording_menuitem)
 
-            true;
-        });
+        this.subscribeOptionsMenuToViewModel()
 
-        menu.findItem(R.id.trackrecorderactivity_toolbar_attachments).setOnMenuItemClickListener { true };
-
-        menu.findItem(R.id.trackrecorderactivity_toolbar_finish).setOnMenuItemClickListener ({
-
-
-            true;
-        });
-
-        menu.findItem(R.id.trackrecorderactivity_toolbar_discard).setOnMenuItemClickListener ({
-            this.discardCurrentTrackRecording();
-
-            true;
-        });
-
-        return true;
+        return true
     }
 
-    private final fun refreshTrackPathOnMap() {
-        this.trackRecorderMap!!.setRecordedTrack(this.trackRecorderService!!.locations);
-
-        this.saveCurrentState();
+    private fun refreshTrackPathOnMap() {
+        this.viewModel!!.saveCurrentTrackRecording()
     }
 
-    private final fun saveCurrentState() {
-        this.currentTrackRecording!!.locations.clear();
-        this.currentTrackRecording!!.locations.addAll(this.trackRecorderService!!.locations);
+    override fun onStart() {
+        super.onStart()
 
-        this.currentTrackRecordingStore!!.save(this.currentTrackRecording!!);
+        this.subscribeToViewModel()
     }
 
-    private final fun discardCurrentTrackRecording() {
-        this.trackRecorderService!!.stopLocationTracking();
+    private fun subscribeToViewModel() {
+        val startRecordingFloatingActionButton = this.findViewById<FloatingActionButton>(R.id.trackrecorderactivity_startrecording_floatingactionbutton)
+        this.subscriptions.addAll(
+                this.viewModel!!.canStartRecording.subscribe(RxView.visibility(startRecordingFloatingActionButton)),
+                this.viewModel!!.canStartRecording.subscribe(RxView.enabled(startRecordingFloatingActionButton)),
+                RxView.clicks(startRecordingFloatingActionButton).subscribe({
+                    this.viewModel!!.startRecording()
+                })
+        )
 
-        this.currentTrackRecording = null;
+        val pauseRecordingFloatingActionButton = this.findViewById<FloatingActionButton>(R.id.trackrecorderactivity_pauserecording_floatingactionbutton)
+        this.subscriptions.addAll(
+                this.viewModel!!.canPauseRecording.subscribe(RxView.visibility(pauseRecordingFloatingActionButton)),
+                this.viewModel!!.canPauseRecording.subscribe(RxView.enabled(pauseRecordingFloatingActionButton)),
+                RxView.clicks(pauseRecordingFloatingActionButton).subscribe({
+                    this.viewModel!!.pauseRecording()
+                })
+        )
 
-        this.currentTrackRecordingStore?.delete();
+        val googleMapSwipeRefresh = this.findViewById<SwipeRefreshLayout>(R.id.trackrecorderactivity_swiperefresh_map)
+        this.subscriptions.add(RxSwipeRefreshLayout.refreshes(googleMapSwipeRefresh).subscribe({
+            this.refreshTrackPathOnMap()
+
+            googleMapSwipeRefresh.isRefreshing = false
+        }))
+
+        this.subscribeGoogleMapToLocationUpdates()
     }
 
-    override final fun onPause() {
-        this.saveCurrentState();
+    private fun subscribeGoogleMapToLocationUpdates() {
+        this.viewModelReadySubscription = this.viewModel!!.isReady.subscribe {
+            isReady: Boolean ->
+            if(isReady) {
+                this.subscriptions.add(this.viewModel!!.trackRecorderServiceStateChanged.subscribe{
+                    state: TrackRecorderServiceState ->
+                        if(state == TrackRecorderServiceState.Running) {
+                            if(this.foregroundTrackRecorderMapLocationSubscription != null) {
+                                Log.w("TrackRecorderActivity", "foregroundTrackRecorderMapLocationSubscription NOT NULL")
 
-        super.onPause();
-    }
-
-    override final fun onDestroy() {
-        this.trackRecorderService!!.stopLocationTracking();
-
-        this.saveCurrentState();
-
-        this.unbindFromTrackRecorderServic();
-
-        super.onDestroy();
-    }
-
-    private final fun unbindFromTrackRecorderServic() {
-        this.stopService(Intent(this, TrackRecorderService::class.java));
-
-        this.unbindService(this.trackRecorderServiceConnection);
-    }
-
-    private final fun bindToTrackRecorderService() {
-        this.startService(Intent(this, TrackRecorderService::class.java));
-
-        this.bindService(Intent(this, TrackRecorderService::class.java), this.trackRecorderServiceConnection, BIND_AUTO_CREATE);
-    }
-
-    private final fun initializeGoogleMap() {
-        val mapFragment = this.fragmentManager.findFragmentById(R.id.trackRecorderMapFragment) as MapFragment;
-        mapFragment.getMapAsync(this);
-    }
-
-    override final fun onMapReady(googleMap: GoogleMap) {
-        if (googleMap == null) {
-            throw IllegalArgumentException("googleMap");
-        }
-
-        this.trackRecorderMap = TrackRecorderMap.fromGoogleMap(googleMap, LatLng(50.8357, 12.92922), 13f);
-    }
-
-    public override final fun update(o: Observable?, arg: Any?) {
-        if(arg is Boolean) {
-            if(arg) {
-                if(this.currentTrackRecording == null){
-                    this.currentTrackRecording = CurrentTrackRecording();
-                }
-
-                this@TrackRecorderActivity.trackRecorderStopButton!!.visibility = View.VISIBLE
-                this@TrackRecorderActivity.trackRecorderRecordButton!!.visibility = View.GONE
+                                if(!this.foregroundTrackRecorderMapLocationSubscription!!.isDisposed) {
+                                    Log.w("TrackRecorderActivity", "foregroundTrackRecorderMapLocationSubscription NOT DISPOSED")
+                                }
+                            }
+                            this.foregroundTrackRecorderMapLocationSubscription = this.viewModel!!.locations.observeOn(AndroidSchedulers.mainThread()).subscribe(this.trackRecorderMap!!.consume())
+                        } else {
+                            this.foregroundTrackRecorderMapLocationSubscription?.dispose()
+                        }
+                })
             } else {
-                this@TrackRecorderActivity.trackRecorderStopButton!!.visibility = View.GONE
-                this@TrackRecorderActivity.trackRecorderRecordButton!!.visibility = View.VISIBLE
+                this.viewModelReadySubscription?.dispose()
             }
         }
+    }
+
+    private fun subscribeOptionsMenuToViewModel() {
+        this.optionsMenuSubscriptions.addAll(
+                // this.viewModel!!.canFinishCurrentTrackRecording.subscribe(RxMenuItem.enabled(this.refreshViewMenuItem!!)),
+                RxMenuItem.clicks(this.refreshViewMenuItem!!).subscribe({
+                    this.refreshTrackPathOnMap()
+                })
+        )
+
+        this.optionsMenuSubscriptions.addAll(
+                this.viewModel!!.canFinishCurrentTrackRecording.subscribe(RxMenuItem.enabled(this.finishCurrentTrackRecordingMenuItem!!)),
+                RxMenuItem.clicks(this.finishCurrentTrackRecordingMenuItem!!).subscribe({
+                    this.viewModel!!.finishCurrentTrackRecording()
+                })
+        )
+
+        this.optionsMenuSubscriptions.addAll(
+                this.viewModel!!.canDiscardCurrentTrackRecording.subscribe(RxMenuItem.enabled(this.discardCurrentTrackRecordingMenuItem!!)),
+                RxMenuItem.clicks(this.discardCurrentTrackRecordingMenuItem!!).subscribe({
+                    this.viewModel!!.discardCurrentTrackRecording()
+                })
+        )
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        this.viewModel!!.saveCurrentTrackRecording()
+
+        this.subscriptions.clear()
+        this.foregroundTrackRecorderMapLocationSubscription?.dispose()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        this.viewModel!!.pauseRecording()
+
+        this.viewModel!!.saveCurrentTrackRecording()
+
+        this.viewModel!!.dispose()
+    }
+
+    private fun initializeGoogleMap() {
+        val mapFragment = this.fragmentManager.findFragmentById(R.id.trackrecorderactivity_googlemap_mapfragment) as MapFragment
+
+        mapFragment.getMapAsync(this)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        // Zoom to awesome Kackstadt :)
+        this.trackRecorderMap = TrackRecorderMap.fromGoogleMap(googleMap, LatLng(50.8357, 12.92922), 13f)
     }
 }

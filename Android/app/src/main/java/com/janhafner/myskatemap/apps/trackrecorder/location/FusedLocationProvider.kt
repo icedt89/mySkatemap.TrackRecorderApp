@@ -5,56 +5,51 @@ import android.content.Context
 import com.google.android.gms.location.*
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
 
-internal final class FusedLocationProvider : LocationProvider {
-    private final val fusedLocationProviderClient: FusedLocationProviderClient;
+internal final class FusedLocationProvider(context: Context) : LocationProvider() {
+    private val fusedLocationProviderClient: FusedLocationProviderClient
 
-    private final val locationCallback: LocationCallback;
+    private val locationCallback: LocationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            val self = this@FusedLocationProvider
 
-    private final val locationRequest: LocationRequest;
+            for(sourceLocation in locationResult.locations) {
+                val sequenceNumber = self.generateSequenceNumber()
 
-    public constructor(context: Context) : super() {
-        if (context == null) {
-            throw IllegalArgumentException("context");
-        }
+                var location = sourceLocation.toLocation(sequenceNumber)
 
-        this.locationRequest = LocationRequest();
-        locationRequest.interval = 8000;
-        locationRequest.fastestInterval = 4000;
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY;
-
-        this.fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-
-        this.locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                super.onLocationResult(locationResult)
-
-                for (receivedLocation in locationResult.locations) {
-                    val location = receivedLocation.toLocation();
-
-                    this@FusedLocationProvider.PostLocationUpdate(location);
-                }
+                self.postLocationUpdate(location)
             }
         }
     }
 
-    @SuppressLint("MissingPermission")
-    public final override fun startLocationUpdates() {
-        if (this.hasRequestedLocationUpdates) {
-            return;
-        }
+    private val locationRequest: LocationRequest = LocationRequest()
 
-        this.fusedLocationProviderClient.requestLocationUpdates(this.locationRequest, this.locationCallback, null);
+    init {
+        locationRequest.interval = 8000
+        locationRequest.fastestInterval = 4000
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
-        this.hasRequestedLocationUpdates = true;
+        this.fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
     }
 
-    public final override fun stopLocationUpdates() {
-        if (!this.hasRequestedLocationUpdates) {
-            return;
+    @SuppressLint("MissingPermission")
+    public override fun startLocationUpdates() {
+        if (this.isActive) {
+            throw IllegalStateException()
         }
 
-        this.fusedLocationProviderClient.removeLocationUpdates(this.locationCallback);
+        this.fusedLocationProviderClient.requestLocationUpdates(this.locationRequest, this.locationCallback, null)
 
-        this.hasRequestedLocationUpdates = false;
+        this.isActive = true
+    }
+
+    public override fun stopLocationUpdates() {
+        if (!this.isActive) {
+            throw IllegalStateException()
+        }
+
+        this.fusedLocationProviderClient.removeLocationUpdates(this.locationCallback)
+
+        this.isActive = false
     }
 }
