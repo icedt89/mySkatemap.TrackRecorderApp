@@ -2,7 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder
 
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import org.joda.time.DateTime
-import org.joda.time.Duration
+import org.joda.time.Period
 import java.util.*
 
 internal final class TrackRecording {
@@ -27,7 +27,7 @@ internal final class TrackRecording {
     public var trackingStartedAt: DateTime = DateTime.now()
         private set
 
-    public var duration: Duration? = null
+    public var recordingTime: Period? = null
 
     public var trackingFinishedAt: DateTime? = null
         private set

@@ -3,7 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.location
 import android.os.Binder
 import com.janhafner.myskatemap.apps.trackrecorder.TrackRecording
 import io.reactivex.Observable
-import org.joda.time.Duration
+import org.joda.time.Period
 
 internal final class TrackRecorderServiceBinder(private val trackRecorderService : ITrackRecorderService) : Binder(), ITrackRecorderService {
     public override val locations: Observable<Location>
@@ -15,7 +15,7 @@ internal final class TrackRecorderServiceBinder(private val trackRecorderService
     public override val state: TrackRecorderServiceState
         get() = this.trackRecorderService.state
 
-    public override val recordingDuration: Observable<Duration>
+    public override val recordingDuration: Observable<Period>
         get() = this.trackRecorderService.recordingDuration
 
     public override val trackLength: Observable<Float>

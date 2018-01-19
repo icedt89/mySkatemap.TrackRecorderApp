@@ -12,7 +12,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTime
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
-import org.joda.time.Duration
+import org.joda.time.Period
 
 internal final class TrackRecorderService : Service(), ITrackRecorderService {
     private lateinit var locationProvider : ILocationProvider
@@ -30,7 +30,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     private var currentTrackRecording : TrackRecording? = null
 
     public override lateinit var locations : Observable<Location>
-        get
         private set
 
     private val stateChangedSubject : BehaviorSubject<TrackRecorderServiceState> =  BehaviorSubject.createDefault<TrackRecorderServiceState>(TrackRecorderServiceState.Initializing)
@@ -40,31 +39,30 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public override val state : TrackRecorderServiceState
         get() = this.stateChangedSubject.value
 
-    public override lateinit var recordingDuration : Observable<Duration>
-        get
+    public override lateinit var recordingDuration : Observable<Period>
         private set
 
     private val trackLengthSubject : BehaviorSubject<Float> = BehaviorSubject.createDefault<Float>(0f)
     public override val trackLength : Observable<Float>
         get() = this.trackLengthSubject
 
-    private fun createDurationObservable(duration : Duration) : Observable<Duration> {
-        var result : Observable<Duration> = this.durationTimer.secondElapsed
+    private fun createDurationObservable(duration : Period) : Observable<Period> {
+        var result : Observable<Period> = this.durationTimer.secondElapsed
 
-        if(duration != Duration.ZERO && duration.standardSeconds > 0) {
+        if(duration != Period.ZERO && duration.seconds > 0) {
             result = result.startWith(duration)
         }
 
         return result.share()
     }
 
-    private fun initializeDurationObservable(duration : Duration) {
+    private fun initializeDurationObservable(duration : Period) {
         this.recordingDuration = this.createDurationObservable(duration)
 
         // Subscribe with a non/or debug emitting subscriber to force the replay subject to work instantly as expected
         this.recordingDurationSubscription = this.recordingDuration.subscribe {
             duration ->
-                this.currentTrackRecording?.duration = duration
+                this.currentTrackRecording?.recordingTime = duration
 
                 Log.v("TrackRecorderService", "Elapsed: ${duration}")
         }
@@ -83,7 +81,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         // share()          = seriously, i don`t have really understood if i need this, but it doesnt hurt to append it...
         return result.share()
     }
-
 
     private fun initializeLocationObservable(locations : Iterable<Location>?) {
         this.locations = this.createLocationsObservable(this.locationProvider.locations, locations)
@@ -153,6 +150,10 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
 
         this.saveTracking()
 
+        this.initializeDurationObservable(org.joda.time.Period.ZERO)
+
+        this.initializeLocationObservable(null)
+
         this.changeState(TrackRecorderServiceState.Ready)
     }
 
@@ -162,7 +163,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         }
 
         var locations : Iterable<Location>? = null
-        var duration : Duration = Duration.ZERO
+        var duration : Period = Period.ZERO
 
         if(trackRecording.locations.any()) {
             locations = trackRecording.locations.sortedBy { location -> location.sequenceNumber }
@@ -175,10 +176,10 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
             this.locationProvider.overrideSequenceNumber(sequenceNumberOverride)
         }
 
-        if(trackRecording.duration != null) {
-            duration = trackRecording.duration!!
+        if(trackRecording.recordingTime != null) {
+            duration = trackRecording.recordingTime!!
 
-            this.durationTimer.reset(duration.standardSeconds)
+            this.durationTimer.reset(duration.seconds)
         }
 
         this.initializeDurationObservable(duration)
@@ -201,15 +202,11 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     private fun changeState(newState : TrackRecorderServiceState) {
         this.stateChangedSubject.onNext(newState)
 
-        if(newState == TrackRecorderServiceState.Initializing) {
-            return
-        }
-
         // TODO: Supply duration of recording and length of track
         if(this.recordingNotification == null) {
             this.recordingNotification = TrackRecorderServiceNotification.showNew(this, newState, null, null)
         } else {
-            this.recordingNotification?.update(newState, this.currentTrackRecording?.duration, this.trackLengthSubject.value)
+            this.recordingNotification?.update(newState, this.currentTrackRecording?.recordingTime, this.trackLengthSubject.value)
         }
     }
 
@@ -224,6 +221,8 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public override fun onCreate() {
         this.trackRecordingStore = CurrentTrackRecordingStore(this)
         this.locationProvider = this.createLocationProvider(true)
+
+        this.changeState(com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState.Initializing)
     }
 
     private fun createLocationProvider(useEmulatedLocationProvider : Boolean) : ILocationProvider {

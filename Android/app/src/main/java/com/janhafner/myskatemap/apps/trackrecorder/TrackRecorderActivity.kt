@@ -28,6 +28,7 @@ import com.karumi.dexter.listener.single.PermissionListener
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import java.util.concurrent.TimeUnit
 
 internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCallback {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
@@ -147,7 +148,10 @@ internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCall
                                     Log.w("TrackRecorderActivity", "foregroundTrackRecorderMapLocationSubscription NOT DISPOSED")
                                 }
                             }
-                            this.foregroundTrackRecorderMapLocationSubscription = this.viewModel!!.locations.observeOn(AndroidSchedulers.mainThread()).subscribe(this.trackRecorderMap!!.consume())
+                            this.foregroundTrackRecorderMapLocationSubscription = this.viewModel!!.locations
+                                    .buffer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread(), 5)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(this.trackRecorderMap!!.consumeMany())
                         } else {
                             this.foregroundTrackRecorderMapLocationSubscription?.dispose()
                         }

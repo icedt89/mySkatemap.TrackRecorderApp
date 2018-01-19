@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.joda.time.DateTime
+import org.joda.time.Period
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
@@ -11,7 +12,10 @@ import java.io.IOException
 import java.lang.reflect.ParameterizedType
 
 internal abstract class FileBasedDataStore<T>(private val file: File) : IDataStore<T> {
-    private val gson: Gson = GsonBuilder().registerTypeAdapter(DateTime::class.java, JodaTimeDateTimeGsonAdapter()).create()
+    private val gson: Gson = GsonBuilder()
+            .registerTypeAdapter(DateTime::class.java, JodaTimeDateTimeGsonAdapter())
+            .registerTypeAdapter(Period::class.java, JodaTimePeriodGsonAdapter())
+            .create()
 
     @Throws(IOException::class)
     public final override fun save(data: T) {

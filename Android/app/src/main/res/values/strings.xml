@@ -9,8 +9,10 @@
     <string name="trackrecorderservice_notification_status_paused">Paused</string>
     <string name="trackrecorderservice_notification_status_runnning">Running</string>
     <string name="trackrecorderservice_notification_status_ready">Ready</string>
+    <string name="trackrecorderservice_notification_status_initializing">Initializing</string>
     <string name="trackrecorderservice_notification_action_resume">Resume</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
-    <string name="trackrecorderservice_notification_recordingduration_template">HH:mm:ss</string>
-    <string name="trackrecorderservice_notification_tracklength_template">~%f m</string>
+    <string name="trackrecorderservice_notification_recordingduration_template">%s</string>
+    <string name="trackrecorderservice_notification_recordingduration_format">HH:mm:ss</string>
+    <string name="trackrecorderservice_notification_tracklength_template">~(%f) m</string>
 </resources>

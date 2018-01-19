@@ -2,7 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.location
 
 import com.janhafner.myskatemap.apps.trackrecorder.TrackRecording
 import io.reactivex.Observable
-import org.joda.time.Duration
+import org.joda.time.Period
 
 internal interface ITrackRecorderService {
     val locations : Observable<Location>
@@ -11,7 +11,7 @@ internal interface ITrackRecorderService {
 
     val state : TrackRecorderServiceState
 
-    val recordingDuration: Observable<Duration>
+    val recordingDuration: Observable<Period>
 
     val trackLength: Observable<Float>
 

@@ -5,31 +5,49 @@ import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
-import org.joda.time.Duration
+import org.joda.time.MutablePeriod
+import org.joda.time.Period
+import org.joda.time.PeriodType
 import java.util.*
 
 internal final class ObservableTimer {
-    public var state : ObservableTimerState = ObservableTimerState.Stopped
-        private set
-
-    private var elapsedSecondsSinceStart : Long = 0
-
     private val timer: Timer = Timer()
 
     private var timerTask: TimerTask? = this.createTimerTask()
+
+    public var state : ObservableTimerState = ObservableTimerState.Stopped
+        private set
+
+    private val secondElapsedSubject : BehaviorSubject<Period> = BehaviorSubject.createDefault<Period>(Period.ZERO)
+    public val secondElapsed : Observable<Period> = this.secondElapsedSubject.share()
+
+    private val stateChangedSubject : BehaviorSubject<ObservableTimerState> = BehaviorSubject.createDefault<ObservableTimerState>(ObservableTimerState.Stopped)
+    public val stateChanged : Observable<ObservableTimerState> = this.stateChangedSubject.share()
+
+    private val timerResetSubject : Subject<Long> = PublishSubject.create<Long>()
+    public val timerReset : Observable<Long> = this.timerResetSubject.share()
+
+    private val elapsedSeconds : MutablePeriod = MutablePeriod(PeriodType.seconds())
 
     private fun createTimerTask() : TimerTask {
         return object : TimerTask() {
             override fun run() {
                 val self = this@ObservableTimer
 
-                self.secondElapsedSubject.onNext(Duration.standardSeconds(self.elapsedSecondsSinceStart++))
+                self.elapsedSeconds.addSeconds(1)
+
+                self.secondElapsedSubject.onNext(self.elapsedSeconds.toPeriod())
             }
         }
     }
 
-    public fun reset(elapsedSecondsSinceStart : Long) {
-        this.elapsedSecondsSinceStart = elapsedSecondsSinceStart
+    public fun reset(elapsedSecondsSinceStart : Int) {
+        if(elapsedSecondsSinceStart < 0) {
+            throw IllegalArgumentException("elapsedSecondsSinceStart")
+        }
+
+        this.elapsedSeconds.clear()
+        this.elapsedSeconds.addSeconds(elapsedSecondsSinceStart)
 
         this.timerResetSubject.onNext(SystemClock.elapsedRealtime())
     }
@@ -68,16 +86,4 @@ internal final class ObservableTimer {
 
         this.stateChangedSubject.onNext(state)
     }
-
-    private val secondElapsedSubject : BehaviorSubject<Duration> = BehaviorSubject.createDefault<Duration>(Duration.ZERO)
-    public val secondElapsed : Observable<Duration>
-        get() = this.secondElapsedSubject
-
-    private val stateChangedSubject : BehaviorSubject<ObservableTimerState> = BehaviorSubject.createDefault<ObservableTimerState>(ObservableTimerState.Stopped)
-    public val stateChanged : Observable<ObservableTimerState>
-        get() = this.stateChangedSubject
-
-    private val timerResetSubject : Subject<Long> = PublishSubject.create<Long>()
-    public val timerReset : Observable<Long>
-        get() = this.timerResetSubject
 }

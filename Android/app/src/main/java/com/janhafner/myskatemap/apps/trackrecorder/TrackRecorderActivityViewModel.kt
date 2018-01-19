@@ -102,7 +102,7 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
         get() = this.canPauseRecordingObservable
 
     public fun pauseRecording() {
-        this.trackRecorderService!!.pauseTracking()
+        this.trackRecorderService?.pauseTracking()
     }
 
     private val canDiscardCurrentTrackRecordingObservable: Subject<Boolean> = BehaviorSubject.createDefault(false)
@@ -142,6 +142,6 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
     }
 
     public fun saveCurrentTrackRecording() {
-        this.trackRecorderService!!.saveTracking()
+        this.trackRecorderService?.saveTracking()
     }
 }

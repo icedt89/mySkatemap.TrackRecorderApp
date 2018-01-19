@@ -12,6 +12,7 @@ internal fun Location.toLatLng() : LatLng {
     return LatLng(this.latitude, this.longitude)
 }
 
+@Deprecated("If receiving locations in chunks is implemented for the map, removed this method and use consumeMany(...) instead!")
 internal fun ITrackRecorderMap.consume() : Consumer<in Location> {
     return Consumer({
         location: Location ->
@@ -76,8 +77,8 @@ internal fun Location.distanceTo(location : Location) : Float {
     return androidLocation.distanceTo(otherAndroidLocation)
 }
 
-internal fun android.location.Location.toLocation(sessionId : Int) : Location {
-    val result = Location(sessionId)
+internal fun android.location.Location.toLocation(sequenceNumber : Int) : Location {
+    val result = Location(sequenceNumber)
 
     result.altitude = this.altitude
     result.latitude = this.latitude

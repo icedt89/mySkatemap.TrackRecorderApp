@@ -8,23 +8,27 @@ import android.support.v4.app.NotificationCompat
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.TrackRecorderActivity
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.MySkatemapTrackRecorderAppChannel
-import org.joda.time.Duration
+import org.joda.time.Period
+import org.joda.time.format.PeriodFormatter
+import org.joda.time.format.PeriodFormatterBuilder
 
 internal final class TrackRecorderServiceNotification(private val context : Context) {
     private val notificationManager : NotificationManager = this.context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    private constructor(context : Context, trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Duration? = null, trackLengthInMeters : Float? = null)
+    private constructor(context : Context, trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Period? = null, trackLengthInMeters : Float? = null)
         : this(context) {
         this.update(trackRecorderServiceState, durationOfRecording, trackLengthInMeters)
     }
 
-    public fun update(trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Duration? = null, trackLengthInMeters : Float? = null) {
-        val notificationCompatBuilder = NotificationCompat.Builder(context, MySkatemapTrackRecorderAppChannel.CHANNEL_ID)
+    public fun update(trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Period? = null, trackLengthInMeters : Float? = null) {
+        val notificationCompatBuilder = NotificationCompat.Builder(this.context, MySkatemapTrackRecorderAppChannel.CHANNEL_ID)
 
         notificationCompatBuilder.setSmallIcon(R.mipmap.ic_launcher)
         notificationCompatBuilder.setContentTitle(context.getText(R.string.trackrecorderservice_notification_title))
 
         when(trackRecorderServiceState) {
+            TrackRecorderServiceState.Initializing ->
+                notificationCompatBuilder.setContentText(context.getString(R.string.trackrecorderservice_notification_status_initializing))
             TrackRecorderServiceState.Ready ->
                 notificationCompatBuilder.setContentText(context.getString(R.string.trackrecorderservice_notification_status_ready))
             TrackRecorderServiceState.Running ->
@@ -34,15 +38,17 @@ internal final class TrackRecorderServiceNotification(private val context : Cont
         }
 
         if(durationOfRecording != null) {
-            notificationCompatBuilder.setSubText(durationOfRecording.toString())
+            val durationDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_recordingduration_template, TrackRecorderServiceNotification.durationFormatter.print(durationOfRecording))
+            notificationCompatBuilder.setSubText(durationDisplayTemplate)
         }
 
         if(trackLengthInMeters != null) {
-            notificationCompatBuilder.setContentInfo(trackLengthInMeters.toString())
+            val lengthDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_tracklength_template, trackLengthInMeters)
+            notificationCompatBuilder.setContentInfo(lengthDisplayTemplate)
         }
 
         notificationCompatBuilder.setOngoing(true)
-        notificationCompatBuilder.setContentIntent(PendingIntent.getActivity(context, 0, Intent(context, TrackRecorderActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+        notificationCompatBuilder.setContentIntent(PendingIntent.getActivity(this.context, 0, Intent(this.context, TrackRecorderActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
 
         val notification = notificationCompatBuilder.build()
 
@@ -56,7 +62,17 @@ internal final class TrackRecorderServiceNotification(private val context : Cont
     companion object {
         private val Id : Int = 1
 
-        public fun showNew(context : Context, trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Duration? = null, trackLengthInMeters : Float? = null) : TrackRecorderServiceNotification {
+        private val durationFormatter : PeriodFormatter = PeriodFormatterBuilder()
+                .minimumPrintedDigits(2)
+                .printZeroAlways()
+                .appendHours()
+                .appendSeparator(":")
+                .appendMinutes()
+                .appendSeparator(":")
+                .appendSeconds()
+                .toFormatter()
+
+        public fun showNew(context : Context, trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Period? = null, trackLengthInMeters : Float? = null) : TrackRecorderServiceNotification {
             return TrackRecorderServiceNotification(context, trackRecorderServiceState, durationOfRecording, trackLengthInMeters)
         }
     }

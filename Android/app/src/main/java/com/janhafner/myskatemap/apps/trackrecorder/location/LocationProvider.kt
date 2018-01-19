@@ -8,10 +8,9 @@ internal abstract class LocationProvider : ILocationProvider {
         private set
 
     private val locationObservable: Subject<Location> = PublishSubject.create<Location>()
-    public final override val locations: io.reactivex.Observable<Location>
-        get() = this.locationObservable
+    public final override val locations: io.reactivex.Observable<Location> = this.locationObservable.share()
 
-    override var isActive: Boolean = false
+    public override var isActive: Boolean = false
         protected set
 
     protected fun postLocationUpdate(location: Location) {
@@ -36,7 +35,7 @@ internal abstract class LocationProvider : ILocationProvider {
         }
 
         if(sequenceNumber < -1) {
-            throw IllegalStateException()
+            throw IllegalArgumentException("sequenceNumber")
         }
 
         this.currentSequenceNumber = sequenceNumber

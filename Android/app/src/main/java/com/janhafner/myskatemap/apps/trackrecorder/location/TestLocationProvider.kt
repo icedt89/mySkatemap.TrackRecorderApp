@@ -1,6 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
-import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
 import com.janhafner.myskatemap.apps.trackrecorder.toLatLng
@@ -12,12 +11,13 @@ internal final class TestLocationProvider(private val initialLocation : Location
                                           private val latitudeStepping : Double = 0.01,
                                           private val longitudeStepping : Double = 0.01,
                                           private val delay : Long = 5000,
-                                          private val interval : Long = 5000) : LocationProvider() {
+                                          private val interval : Long = 5000,
+                                          private val simulateDependencyToAndroidLocationServices : Boolean = true) : LocationProvider() {
     private val timer : Timer = Timer()
 
     private var lastComputedLocation : com.janhafner.myskatemap.apps.trackrecorder.location.Location? = null
 
-    private var postLocationTimerTask : TimerTask? = null
+    private var postLocationTimerTask : TimerTask? = this.createTimerTask()
 
     private fun createTimerTask() : TimerTask {
         return object : TimerTask() {
@@ -26,12 +26,11 @@ internal final class TestLocationProvider(private val initialLocation : Location
 
                 val computedLocation = self.computeLocation()
 
-                Log.i("TestLocationProvider", computedLocation.toString())
-
                 self.postLocationUpdate(computedLocation)
             }
         }
     }
+
 
     private fun computeNextLocation(counter : Int, initialLocation: LatLng, currentLocation : LatLng, offsetLatitude: Double, offsetLongitude : Double) : LatLng {
         if(counter == 0) {
@@ -55,29 +54,29 @@ internal final class TestLocationProvider(private val initialLocation : Location
         if(this.lastComputedLocation == null) {
             this.lastComputedLocation = Location(sequenceNumber)
 
-            this.lastComputedLocation!!.provider = "fake-gps"
-            this.lastComputedLocation!!.bearing = initialLocation.bearing
-            this.lastComputedLocation!!.accuracy = initialLocation.accuracy
-            this.lastComputedLocation!!.capturedAt = DateTime.now()
-            this.lastComputedLocation!!.latitude = initialLocation.latitude
-            this.lastComputedLocation!!.longitude = initialLocation.longitude
-            this.lastComputedLocation!!.speed = initialLocation.speed
+            this.lastComputedLocation?.provider = "fake-gps"
+            this.lastComputedLocation?.bearing = initialLocation.bearing
+            this.lastComputedLocation?.accuracy = initialLocation.accuracy
+            this.lastComputedLocation?.capturedAt = DateTime.now()
+            this.lastComputedLocation?.latitude = initialLocation.latitude
+            this.lastComputedLocation?.longitude = initialLocation.longitude
+            this.lastComputedLocation?.speed = initialLocation.speed
         } else {
-            this.lastComputedLocation = this.lastComputedLocation!!.clone(sequenceNumber)
+            this.lastComputedLocation = this.lastComputedLocation?.clone(sequenceNumber)
 
-            this.lastComputedLocation!!.bearing = this.lastComputedLocation!!.bearing?.plus(this.bearingStepping)
+            this.lastComputedLocation?.bearing = this.lastComputedLocation?.bearing?.plus(this.bearingStepping)
 
             val nextComputedLocation = this.computeNextLocation(sequenceNumber, this.initialLocation.toLatLng(), this.lastComputedLocation!!.toLatLng(), this.latitudeStepping, this.longitudeStepping)
 
-            this.lastComputedLocation!!.latitude = nextComputedLocation.latitude
-            this.lastComputedLocation!!.longitude = nextComputedLocation.longitude
+            this.lastComputedLocation?.latitude = nextComputedLocation.latitude
+            this.lastComputedLocation?.longitude = nextComputedLocation.longitude
         }
 
         return this.lastComputedLocation!!
     }
 
     override fun stopLocationUpdates() {
-        if(this.postLocationTimerTask == null) {
+        if (!this.isActive) {
             throw IllegalStateException()
         }
 
@@ -88,11 +87,13 @@ internal final class TestLocationProvider(private val initialLocation : Location
     }
 
     override fun startLocationUpdates() {
-        if(this.postLocationTimerTask != null)  {
+        if (this.isActive) {
             throw IllegalStateException()
         }
 
-        this.postLocationTimerTask = this.createTimerTask()
+        if(this.postLocationTimerTask == null) {
+            this.postLocationTimerTask = this.createTimerTask()
+        }
 
         this.timer.schedule(this.postLocationTimerTask, this.delay, this.interval)
 

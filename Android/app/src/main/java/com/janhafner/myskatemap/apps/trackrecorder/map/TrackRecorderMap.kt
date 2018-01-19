@@ -1,13 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.map
 
+import android.graphics.Color
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.UiSettings
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
-import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.google.android.gms.maps.model.*
 
 internal final class TrackRecorderMap(private val googleMap: GoogleMap) : ITrackRecorderMap {
     private val polyline: Polyline = this.googleMap.addPolyline(PolylineOptions())
@@ -59,7 +56,7 @@ internal final class TrackRecorderMap(private val googleMap: GoogleMap) : ITrack
 
             googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
-            trackRecorderMap.trackColor = R.color.colorTrackedPathFill
+            trackRecorderMap.trackColor = Color.RED
 
             return trackRecorderMap
         }
