@@ -7,28 +7,28 @@ import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
 internal final class TrackDistanceCalculator() {
-    private val innerList : MutableList<Location> = ArrayList<Location>()
+    private val innerList: MutableList<Location> = ArrayList<Location>()
 
-    private var lastAccessLocationForComputation : Location? = null
+    private var lastAccessLocationForComputation: Location? = null
 
-    private val distanceSubject : BehaviorSubject<Float> = BehaviorSubject.createDefault<Float>(0f)
-    public val distanceCalculated : Observable<Float> = this.distanceSubject
+    private val distanceSubject: BehaviorSubject<Float> = BehaviorSubject.createDefault<Float>(0f)
+    public val distanceCalculated: Observable<Float> = this.distanceSubject
 
-    public val distance : Float
+    public val distance: Float
         get() = this.distanceSubject.value
 
-    public constructor(locations : Iterable<Location>)
-        : this() {
+    public constructor(locations: Iterable<Location>)
+       : this() {
         this.addAll(locations)
     }
 
-    public constructor(location : Location)
-        : this() {
+    public constructor(location: Location)
+       : this() {
         this.add(location)
     }
 
-    private fun computeDistance(location : Location) {
-        if(this.lastAccessLocationForComputation != null) {
+    private fun computeDistance(location: Location) {
+        if (this.lastAccessLocationForComputation != null) {
             val distanceBetween = this.lastAccessLocationForComputation!!.distanceTo(location)
 
             Log.v("TrackLengthCalculator", "Adding new distance of ${distanceBetween}m")
@@ -51,7 +51,7 @@ internal final class TrackDistanceCalculator() {
         this.distanceSubject.onNext(0f)
     }
 
-    public fun addAll(locations : Iterable<Location>) {
+    public fun addAll(locations: Iterable<Location>) {
         for(location in locations) {
             this.computeDistance(location)
         }
@@ -59,7 +59,7 @@ internal final class TrackDistanceCalculator() {
         this.innerList.addAll(locations)
     }
 
-    public fun add(location : Location) {
+    public fun add(location: Location) {
         this.computeDistance(location)
 
         this.innerList.add(location)

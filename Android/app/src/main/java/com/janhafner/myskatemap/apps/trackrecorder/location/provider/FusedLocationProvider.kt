@@ -5,10 +5,10 @@ import android.content.Context
 import com.google.android.gms.location.*
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
 
-internal final class FusedLocationProvider(context: Context) : LocationProvider() {
+internal final class FusedLocationProvider(context: Context): LocationProvider() {
     private val fusedLocationProviderClient: FusedLocationProviderClient
 
-    private val locationCallback: LocationCallback = object : LocationCallback() {
+    private val locationCallback: LocationCallback = object: LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val self = this@FusedLocationProvider
 

@@ -19,19 +19,19 @@ internal final class ObservableTimer {
     public var isRunning: Boolean = false
         private set
 
-    private val secondElapsedSubject : BehaviorSubject<Period> = BehaviorSubject.createDefault<Period>(Period.ZERO)
-    public val secondElapsed : Observable<Period> = this.secondElapsedSubject
+    private val secondElapsedSubject: BehaviorSubject<Period> = BehaviorSubject.createDefault<Period>(Period.ZERO)
+    public val secondElapsed: Observable<Period> = this.secondElapsedSubject
 
     private val isRunningSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
     public val isRunningChanged: Observable<Boolean> = this.isRunningSubject
 
-    private val timerResetSubject : Subject<Long> = PublishSubject.create<Long>()
-    public val timerReset : Observable<Long> = this.timerResetSubject
+    private val timerResetSubject: Subject<Long> = PublishSubject.create<Long>()
+    public val timerReset: Observable<Long> = this.timerResetSubject
 
-    private val elapsedSeconds : MutablePeriod = MutablePeriod(PeriodType.seconds())
+    private val elapsedSeconds: MutablePeriod = MutablePeriod(PeriodType.seconds())
 
-    private fun createTimerTask() : TimerTask {
-        return object : TimerTask() {
+    private fun createTimerTask(): TimerTask {
+        return object: TimerTask() {
             override fun run() {
                 val self = this@ObservableTimer
 
@@ -44,8 +44,8 @@ internal final class ObservableTimer {
         }
     }
 
-    public fun reset(elapsedSecondsSinceStart : Int) {
-        if(elapsedSecondsSinceStart < 0) {
+    public fun reset(elapsedSecondsSinceStart: Int) {
+        if (elapsedSecondsSinceStart < 0) {
             throw IllegalArgumentException("elapsedSecondsSinceStart")
         }
 
@@ -54,7 +54,7 @@ internal final class ObservableTimer {
 
         Log.v("ObservableTimer", "Elapsed seconds reset to ${elapsedSecondsSinceStart}")
 
-        if(!this.isRunning) {
+        if (!this.isRunning) {
             this.secondElapsedSubject.onNext(this.elapsedSeconds.toPeriod())
         }
 
@@ -66,11 +66,11 @@ internal final class ObservableTimer {
     }
 
     public fun start() {
-        if(this.isRunning) {
+        if (this.isRunning) {
             throw IllegalStateException()
         }
 
-        if(this.timerTask == null) {
+        if (this.timerTask == null) {
             this.timerTask = this.createTimerTask()
         }
 
@@ -80,7 +80,7 @@ internal final class ObservableTimer {
     }
 
     public fun stop() {
-        if(!this.isRunning) {
+        if (!this.isRunning) {
             throw IllegalStateException()
         }
 
@@ -90,7 +90,7 @@ internal final class ObservableTimer {
         this.changeState(false)
     }
 
-    private fun changeState(isRunning : Boolean) {
+    private fun changeState(isRunning: Boolean) {
         this.isRunning = isRunning
 
         this.isRunningSubject.onNext(isRunning)

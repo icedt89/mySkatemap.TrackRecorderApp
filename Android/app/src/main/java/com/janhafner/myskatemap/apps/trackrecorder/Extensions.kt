@@ -9,11 +9,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
 
-internal fun Location.toLatLng() : LatLng {
+internal fun Location.toLatLng(): LatLng {
     return LatLng(this.latitude, this.longitude)
 }
 
-internal fun Location.clone(sequenceNumber : Int) : Location {
+internal fun Location.clone(sequenceNumber: Int): Location {
     val result = Location(sequenceNumber)
 
     result.latitude = this.latitude
@@ -30,11 +30,11 @@ internal fun Location.clone(sequenceNumber : Int) : Location {
     return result
 }
 
-internal fun ITrackRecorderMap.consumeLocations() : Consumer<Iterable<Location>> {
+internal fun ITrackRecorderMap.consumeLocations(): Consumer<Iterable<Location>> {
     return Consumer({
         locations: Iterable<Location> ->
             val locationsCount = locations.count()
-            if(locationsCount > 0) {
+            if (locationsCount > 0) {
                 Log.v("ITrackRecorderMap", "Received locations: ${locationsCount}")
 
                 val points = this.track.toMutableList()
@@ -48,19 +48,19 @@ internal fun ITrackRecorderMap.consumeLocations() : Consumer<Iterable<Location>>
     })
 }
 
-internal fun ITrackRecorderMap.consumeReset() : Consumer<TrackRecorderServiceState> {
+internal fun ITrackRecorderMap.consumeReset(): Consumer<TrackRecorderServiceState> {
     return Consumer({
         currentState ->
-            if(currentState == TrackRecorderServiceState.Initializing) {
+            if (currentState == TrackRecorderServiceState.Initializing) {
                 this.track = kotlin.collections.emptyList()
             }
     })
 }
 
-private fun Location.toLiteAndroidLocation() : android.location.Location {
+private fun Location.toLiteAndroidLocation(): android.location.Location {
     val result = android.location.Location(this.provider)
 
-    if(this.bearing != null) {
+    if (this.bearing != null) {
         result.bearing = this.bearing!!
     }
 
@@ -70,14 +70,14 @@ private fun Location.toLiteAndroidLocation() : android.location.Location {
     return result
 }
 
-internal fun Location.distanceTo(location : Location) : Float {
+internal fun Location.distanceTo(location: Location): Float {
     val androidLocation = this.toLiteAndroidLocation()
     val otherAndroidLocation = location.toLiteAndroidLocation()
 
     return androidLocation.distanceTo(otherAndroidLocation)
 }
 
-internal fun android.location.Location.toLocation(sequenceNumber : Int) : Location {
+internal fun android.location.Location.toLocation(sequenceNumber: Int): Location {
     val result = Location(sequenceNumber)
 
     result.altitude = this.altitude

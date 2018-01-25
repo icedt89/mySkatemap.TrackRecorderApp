@@ -17,7 +17,7 @@ internal final class TrackRecording {
 
     public var name: String = ""
         set(value) {
-            if(this.isFinished) {
+            if (this.isFinished) {
                 throw IllegalStateException()
             }
 
@@ -33,7 +33,7 @@ internal final class TrackRecording {
         private set
 
     public fun finish() {
-        if(this.isFinished) {
+        if (this.isFinished) {
             throw IllegalStateException()
         }
 

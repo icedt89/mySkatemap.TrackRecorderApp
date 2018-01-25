@@ -4,9 +4,9 @@ import com.google.gson.*
 import org.joda.time.DateTime
 import java.lang.reflect.Type
 
-internal final class JodaTimeDateTimeGsonAdapter : JsonSerializer<DateTime>, JsonDeserializer<DateTime> {
+internal final class JodaTimeDateTimeGsonAdapter: JsonSerializer<DateTime>, JsonDeserializer<DateTime> {
     public override fun serialize(src: DateTime?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
-        if(src == null) {
+        if (src == null) {
             return JsonNull.INSTANCE
         }
 
@@ -14,7 +14,7 @@ internal final class JodaTimeDateTimeGsonAdapter : JsonSerializer<DateTime>, Jso
     }
 
     public override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): DateTime {
-        if(json == null) {
+        if (json == null) {
             return DateTime()
         }
 

@@ -4,9 +4,9 @@ import com.google.gson.*
 import org.joda.time.Period
 import java.lang.reflect.Type
 
-internal final class JodaTimePeriodGsonAdapter : JsonSerializer<Period>, JsonDeserializer<Period> {
+internal final class JodaTimePeriodGsonAdapter: JsonSerializer<Period>, JsonDeserializer<Period> {
     public override fun serialize(src: Period?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
-        if(src == null) {
+        if (src == null) {
             return JsonNull.INSTANCE
         }
 
@@ -14,7 +14,7 @@ internal final class JodaTimePeriodGsonAdapter : JsonSerializer<Period>, JsonDes
     }
 
     public override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Period {
-        if(json == null) {
+        if (json == null) {
             return Period.ZERO
         }
 

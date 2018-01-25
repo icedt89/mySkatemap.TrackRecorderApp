@@ -10,7 +10,7 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.lang.reflect.ParameterizedType
 
-internal abstract class FileBasedDataStore<T>(private val file: File) : IDataStore<T> {
+internal abstract class FileBasedDataStore<T>(private val file: File): IDataStore<T> {
 
 
     public final override fun save(data: T) {

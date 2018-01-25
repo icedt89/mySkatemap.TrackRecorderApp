@@ -12,15 +12,15 @@ import org.joda.time.Period
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 
-internal final class TrackRecorderServiceNotification(private val context : Context) {
-    private val notificationManager : NotificationManager = this.context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as NotificationManager
+internal final class TrackRecorderServiceNotification(private val context: Context) {
+    private val notificationManager: NotificationManager = this.context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    private constructor(context : Context, trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Period? = null, trackLengthInMeters : Float? = null)
-        : this(context) {
+    private constructor(context: Context, trackRecorderServiceState: TrackRecorderServiceState, durationOfRecording: Period? = null, trackLengthInMeters: Float? = null)
+       : this(context) {
         this.update(trackRecorderServiceState, durationOfRecording, trackLengthInMeters)
     }
 
-    public fun update(trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Period? = null, trackLengthInMeters : Float? = null) {
+    public fun update(trackRecorderServiceState: TrackRecorderServiceState, durationOfRecording: Period? = null, trackLengthInMeters: Float? = null) {
         val notificationCompatBuilder = NotificationCompat.Builder(this.context, TrackRecorderServiceNotificationChannel.Id)
 
         notificationCompatBuilder.setSmallIcon(R.mipmap.ic_launcher)
@@ -39,13 +39,13 @@ internal final class TrackRecorderServiceNotification(private val context : Cont
                 notificationCompatBuilder.setContentText(context.getString(R.string.trackrecorderservice_notification_status_paused))
         }
 
-        if(trackRecorderServiceState != TrackRecorderServiceState.Initializing) {
-            if(durationOfRecording != null) {
+        if (trackRecorderServiceState != TrackRecorderServiceState.Initializing) {
+            if (durationOfRecording != null) {
                 val durationDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_recordingduration_template, TrackRecorderServiceNotification.durationFormatter.print(durationOfRecording))
                 notificationCompatBuilder.setSubText(durationDisplayTemplate)
             }
 
-            if(trackLengthInMeters != null) {
+            if (trackLengthInMeters != null) {
                 val lengthDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_tracklength_template, trackLengthInMeters)
                 notificationCompatBuilder.setContentInfo(lengthDisplayTemplate)
             }
@@ -64,9 +64,9 @@ internal final class TrackRecorderServiceNotification(private val context : Cont
     }
 
     companion object {
-        private val Id : Int = 1
+        private val Id: Int = 1
 
-        private val durationFormatter : PeriodFormatter = PeriodFormatterBuilder()
+        private val durationFormatter: PeriodFormatter = PeriodFormatterBuilder()
                 .minimumPrintedDigits(2)
                 .printZeroAlways()
                 .appendHours()
@@ -76,7 +76,7 @@ internal final class TrackRecorderServiceNotification(private val context : Cont
                 .appendSeconds()
                 .toFormatter()
 
-        public fun showNew(context : Context, trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Period? = null, trackLengthInMeters : Float? = null) : TrackRecorderServiceNotification {
+        public fun showNew(context: Context, trackRecorderServiceState: TrackRecorderServiceState, durationOfRecording: Period? = null, trackLengthInMeters: Float? = null): TrackRecorderServiceNotification {
             return TrackRecorderServiceNotification(context, trackRecorderServiceState, durationOfRecording, trackLengthInMeters)
         }
     }

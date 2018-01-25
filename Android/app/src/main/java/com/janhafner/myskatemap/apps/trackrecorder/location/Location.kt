@@ -2,7 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.location
 
 import org.joda.time.DateTime
 
-internal final class Location(public val sequenceNumber : Int) {
+internal final class Location(public val sequenceNumber: Int) {
     public var bearing: Float? = null
 
     public var altitude: Double? = null
@@ -26,7 +26,7 @@ internal final class Location(public val sequenceNumber : Int) {
 
     public var verticalAccuracyMeters: Float? = null
 
-    override fun toString(): String {
+    public override fun toString(): String {
         return "Location(#${this.sequenceNumber}; lat: ${this.latitude}; lon: ${this.longitude})"
     }
 }

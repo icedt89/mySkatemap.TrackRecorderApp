@@ -18,28 +18,28 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
 import org.joda.time.Period
 
-internal final class TrackRecorderService : Service(), ITrackRecorderService {
-    private lateinit var locationProvider : ILocationProvider
+internal final class TrackRecorderService: Service(), ITrackRecorderService {
+    private lateinit var locationProvider: ILocationProvider
 
-    private lateinit var trackRecordingStore : IDataStore<TrackRecording>
+    private lateinit var trackRecordingStore: IDataStore<TrackRecording>
 
-    private lateinit var locationChangedBroadcasterReceiver : LocationAvailabilityChangedBroadcastReceiver
+    private lateinit var locationChangedBroadcasterReceiver: LocationAvailabilityChangedBroadcastReceiver
 
-    private val durationTimer : ObservableTimer = ObservableTimer()
+    private val durationTimer: ObservableTimer = ObservableTimer()
 
-    private var trackRecorderServiceNotification : TrackRecorderServiceNotification? = null
+    private var trackRecorderServiceNotification: TrackRecorderServiceNotification? = null
 
-    private val trackDistanceCalculator : TrackDistanceCalculator = TrackDistanceCalculator()
+    private val trackDistanceCalculator: TrackDistanceCalculator = TrackDistanceCalculator()
 
-    private lateinit var locationAvailabilityChangedSubscription : Disposable
+    private lateinit var locationAvailabilityChangedSubscription: Disposable
 
-    private var sessionSubscriptions : CompositeDisposable? = null
+    private var sessionSubscriptions: CompositeDisposable? = null
 
-    private var currentTrackRecording : TrackRecording? = null
+    private var currentTrackRecording: TrackRecording? = null
 
-    private val stateChangedSubject : BehaviorSubject<TrackRecorderServiceState> =  BehaviorSubject.createDefault<TrackRecorderServiceState>(TrackRecorderServiceState.Initializing)
+    private val stateChangedSubject: BehaviorSubject<TrackRecorderServiceState> =  BehaviorSubject.createDefault<TrackRecorderServiceState>(TrackRecorderServiceState.Initializing)
 
-    public override var currentSession : ITrackRecordingSession? = null
+    public override var currentSession: ITrackRecordingSession? = null
         private set
 
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
@@ -47,14 +47,14 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         this.registerReceiver(this.locationChangedBroadcasterReceiver, android.content.IntentFilter("android.location.PROVIDERS_CHANGED"))
         this.locationAvailabilityChangedSubscription = this.locationChangedBroadcasterReceiver.locationAvailabilityChanged.subscribe{
             isLocationModeEnabled ->
-                if(!isLocationModeEnabled) {
-                    if(this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
+                if (!isLocationModeEnabled) {
+                    if (this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
                         this.pauseTracking()
 
                         this.changeState(TrackRecorderServiceState.LocationServicesUnavailable)
                     }
                 } else {
-                    if(this.stateChangedSubject.value == TrackRecorderServiceState.LocationServicesUnavailable) {
+                    if (this.stateChangedSubject.value == TrackRecorderServiceState.LocationServicesUnavailable) {
                         this.resumeTracking()
 
                         this.changeState(TrackRecorderServiceState.Running)
@@ -66,7 +66,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     }
 
     public fun resumeTracking() {
-        if(this.stateChangedSubject.value != TrackRecorderServiceState.Ready
+        if (this.stateChangedSubject.value != TrackRecorderServiceState.Ready
                 && this.stateChangedSubject.value != TrackRecorderServiceState.Paused) {
             throw IllegalStateException()
         }
@@ -79,7 +79,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     }
 
     public fun pauseTracking() {
-        if(this.stateChangedSubject.value != TrackRecorderServiceState.Running) {
+        if (this.stateChangedSubject.value != TrackRecorderServiceState.Running) {
             throw IllegalStateException()
         }
 
@@ -93,17 +93,17 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     }
 
     public override fun discardTracking() {
-        if(this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
+        if (this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
             throw IllegalStateException()
         }
 
-        if(this.durationTimer.isRunning) {
+        if (this.durationTimer.isRunning) {
             this.durationTimer.stop()
         }
 
         this.durationTimer.reset()
 
-        if(this.locationProvider.isActive) {
+        if (this.locationProvider.isActive) {
             this.locationProvider.stopLocationUpdates()
         }
 
@@ -123,9 +123,9 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         this.currentSession = null
     }
 
-    public override fun finishTracking() : TrackRecording {
+    public override fun finishTracking(): TrackRecording {
         // TODO: Check other states to provide meaningful exception messages
-        if(this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
+        if (this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
             throw IllegalStateException()
         }
 
@@ -138,8 +138,8 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         return finishedTrackRecording
     }
 
-    public override fun createSession(name: String) : ITrackRecordingSession {
-        if(this.currentSession != null) {
+    public override fun createSession(name: String): ITrackRecordingSession {
+        if (this.currentSession != null) {
             throw IllegalStateException()
         }
 
@@ -161,17 +161,17 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         return this.currentSession!!
     }
 
-    public override fun createSession(trackRecording : TrackRecording) : ITrackRecordingSession {
-        if(this.currentSession != null) {
+    public override fun createSession(trackRecording: TrackRecording): ITrackRecordingSession {
+        if (this.currentSession != null) {
             throw IllegalStateException()
         }
         
-        if(trackRecording.isFinished) {
+        if (trackRecording.isFinished) {
             throw IllegalStateException()
         }
 
         var locationsChanged = this.locationProvider.locations.replay().autoConnect()
-        if(trackRecording.locations.any()) {
+        if (trackRecording.locations.any()) {
             val sortedLocations = trackRecording.locations.sortedBy { location -> location.sequenceNumber }
 
             this.locationProvider.overrideSequenceNumber(sortedLocations.last().sequenceNumber)
@@ -180,7 +180,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         }
 
         var recordingTimeChanged = this.durationTimer.secondElapsed
-        if(trackRecording.recordingTime != Period.ZERO && trackRecording.recordingTime.seconds > 0) {
+        if (trackRecording.recordingTime != Period.ZERO && trackRecording.recordingTime.seconds > 0) {
             this.durationTimer.reset(trackRecording.recordingTime.seconds)
         }
 
@@ -220,35 +220,35 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     }
 
     private fun unsubscribeFromSession() {
-        if(this.sessionSubscriptions != null) {
+        if (this.sessionSubscriptions != null) {
             this.sessionSubscriptions!!.dispose()
             this.sessionSubscriptions = null
         }
     }
 
     public fun saveTracking() {
-        if(this.currentTrackRecording == null) {
+        if (this.currentTrackRecording == null) {
             throw IllegalStateException()
         }
 
         this.trackRecordingStore.save(this.currentTrackRecording!!)
     }
 
-    private fun changeState(newState : TrackRecorderServiceState) {
+    private fun changeState(newState: TrackRecorderServiceState) {
         this.stateChangedSubject.onNext(newState)
 
-        if(this.trackRecorderServiceNotification == null) {
+        if (this.trackRecorderServiceNotification == null) {
             this.trackRecorderServiceNotification = TrackRecorderServiceNotification.showNew(this, newState, null, null)
         } else {
             this.trackRecorderServiceNotification?.update(newState, this.currentTrackRecording?.recordingTime, this.trackDistanceCalculator.distance)
         }
     }
 
-    public override fun onBind(intent: Intent?) : IBinder {
+    public override fun onBind(intent: Intent?): IBinder {
         return TrackRecorderServiceBinder(this)
     }
 
-    public override fun onStartCommand(intent: Intent?, flags: Int, startId: Int) : Int {
+    public override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return START_STICKY
     }
 
@@ -261,17 +261,17 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         this.changeState(TrackRecorderServiceState.Initializing)
     }
 
-    private fun createLocationProvider(useEmulatedLocationProvider : Boolean, useLegacyLocationProvider : Boolean) : ILocationProvider {
+    private fun createLocationProvider(useEmulatedLocationProvider: Boolean, useLegacyLocationProvider: Boolean): ILocationProvider {
         if (useEmulatedLocationProvider) {
-            val initialLocation : Location = Location(-1)
+            val initialLocation: Location = Location(-1)
 
             initialLocation.bearing = 1.0f
             initialLocation.latitude = 50.8333
             initialLocation.longitude = 12.9167
 
-            return TestLocationProvider(this, initialLocation, delay = 2500, interval = 500)
+            return TestLocationProvider(this, initialLocation, interval = 500)
         } else {
-            if(useLegacyLocationProvider) {
+            if (useLegacyLocationProvider) {
                 return LegacyLocationProvider(this)
             }
 
@@ -280,11 +280,11 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     }
 
     public override fun onDestroy() {
-        if(this.locationProvider.isActive) {
+        if (this.locationProvider.isActive) {
             this.locationProvider.stopLocationUpdates()
         }
 
-        if(this.durationTimer.isRunning) {
+        if (this.durationTimer.isRunning) {
             this.durationTimer.stop()
         }
 

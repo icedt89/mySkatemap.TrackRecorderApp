@@ -4,9 +4,12 @@ import android.graphics.Color
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.UiSettings
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 
-internal final class TrackRecorderMap(private val googleMap: GoogleMap) : ITrackRecorderMap {
+internal final class TrackRecorderMap(private val googleMap: GoogleMap): ITrackRecorderMap {
     private val polyline: Polyline = this.googleMap.addPolyline(PolylineOptions())
 
     public override val uiSettings: UiSettings
@@ -20,7 +23,7 @@ internal final class TrackRecorderMap(private val googleMap: GoogleMap) : ITrack
         get() = this.polyline.color
         set(value){ this.polyline.color = value }
 
-    public override var track : Iterable<LatLng>
+    public override var track: Iterable<LatLng>
         get() = this.polyline.points.asIterable()
         set(value) {
             this.polyline.points = value.toList()
@@ -30,7 +33,7 @@ internal final class TrackRecorderMap(private val googleMap: GoogleMap) : ITrack
 
     private fun moveTrackIntoView() {
         val points = this.polyline.points
-        if(!points.any()) {
+        if (!points.any()) {
             return
         }
 

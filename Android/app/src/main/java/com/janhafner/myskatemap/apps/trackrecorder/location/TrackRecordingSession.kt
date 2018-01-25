@@ -4,12 +4,12 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.Period
 
-internal final class TrackRecordingSession(public override val trackDistanceChanged : Observable<Float>,
-                                           public override val recordingTimeChanged : Observable<Period>,
-                                           public override val locationsChanged : Observable<Location>,
-                                           public override val stateChanged : Observable<TrackRecorderServiceState>,
-                                           private val trackRecorderService : TrackRecorderService) : ITrackRecordingSession {
-    private val subscriptions : CompositeDisposable = CompositeDisposable()
+internal final class TrackRecordingSession(public override val trackDistanceChanged: Observable<Float>,
+                                           public override val recordingTimeChanged: Observable<Period>,
+                                           public override val locationsChanged: Observable<Location>,
+                                           public override val stateChanged: Observable<TrackRecorderServiceState>,
+                                           private val trackRecorderService: TrackRecorderService): ITrackRecordingSession {
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     init {
         this.subscriptions.addAll(
@@ -28,13 +28,13 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
         )
     }
 
-    public override var trackDistance : Float = 0f
+    public override var trackDistance: Float = 0f
         private set
 
-    public override var recordingTime : Period = Period.ZERO
+    public override var recordingTime: Period = Period.ZERO
         private set
 
-    public override var state : TrackRecorderServiceState = TrackRecorderServiceState.Initializing
+    public override var state: TrackRecorderServiceState = TrackRecorderServiceState.Initializing
         private set
 
     public override fun terminate() {

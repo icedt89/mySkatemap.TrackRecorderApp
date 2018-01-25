@@ -18,7 +18,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
-internal final class TrackRecorderActivityViewModel(private val context : Context) {
+internal final class TrackRecorderActivityViewModel(private val context: Context) {
     private var trackRecorderService: ITrackRecorderService? = null
 
     private var trackRecordingSession: ITrackRecordingSession? = null
@@ -27,25 +27,25 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
 
     private val currentTrackRecordingStore: IDataStore<TrackRecording> = CurrentTrackRecordingStore(context)
 
-    private val trackRecorderServiceConnection: ServiceConnection = object : ServiceConnection {
+    private val trackRecorderServiceConnection: ServiceConnection = object: ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val self = this@TrackRecorderActivityViewModel
 
             self.trackRecorderService = service as ITrackRecorderService
             self.trackRecordingSession = self.trackRecorderService!!.currentSession
 
-            if(self.trackRecordingSession == null) {
+            if (self.trackRecordingSession == null) {
                 try {
                     var restoredTrackRecording = self.currentTrackRecordingStore.getData()
-                    if(restoredTrackRecording != null) {
+                    if (restoredTrackRecording != null) {
                         self.trackRecordingSession = self.trackRecorderService?.createSession(restoredTrackRecording)
                     }
-                } catch(exception : Exception) {
+                } catch(exception: Exception) {
                     Log.e("TrackRecorderActivityVM", "Unable to restore saved state of current recording! App still works but unfortunately you have lost your last recording :(", exception)
                 }
             }
 
-            if(self.trackRecordingSession != null) {
+            if (self.trackRecordingSession != null) {
                 self.subscribeToSession()
             }
         }
@@ -74,7 +74,7 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
     private fun subscribeToSession() {
         this.unsubscribeFromSession()
 
-        if(this.subscriptions == null) {
+        if (this.subscriptions == null) {
             this.subscriptions = CompositeDisposable()
         }
 
@@ -98,7 +98,7 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
     }
 
     private fun unsubscribeFromSession() {
-        if(this.subscriptions != null) {
+        if (this.subscriptions != null) {
             this.subscriptions?.dispose()
             this.subscriptions = null
         }
@@ -106,17 +106,17 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
         this.locationChangedAvailableSubject.onNext(Observable.never())
     }
 
-    private val trackSessionStateChangedSubject : BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault(TrackRecorderServiceState.Initializing)
-    public val trackSessionStateChanged : Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
+    private val trackSessionStateChangedSubject: BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault(TrackRecorderServiceState.Initializing)
+    public val trackSessionStateChanged: Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
 
-    private val locationChangedAvailableSubject : BehaviorSubject<Observable<Location>> = BehaviorSubject.createDefault<Observable<Location>>(Observable.never())
-    public val locationsChangedAvailable : Observable<Observable<Location>> = this.locationChangedAvailableSubject
+    private val locationChangedAvailableSubject: BehaviorSubject<Observable<Location>> = BehaviorSubject.createDefault<Observable<Location>>(Observable.never())
+    public val locationsChangedAvailable: Observable<Observable<Location>> = this.locationChangedAvailableSubject
 
-    private val canStartResumeRecordingSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(true)
-    public val canStartResumeRecordingChanged : Observable<Boolean> = this.canStartResumeRecordingSubject
+    private val canStartResumeRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(true)
+    public val canStartResumeRecordingChanged: Observable<Boolean> = this.canStartResumeRecordingSubject
 
     public fun startResumeRecording() {
-        if(this.trackRecordingSession == null) {
+        if (this.trackRecordingSession == null) {
             val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
             val nameTemplate = this.context.getString(R.string.trackrecorderactivity_viewmodel_default_new_trackrecording_name_template)
 
@@ -130,15 +130,15 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
         this.trackRecordingSession!!.resumeTracking()
     }
 
-    private var canPauseRecordingSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canPauseRecordingChanged : Observable<Boolean> = this.canPauseRecordingSubject
+    private var canPauseRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
+    public val canPauseRecordingChanged: Observable<Boolean> = this.canPauseRecordingSubject
 
     public fun pauseRecording() {
         this.trackRecordingSession!!.pauseTracking()
     }
 
-    private var canDiscardRecordingSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canDiscardRecordingChanged : Observable<Boolean> = this.canDiscardRecordingSubject
+    private var canDiscardRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
+    public val canDiscardRecordingChanged: Observable<Boolean> = this.canDiscardRecordingSubject
 
     public fun discardRecording() {
         // TODO: ViewModel or Activity?
@@ -164,8 +164,8 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
         alertBuilder.show()
     }
 
-    private var canFinishRecordingSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canFinishRecordingChanged : Observable<Boolean> = this.canFinishRecordingSubject
+    private var canFinishRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
+    public val canFinishRecordingChanged: Observable<Boolean> = this.canFinishRecordingSubject
 
     public fun finishRecording() {
         // TODO: ViewModel or Activity?
@@ -191,10 +191,12 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
         alertBuilder.show()
     }
 
-    private var canShowTrackAttachmentsSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canShowTrackAttachmentsChanged : Observable<Boolean> = this.canShowTrackAttachmentsSubject
+    private var canShowTrackAttachmentsSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
+    public val canShowTrackAttachmentsChanged: Observable<Boolean> = this.canShowTrackAttachmentsSubject
 
     public fun showTrackAttachments() {
+        val showTrackAttachmentsIntent = Intent(this.context, TrackAttachmentsActivity::class.java)
 
+        this.context.startActivity(showTrackAttachmentsIntent)
     }
 }

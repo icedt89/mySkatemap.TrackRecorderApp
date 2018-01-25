@@ -33,22 +33,22 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
-internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCallback {
+internal final class TrackRecorderActivity: AppCompatActivity(), OnMapReadyCallback {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     private val optionsMenuSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private var viewModel: TrackRecorderActivityViewModel? = null
 
-    private var locationsChangedAvailableSubscription : Disposable? = null
+    private var locationsChangedAvailableSubscription: Disposable? = null
 
-    private var currentLocationsChangedObservable : Disposable? = null
+    private var currentLocationsChangedObservable: Disposable? = null
 
     private var trackRecorderMap: ITrackRecorderMap? = null
 
     private var finishCurrentTrackRecordingMenuItem: MenuItem? = null
 
-    private var discardCurrentTrackRecordingMenuItem : MenuItem? = null
+    private var discardCurrentTrackRecordingMenuItem: MenuItem? = null
 
     private var showCurrentTrackRecordingAttachments: MenuItem? = null
 
@@ -119,7 +119,7 @@ internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCall
                 RxView.clicks(startRecordingFloatingActionButton).subscribe({
                     Dexter.withActivity(this)
                             .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                            .withListener(object : PermissionListener {
+                            .withListener(object: PermissionListener {
                                 override final fun onPermissionGranted(response: PermissionGrantedResponse) {
                                     Log.d("TrackRecorderActivity", "Permission for ACCESS_FINE_LOCATION is granted")
                                 }
@@ -162,11 +162,11 @@ internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCall
     private fun subscribeGoogleMapToLocationUpdates() {
         this.locationsChangedAvailableSubscription = this.viewModel!!.locationsChangedAvailable.subscribe{
             locationsChangedObservable ->
-                if(this.currentLocationsChangedObservable != null) {
+                if (this.currentLocationsChangedObservable != null) {
                     this.currentLocationsChangedObservable!!.dispose()
                 }
 
-                if(this.trackRecorderMap != null) {
+                if (this.trackRecorderMap != null) {
                     this.currentLocationsChangedObservable = locationsChangedObservable
                             .observeOn(AndroidSchedulers.mainThread())
                             .buffer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread(), 5)
@@ -180,8 +180,7 @@ internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCall
                 this.viewModel!!.canFinishRecordingChanged.subscribe(RxMenuItem.enabled(this.finishCurrentTrackRecordingMenuItem!!)),
                 RxMenuItem.clicks(this.finishCurrentTrackRecordingMenuItem!!).subscribe({
                     this.viewModel!!.finishRecording()
-                })
-                ,
+                }),
 
                 this.viewModel!!.canDiscardRecordingChanged.subscribe(RxMenuItem.enabled(this.discardCurrentTrackRecordingMenuItem!!)),
                 RxMenuItem.clicks(this.discardCurrentTrackRecordingMenuItem!!).subscribe({

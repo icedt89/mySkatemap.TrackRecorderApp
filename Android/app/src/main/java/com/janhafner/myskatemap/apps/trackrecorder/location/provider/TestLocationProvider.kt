@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location.provider
 
 import android.content.Context
-import android.graphics.PointF
 import android.provider.Settings
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
@@ -11,26 +10,28 @@ import org.joda.time.DateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
-internal final class TestLocationProvider(private val context : Context,
-                                          private val initialLocation : Location,
-                                          private val bearingStepping : Float = 0.01f,
-                                          private val latitudeStepping : Double = 0.01,
-                                          private val longitudeStepping : Double = 0.01,
-                                          private val delay : Long = 5000,
-                                          private val interval : Long = 5000,
-                                          private val simulateDependencyToAndroidLocationServices : Boolean = true) : LocationProvider() {
-    private val timer : Timer = Timer()
+internal final class TestLocationProvider(private val context: Context,
+                                          private val initialLocation: Location,
+                                          private val bearingStepping: Float = 0.01f,
+                                          private val latitudeStepping: Double = 0.01,
+                                          private val longitudeStepping: Double = 0.01,
+                                          private val delay: Long = 0,
+                                          private val interval: Long = 5000,
+                                          private val simulateDependencyToAndroidLocationServices: Boolean = true): LocationProvider() {
+    private val timer: Timer = Timer()
 
-    private var lastComputedLocation : Location? = null
+    private val referencelessCoordinates = ArrayList<PointD>()
 
-    private var postLocationTimerTask : TimerTask? = this.createTimerTask()
+    private var lastComputedLocation: Location? = null
 
-    private fun createTimerTask() : TimerTask {
-        return object : TimerTask() {
+    private var postLocationTimerTask: TimerTask? = this.createTimerTask()
+
+    private fun createTimerTask(): TimerTask {
+        return object: TimerTask() {
             override fun run() {
                 val self = this@TestLocationProvider
 
-                if(self.simulateDependencyToAndroidLocationServices && !self.isLocationServicesEnabled()) {
+                if (self.simulateDependencyToAndroidLocationServices && !self.isLocationServicesEnabled()) {
                     return
                 }
 
@@ -41,50 +42,47 @@ internal final class TestLocationProvider(private val context : Context,
         }
     }
 
-    private fun isLocationServicesEnabled() : Boolean {
+    private fun isLocationServicesEnabled(): Boolean {
         val contentResolver = this.context.contentResolver
 
         return Settings.Secure.getInt(contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF) != Settings.Secure.LOCATION_MODE_OFF
     }
 
-    private val init = ArrayList<PointF>()
-    private fun computeNextLocation(counter : Int, initialLocation: LatLng, currentLocation : LatLng, offsetLatitude: Double, offsetLongitude : Double) : LatLng {
-        if(counter == 0) {
-            init.add(PointF(0.0f, 0.0f))
+    private fun computeNextLocation(counter: Int, initialLocation: LatLng, offsetLatitude: Double, offsetLongitude: Double): LatLng {
+        if (counter == 0) {
+            referencelessCoordinates.add(PointD(0.0, 0.0))
 
             return initialLocation
         }
 
-        var x = init[counter - 1].x
-        var y = init[counter - 1].y
+        val previousCoordinates = referencelessCoordinates[counter - 1]
 
-        if(counter % 2 != 0) {
-            // Gerade
+        var x = previousCoordinates.x
+        var y = previousCoordinates.y
 
-            if(x > 0) {
+        if (counter % 2 != 0) {
+            if (x > 0) {
                 x = -x
-            } else if(x <= 0) {
-                x = ((-x).toDouble() + offsetLatitude).toFloat()
+            } else if (x <= 0) {
+                x = -x + offsetLatitude
             }
         } else {
-            // Ungerade
-
-            if(y >= 0) {
-                y = ((-y).toDouble() - offsetLongitude).toFloat()
-            } else if(y < 0) {
+            if (y >= 0) {
+                y = -y - offsetLongitude
+            } else if (y < 0) {
                 y = -y
             }
         }
 
-        init.add(PointF(x, y))
+        referencelessCoordinates.add(PointD(x, y))
 
         return LatLng(x + initialLocation.latitude, y + initialLocation.longitude)
     }
 
-    private fun computeLocation() : Location {
+    private fun computeLocation(): Location {
         val sequenceNumber = this.generateSequenceNumber()
 
-        if(this.lastComputedLocation == null) {
+        if (this.lastComputedLocation == null) {
             this.lastComputedLocation = Location(sequenceNumber)
 
             this.lastComputedLocation?.provider = "fake-gps"
@@ -99,7 +97,7 @@ internal final class TestLocationProvider(private val context : Context,
 
             this.lastComputedLocation?.bearing = this.lastComputedLocation?.bearing?.plus(this.bearingStepping)
 
-            val nextComputedLocation = this.computeNextLocation(sequenceNumber, this.initialLocation.toLatLng(), this.lastComputedLocation!!.toLatLng(), this.latitudeStepping, this.longitudeStepping)
+            val nextComputedLocation = this.computeNextLocation(sequenceNumber, this.initialLocation.toLatLng(), this.latitudeStepping, this.longitudeStepping)
 
             this.lastComputedLocation?.latitude = nextComputedLocation.latitude
             this.lastComputedLocation?.longitude = nextComputedLocation.longitude
@@ -124,16 +122,19 @@ internal final class TestLocationProvider(private val context : Context,
             throw IllegalStateException()
         }
 
-        if(this.simulateDependencyToAndroidLocationServices && !this.isLocationServicesEnabled()) {
+        if (this.simulateDependencyToAndroidLocationServices && !this.isLocationServicesEnabled()) {
             throw IllegalStateException()
         }
 
-        if(this.postLocationTimerTask == null) {
+        if (this.postLocationTimerTask == null) {
             this.postLocationTimerTask = this.createTimerTask()
         }
 
         this.timer.schedule(this.postLocationTimerTask, this.delay, this.interval)
 
         this.isActive = true
+    }
+
+    private final class PointD(public val x: Double, public val y: Double){
     }
 }
