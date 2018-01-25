@@ -6,8 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.TrackRecorderActivity
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.MySkatemapTrackRecorderAppChannel
+import com.janhafner.myskatemap.apps.trackrecorder.activities.TrackRecorderActivity
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.TrackRecorderServiceNotificationChannel
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
@@ -21,7 +21,7 @@ internal final class TrackRecorderServiceNotification(private val context : Cont
     }
 
     public fun update(trackRecorderServiceState : TrackRecorderServiceState, durationOfRecording : Period? = null, trackLengthInMeters : Float? = null) {
-        val notificationCompatBuilder = NotificationCompat.Builder(this.context, MySkatemapTrackRecorderAppChannel.CHANNEL_ID)
+        val notificationCompatBuilder = NotificationCompat.Builder(this.context, TrackRecorderServiceNotificationChannel.Id)
 
         notificationCompatBuilder.setSmallIcon(R.mipmap.ic_launcher)
         notificationCompatBuilder.setContentTitle(context.getText(R.string.trackrecorderservice_notification_title))
@@ -33,18 +33,22 @@ internal final class TrackRecorderServiceNotification(private val context : Cont
                 notificationCompatBuilder.setContentText(context.getString(R.string.trackrecorderservice_notification_status_ready))
             TrackRecorderServiceState.Running ->
                 notificationCompatBuilder.setContentText(context.getString(R.string.trackrecorderservice_notification_status_runnning))
+            TrackRecorderServiceState.LocationServicesUnavailable ->
+                notificationCompatBuilder.setContentText(context.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
             TrackRecorderServiceState.Paused ->
                 notificationCompatBuilder.setContentText(context.getString(R.string.trackrecorderservice_notification_status_paused))
         }
 
-        if(durationOfRecording != null) {
-            val durationDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_recordingduration_template, TrackRecorderServiceNotification.durationFormatter.print(durationOfRecording))
-            notificationCompatBuilder.setSubText(durationDisplayTemplate)
-        }
+        if(trackRecorderServiceState != TrackRecorderServiceState.Initializing) {
+            if(durationOfRecording != null) {
+                val durationDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_recordingduration_template, TrackRecorderServiceNotification.durationFormatter.print(durationOfRecording))
+                notificationCompatBuilder.setSubText(durationDisplayTemplate)
+            }
 
-        if(trackLengthInMeters != null) {
-            val lengthDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_tracklength_template, trackLengthInMeters)
-            notificationCompatBuilder.setContentInfo(lengthDisplayTemplate)
+            if(trackLengthInMeters != null) {
+                val lengthDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_tracklength_template, trackLengthInMeters)
+                notificationCompatBuilder.setContentInfo(lengthDisplayTemplate)
+            }
         }
 
         notificationCompatBuilder.setOngoing(true)

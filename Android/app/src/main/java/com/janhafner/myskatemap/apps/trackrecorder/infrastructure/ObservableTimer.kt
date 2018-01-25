@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
 
 import android.os.SystemClock
+import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
@@ -15,14 +16,14 @@ internal final class ObservableTimer {
 
     private var timerTask: TimerTask? = this.createTimerTask()
 
-    public var state : ObservableTimerState = ObservableTimerState.Stopped
+    public var isRunning: Boolean = false
         private set
 
     private val secondElapsedSubject : BehaviorSubject<Period> = BehaviorSubject.createDefault<Period>(Period.ZERO)
     public val secondElapsed : Observable<Period> = this.secondElapsedSubject.share()
 
-    private val stateChangedSubject : BehaviorSubject<ObservableTimerState> = BehaviorSubject.createDefault<ObservableTimerState>(ObservableTimerState.Stopped)
-    public val stateChanged : Observable<ObservableTimerState> = this.stateChangedSubject.share()
+    private val isRunningSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
+    public val isRunningChanged: Observable<Boolean> = this.isRunningSubject.share()
 
     private val timerResetSubject : Subject<Long> = PublishSubject.create<Long>()
     public val timerReset : Observable<Long> = this.timerResetSubject.share()
@@ -35,6 +36,8 @@ internal final class ObservableTimer {
                 val self = this@ObservableTimer
 
                 self.elapsedSeconds.addSeconds(1)
+
+                Log.v("ObservableTimer", "One more second is elapsed, total duration is ${self.elapsedSeconds.seconds}")
 
                 self.secondElapsedSubject.onNext(self.elapsedSeconds.toPeriod())
             }
@@ -49,6 +52,8 @@ internal final class ObservableTimer {
         this.elapsedSeconds.clear()
         this.elapsedSeconds.addSeconds(elapsedSecondsSinceStart)
 
+        Log.v("ObservableTimer", "Elapsed seconds reset to ${elapsedSecondsSinceStart}")
+
         this.timerResetSubject.onNext(SystemClock.elapsedRealtime())
     }
 
@@ -57,7 +62,7 @@ internal final class ObservableTimer {
     }
 
     public fun start() {
-        if(this.state == ObservableTimerState.Running) {
+        if(this.isRunning) {
             throw IllegalStateException()
         }
 
@@ -65,25 +70,25 @@ internal final class ObservableTimer {
             this.timerTask = this.createTimerTask()
         }
 
-        this.changeState(ObservableTimerState.Running)
+        this.changeState(true)
 
         this.timer.scheduleAtFixedRate(this.timerTask, 0, 1000)
     }
 
     public fun stop() {
-        if(this.state == ObservableTimerState.Stopped) {
+        if(!this.isRunning) {
             throw IllegalStateException()
         }
 
         this.timerTask!!.cancel()
         this.timerTask = null
 
-        this.changeState(ObservableTimerState.Stopped)
+        this.changeState(false)
     }
 
-    private fun changeState(state : ObservableTimerState) {
-        this.state = state
+    private fun changeState(isRunning : Boolean) {
+        this.isRunning = isRunning
 
-        this.stateChangedSubject.onNext(state)
+        this.isRunningSubject.onNext(isRunning)
     }
 }

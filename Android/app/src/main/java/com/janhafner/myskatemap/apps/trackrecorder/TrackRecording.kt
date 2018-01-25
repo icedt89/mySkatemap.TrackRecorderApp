@@ -27,7 +27,7 @@ internal final class TrackRecording {
     public var trackingStartedAt: DateTime = DateTime.now()
         private set
 
-    public var recordingTime: Period? = null
+    public var recordingTime: Period = Period.ZERO
 
     public var trackingFinishedAt: DateTime? = null
         private set

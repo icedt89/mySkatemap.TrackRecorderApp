@@ -8,20 +8,15 @@ import org.joda.time.Period
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import java.io.IOException
 import java.lang.reflect.ParameterizedType
 
 internal abstract class FileBasedDataStore<T>(private val file: File) : IDataStore<T> {
-    private val gson: Gson = GsonBuilder()
-            .registerTypeAdapter(DateTime::class.java, JodaTimeDateTimeGsonAdapter())
-            .registerTypeAdapter(Period::class.java, JodaTimePeriodGsonAdapter())
-            .create()
 
-    @Throws(IOException::class)
+
     public final override fun save(data: T) {
         val writer = FileWriter(this.file)
 
-        this.gson.toJson(data, writer)
+        FileBasedDataStore.gson.toJson(data, writer)
 
         writer.flush()
         writer.close()
@@ -34,9 +29,8 @@ internal abstract class FileBasedDataStore<T>(private val file: File) : IDataSto
 
         val deleteResult = this.file.delete()
 
-        // TODO: remove if tested!
         if (!deleteResult) {
-            Log.w("FileBasedDataStore", "File was not deleted!")
+            Log.w("FileBasedDataStore", "File was not properly deleted")
         }
     }
 
@@ -47,12 +41,20 @@ internal abstract class FileBasedDataStore<T>(private val file: File) : IDataSto
 
         val reader = FileReader(this.file)
 
+        // Horrible hack to get type of T...
         val typeOfT = (this.javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[0]
 
-        val result = this.gson.fromJson<T>(reader, typeOfT)
+        val result = FileBasedDataStore.gson.fromJson<T>(reader, typeOfT)
 
         reader.close()
 
         return result as T
+    }
+
+    companion object {
+        private val gson: Gson = GsonBuilder()
+                .registerTypeAdapter(DateTime::class.java, JodaTimeDateTimeGsonAdapter())
+                .registerTypeAdapter(Period::class.java, JodaTimePeriodGsonAdapter())
+                .create()
     }
 }

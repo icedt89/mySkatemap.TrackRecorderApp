@@ -7,5 +7,7 @@ internal enum class TrackRecorderServiceState{
 
     Running,
 
-    Paused
+    Paused,
+
+    LocationServicesUnavailable
 }

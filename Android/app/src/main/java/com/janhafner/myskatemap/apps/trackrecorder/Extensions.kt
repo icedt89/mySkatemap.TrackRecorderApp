@@ -12,19 +12,6 @@ internal fun Location.toLatLng() : LatLng {
     return LatLng(this.latitude, this.longitude)
 }
 
-@Deprecated("If receiving locations in chunks is implemented for the map, removed this method and use consumeMany(...) instead!")
-internal fun ITrackRecorderMap.consume() : Consumer<in Location> {
-    return Consumer({
-        location: Location ->
-            Log.v("ITrackRecorderMap", "Received location: ${location}")
-
-            val points = this.track.toMutableList()
-            points.add(location.toLatLng())
-
-            this.track = points
-    })
-}
-
 internal fun Location.clone(sequenceNumber : Int) : Location {
     val result = Location(sequenceNumber)
 
@@ -42,18 +29,21 @@ internal fun Location.clone(sequenceNumber : Int) : Location {
     return result
 }
 
-internal fun ITrackRecorderMap.consumeMany() : Consumer<Iterable<Location>> {
+internal fun ITrackRecorderMap.consume() : Consumer<Iterable<Location>> {
     return Consumer({
         locations: Iterable<Location> ->
-            Log.v("ITrackRecorderMap", "Received locations: ${locations.count()}")
+            val locationsCount = locations.count()
+            if(locationsCount > 0) {
+                Log.v("ITrackRecorderMap", "Received locations: ${locationsCount}")
 
-            val points = this.track.toMutableList()
-            points.addAll(locations
-                    .sortedBy { location -> location.sequenceNumber }
-                    .map { location -> location.toLatLng() }
-            )
+                val points = this.track.toMutableList()
+                points.addAll(locations
+                        .sortedBy { location -> location.sequenceNumber }
+                        .map { location -> location.toLatLng() }
+                )
 
-            this.track = points
+                this.track = points
+            }
     })
 }
 
