@@ -107,11 +107,17 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
             this.locationProvider.stopLocationUpdates()
         }
 
+        this.locationProvider.resetSequenceNumber()
+
         this.trackDistanceCalculator.clear()
 
         this.trackRecordingStore.delete()
 
         this.currentTrackRecording = null
+
+        this.changeState(com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState.Initializing)
+
+        this.unsubscribeFromSession()
 
         this.currentSession!!.terminate()
         this.currentSession = null
@@ -141,7 +147,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
 
         this.saveTracking()
 
-        this.currentSession = TrackRecordingSession.createWithSharedObservableSources(
+        this.currentSession = TrackRecordingSession(
                 this.trackDistanceCalculator.distanceCalculated,
                 this.durationTimer.secondElapsed,
                 this.locationProvider.locations.replay().autoConnect(),
@@ -169,18 +175,18 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
             val sortedLocations = trackRecording.locations.sortedBy { location -> location.sequenceNumber }
 
             this.locationProvider.overrideSequenceNumber(sortedLocations.last().sequenceNumber)
+
+            locationsChanged = locationsChanged.startWith(sortedLocations)
         }
 
         var recordingTimeChanged = this.durationTimer.secondElapsed
         if(trackRecording.recordingTime != Period.ZERO && trackRecording.recordingTime.seconds > 0) {
-            val duration = trackRecording.recordingTime!!
-
-            this.durationTimer.reset(duration.seconds)
+            this.durationTimer.reset(trackRecording.recordingTime.seconds)
         }
 
         this.currentTrackRecording = trackRecording
 
-        this.currentSession = TrackRecordingSession.createWithSharedObservableSources(
+        this.currentSession = TrackRecordingSession(
                 this.trackDistanceCalculator.distanceCalculated,
                 recordingTimeChanged,
                 locationsChanged,
@@ -208,7 +214,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
 
                     this.currentTrackRecording!!.locations.add(location)
 
-                    Log.i("TrackRecorderService", "Location ${location} received for persistance.")
+                    Log.d("TrackRecorderService", "Location ${location} received for persistence.")
             })
         )
     }

@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location.provider
 
 import android.content.Context
+import android.graphics.PointF
 import android.provider.Settings
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
@@ -8,6 +9,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.toLatLng
 import org.joda.time.DateTime
 import java.util.*
+import kotlin.collections.ArrayList
 
 internal final class TestLocationProvider(private val context : Context,
                                           private val initialLocation : Location,
@@ -45,20 +47,38 @@ internal final class TestLocationProvider(private val context : Context,
         return Settings.Secure.getInt(contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF) != Settings.Secure.LOCATION_MODE_OFF
     }
 
+    private val init = ArrayList<PointF>()
     private fun computeNextLocation(counter : Int, initialLocation: LatLng, currentLocation : LatLng, offsetLatitude: Double, offsetLongitude : Double) : LatLng {
         if(counter == 0) {
+            init.add(PointF(0.0f, 0.0f))
+
             return initialLocation
         }
 
-        var x = currentLocation.latitude
-        var y = currentLocation.longitude
+        var x = init[counter - 1].x
+        var y = init[counter - 1].y
 
-        // TODO: Place code here which computes funny figure to draw on map.
+        if(counter % 2 != 0) {
+            // Gerade
 
-        x += offsetLatitude
-        y += offsetLongitude
+            if(x > 0) {
+                x = -x
+            } else if(x <= 0) {
+                x = ((-x).toDouble() + offsetLatitude).toFloat()
+            }
+        } else {
+            // Ungerade
 
-        return LatLng(x, y)
+            if(y >= 0) {
+                y = ((-y).toDouble() - offsetLongitude).toFloat()
+            } else if(y < 0) {
+                y = -y
+            }
+        }
+
+        init.add(PointF(x, y))
+
+        return LatLng(x + initialLocation.latitude, y + initialLocation.longitude)
     }
 
     private fun computeLocation() : Location {

@@ -17,7 +17,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.jakewharton.rxbinding2.view.RxMenuItem
 import com.jakewharton.rxbinding2.view.RxView
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.consume
+import com.janhafner.myskatemap.apps.trackrecorder.consumeLocations
+import com.janhafner.myskatemap.apps.trackrecorder.consumeReset
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
 import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMap
@@ -102,10 +103,16 @@ internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCall
     override fun onMapReady(googleMap: GoogleMap) {
         // Zoom to awesome Kackstadt :)
         this.trackRecorderMap = TrackRecorderMap.fromGoogleMap(googleMap, LatLng(50.8357, 12.92922), 13f)
+
+        this.subscriptions.add(
+            this.viewModel!!.trackSessionStateChanged.subscribe(this.trackRecorderMap!!.consumeReset())
+        )
     }
 
     private fun subscribeToViewModel() {
         val startRecordingFloatingActionButton = this.findViewById<FloatingActionButton>(R.id.trackrecorderactivity_startrecording_floatingactionbutton)
+        val pauseRecordingFloatingActionButton = this.findViewById<FloatingActionButton>(R.id.trackrecorderactivity_pauserecording_floatingactionbutton)
+
         this.subscriptions.addAll(
                 this.viewModel!!.canStartResumeRecordingChanged.subscribe(RxView.visibility(startRecordingFloatingActionButton)),
                 this.viewModel!!.canStartResumeRecordingChanged.subscribe(RxView.enabled(startRecordingFloatingActionButton)),
@@ -129,19 +136,14 @@ internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCall
                             .check()
 
                     this.viewModel!!.startResumeRecording()
-                })
-        )
+                }),
 
-        val pauseRecordingFloatingActionButton = this.findViewById<FloatingActionButton>(R.id.trackrecorderactivity_pauserecording_floatingactionbutton)
-        this.subscriptions.addAll(
                 this.viewModel!!.canPauseRecordingChanged.subscribe(RxView.visibility(pauseRecordingFloatingActionButton)),
                 this.viewModel!!.canPauseRecordingChanged.subscribe(RxView.enabled(pauseRecordingFloatingActionButton)),
                 RxView.clicks(pauseRecordingFloatingActionButton).subscribe({
                     this.viewModel!!.pauseRecording()
-                })
-        )
+                }),
 
-        this.subscriptions.addAll(
                 this.viewModel!!.trackSessionStateChanged.subscribe{
                     currentState ->
                     when (currentState) {
@@ -168,7 +170,7 @@ internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCall
                     this.currentLocationsChangedObservable = locationsChangedObservable
                             .observeOn(AndroidSchedulers.mainThread())
                             .buffer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread(), 5)
-                            .subscribe(this.trackRecorderMap!!.consume())
+                            .subscribe(this.trackRecorderMap!!.consumeLocations())
                 }
         }
     }
@@ -179,12 +181,16 @@ internal final class TrackRecorderActivity : AppCompatActivity(), OnMapReadyCall
                 RxMenuItem.clicks(this.finishCurrentTrackRecordingMenuItem!!).subscribe({
                     this.viewModel!!.finishRecording()
                 })
-        )
+                ,
 
-        this.optionsMenuSubscriptions.addAll(
                 this.viewModel!!.canDiscardRecordingChanged.subscribe(RxMenuItem.enabled(this.discardCurrentTrackRecordingMenuItem!!)),
                 RxMenuItem.clicks(this.discardCurrentTrackRecordingMenuItem!!).subscribe({
                     this.viewModel!!.discardRecording()
+                }),
+
+                this.viewModel!!.canShowTrackAttachmentsChanged.subscribe(RxMenuItem.enabled(this.showCurrentTrackRecordingAttachments!!)),
+                RxMenuItem.clicks(this.showCurrentTrackRecordingAttachments!!).subscribe({
+                    this.viewModel!!.showTrackAttachments()
                 })
         )
     }

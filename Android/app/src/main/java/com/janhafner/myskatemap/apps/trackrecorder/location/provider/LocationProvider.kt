@@ -9,7 +9,7 @@ internal abstract class LocationProvider : ILocationProvider {
         private set
 
     private val locationObservable: Subject<Location> = PublishSubject.create<Location>()
-    public final override val locations: io.reactivex.Observable<Location> = this.locationObservable.share()
+    public final override val locations: io.reactivex.Observable<Location> = this.locationObservable
 
     public override var isActive: Boolean = false
         protected set

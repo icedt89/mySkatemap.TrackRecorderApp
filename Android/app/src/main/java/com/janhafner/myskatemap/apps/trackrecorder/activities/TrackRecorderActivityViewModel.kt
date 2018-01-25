@@ -88,9 +88,9 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
 
                     this.canStartResumeRecordingSubject.onNext(!isRunning)
                     this.canPauseRecordingSubject.onNext(isRunning)
-                    this.canDiscardRecordingSubject.onNext(!isRunning || isPaused)
-                    this.canFinishRecordingSubject.onNext(!isRunning || isPaused)
-                    this.canShowTrackAttachmentsSubject.onNext(!isRunning || isPaused)
+                    this.canDiscardRecordingSubject.onNext(isPaused)
+                    this.canFinishRecordingSubject.onNext(isPaused)
+                    this.canShowTrackAttachmentsSubject.onNext(!isRunning && isPaused)
             }
         )
 
@@ -107,13 +107,13 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
     }
 
     private val trackSessionStateChangedSubject : BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault(TrackRecorderServiceState.Initializing)
-    public val trackSessionStateChanged : Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject.share()
+    public val trackSessionStateChanged : Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
 
     private val locationChangedAvailableSubject : BehaviorSubject<Observable<Location>> = BehaviorSubject.createDefault<Observable<Location>>(Observable.never())
-    public val locationsChangedAvailable : Observable<Observable<Location>> = this.locationChangedAvailableSubject.share()
+    public val locationsChangedAvailable : Observable<Observable<Location>> = this.locationChangedAvailableSubject
 
     private val canStartResumeRecordingSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(true)
-    public val canStartResumeRecordingChanged : Observable<Boolean> = this.canStartResumeRecordingSubject.share()
+    public val canStartResumeRecordingChanged : Observable<Boolean> = this.canStartResumeRecordingSubject
 
     public fun startResumeRecording() {
         if(this.trackRecordingSession == null) {
@@ -131,14 +131,14 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
     }
 
     private var canPauseRecordingSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canPauseRecordingChanged : Observable<Boolean> = this.canPauseRecordingSubject.share()
+    public val canPauseRecordingChanged : Observable<Boolean> = this.canPauseRecordingSubject
 
     public fun pauseRecording() {
         this.trackRecordingSession!!.pauseTracking()
     }
 
     private var canDiscardRecordingSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canDiscardRecordingChanged : Observable<Boolean> = this.canDiscardRecordingSubject.share()
+    public val canDiscardRecordingChanged : Observable<Boolean> = this.canDiscardRecordingSubject
 
     public fun discardRecording() {
         // TODO: ViewModel or Activity?
@@ -165,7 +165,7 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
     }
 
     private var canFinishRecordingSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canFinishRecordingChanged : Observable<Boolean> = this.canFinishRecordingSubject.share()
+    public val canFinishRecordingChanged : Observable<Boolean> = this.canFinishRecordingSubject
 
     public fun finishRecording() {
         // TODO: ViewModel or Activity?
@@ -192,7 +192,7 @@ internal final class TrackRecorderActivityViewModel(private val context : Contex
     }
 
     private var canShowTrackAttachmentsSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canShowTrackAttachmentsChanged : Observable<Boolean> = this.canShowTrackAttachmentsSubject.share()
+    public val canShowTrackAttachmentsChanged : Observable<Boolean> = this.canShowTrackAttachmentsSubject
 
     public fun showTrackAttachments() {
 

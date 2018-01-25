@@ -20,13 +20,13 @@ internal final class ObservableTimer {
         private set
 
     private val secondElapsedSubject : BehaviorSubject<Period> = BehaviorSubject.createDefault<Period>(Period.ZERO)
-    public val secondElapsed : Observable<Period> = this.secondElapsedSubject.share()
+    public val secondElapsed : Observable<Period> = this.secondElapsedSubject
 
     private val isRunningSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val isRunningChanged: Observable<Boolean> = this.isRunningSubject.share()
+    public val isRunningChanged: Observable<Boolean> = this.isRunningSubject
 
     private val timerResetSubject : Subject<Long> = PublishSubject.create<Long>()
-    public val timerReset : Observable<Long> = this.timerResetSubject.share()
+    public val timerReset : Observable<Long> = this.timerResetSubject
 
     private val elapsedSeconds : MutablePeriod = MutablePeriod(PeriodType.seconds())
 
@@ -53,6 +53,10 @@ internal final class ObservableTimer {
         this.elapsedSeconds.addSeconds(elapsedSecondsSinceStart)
 
         Log.v("ObservableTimer", "Elapsed seconds reset to ${elapsedSecondsSinceStart}")
+
+        if(!this.isRunning) {
+            this.secondElapsedSubject.onNext(this.elapsedSeconds.toPeriod())
+        }
 
         this.timerResetSubject.onNext(SystemClock.elapsedRealtime())
     }

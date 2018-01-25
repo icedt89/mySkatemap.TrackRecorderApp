@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
+import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
@@ -29,7 +30,7 @@ internal fun Location.clone(sequenceNumber : Int) : Location {
     return result
 }
 
-internal fun ITrackRecorderMap.consume() : Consumer<Iterable<Location>> {
+internal fun ITrackRecorderMap.consumeLocations() : Consumer<Iterable<Location>> {
     return Consumer({
         locations: Iterable<Location> ->
             val locationsCount = locations.count()
@@ -43,6 +44,15 @@ internal fun ITrackRecorderMap.consume() : Consumer<Iterable<Location>> {
                 )
 
                 this.track = points
+            }
+    })
+}
+
+internal fun ITrackRecorderMap.consumeReset() : Consumer<TrackRecorderServiceState> {
+    return Consumer({
+        currentState ->
+            if(currentState == TrackRecorderServiceState.Initializing) {
+                this.track = kotlin.collections.emptyList()
             }
     })
 }

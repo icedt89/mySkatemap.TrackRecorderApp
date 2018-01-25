@@ -10,7 +10,7 @@ import io.reactivex.subjects.BehaviorSubject
 
 internal final class LocationAvailabilityChangedBroadcastReceiver(context : Context) : BroadcastReceiver() {
     private val locationAvailabilityChangedSubject : BehaviorSubject<Boolean> = BehaviorSubject.createDefault(this.isLocationModeEnabled(context))
-    public val locationAvailabilityChanged : Observable<Boolean> = this.locationAvailabilityChangedSubject.share()
+    public val locationAvailabilityChanged : Observable<Boolean> = this.locationAvailabilityChangedSubject
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if(context == null) {

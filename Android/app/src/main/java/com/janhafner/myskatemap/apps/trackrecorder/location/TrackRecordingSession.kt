@@ -53,19 +53,4 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
     public override fun saveTracking() {
         this.trackRecorderService.saveTracking()
     }
-
-    companion object Factory {
-        public fun createWithSharedObservableSources(trackDistanceChanged: Observable<Float>,
-                             recordingTimeChanged: Observable<Period>,
-                             locationsChanged: Observable<Location>,
-                             stateChanged: Observable<TrackRecorderServiceState>,
-                             trackRecorderService : TrackRecorderService) : ITrackRecordingSession {
-            return TrackRecordingSession(
-                    trackDistanceChanged.share(),
-                    recordingTimeChanged.share(),
-                    locationsChanged.share(),
-                    stateChanged.share(),
-                    trackRecorderService)
-        }
-    }
 }

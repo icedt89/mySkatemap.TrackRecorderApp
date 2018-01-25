@@ -12,7 +12,7 @@ internal final class TrackDistanceCalculator() {
     private var lastAccessLocationForComputation : Location? = null
 
     private val distanceSubject : BehaviorSubject<Float> = BehaviorSubject.createDefault<Float>(0f)
-    public val distanceCalculated : Observable<Float> = this.distanceSubject.share()
+    public val distanceCalculated : Observable<Float> = this.distanceSubject
 
     public val distance : Float
         get() = this.distanceSubject.value
