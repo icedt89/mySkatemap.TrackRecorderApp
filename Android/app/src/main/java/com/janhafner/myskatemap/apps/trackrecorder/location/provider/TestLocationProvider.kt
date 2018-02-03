@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location.provider
 
 import android.content.Context
+import android.os.SystemClock
 import android.provider.Settings
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
@@ -8,6 +9,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.toLatLng
 import org.joda.time.DateTime
 import java.util.*
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.collections.ArrayList
 
 internal final class TestLocationProvider(private val context: Context,
@@ -20,7 +22,7 @@ internal final class TestLocationProvider(private val context: Context,
                                           private val simulateDependencyToAndroidLocationServices: Boolean = true): LocationProvider() {
     private val timer: Timer = Timer()
 
-    private val referencelessCoordinates = ArrayList<PointD>()
+    private val referencelessCoordinates: MutableList<PointD> = ArrayList<PointD>()
 
     private var lastComputedLocation: Location? = null
 
@@ -40,6 +42,10 @@ internal final class TestLocationProvider(private val context: Context,
                 self.postLocationUpdate(computedLocation)
             }
         }
+    }
+
+    public override fun overrideSequenceNumber(sequenceNumber: Int) {
+        super.overrideSequenceNumber(sequenceNumber)
     }
 
     private fun isLocationServicesEnabled(): Boolean {
@@ -106,6 +112,22 @@ internal final class TestLocationProvider(private val context: Context,
         return this.lastComputedLocation!!
     }
 
+    public override fun getCurrentLocation(): Location {
+        val result = Location(-1)
+
+        result.latitude = ThreadLocalRandom.current().nextDouble() * 50
+        if(SystemClock.elapsedRealtimeNanos() % 2 == 0L) {
+            result.latitude = -result.latitude
+        }
+
+        result.longitude = ThreadLocalRandom.current().nextDouble() * 12
+        if(SystemClock.elapsedRealtimeNanos() % 4 == 0L) {
+            result.longitude = -result.longitude
+        }
+
+        return result
+    }
+
     override fun stopLocationUpdates() {
         if (!this.isActive) {
             throw IllegalStateException()
@@ -135,6 +157,6 @@ internal final class TestLocationProvider(private val context: Context,
         this.isActive = true
     }
 
-    private final class PointD(public val x: Double, public val y: Double){
+    private final class PointD(public val x: Double, public val y: Double) {
     }
 }

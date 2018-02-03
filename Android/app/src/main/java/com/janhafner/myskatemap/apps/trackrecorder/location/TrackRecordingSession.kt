@@ -39,7 +39,6 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
 
     public override fun terminate() {
         this.subscriptions.clear()
-        this.subscriptions.dispose()
     }
 
     public override fun resumeTracking() {

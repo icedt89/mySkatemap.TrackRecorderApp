@@ -3,6 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.location.provider
 import android.annotation.SuppressLint
 import android.content.Context
 import com.google.android.gms.location.*
+import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
 
 internal final class FusedLocationProvider(context: Context): LocationProvider() {
@@ -15,7 +16,7 @@ internal final class FusedLocationProvider(context: Context): LocationProvider()
             for(sourceLocation in locationResult.locations) {
                 val sequenceNumber = self.generateSequenceNumber()
 
-                var location = sourceLocation.toLocation(sequenceNumber)
+                val location = sourceLocation.toLocation(sequenceNumber)
 
                 self.postLocationUpdate(location)
             }
@@ -51,5 +52,10 @@ internal final class FusedLocationProvider(context: Context): LocationProvider()
         this.fusedLocationProviderClient.removeLocationUpdates(this.locationCallback)
 
         this.isActive = false
+    }
+
+    @SuppressLint("MissingPermission")
+    public override fun getCurrentLocation(): Location? {
+        return this.fusedLocationProviderClient.lastLocation.result.toLocation(-1)
     }
 }

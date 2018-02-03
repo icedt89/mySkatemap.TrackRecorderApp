@@ -43,7 +43,7 @@ internal final class LegacyLocationProvider(context: Context): LocationProvider(
             throw IllegalStateException()
         }
 
-        this.locationManager.requestLocationUpdates("gps", 2500, 5f, this.locationListener, null)
+        this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2500, 5f, this.locationListener, null)
 
         this.isActive = true
     }
@@ -56,5 +56,10 @@ internal final class LegacyLocationProvider(context: Context): LocationProvider(
         this.locationManager.removeUpdates(this.locationListener)
 
         this.isActive = false
+    }
+
+    @SuppressLint("MissingPermission")
+    public override fun getCurrentLocation(): com.janhafner.myskatemap.apps.trackrecorder.location.Location {
+        return this.locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toLocation(-1)
     }
 }

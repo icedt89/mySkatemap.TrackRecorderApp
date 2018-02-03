@@ -3,6 +3,13 @@
     <string name="trackrecorderactivity_toolbar_finish_currenttrackrecording_menuitem_text">Finish</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttrackrecording_menuitem_text">Discard</string>
     <string name="trackrecorderactivity_viewmodel_default_new_trackrecording_name_template">Track %s</string>
+    <string name="trackrecorderactivity_toolbar_attachments_currenttrackrecording_menuitem_text">Attachments</string>
+    <string name="trackrecorderactivity_toast_recording_running">Recording active</string>
+    <string name="trackrecorderactivity_toast_recording_paused">Recording paused</string>
+    <string name="trackrecorderactivity_tab_map_title">Map</string>
+    <string name="trackrecorderactivity_tab_data_title">Data</string>
+    <string name="trackrecorderactivity_tab_attachments_title">Attachments</string>
+
     <string name="trackrecorderservice_notification_title">mySkatemap Track Recorder</string>
     <string name="trackrecorderservice_notification_status_paused">Paused</string>
     <string name="trackrecorderservice_notification_status_locationservicesunavailable">Location unavailable</string>
@@ -12,9 +19,5 @@
     <string name="trackrecorderservice_notification_action_resume">Resume</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
     <string name="trackrecorderservice_notification_recordingduration_template">%s</string>
-    <string name="trackrecorderservice_notification_recordingduration_format">HH:mm:ss</string>
-    <string name="trackrecorderservice_notification_tracklength_template">~(%f) m</string>
-    <string name="trackrecorderactivity_toolbar_attachments_currenttrackrecording_menuitem_text">Attachments</string>
-    <string name="trackrecordersactivity_toast_recording_running">Recording running</string>
-    <string name="trackrecordersactivity_toast_recording_paused">Recording paused</string>
+    <string name="trackrecorderservice_notification_tracklength_template">~%sm</string>
 </resources>

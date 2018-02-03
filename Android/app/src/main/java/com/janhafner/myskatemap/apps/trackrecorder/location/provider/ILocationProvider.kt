@@ -10,6 +10,8 @@ internal interface ILocationProvider {
 
     fun resetSequenceNumber()
 
+    fun getCurrentLocation(): Location?
+
     fun overrideSequenceNumber(sequenceNumber: Int)
 
     val isActive: Boolean

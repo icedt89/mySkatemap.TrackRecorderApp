@@ -11,4 +11,6 @@ internal interface ITrackRecorderMap {
     var trackColor: Int
 
     var track: Iterable<LatLng>
+
+    fun zoomToLocation(location: LatLng, zoom: Float)
 }

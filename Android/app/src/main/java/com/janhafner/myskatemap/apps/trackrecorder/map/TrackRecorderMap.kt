@@ -1,13 +1,11 @@
 package com.janhafner.myskatemap.apps.trackrecorder.map
 
-import android.graphics.Color
+import android.content.Context
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.UiSettings
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
+import com.janhafner.myskatemap.apps.trackrecorder.R
 
 internal final class TrackRecorderMap(private val googleMap: GoogleMap): ITrackRecorderMap {
     private val polyline: Polyline = this.googleMap.addPolyline(PolylineOptions())
@@ -42,13 +40,17 @@ internal final class TrackRecorderMap(private val googleMap: GoogleMap): ITrackR
 
         val cameraBounds = cameraBoundsBuilder.build()
 
-        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(cameraBounds, 30)
+        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(cameraBounds, 50)
 
         this.googleMap.animateCamera(cameraUpdate)
     }
 
+    public override fun zoomToLocation(location: LatLng, zoom: Float) {
+        this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, zoom))
+    }
+
     companion object Factory {
-        fun fromGoogleMap(googleMap: GoogleMap): ITrackRecorderMap {
+        public fun fromGoogleMapWithDefaults(googleMap: GoogleMap, context : Context): ITrackRecorderMap {
             val trackRecorderMap = TrackRecorderMap(googleMap)
 
             val uiSettings = googleMap.uiSettings
@@ -59,15 +61,9 @@ internal final class TrackRecorderMap(private val googleMap: GoogleMap): ITrackR
 
             googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
-            trackRecorderMap.trackColor = Color.RED
+            googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_fanticmotor))
 
-            return trackRecorderMap
-        }
-
-        fun fromGoogleMap(googleMap: GoogleMap, initialLocation: LatLng, initialZoom: Float): ITrackRecorderMap {
-            val trackRecorderMap = fromGoogleMap(googleMap)
-
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, initialZoom))
+            trackRecorderMap.trackColor = context.getColor(R.color.colorPrimary)
 
             return trackRecorderMap
         }

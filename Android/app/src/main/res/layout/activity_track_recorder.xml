@@ -8,8 +8,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <LinearLayout
-            android:orientation="vertical"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <android.support.v7.widget.Toolbar
@@ -17,25 +16,45 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:elevation="4dp" />
-            <fragment
-                android:id="@+id/trackrecorderactivity_googlemap_mapfragment"
+            <android.support.v4.view.ViewPager
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                class="com.google.android.gms.maps.MapFragment" />
-        </LinearLayout>
-
+                android:id="@+id/trackrecorderactivity_toolbar_viewpager">
+                <android.support.design.widget.TabLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/trackrecorderactivity_toolbar_tablayout">
+                    <android.support.design.widget.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/trackrecorderactivity_toolbar_tab_track"
+                        android:focusedByDefault="true" />
+                    <android.support.design.widget.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/trackrecorderactivity_toolbar_tab_data" />
+                    <android.support.design.widget.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/trackrecorderactivity_toolbar_tab_attachments" />
+                </android.support.design.widget.TabLayout>
+            </android.support.v4.view.ViewPager>
+        </android.support.design.widget.AppBarLayout>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/trackrecorderactivity_startrecording_floatingactionbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:clickable="true"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
             android:src="@mipmap/ic_play_arrow_white_48dp" />
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/trackrecorderactivity_pauserecording_floatingactionbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
             android:visibility="gone"
             android:src="@mipmap/ic_pause_white_48dp" />
     </android.support.design.widget.CoordinatorLayout>

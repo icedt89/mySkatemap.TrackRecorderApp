@@ -23,11 +23,7 @@ internal abstract class LocationProvider: ILocationProvider {
     }
 
     public override fun resetSequenceNumber() {
-        if (this.isActive) {
-            throw IllegalStateException()
-        }
-
-        this.currentSequenceNumber = -1
+        this.overrideSequenceNumber(-1)
     }
 
     public override fun overrideSequenceNumber(sequenceNumber: Int) {

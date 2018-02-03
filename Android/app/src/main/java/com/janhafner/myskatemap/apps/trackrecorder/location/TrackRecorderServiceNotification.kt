@@ -6,8 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.activities.TrackRecorderActivity
+import com.janhafner.myskatemap.apps.trackrecorder.activities.trackrecorder.TrackRecorderActivity
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.TrackRecorderServiceNotificationChannel
+import com.janhafner.myskatemap.apps.trackrecorder.roundToDecimalPlaces
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
@@ -23,7 +24,8 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
     public fun update(trackRecorderServiceState: TrackRecorderServiceState, durationOfRecording: Period? = null, trackLengthInMeters: Float? = null) {
         val notificationCompatBuilder = NotificationCompat.Builder(this.context, TrackRecorderServiceNotificationChannel.Id)
 
-        notificationCompatBuilder.setSmallIcon(R.mipmap.ic_launcher)
+        notificationCompatBuilder.setSmallIcon(R.drawable.ic_launcher, NotificationCompat.BADGE_ICON_LARGE)
+        notificationCompatBuilder.setBadgeIconType(R.drawable.ic_launcher)
         notificationCompatBuilder.setContentTitle(context.getText(R.string.trackrecorderservice_notification_title))
 
         when(trackRecorderServiceState) {
@@ -46,11 +48,18 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
             }
 
             if (trackLengthInMeters != null) {
-                val lengthDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_tracklength_template, trackLengthInMeters)
+                 val lengthDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_tracklength_template, trackLengthInMeters!!.roundToDecimalPlaces())
                 notificationCompatBuilder.setContentInfo(lengthDisplayTemplate)
+            }
+
+            if(trackRecorderServiceState == TrackRecorderServiceState.Paused) {
+                notificationCompatBuilder.addAction(R.mipmap.ic_play_arrow_white_48dp, this.context.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.context, 0, Intent("trackrecorderservice.action.resume", null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+            } else if(trackRecorderServiceState == TrackRecorderServiceState.Running) {
+                notificationCompatBuilder.addAction(R.mipmap.ic_pause_white_48dp, this.context.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.context, 0, Intent("trackrecorderservice.action.pause", null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
             }
         }
 
+        notificationCompatBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         notificationCompatBuilder.setOngoing(true)
         notificationCompatBuilder.setContentIntent(PendingIntent.getActivity(this.context, 0, Intent(this.context, TrackRecorderActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
 

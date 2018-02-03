@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.activities
+package com.janhafner.myskatemap.apps.trackrecorder.activities.trackrecorder
 
 import android.content.*
 import android.os.Build
@@ -15,15 +15,17 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.BehaviorSubject
 import org.joda.time.DateTime
+import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
+import java.io.IOException
 
 internal final class TrackRecorderActivityViewModel(private val context: Context) {
     private var trackRecorderService: ITrackRecorderService? = null
 
     private var trackRecordingSession: ITrackRecordingSession? = null
 
-    private var subscriptions: CompositeDisposable? = CompositeDisposable()
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     private val currentTrackRecordingStore: IDataStore<TrackRecording> = CurrentTrackRecordingStore(context)
 
@@ -36,11 +38,13 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
 
             if (self.trackRecordingSession == null) {
                 try {
-                    var restoredTrackRecording = self.currentTrackRecordingStore.getData()
+                    val restoredTrackRecording = self.currentTrackRecordingStore.getData()
                     if (restoredTrackRecording != null) {
                         self.trackRecordingSession = self.trackRecorderService?.createSession(restoredTrackRecording)
                     }
-                } catch(exception: Exception) {
+                } catch(exception: IOException) {
+                    self.currentTrackRecordingStore.delete()
+
                     Log.e("TrackRecorderActivityVM", "Unable to restore saved state of current recording! App still works but unfortunately you have lost your last recording :(", exception)
                 }
             }
@@ -53,8 +57,7 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
         override fun onServiceDisconnected(name: ComponentName) {
             val self = this@TrackRecorderActivityViewModel
 
-            self.subscriptions?.dispose()
-            self.subscriptions = null
+            self.unsubscribeFromSession()
 
             self.trackRecordingSession = null
             self.trackRecorderService = null
@@ -62,23 +65,21 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
     }
 
     init {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.context.startForegroundService(Intent(this.context, TrackRecorderService::class.java))
-        } else {
-            this.context.startService(Intent(this.context, TrackRecorderService::class.java))
-        }
-
-        this.context.bindService(Intent(this.context, TrackRecorderService::class.java), this.trackRecorderServiceConnection, AppCompatActivity.BIND_AUTO_CREATE)
+        this.startService()
     }
 
     private fun subscribeToSession() {
-        this.unsubscribeFromSession()
+        this.subscriptions.addAll(
+            this.trackRecordingSession!!.recordingTimeChanged.subscribe {
+                currentRecordingTime ->
+                    this.recordingTimeChangedSubject.onNext(currentRecordingTime)
+            },
 
-        if (this.subscriptions == null) {
-            this.subscriptions = CompositeDisposable()
-        }
+            this.trackRecordingSession!!.trackDistanceChanged.subscribe{
+                currentTrackDistance ->
+                    this.trackDistanceChangedSubject.onNext(currentTrackDistance)
+            },
 
-        this.subscriptions!!.addAll(
             this.trackRecordingSession!!.stateChanged.subscribe {
                 currentState ->
                     this.trackSessionStateChangedSubject.onNext(currentState)
@@ -98,13 +99,40 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
     }
 
     private fun unsubscribeFromSession() {
-        if (this.subscriptions != null) {
-            this.subscriptions?.dispose()
-            this.subscriptions = null
-        }
+        this.subscriptions.clear()
 
         this.locationChangedAvailableSubject.onNext(Observable.never())
     }
+
+    public fun startService() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.context.startForegroundService(Intent(this.context, TrackRecorderService::class.java))
+        } else {
+            this.context.startService(Intent(this.context, TrackRecorderService::class.java))
+        }
+
+        this.context.bindService(Intent(this.context, TrackRecorderService::class.java), this.trackRecorderServiceConnection, AppCompatActivity.BIND_AUTO_CREATE)
+    }
+
+    public fun terminateService() {
+        this.context.unbindService(this.trackRecorderServiceConnection)
+
+        this.context.stopService(Intent(this.context, TrackRecorderService::class.java))
+    }
+
+    public fun saveCurrentRecording() {
+        if(this.trackRecordingSession == null) {
+            throw IllegalStateException()
+        }
+
+        this.trackRecordingSession!!.saveTracking()
+    }
+
+    private val recordingTimeChangedSubject: BehaviorSubject<Period> = BehaviorSubject.createDefault(Period.ZERO)
+    public val recordingTimeChanged: Observable<Period> = this.recordingTimeChangedSubject
+
+    private val trackDistanceChangedSubject: BehaviorSubject<Float> = BehaviorSubject.createDefault(0.0f)
+    public val trackDistanceChanged: Observable<Float> = this.trackDistanceChangedSubject
 
     private val trackSessionStateChangedSubject: BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault(TrackRecorderServiceState.Initializing)
     public val trackSessionStateChanged: Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
@@ -120,7 +148,7 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
             val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
             val nameTemplate = this.context.getString(R.string.trackrecorderactivity_viewmodel_default_new_trackrecording_name_template)
 
-            var trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
+            val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
             this.trackRecordingSession = this.trackRecorderService!!.createSession(trackRecordingName)
 
@@ -195,8 +223,5 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
     public val canShowTrackAttachmentsChanged: Observable<Boolean> = this.canShowTrackAttachmentsSubject
 
     public fun showTrackAttachments() {
-        val showTrackAttachmentsIntent = Intent(this.context, TrackAttachmentsActivity::class.java)
-
-        this.context.startActivity(showTrackAttachmentsIntent)
     }
 }

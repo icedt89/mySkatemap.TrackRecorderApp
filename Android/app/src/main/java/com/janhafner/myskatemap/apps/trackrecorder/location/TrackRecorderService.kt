@@ -13,6 +13,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.provider.FusedLocati
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.LegacyLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.TestLocationProvider
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
@@ -33,7 +34,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     private lateinit var locationAvailabilityChangedSubscription: Disposable
 
-    private var sessionSubscriptions: CompositeDisposable? = null
+    private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private var currentTrackRecording: TrackRecording? = null
 
@@ -74,17 +75,16 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.changeState(TrackRecorderServiceState.Running)
 
         this.durationTimer.start()
-
         this.locationProvider.startLocationUpdates()
     }
 
     public fun pauseTracking() {
-        if (this.stateChangedSubject.value != TrackRecorderServiceState.Running) {
+        if (this.stateChangedSubject.value != TrackRecorderServiceState.Running
+            || this.stateChangedSubject.value == TrackRecorderServiceState.Initializing) {
             throw IllegalStateException()
         }
 
         this.durationTimer.stop()
-
         this.locationProvider.stopLocationUpdates()
 
         this.saveTracking()
@@ -93,49 +93,55 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     }
 
     public override fun discardTracking() {
-        if (this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
+        if (this.stateChangedSubject.value == TrackRecorderServiceState.Running
+            || this.stateChangedSubject.value == TrackRecorderServiceState.Initializing) {
             throw IllegalStateException()
         }
 
-        if (this.durationTimer.isRunning) {
-            this.durationTimer.stop()
-        }
-
         this.durationTimer.reset()
-
-        if (this.locationProvider.isActive) {
-            this.locationProvider.stopLocationUpdates()
-        }
-
         this.locationProvider.resetSequenceNumber()
 
         this.trackDistanceCalculator.clear()
 
         this.trackRecordingStore.delete()
-
         this.currentTrackRecording = null
 
         this.changeState(com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState.Initializing)
 
-        this.unsubscribeFromSession()
-
-        this.currentSession!!.terminate()
-        this.currentSession = null
+        this.closeCurrentSession()
     }
 
     public override fun finishTracking(): TrackRecording {
         // TODO: Check other states to provide meaningful exception messages
-        if (this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
+        if (this.stateChangedSubject.value == TrackRecorderServiceState.Running
+            || this.stateChangedSubject.value == TrackRecorderServiceState.Initializing) {
             throw IllegalStateException()
         }
 
-        val finishedTrackRecording  = this.currentTrackRecording!!
+        val finishedTrackRecording = this.currentTrackRecording!!
 
         this.saveTracking()
 
-        this.discardTracking()
+        this.durationTimer.reset()
+        this.locationProvider.resetSequenceNumber()
+
+        this.trackDistanceCalculator.clear()
+
+        this.trackRecordingStore.delete()
+        this.currentTrackRecording = null
+
+        this.changeState(com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState.Initializing)
+
+        this.closeCurrentSession()
 
         return finishedTrackRecording
+    }
+
+    private fun closeCurrentSession() {
+        this.sessionSubscriptions.clear()
+
+        this.currentSession!!.terminate()
+        this.currentSession = null
     }
 
     public override fun createSession(name: String): ITrackRecordingSession {
@@ -143,18 +149,9 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             throw IllegalStateException()
         }
 
-        this.currentTrackRecording = TrackRecording(name)
+        this.createSessionCore(com.janhafner.myskatemap.apps.trackrecorder.TrackRecording(name), this.durationTimer.secondElapsed, this.locationProvider.locations.replay().autoConnect())
 
         this.saveTracking()
-
-        this.currentSession = TrackRecordingSession(
-                this.trackDistanceCalculator.distanceCalculated,
-                this.durationTimer.secondElapsed,
-                this.locationProvider.locations.replay().autoConnect(),
-                this.stateChangedSubject,
-                this)
-
-        this.subscribeToSession()
 
         this.changeState(TrackRecorderServiceState.Ready)
 
@@ -184,6 +181,14 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             this.durationTimer.reset(trackRecording.recordingTime.seconds)
         }
 
+        this.createSessionCore(trackRecording, recordingTimeChanged, locationsChanged)
+
+        this.changeState(TrackRecorderServiceState.Paused)
+
+        return this.currentSession!!
+    }
+
+    private fun createSessionCore(trackRecording: TrackRecording, recordingTimeChanged: Observable<Period>, locationsChanged: Observable<Location>) {
         this.currentTrackRecording = trackRecording
 
         this.currentSession = TrackRecordingSession(
@@ -194,36 +199,28 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                 this)
 
         this.subscribeToSession()
-
-        this.changeState(TrackRecorderServiceState.Paused)
-
-        return this.currentSession!!
     }
 
     private fun subscribeToSession() {
-        this.sessionSubscriptions = CompositeDisposable()
-
-        this.sessionSubscriptions!!.addAll(
-            this.currentSession!!.recordingTimeChanged.subscribe{
+        this.sessionSubscriptions.addAll(
+            this.currentSession!!.recordingTimeChanged.subscribe {
                 currentRecordingTime ->
                     this.currentTrackRecording!!.recordingTime = currentRecordingTime
+
+                    // Update Notification every five seconds with current duration and track length
+                    if(currentRecordingTime.seconds % 5 == 0) {
+                        this.trackRecorderServiceNotification!!.update(this.stateChangedSubject.value, currentRecordingTime, this.trackDistanceCalculator.distance)
+                    }
             },
-            this.currentSession!!.locationsChanged.subscribe ({
+            this.currentSession!!.locationsChanged.subscribe {
                 location ->
                     this.trackDistanceCalculator.add(location)
 
                     this.currentTrackRecording!!.locations.add(location)
 
                     Log.d("TrackRecorderService", "Location ${location} received for persistence.")
-            })
+            }
         )
-    }
-
-    private fun unsubscribeFromSession() {
-        if (this.sessionSubscriptions != null) {
-            this.sessionSubscriptions!!.dispose()
-            this.sessionSubscriptions = null
-        }
     }
 
     public fun saveTracking() {
@@ -249,6 +246,14 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     }
 
     public override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if(intent != null) {
+            when(intent.action) {
+                "trackrecorderservice.action.resume" ->
+                    this.resumeTracking()
+                "trackrecorderservice.action.pause" ->
+                    this.pauseTracking()
+            }
+        }
         return START_STICKY
     }
 
@@ -288,12 +293,11 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             this.durationTimer.stop()
         }
 
-        this.durationTimer.reset()
-
         this.unregisterReceiver(this.locationChangedBroadcasterReceiver)
 
-        this.trackRecorderServiceNotification?.close()
+        this.closeCurrentSession()
 
+        this.trackRecorderServiceNotification?.close()
         this.locationAvailabilityChangedSubscription.dispose()
     }
 }

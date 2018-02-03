@@ -9,4 +9,8 @@ internal final class App: Application() {
 
         JodaTimeAndroid.init(this)
     }
+
+    override fun onTerminate() {
+        super.onTerminate()
+    }
 }
