@@ -7,11 +7,10 @@ import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.activities.trackrecorder.TrackRecorderActivity
+import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
+import com.janhafner.myskatemap.apps.trackrecorder.formatTrackDistance
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.TrackRecorderServiceNotificationChannel
-import com.janhafner.myskatemap.apps.trackrecorder.roundToDecimalPlaces
 import org.joda.time.Period
-import org.joda.time.format.PeriodFormatter
-import org.joda.time.format.PeriodFormatterBuilder
 
 internal final class TrackRecorderServiceNotification(private val context: Context) {
     private val notificationManager: NotificationManager = this.context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -22,7 +21,7 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
     }
 
     public fun update(trackRecorderServiceState: TrackRecorderServiceState, durationOfRecording: Period? = null, trackLengthInMeters: Float? = null) {
-        val notificationCompatBuilder = NotificationCompat.Builder(this.context, TrackRecorderServiceNotificationChannel.Id)
+        val notificationCompatBuilder = NotificationCompat.Builder(this.context, TrackRecorderServiceNotificationChannel.ID)
 
         notificationCompatBuilder.setSmallIcon(R.drawable.ic_launcher, NotificationCompat.BADGE_ICON_LARGE)
         notificationCompatBuilder.setBadgeIconType(R.drawable.ic_launcher)
@@ -43,19 +42,19 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
 
         if (trackRecorderServiceState != TrackRecorderServiceState.Initializing) {
             if (durationOfRecording != null) {
-                val durationDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_recordingduration_template, TrackRecorderServiceNotification.durationFormatter.print(durationOfRecording))
+                val durationDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_recordingduration_template, durationOfRecording.formatRecordingTime())
                 notificationCompatBuilder.setSubText(durationDisplayTemplate)
             }
 
             if (trackLengthInMeters != null) {
-                 val lengthDisplayTemplate = context.getString(R.string.trackrecorderservice_notification_tracklength_template, trackLengthInMeters!!.roundToDecimalPlaces())
+                 val lengthDisplayTemplate = trackLengthInMeters.formatTrackDistance(this.context)
                 notificationCompatBuilder.setContentInfo(lengthDisplayTemplate)
             }
 
             if(trackRecorderServiceState == TrackRecorderServiceState.Paused) {
-                notificationCompatBuilder.addAction(R.mipmap.ic_play_arrow_white_48dp, this.context.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.context, 0, Intent("trackrecorderservice.action.resume", null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+                notificationCompatBuilder.addAction(R.mipmap.ic_play_arrow_white_48dp, this.context.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.context, 0, Intent(TrackRecorderServiceNotification.ACTION_RESUME, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
             } else if(trackRecorderServiceState == TrackRecorderServiceState.Running) {
-                notificationCompatBuilder.addAction(R.mipmap.ic_pause_white_48dp, this.context.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.context, 0, Intent("trackrecorderservice.action.pause", null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+                notificationCompatBuilder.addAction(R.mipmap.ic_pause_white_48dp, this.context.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.context, 0, Intent(TrackRecorderServiceNotification.ACTION_PAUSE, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
             }
         }
 
@@ -65,25 +64,19 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
 
         val notification = notificationCompatBuilder.build()
 
-        this.notificationManager.notify(Id, notification)
+        this.notificationManager.notify(ID, notification)
     }
 
     public fun close() {
-        this.notificationManager.cancel(Id)
+        this.notificationManager.cancel(ID)
     }
 
     companion object {
-        private val Id: Int = 1
+        public const val ACTION_RESUME = "trackrecorderservice.action.resume"
 
-        private val durationFormatter: PeriodFormatter = PeriodFormatterBuilder()
-                .minimumPrintedDigits(2)
-                .printZeroAlways()
-                .appendHours()
-                .appendSeparator(":")
-                .appendMinutes()
-                .appendSeparator(":")
-                .appendSeconds()
-                .toFormatter()
+        public const val ACTION_PAUSE = "trackrecorderservice.action.pause"
+
+        private const val ID: Int = 1
 
         public fun showNew(context: Context, trackRecorderServiceState: TrackRecorderServiceState, durationOfRecording: Period? = null, trackLengthInMeters: Float? = null): TrackRecorderServiceNotification {
             return TrackRecorderServiceNotification(context, trackRecorderServiceState, durationOfRecording, trackLengthInMeters)

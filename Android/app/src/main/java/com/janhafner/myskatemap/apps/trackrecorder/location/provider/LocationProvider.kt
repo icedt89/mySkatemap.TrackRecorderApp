@@ -19,7 +19,7 @@ internal abstract class LocationProvider: ILocationProvider {
     }
 
     protected fun generateSequenceNumber(): Int {
-        return this.currentSequenceNumber++
+        return ++this.currentSequenceNumber
     }
 
     public override fun resetSequenceNumber() {

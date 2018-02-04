@@ -11,28 +11,20 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import com.google.android.gms.maps.model.LatLng
 import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.view.enabled
 import com.jakewharton.rxbinding2.view.visibility
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.consumeLocations
-import com.janhafner.myskatemap.apps.trackrecorder.consumeReset
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
-import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
-import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapReadyCallback
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import java.util.concurrent.TimeUnit
 
-internal final class TrackRecorderActivity: AppCompatActivity(), OnTrackRecorderMapReadyCallback {
+internal final class TrackRecorderActivity: AppCompatActivity() {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     private var optionsMenuSubscriptions: CompositeDisposable? = null
@@ -41,15 +33,9 @@ internal final class TrackRecorderActivity: AppCompatActivity(), OnTrackRecorder
 
     private var viewModel: TrackRecorderActivityViewModel? = null
 
-    private var currentLocationsChangedObservable: Disposable? = null
-
-    private var trackRecorderMap: ITrackRecorderMap? = null
-
     private var finishCurrentTrackRecordingMenuItem: MenuItem? = null
 
     private var discardCurrentTrackRecordingMenuItem: MenuItem? = null
-
-    private var showCurrentTrackRecordingAttachmentsMenuItem: MenuItem? = null
 
     private lateinit var startRecordingFloatingActionButton: FloatingActionButton
 
@@ -73,14 +59,12 @@ internal final class TrackRecorderActivity: AppCompatActivity(), OnTrackRecorder
         this.pauseRecordingFloatingActionButton = this.findViewById<FloatingActionButton>(R.id.trackrecorderactivity_pauserecording_floatingactionbutton)
 
         this.viewModel = TrackRecorderActivityViewModel(this)
-
-        this.initializeGoogleMap()
+        this.viewModel!!.startAndBindService()
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         this.menuInflater.inflate(R.menu.track_recorder_activity_toolbar_menu, menu)
 
-        this.showCurrentTrackRecordingAttachmentsMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_attachments_currenttrackrecording_menuitem)
         this.discardCurrentTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_discard_currenttrackrecording_menuitem)
         this.finishCurrentTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_finish_currenttrackrecording_menuitem)
 
@@ -115,7 +99,6 @@ internal final class TrackRecorderActivity: AppCompatActivity(), OnTrackRecorder
         super.onResume()
 
         this.subscribeToViewModel()
-        this.subscribeToMap()
         this.subscribeToOptionsMenu()
     }
 
@@ -131,48 +114,12 @@ internal final class TrackRecorderActivity: AppCompatActivity(), OnTrackRecorder
     override fun onDestroy() {
         super.onDestroy()
 
+        this.viewModel!!.unbindService()
+
         this.mapSubscriptions.clear()
         this.subscriptions.clear()
         this.optionsMenuSubscriptions?.clear()
         this.optionsMenuSubscriptions = null
-
-        // this.viewModel!!.terminateService()
-    }
-
-    private fun initializeGoogleMap() {
-        // val mapFragment = this.fragmentManager.findFragmentById(R.id.trackrecorderactivity_googlemap_mapfragment) as TrackRecorderMapFragment
-
-        // mapFragment.getMapAsync(this)
-    }
-
-    public override fun onMapReady(trackRecorderMap: ITrackRecorderMap) {
-        this.trackRecorderMap = trackRecorderMap
-
-        this.trackRecorderMap!!.zoomToLocation(LatLng(50.8357, 12.92922), 12f)
-
-        this.subscribeToMap()
-    }
-
-    private fun subscribeToMap() {
-        if(this.trackRecorderMap == null) {
-            return
-        }
-
-        this.mapSubscriptions.addAll(
-            this.viewModel!!.trackSessionStateChanged.subscribe(this.trackRecorderMap!!.consumeReset()),
-
-            this.viewModel!!.locationsChangedAvailable.subscribe{
-                locationsChangedObservable ->
-                    this.currentLocationsChangedObservable?.dispose()
-
-                    if (this.trackRecorderMap != null) {
-                        this.currentLocationsChangedObservable = locationsChangedObservable
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .buffer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread(), 5)
-                                .subscribe(this.trackRecorderMap!!.consumeLocations())
-                    }
-            }
-        )
     }
 
     private fun subscribeToViewModel() {
@@ -221,8 +168,7 @@ internal final class TrackRecorderActivity: AppCompatActivity(), OnTrackRecorder
     private fun subscribeToOptionsMenu() {
         if(this.optionsMenuSubscriptions != null ||
                 (this.finishCurrentTrackRecordingMenuItem == null
-                      || discardCurrentTrackRecordingMenuItem == null
-                        || showCurrentTrackRecordingAttachmentsMenuItem == null)) {
+                      || discardCurrentTrackRecordingMenuItem == null)) {
             return
         }
 
@@ -236,11 +182,6 @@ internal final class TrackRecorderActivity: AppCompatActivity(), OnTrackRecorder
                 this.viewModel!!.canDiscardRecordingChanged.subscribe(this.discardCurrentTrackRecordingMenuItem!!.enabled()),
                 this.discardCurrentTrackRecordingMenuItem!!.clicks().subscribe({
                     this.viewModel!!.discardRecording()
-                }),
-
-                this.viewModel!!.canShowTrackAttachmentsChanged.subscribe(this.showCurrentTrackRecordingAttachmentsMenuItem!!.enabled()),
-                this.showCurrentTrackRecordingAttachmentsMenuItem!!.clicks().subscribe({
-                    this.viewModel!!.showTrackAttachments()
                 })
         )
     }

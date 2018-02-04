@@ -3,14 +3,13 @@ package com.janhafner.myskatemap.apps.trackrecorder
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import org.joda.time.DateTime
 import org.joda.time.Period
-import java.util.*
 
 internal final class TrackRecording {
     public constructor(name: String) {
         this.name = name
     }
 
-    public var locations: MutableCollection<Location> = ArrayList<Location>()
+    public var locations: HashMap<Int, Location> = HashMap<Int, Location>()
 
     public val isFinished: Boolean
         get() = this.trackingFinishedAt != null
@@ -39,7 +38,4 @@ internal final class TrackRecording {
 
         this.trackingFinishedAt = DateTime.now()
     }
-
-    public val isInvalid: Boolean
-        get() = this.name.isNullOrBlank()
 }

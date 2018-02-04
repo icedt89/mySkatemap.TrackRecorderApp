@@ -13,6 +13,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.provider.FusedLocati
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.LegacyLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.TestLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.putIfAbsentWorkaround
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -120,6 +121,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         val finishedTrackRecording = this.currentTrackRecording!!
 
+        finishedTrackRecording.finish()
         this.saveTracking()
 
         this.durationTimer.reset()
@@ -169,7 +171,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         var locationsChanged = this.locationProvider.locations.replay().autoConnect()
         if (trackRecording.locations.any()) {
-            val sortedLocations = trackRecording.locations.sortedBy { location -> location.sequenceNumber }
+            val sortedLocations = trackRecording.locations.toSortedMap(compareBy { it }).
 
             this.locationProvider.overrideSequenceNumber(sortedLocations.last().sequenceNumber)
 
@@ -196,7 +198,8 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                 recordingTimeChanged,
                 locationsChanged,
                 this.stateChangedSubject,
-                this)
+                this,
+                trackRecording.trackingStartedAt)
 
         this.subscribeToSession()
     }
@@ -216,7 +219,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                 location ->
                     this.trackDistanceCalculator.add(location)
 
-                    this.currentTrackRecording!!.locations.add(location)
+                    this.currentTrackRecording!!.locations.putIfAbsentWorkaround(location.sequenceNumber, location)
 
                     Log.d("TrackRecorderService", "Location ${location} received for persistence.")
             }
@@ -248,13 +251,13 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     public override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if(intent != null) {
             when(intent.action) {
-                "trackrecorderservice.action.resume" ->
+                TrackRecorderServiceNotification.ACTION_RESUME ->
                     this.resumeTracking()
-                "trackrecorderservice.action.pause" ->
+                TrackRecorderServiceNotification.ACTION_PAUSE ->
                     this.pauseTracking()
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     public override fun onCreate() {
@@ -299,5 +302,9 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackRecorderServiceNotification?.close()
         this.locationAvailabilityChangedSubscription.dispose()
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        return super.onUnbind(intent)
     }
 }

@@ -12,6 +12,7 @@
         android:textSize="18sp" />
 
     <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/trackrecorderactivity_fragment_data_tab_name"
         android:layout_marginBottom="5dp"
         android:inputType="textShortMessage"
         android:hint="Name der Strecke"
@@ -26,6 +27,7 @@
         android:textSize="18sp" />
 
     <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/trackrecorderactivity_fragment_data_tab_distance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
@@ -42,6 +44,7 @@
         android:textSize="18sp" />
 
     <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/trackrecorderactivity_fragment_data_tab_recordingtime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
@@ -58,6 +61,7 @@
         android:textSize="18sp" />
 
     <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/trackrecorderactivity_fragment_data_tab_locationscount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
@@ -74,6 +78,7 @@
         android:textSize="18sp" />
 
     <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/trackrecorderactivity_fragment_data_tab_trackingstartedat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
@@ -90,6 +95,7 @@
         android:textSize="18sp" />
 
     <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/trackrecorderactivity_fragment_data_tab_notice"
         android:inputType="textMultiLine"
         android:hint="Relevante Notizen zur Strecke"
         android:textSize="24sp"

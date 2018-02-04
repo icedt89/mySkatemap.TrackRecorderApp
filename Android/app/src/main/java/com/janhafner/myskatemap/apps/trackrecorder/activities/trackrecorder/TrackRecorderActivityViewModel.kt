@@ -62,13 +62,14 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
             self.trackRecordingSession = null
             self.trackRecorderService = null
         }
-    }
 
-    init {
-        this.startService()
+        public override fun onBindingDied(name: ComponentName?) {
+        }
     }
 
     private fun subscribeToSession() {
+        this.trackingStartedAtChangedSubject.onNext(this.trackRecordingSession!!.trackingStartedAt)
+
         this.subscriptions.addAll(
             this.trackRecordingSession!!.recordingTimeChanged.subscribe {
                 currentRecordingTime ->
@@ -91,7 +92,6 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
                     this.canPauseRecordingSubject.onNext(isRunning)
                     this.canDiscardRecordingSubject.onNext(isPaused)
                     this.canFinishRecordingSubject.onNext(isPaused)
-                    this.canShowTrackAttachmentsSubject.onNext(!isRunning && isPaused)
             }
         )
 
@@ -102,9 +102,10 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
         this.subscriptions.clear()
 
         this.locationChangedAvailableSubject.onNext(Observable.never())
+        this.trackingStartedAtChangedSubject.onNext(DateTime(0))
     }
 
-    public fun startService() {
+    public fun startAndBindService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             this.context.startForegroundService(Intent(this.context, TrackRecorderService::class.java))
         } else {
@@ -114,8 +115,12 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
         this.context.bindService(Intent(this.context, TrackRecorderService::class.java), this.trackRecorderServiceConnection, AppCompatActivity.BIND_AUTO_CREATE)
     }
 
-    public fun terminateService() {
+    public fun unbindService() {
         this.context.unbindService(this.trackRecorderServiceConnection)
+    }
+
+    public fun terminateService() {
+        this.unbindService()
 
         this.context.stopService(Intent(this.context, TrackRecorderService::class.java))
     }
@@ -127,6 +132,9 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
 
         this.trackRecordingSession!!.saveTracking()
     }
+
+    private val trackingStartedAtChangedSubject: BehaviorSubject<DateTime> = BehaviorSubject.createDefault(DateTime(0))
+    public val trackingStartedAtChanged: Observable<DateTime> = this.trackingStartedAtChangedSubject
 
     private val recordingTimeChangedSubject: BehaviorSubject<Period> = BehaviorSubject.createDefault(Period.ZERO)
     public val recordingTimeChanged: Observable<Period> = this.recordingTimeChangedSubject
@@ -217,11 +225,5 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
         })
 
         alertBuilder.show()
-    }
-
-    private var canShowTrackAttachmentsSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canShowTrackAttachmentsChanged: Observable<Boolean> = this.canShowTrackAttachmentsSubject
-
-    public fun showTrackAttachments() {
     }
 }

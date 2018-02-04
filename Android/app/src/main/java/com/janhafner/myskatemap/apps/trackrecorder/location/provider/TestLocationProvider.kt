@@ -45,6 +45,14 @@ internal final class TestLocationProvider(private val context: Context,
     }
 
     public override fun overrideSequenceNumber(sequenceNumber: Int) {
+        super.overrideSequenceNumber(-1)
+
+        this.referencelessCoordinates.clear()
+
+        for (i in 0..sequenceNumber) {
+            this.computeLocation()
+        }
+
         super.overrideSequenceNumber(sequenceNumber)
     }
 
@@ -55,12 +63,6 @@ internal final class TestLocationProvider(private val context: Context,
     }
 
     private fun computeNextLocation(counter: Int, initialLocation: LatLng, offsetLatitude: Double, offsetLongitude: Double): LatLng {
-        if (counter == 0) {
-            referencelessCoordinates.add(PointD(0.0, 0.0))
-
-            return initialLocation
-        }
-
         val previousCoordinates = referencelessCoordinates[counter - 1]
 
         var x = previousCoordinates.x
@@ -98,6 +100,8 @@ internal final class TestLocationProvider(private val context: Context,
             this.lastComputedLocation?.latitude = initialLocation.latitude
             this.lastComputedLocation?.longitude = initialLocation.longitude
             this.lastComputedLocation?.speed = initialLocation.speed
+
+            this.referencelessCoordinates.add(PointD(0.0, 0.0))
         } else {
             this.lastComputedLocation = this.lastComputedLocation?.clone(sequenceNumber)
 
@@ -158,5 +162,8 @@ internal final class TestLocationProvider(private val context: Context,
     }
 
     private final class PointD(public val x: Double, public val y: Double) {
+        public override fun toString(): String {
+            return "PointD(X: ${this.x}; Y: ${this.y})"
+        }
     }
 }

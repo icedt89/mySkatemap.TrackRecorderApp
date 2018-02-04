@@ -8,18 +8,9 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
-import java.math.RoundingMode
-import java.text.DecimalFormat
 
 internal fun Location.toLatLng(): LatLng {
     return LatLng(this.latitude, this.longitude)
-}
-
-internal fun Float.roundToDecimalPlaces(): String {
-    val decimalFormat = DecimalFormat("#.##")
-    decimalFormat.roundingMode = RoundingMode.CEILING
-
-    return decimalFormat.format(this)
 }
 
 internal fun Location.clone(sequenceNumber: Int): Location {
@@ -77,6 +68,14 @@ private fun Location.toLiteAndroidLocation(): android.location.Location {
     result.longitude = this.longitude
 
     return result
+}
+
+internal fun <K, V> HashMap<K, V>.putIfAbsentWorkaround(key: K, value: V) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        this.putIfAbsent(key, value)
+    } else if(!this.containsKey(key)) {
+        this.put(key, value)
+    }
 }
 
 internal fun Location.distanceTo(location: Location): Float {
