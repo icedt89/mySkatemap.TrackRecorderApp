@@ -1,6 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.activities.trackrecorder
 
-import android.content.*
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
 import android.support.v7.app.AlertDialog
@@ -20,18 +23,18 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import java.io.IOException
 
-internal final class TrackRecorderActivityViewModel(private val context: Context) {
+internal final class TrackRecorderActivityPresenter(private val context: Context) {
     private var trackRecorderService: ITrackRecorderService? = null
 
     private var trackRecordingSession: ITrackRecordingSession? = null
 
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    private val currentTrackRecordingStore: IDataStore<TrackRecording> = CurrentTrackRecordingStore(context)
+    private val currentTrackRecordingStore: IDataStore<TrackRecording> = CurrentTrackRecordingStore(context, TrackRecording::class.java)
 
     private val trackRecorderServiceConnection: ServiceConnection = object: ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val self = this@TrackRecorderActivityViewModel
+            val self = this@TrackRecorderActivityPresenter
 
             self.trackRecorderService = service as ITrackRecorderService
             self.trackRecordingSession = self.trackRecorderService!!.currentSession
@@ -45,7 +48,7 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
                 } catch(exception: IOException) {
                     self.currentTrackRecordingStore.delete()
 
-                    Log.e("TrackRecorderActivityVM", "Unable to restore saved state of current recording! App still works but unfortunately you have lost your last recording :(", exception)
+                    Log.e("TrackRecorderAPresenter", "Unable to restore saved state of current recording! App still works but unfortunately you have lost your last recording :(", exception)
                 }
             }
 
@@ -55,7 +58,7 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            val self = this@TrackRecorderActivityViewModel
+            val self = this@TrackRecorderActivityPresenter
 
             self.unsubscribeFromSession()
 
@@ -72,26 +75,24 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
 
         this.subscriptions.addAll(
             this.trackRecordingSession!!.recordingTimeChanged.subscribe {
-                currentRecordingTime ->
-                    this.recordingTimeChangedSubject.onNext(currentRecordingTime)
+                this.recordingTimeChangedSubject.onNext(it)
             },
 
-            this.trackRecordingSession!!.trackDistanceChanged.subscribe{
-                currentTrackDistance ->
-                    this.trackDistanceChangedSubject.onNext(currentTrackDistance)
+            this.trackRecordingSession!!.trackDistanceChanged
+                    .subscribe{
+                this.trackDistanceChangedSubject.onNext(it)
             },
 
             this.trackRecordingSession!!.stateChanged.subscribe {
-                currentState ->
-                    this.trackSessionStateChangedSubject.onNext(currentState)
+                this.trackSessionStateChangedSubject.onNext(it)
 
-                    val isRunning = currentState == TrackRecorderServiceState.Running
-                    val isPaused = currentState == TrackRecorderServiceState.Paused
+                val isRunning = it == TrackRecorderServiceState.Running
+                val isPaused = it == TrackRecorderServiceState.Paused
 
-                    this.canStartResumeRecordingSubject.onNext(!isRunning)
-                    this.canPauseRecordingSubject.onNext(isRunning)
-                    this.canDiscardRecordingSubject.onNext(isPaused)
-                    this.canFinishRecordingSubject.onNext(isPaused)
+                this.canStartResumeRecordingSubject.onNext(!isRunning)
+                this.canPauseRecordingSubject.onNext(isRunning)
+                this.canDiscardRecordingSubject.onNext(isPaused)
+                this.canFinishRecordingSubject.onNext(isPaused)
             }
         )
 
@@ -154,7 +155,7 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
     public fun startResumeRecording() {
         if (this.trackRecordingSession == null) {
             val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
-            val nameTemplate = this.context.getString(R.string.trackrecorderactivity_viewmodel_default_new_trackrecording_name_template)
+            val nameTemplate = this.context.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
 
             val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
@@ -177,20 +178,15 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
     public val canDiscardRecordingChanged: Observable<Boolean> = this.canDiscardRecordingSubject
 
     public fun discardRecording() {
-        // TODO: ViewModel or Activity?
+        // TODO:Presenter or Activity?
         val alertBuilder = AlertDialog.Builder(this.context)
-        alertBuilder.setTitle("TITEL")
+        alertBuilder.setTitle(R.string.trackrecorderactivity_discard_confirmation_title)
         alertBuilder.setCancelable(true)
-        alertBuilder.setMessage("NACHRICHT?")
+        alertBuilder.setMessage(R.string.trackrecorderactivity_discard_confirmation_message)
         alertBuilder.setIcon(android.R.drawable.ic_dialog_alert)
-        alertBuilder.setNegativeButton("NEIN!", {
-            dialog: DialogInterface?,
-            button: Int ->
-                dialog!!.dismiss()
-        })
-        alertBuilder.setPositiveButton("JA!!", {
-            dialog: DialogInterface?,
-            button: Int ->
+        alertBuilder.setNegativeButton(R.string.trackrecorderactivity_discard_confirmation_button_no_label, null)
+        alertBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
+            _, _ ->
                 this.trackRecorderService!!.discardTracking()
 
                 this.unsubscribeFromSession()
@@ -204,24 +200,20 @@ internal final class TrackRecorderActivityViewModel(private val context: Context
     public val canFinishRecordingChanged: Observable<Boolean> = this.canFinishRecordingSubject
 
     public fun finishRecording() {
-        // TODO: ViewModel or Activity?
+        // TODO: Presenter or Activity?
         val alertBuilder = AlertDialog.Builder(this.context)
-        alertBuilder.setTitle("TITEL")
+        alertBuilder.setTitle(R.string.trackrecorderactivity_finish_confirmation_title)
         alertBuilder.setCancelable(true)
-        alertBuilder.setMessage("NACHRICHT?")
-        alertBuilder.setIcon(android.R.drawable.ic_dialog_alert)
-        alertBuilder.setNegativeButton("NEIN!", {
-            dialog: DialogInterface?,
-            button: Int ->
-            dialog!!.dismiss()
-        })
-        alertBuilder.setPositiveButton("JA!!", {
-            dialog: DialogInterface?,
-            button: Int ->
-            this.trackRecorderService!!.finishTracking()
+        alertBuilder.setMessage(R.string.trackrecorderactivity_finish_confirmation_message)
+        alertBuilder.setIcon(android.R.drawable.ic_dialog_info)
+        alertBuilder.setNegativeButton(R.string.trackrecorderactivity_finish_confirmation_button_no_label, null)
+        alertBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
+            _,
+            _ ->
+                this.trackRecorderService!!.finishTracking()
 
-            this.unsubscribeFromSession()
-            this.trackRecordingSession = null
+                this.unsubscribeFromSession()
+                this.trackRecordingSession = null
         })
 
         alertBuilder.show()

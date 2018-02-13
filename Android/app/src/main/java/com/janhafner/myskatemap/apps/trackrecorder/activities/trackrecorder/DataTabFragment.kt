@@ -7,10 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.jakewharton.rxbinding2.widget.text
-import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.formatDefault
-import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
-import com.janhafner.myskatemap.apps.trackrecorder.formatTrackDistance
+import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -20,7 +17,7 @@ import org.joda.time.DateTime
 import java.util.concurrent.atomic.AtomicInteger
 
 internal final class DataTabFragment : Fragment(), ITrackRecorderActivityDependantFragment {
-    private lateinit var viewModel: TrackRecorderActivityViewModel
+    private lateinit var presenter: TrackRecorderActivityPresenter
 
     private var currentLocationsCount: AtomicInteger = AtomicInteger()
 
@@ -30,72 +27,83 @@ internal final class DataTabFragment : Fragment(), ITrackRecorderActivityDependa
 
     private val locationsCountSubject: BehaviorSubject<Int> = BehaviorSubject.createDefault(0)
 
+    private val viewHolder: ViewHolder = ViewHolder()
+
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_data_tab, container, false)
     }
 
-    public override fun onDetach() {
-        super.onDetach()
-
-        this.currentLocationsCount.set(0)
-        this.subscriptions.clear()
-        this.currentLocationsChangedSubscription?.dispose()
-    }
-
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val trackDistanceTextView = this.view!!.findViewById<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_distance)
-        val trackRecordingTimeTextView = this.view!!.findViewById<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_recordingtime)
-        val trackLocationsCountTextView = this.view!!.findViewById<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_locationscount)
-        val trackingStartedAtTextView = this.view!!.findViewById<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_trackingstartedat)
+        this.viewHolder
+                .store(view.findViewById<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_distance))
+                .store(view.findViewById<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_recordingtime))
+                .store(view.findViewById<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_locationscount))
+                .store(view.findViewById<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_trackingstartedat))
+    }
+
+    public override fun onStart() {
+        super.onStart()
 
         this.subscriptions.addAll(
-                this.viewModel.trackDistanceChanged.map {
-                    currentTrackDistance ->
-                        currentTrackDistance.formatTrackDistance(this.context)
-                }.observeOn(AndroidSchedulers.mainThread()).subscribe(trackDistanceTextView.text()),
+                this.presenter.trackDistanceChanged.map {
+                    it.formatTrackDistance(this.context!!)
+                }.observeOn(AndroidSchedulers.mainThread()).subscribe(this.viewHolder.retrieve<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_distance).text()),
 
-                this.viewModel.recordingTimeChanged.map {
-                    currentRecordingTime ->
-                        currentRecordingTime.formatRecordingTime()
-                }.observeOn(AndroidSchedulers.mainThread()).subscribe(trackRecordingTimeTextView.text()),
+                this.presenter.recordingTimeChanged.map {
+                    it.formatRecordingTime()
+                }.observeOn(AndroidSchedulers.mainThread()).subscribe(this.viewHolder.retrieve<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_recordingtime).text()),
 
-                this.viewModel.trackSessionStateChanged.subscribe {
-                    currentState ->
-                    if(currentState == TrackRecorderServiceState.Initializing) {
+                this.presenter.trackSessionStateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe {
+                    if(it == TrackRecorderServiceState.Initializing) {
                         this.currentLocationsCount.set(0)
 
                         this.locationsCountSubject.onNext(this.currentLocationsCount.get())
                     }
                 },
 
-                this.viewModel.locationsChangedAvailable.subscribe{
-                    locationsChangedObservable ->
-                        this.currentLocationsChangedSubscription?.dispose()
+                this.presenter.locationsChangedAvailable.observeOn(AndroidSchedulers.mainThread()).subscribe{
+                    this.currentLocationsChangedSubscription?.dispose()
 
-                        this.currentLocationsChangedSubscription = locationsChangedObservable.map {
-                            this.currentLocationsCount.incrementAndGet()
-                        }.observeOn(AndroidSchedulers.mainThread()).subscribe{
-                            this.locationsCountSubject.onNext(it)
-                        }
+                    // TODO: Performance: Use buffered!
+                    this.currentLocationsChangedSubscription = it.map {
+                        this.currentLocationsCount.incrementAndGet()
+                    }
+                            .observeOn(AndroidSchedulers.mainThread()).subscribe{
+                        this.locationsCountSubject.onNext(it)
+                    }
                 },
 
                 this.locationsCountSubject.map {
                     it.toString()
-                }.observeOn(AndroidSchedulers.mainThread()).subscribe(trackLocationsCountTextView.text()),
+                }.subscribe(this.viewHolder.retrieve<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_locationscount).text()),
 
-                this.viewModel.trackingStartedAtChanged.map {
+                this.presenter.trackingStartedAtChanged.map {
                     if(it == DateTime(0)) {
-                        this.context.getText(R.string.trackrecorderactivity_fragment_data_tab_trackingstartedat_none)
+                        this.context!!.getText(R.string.trackrecorderactivity_fragment_data_tab_trackingstartedat_none)
                     } else {
                         it.formatDefault()
                     }
-                }.observeOn(AndroidSchedulers.mainThread()).subscribe(trackingStartedAtTextView.text())
+                }.observeOn(AndroidSchedulers.mainThread()).subscribe(this.viewHolder.retrieve<AppCompatTextView>(R.id.trackrecorderactivity_fragment_data_tab_trackingstartedat).text())
         )
     }
 
-    public override fun setViewModel(viewModel: TrackRecorderActivityViewModel) {
-        this.viewModel = viewModel
+    public override fun onStop() {
+        super.onStop()
+
+        this.currentLocationsCount.set(0)
+        this.subscriptions.clear()
+        this.currentLocationsChangedSubscription?.dispose()
+    }
+
+    public override fun onDestroy() {
+        super.onDestroy()
+
+        this.viewHolder.clear()
+    }
+
+    public override fun setPresenter(presenter: TrackRecorderActivityPresenter) {
+        this.presenter = presenter
     }
 }

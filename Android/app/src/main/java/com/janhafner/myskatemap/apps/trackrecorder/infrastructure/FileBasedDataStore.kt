@@ -8,11 +8,9 @@ import org.joda.time.Period
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
-internal abstract class FileBasedDataStore<T>(private val file: File): IDataStore<T> {
-
-
+internal abstract class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type): IDataStore<T> {
     public final override fun save(data: T) {
         val writer = FileWriter(this.file)
 
@@ -41,10 +39,7 @@ internal abstract class FileBasedDataStore<T>(private val file: File): IDataStor
 
         val reader = FileReader(this.file)
 
-        // Horrible hack to get type of T...
-        val typeOfT = (this.javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[0]
-
-        val result = FileBasedDataStore.gson.fromJson<T>(reader, typeOfT)
+        val result = FileBasedDataStore.gson.fromJson<T>(reader, this.typeOfT)
 
         reader.close()
 

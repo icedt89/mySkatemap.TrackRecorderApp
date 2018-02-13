@@ -58,6 +58,8 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
             }
         }
 
+        notificationCompatBuilder.addAction(R.mipmap.ic_close_white_48dp, this.context.getString(R.string.trackrecorderservice_notification_action_terminate), PendingIntent.getService(this.context, 0, Intent(TrackRecorderServiceNotification.ACTION_TERMINATE, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+
         notificationCompatBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         notificationCompatBuilder.setOngoing(true)
         notificationCompatBuilder.setContentIntent(PendingIntent.getActivity(this.context, 0, Intent(this.context, TrackRecorderActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
@@ -75,6 +77,8 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
         public const val ACTION_RESUME = "trackrecorderservice.action.resume"
 
         public const val ACTION_PAUSE = "trackrecorderservice.action.pause"
+
+        public const val ACTION_TERMINATE = "trackrecorderservice.action.terminate"
 
         private const val ID: Int = 1
 

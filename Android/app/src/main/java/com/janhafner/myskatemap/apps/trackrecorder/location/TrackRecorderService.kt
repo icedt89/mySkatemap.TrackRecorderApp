@@ -3,7 +3,6 @@ package com.janhafner.myskatemap.apps.trackrecorder.location
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.CurrentTrackRecordingStore
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.IDataStore
@@ -13,12 +12,12 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.provider.FusedLocati
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.LegacyLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.TestLocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.putIfAbsentWorkaround
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
 import org.joda.time.Period
+import java.util.concurrent.TimeUnit
 
 internal final class TrackRecorderService: Service(), ITrackRecorderService {
     private lateinit var locationProvider: ILocationProvider
@@ -46,24 +45,21 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
         this.locationChangedBroadcasterReceiver = LocationAvailabilityChangedBroadcastReceiver(this)
-        this.registerReceiver(this.locationChangedBroadcasterReceiver, android.content.IntentFilter("android.location.PROVIDERS_CHANGED"))
+        this.registerReceiver(this.locationChangedBroadcasterReceiver, android.content.IntentFilter())
         this.locationAvailabilityChangedSubscription = this.locationChangedBroadcasterReceiver.locationAvailabilityChanged.subscribe{
-            isLocationModeEnabled ->
-                if (!isLocationModeEnabled) {
-                    if (this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
-                        this.pauseTracking()
+            if (!it) {
+                if (this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
+                    this.pauseTracking()
 
-                        this.changeState(TrackRecorderServiceState.LocationServicesUnavailable)
-                    }
-                } else {
-                    if (this.stateChangedSubject.value == TrackRecorderServiceState.LocationServicesUnavailable) {
-                        this.resumeTracking()
-
-                        this.changeState(TrackRecorderServiceState.Running)
-                    }
+                    this.changeState(TrackRecorderServiceState.LocationServicesUnavailable)
                 }
+            } else {
+                if (this.stateChangedSubject.value == TrackRecorderServiceState.LocationServicesUnavailable) {
+                    this.resumeTracking()
 
-                Log.v("TrackRecord", isLocationModeEnabled.toString())
+                    this.changeState(TrackRecorderServiceState.Running)
+                }
+            }
         }
     }
 
@@ -142,7 +138,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     private fun closeCurrentSession() {
         this.sessionSubscriptions.clear()
 
-        this.currentSession!!.terminate()
+        // TODO: this.currentSession!!.terminate()
         this.currentSession = null
     }
 
@@ -171,7 +167,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         var locationsChanged = this.locationProvider.locations.replay().autoConnect()
         if (trackRecording.locations.any()) {
-            val sortedLocations = trackRecording.locations.toSortedMap(compareBy { it }).
+            val sortedLocations = trackRecording.locations.toSortedMap().values
 
             this.locationProvider.overrideSequenceNumber(sortedLocations.last().sequenceNumber)
 
@@ -215,14 +211,18 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                         this.trackRecorderServiceNotification!!.update(this.stateChangedSubject.value, currentRecordingTime, this.trackDistanceCalculator.distance)
                     }
             },
-            this.currentSession!!.locationsChanged.subscribe {
-                location ->
-                    this.trackDistanceCalculator.add(location)
 
-                    this.currentTrackRecording!!.locations.putIfAbsentWorkaround(location.sequenceNumber, location)
+            this.currentSession!!.locationsChanged
+                    .buffer(5, TimeUnit.SECONDS)
+                    .subscribe {
+                        if(it.any()){
+                            this.trackDistanceCalculator.addAll(it)
 
-                    Log.d("TrackRecorderService", "Location ${location} received for persistence.")
-            }
+                            this.currentTrackRecording!!.locations.putAll(it.map{
+                                Pair(it.sequenceNumber, it)
+                            })
+                        }
+                    }
         )
     }
 
@@ -255,13 +255,15 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                     this.resumeTracking()
                 TrackRecorderServiceNotification.ACTION_PAUSE ->
                     this.pauseTracking()
+                TrackRecorderServiceNotification.ACTION_TERMINATE ->
+                    this.stopSelf()
             }
         }
         return START_NOT_STICKY
     }
 
     public override fun onCreate() {
-        this.trackRecordingStore = CurrentTrackRecordingStore(this)
+        this.trackRecordingStore = CurrentTrackRecordingStore(this, TrackRecording::class.java)
         this.locationProvider = this.createLocationProvider(true, false)
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
@@ -302,9 +304,4 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackRecorderServiceNotification?.close()
         this.locationAvailabilityChangedSubscription.dispose()
-    }
-
-    override fun onUnbind(intent: Intent?): Boolean {
-        return super.onUnbind(intent)
-    }
-}
+    } }

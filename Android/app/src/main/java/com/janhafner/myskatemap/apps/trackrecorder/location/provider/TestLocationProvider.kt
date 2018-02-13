@@ -2,9 +2,9 @@ package com.janhafner.myskatemap.apps.trackrecorder.location.provider
 
 import android.content.Context
 import android.os.SystemClock
-import android.provider.Settings
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
+import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.toLatLng
 import org.joda.time.DateTime
@@ -33,7 +33,7 @@ internal final class TestLocationProvider(private val context: Context,
             override fun run() {
                 val self = this@TestLocationProvider
 
-                if (self.simulateDependencyToAndroidLocationServices && !self.isLocationServicesEnabled()) {
+                if (self.simulateDependencyToAndroidLocationServices && !self.context.isLocationServicesEnabled()) {
                     return
                 }
 
@@ -54,12 +54,6 @@ internal final class TestLocationProvider(private val context: Context,
         }
 
         super.overrideSequenceNumber(sequenceNumber)
-    }
-
-    private fun isLocationServicesEnabled(): Boolean {
-        val contentResolver = this.context.contentResolver
-
-        return Settings.Secure.getInt(contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF) != Settings.Secure.LOCATION_MODE_OFF
     }
 
     private fun computeNextLocation(counter: Int, initialLocation: LatLng, offsetLatitude: Double, offsetLongitude: Double): LatLng {
@@ -148,7 +142,7 @@ internal final class TestLocationProvider(private val context: Context,
             throw IllegalStateException()
         }
 
-        if (this.simulateDependencyToAndroidLocationServices && !this.isLocationServicesEnabled()) {
+        if (this.simulateDependencyToAndroidLocationServices && !this.context.isLocationServicesEnabled()) {
             throw IllegalStateException()
         }
 

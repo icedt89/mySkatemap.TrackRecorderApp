@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/trackrecorderactivity_fragment_map_tab_map"
-    android:layout_width="match_parent"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    class="com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment"
-    />
+    android:layout_width="match_parent">
+    <fragment android:id="@+id/trackrecorderactivity_fragment_map_tab_map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/trackrecorderactivity_tab_map_togglerecording_floatingactionbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="10dp"
+        android:src="@mipmap/ic_pause_white_48dp" />
+</android.support.design.widget.CoordinatorLayout>

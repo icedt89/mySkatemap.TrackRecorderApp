@@ -8,14 +8,14 @@ internal abstract class LocationProvider: ILocationProvider {
     protected var currentSequenceNumber: Int = -1
         private set
 
-    private val locationObservable: Subject<Location> = PublishSubject.create<Location>()
-    public final override val locations: io.reactivex.Observable<Location> = this.locationObservable
+    private val locationsSubject: Subject<Location> = PublishSubject.create<Location>()
+    public final override val locations: io.reactivex.Observable<Location> = this.locationsSubject
 
     public override var isActive: Boolean = false
         protected set
 
     protected fun postLocationUpdate(location: Location) {
-        this.locationObservable.onNext(location)
+        this.locationsSubject.onNext(location)
     }
 
     protected fun generateSequenceNumber(): Int {

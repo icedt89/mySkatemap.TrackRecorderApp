@@ -1,28 +1,21 @@
 package com.janhafner.myskatemap.apps.trackrecorder.activities.trackrecorder
 
-import android.Manifest
+import android.content.Context
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
-import com.jakewharton.rxbinding2.view.enabled
-import com.jakewharton.rxbinding2.view.visibility
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+
 
 internal final class TrackRecorderActivity: AppCompatActivity() {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
@@ -31,15 +24,11 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
     private val mapSubscriptions : CompositeDisposable = CompositeDisposable()
 
-    private var viewModel: TrackRecorderActivityViewModel? = null
+    private lateinit var presenter: TrackRecorderActivityPresenter
 
     private var finishCurrentTrackRecordingMenuItem: MenuItem? = null
 
     private var discardCurrentTrackRecordingMenuItem: MenuItem? = null
-
-    private lateinit var startRecordingFloatingActionButton: FloatingActionButton
-
-    private lateinit var pauseRecordingFloatingActionButton: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,15 +40,33 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
         val viewPager = this.findViewById<ViewPager>(R.id.trackrecorderactivity_toolbar_viewpager)
         viewPager.adapter = TrackRecorderTabsAdapter(this, this.supportFragmentManager)
+        viewPager.offscreenPageLimit = viewPager.adapter!!.count
 
         val tabLayout = this.findViewById<TabLayout>(R.id.trackrecorderactivity_toolbar_tablayout)
         tabLayout.setupWithViewPager(viewPager)
 
-        this.startRecordingFloatingActionButton = this.findViewById<FloatingActionButton>(R.id.trackrecorderactivity_startrecording_floatingactionbutton)
-        this.pauseRecordingFloatingActionButton = this.findViewById<FloatingActionButton>(R.id.trackrecorderactivity_pauserecording_floatingactionbutton)
+        tabLayout.addOnTabSelectedListener(object:TabLayout.OnTabSelectedListener {
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+            }
 
-        this.viewModel = TrackRecorderActivityViewModel(this)
-        this.viewModel!!.startAndBindService()
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                return
+                val self = this@TrackRecorderActivity
+
+                if(self.currentFocus == null) {
+                    return
+                }
+
+                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(self.currentFocus?.windowToken, 0)
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+            }
+        })
+
+        this.presenter = TrackRecorderActivityPresenter(this)
+        this.presenter.startAndBindService()
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -76,21 +83,18 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     public override fun onAttachFragment(fragment: android.support.v4.app.Fragment?) {
         super.onAttachFragment(fragment)
 
-        val trackRecorderActivityDependantFragment = fragment as ITrackRecorderActivityDependantFragment
-        if(trackRecorderActivityDependantFragment == null) {
-            return
+        if(fragment is ITrackRecorderActivityDependantFragment) {
+            fragment.setPresenter(this.presenter)
         }
-
-        trackRecorderActivityDependantFragment.setViewModel(this.viewModel!!)
     }
 
     public override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
 
-        this.viewModel?.trackSessionStateChanged!!.first(TrackRecorderServiceState.Initializing)!!.subscribe{
-            currentState ->
-                if(currentState != TrackRecorderServiceState.Initializing) {
-                    this.viewModel?.saveCurrentRecording()
+        this.presenter.trackSessionStateChanged.first(TrackRecorderServiceState.Initializing)!!.subscribe{
+            it ->
+                if(it != TrackRecorderServiceState.Initializing) {
+                    this.presenter.saveCurrentRecording()
                 }
         }.dispose()
     }
@@ -98,7 +102,7 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        this.subscribeToViewModel()
+        this.subscribeToPresenter()
         this.subscribeToOptionsMenu()
     }
 
@@ -114,7 +118,7 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        this.viewModel!!.unbindService()
+        this.presenter.unbindService()
 
         this.mapSubscriptions.clear()
         this.subscriptions.clear()
@@ -122,44 +126,19 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
         this.optionsMenuSubscriptions = null
     }
 
-    private fun subscribeToViewModel() {
+    private fun subscribeToPresenter() {
         this.subscriptions.addAll(
-                this.viewModel!!.canStartResumeRecordingChanged.subscribe(this.startRecordingFloatingActionButton.visibility()),
-                this.viewModel!!.canStartResumeRecordingChanged.subscribe(this.startRecordingFloatingActionButton.enabled()),
-                this.startRecordingFloatingActionButton.clicks().subscribe({
-                    Dexter.withActivity(this)
-                            .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                            .withListener(object: PermissionListener {
-                                override final fun onPermissionGranted(response: PermissionGrantedResponse) {
-                                    Log.d("TrackRecorderActivity", "Permission for ACCESS_FINE_LOCATION is granted")
-                                    this@TrackRecorderActivity.viewModel!!.startResumeRecording()
-                                }
-
-                                override final fun onPermissionDenied(response: PermissionDeniedResponse) {
-                                    Log.d("TrackRecorderActivity", "Permission for ACCESS_FINE_LOCATION is denied")
-                                }
-
-                                override final fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
-                                    Log.d("TrackRecorderActivity", "Permission Rationale should be shown")
-                                }
-                            })
-                            .check()
-                }),
-
-                this.viewModel!!.canPauseRecordingChanged.subscribe(this.pauseRecordingFloatingActionButton.visibility()),
-                this.viewModel!!.canPauseRecordingChanged.subscribe(this.pauseRecordingFloatingActionButton.enabled()),
-                this.pauseRecordingFloatingActionButton.clicks().subscribe({
-                    this.viewModel!!.pauseRecording()
-                }),
-
-                this.viewModel!!.trackSessionStateChanged.subscribe{
+                this.presenter.trackSessionStateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{
                     currentState ->
                     when (currentState) {
-                        TrackRecorderServiceState.Running ->
+                        TrackRecorderServiceState.Running -> {
                             Toast.makeText(this, R.string.trackrecorderactivity_toast_recording_running, Toast.LENGTH_LONG).show()
+                        }
                         TrackRecorderServiceState.Paused,
                         TrackRecorderServiceState.LocationServicesUnavailable ->
                             Toast.makeText(this, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
+                        else -> {
+                        }
                     }
                 }
         )
@@ -174,14 +153,14 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
         this.optionsMenuSubscriptions = CompositeDisposable()
         this.optionsMenuSubscriptions!!.addAll(
-                this.viewModel!!.canFinishRecordingChanged.subscribe(this.finishCurrentTrackRecordingMenuItem!!.enabled()),
+                this.presenter.canFinishRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{ this.finishCurrentTrackRecordingMenuItem!!.isEnabled = it },
                 this.finishCurrentTrackRecordingMenuItem!!.clicks().subscribe({
-                    this.viewModel!!.finishRecording()
+                    this.presenter.finishRecording()
                 }),
 
-                this.viewModel!!.canDiscardRecordingChanged.subscribe(this.discardCurrentTrackRecordingMenuItem!!.enabled()),
+                this.presenter.canDiscardRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{ this.discardCurrentTrackRecordingMenuItem!!.isEnabled = it},
                 this.discardCurrentTrackRecordingMenuItem!!.clicks().subscribe({
-                    this.viewModel!!.discardRecording()
+                    this.presenter.discardRecording()
                 })
         )
     }

@@ -37,8 +37,6 @@ internal final class ObservableTimer {
 
                 self.elapsedSeconds.addSeconds(1)
 
-                Log.v("ObservableTimer", "One more second is elapsed, total duration is ${self.elapsedSeconds.seconds}")
-
                 self.secondElapsedSubject.onNext(self.elapsedSeconds.toPeriod())
             }
         }
@@ -51,8 +49,6 @@ internal final class ObservableTimer {
 
         this.elapsedSeconds.clear()
         this.elapsedSeconds.addSeconds(elapsedSecondsSinceStart)
-
-        Log.v("ObservableTimer", "Elapsed seconds reset to ${elapsedSecondsSinceStart}")
 
         if (!this.isRunning) {
             this.secondElapsedSubject.onNext(this.elapsedSeconds.toPeriod())

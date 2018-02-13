@@ -1,7 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
+import android.content.Context
 import android.os.Build
-import android.util.Log
+import android.provider.Settings
+import android.view.View
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
@@ -32,20 +34,22 @@ internal fun Location.clone(sequenceNumber: Int): Location {
 
 internal fun ITrackRecorderMap.consumeLocations(): Consumer<Iterable<Location>> {
     return Consumer({
-        locations: Iterable<Location> ->
-            val locationsCount = locations.count()
+            val locationsCount = it.count()
             if (locationsCount > 0) {
-                Log.v("ITrackRecorderMap", "Received locations: ${locationsCount}")
-
                 val points = this.track.toMutableList()
-                points.addAll(locations
-                        .sortedBy { location -> location.sequenceNumber }
-                        .map { location -> location.toLatLng() }
+                points.addAll(it
+                        .map { it.toLatLng() }
                 )
 
                 this.track = points
             }
     })
+}
+
+internal fun ViewHolder.store(view: View): ViewHolder {
+    this.store(view.id, view)
+
+    return this
 }
 
 internal fun ITrackRecorderMap.consumeReset(): Consumer<TrackRecorderServiceState> {
@@ -55,6 +59,10 @@ internal fun ITrackRecorderMap.consumeReset(): Consumer<TrackRecorderServiceStat
                 this.track = kotlin.collections.emptyList()
             }
     })
+}
+
+internal fun Context.isLocationServicesEnabled(): Boolean {
+    return Settings.Secure.getInt(this.contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF) != Settings.Secure.LOCATION_MODE_OFF
 }
 
 private fun Location.toLiteAndroidLocation(): android.location.Location {
@@ -68,14 +76,6 @@ private fun Location.toLiteAndroidLocation(): android.location.Location {
     result.longitude = this.longitude
 
     return result
-}
-
-internal fun <K, V> HashMap<K, V>.putIfAbsentWorkaround(key: K, value: V) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        this.putIfAbsent(key, value)
-    } else if(!this.containsKey(key)) {
-        this.put(key, value)
-    }
 }
 
 internal fun Location.distanceTo(location: Location): Float {

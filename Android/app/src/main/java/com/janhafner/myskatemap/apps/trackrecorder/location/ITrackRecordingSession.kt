@@ -13,15 +13,6 @@ internal interface ITrackRecordingSession {
 
     val stateChanged: Observable<TrackRecorderServiceState>
 
-    @Deprecated("Unused")
-    val trackDistance: Float
-
-    @Deprecated("Unused")
-    val recordingTime: Period
-
-    @Deprecated("Unused")
-    val state: TrackRecorderServiceState
-
     val trackingStartedAt: DateTime
 
     fun resumeTracking()
@@ -29,6 +20,4 @@ internal interface ITrackRecordingSession {
     fun pauseTracking()
 
     fun saveTracking()
-
-    fun terminate()
 }
