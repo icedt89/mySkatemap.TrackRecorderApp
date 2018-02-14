@@ -5,6 +5,7 @@ import android.os.Build
 import android.provider.Settings
 import android.view.View
 import com.google.android.gms.maps.model.LatLng
+import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap

@@ -34,9 +34,9 @@ internal final class Location(public val sequenceNumber: Int) {
         public val defaultComparator: Comparator<Location> = Comparator<Location> { o1, o2 ->
             if(o1 == null || o2 == null) {
                0
+            } else {
+                o1.sequenceNumber.compareTo(o2.sequenceNumber)
             }
-
-            o1.sequenceNumber.compareTo(o2.sequenceNumber)
         }
     }
 }

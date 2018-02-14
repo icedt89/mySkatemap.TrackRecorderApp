@@ -5,11 +5,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.TrackRecording
 internal interface ITrackRecorderService {
     val currentSession: ITrackRecordingSession?
 
-    fun discardTracking()
+    fun resumeSession(trackRecording: TrackRecording): ITrackRecordingSession
 
-    fun finishTracking(): TrackRecording
-
-    fun createSession(trackRecording: TrackRecording): ITrackRecordingSession
-
-    fun createSession(name: String): ITrackRecordingSession
+    fun createNewSession(name: String): ITrackRecordingSession
 }

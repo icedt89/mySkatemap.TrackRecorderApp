@@ -30,6 +30,12 @@ internal final class TrackRecorderMapFragment : android.support.v4.app.Fragment(
 
             this.applyDefaults()
 
+            if(callback is OnTrackRecorderMapLoadedCallback) {
+                it.setOnMapLoadedCallback {
+                    callback.onMapLoaded(this)
+                }
+            }
+
             callback.onMapReady(this)
         })
     }

@@ -24,7 +24,7 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
     private val mapSubscriptions : CompositeDisposable = CompositeDisposable()
 
-    private lateinit var presenter: TrackRecorderActivityPresenter
+    private lateinit var presenter: ITrackRecorderActivityPresenter
 
     private var finishCurrentTrackRecordingMenuItem: MenuItem? = null
 
@@ -50,7 +50,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
-                return
                 val self = this@TrackRecorderActivity
 
                 if(self.currentFocus == null) {

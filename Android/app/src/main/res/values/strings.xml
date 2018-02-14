@@ -10,11 +10,11 @@
     <string name="trackrecorderactivity_tab_attachments_title">Attachments</string>
     <string name="trackrecorderactivity_fragment_data_tab_trackingstartedat_none">No recording in progress</string>
     <string name="trackrecorderactivity_discard_confirmation_title">Discard</string>
-    <string name="trackrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable by lost!\n\nDo you want to proceed?</string>
+    <string name="trackrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost!\n\nDo you want to proceed?</string>
     <string name="trackrecorderactivity_discard_confirmation_button_yes_label">Discard</string>
     <string name="trackrecorderactivity_discard_confirmation_button_no_label">Cancel</string>
     <string name="trackrecorderactivity_finish_confirmation_title">Finish</string>
-    <string name="trackrecorderactivity_finish_confirmation_message">All data of the current recording will be saved for later processing.\n\nDo you want to proceed?</string>
+    <string name="trackrecorderactivity_finish_confirmation_message">All data of the current recording will be saved for later processing by you.\n\nDo you want to proceed?</string>
     <string name="trackrecorderactivity_finish_confirmation_button_yes_label">Finish</string>
     <string name="trackrecorderactivity_finish_confirmation_button_no_label">Cancel</string>
 
@@ -40,4 +40,5 @@
     <string name="notizen">Notizen</string>
     <string name="relevante_notizen_zur_strecke">Relevante Notizen zur Strecke</string>
     <string name="name">Name</string>
+    <string name="fragmentattachmentstab_no_attachments_label">You have currently not attached any images!</string>
 </resources>

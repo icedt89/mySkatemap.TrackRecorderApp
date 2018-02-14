@@ -13,6 +13,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
+import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapLoadedCallback
 import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapReadyCallback
 import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment
 import com.karumi.dexter.Dexter
@@ -26,8 +27,8 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
-internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependantFragment, OnTrackRecorderMapReadyCallback {
-    private lateinit var presenter: TrackRecorderActivityPresenter
+internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependantFragment, OnTrackRecorderMapReadyCallback, OnTrackRecorderMapLoadedCallback {
+    private lateinit var presenter: ITrackRecorderActivityPresenter
 
     private var currentLocationsChangedSubscription: Disposable? = null
 
@@ -105,7 +106,7 @@ internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependant
         this.currentLocationsChangedSubscription?.dispose()
     }
 
-    public override fun setPresenter(presenter: TrackRecorderActivityPresenter) {
+    public override fun setPresenter(presenter: ITrackRecorderActivityPresenter) {
         this.presenter = presenter
     }
 
@@ -113,7 +114,9 @@ internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependant
         this.viewHolder.store(trackRecorderMap::class.java.simpleName!!, trackRecorderMap)
 
         trackRecorderMap.zoomToLocation(LatLng(50.8357, 12.92922), 12f)
+    }
 
+    public override fun onMapLoaded(trackRecorderMap: ITrackRecorderMap) {
         this.subscribeToMap()
     }
 

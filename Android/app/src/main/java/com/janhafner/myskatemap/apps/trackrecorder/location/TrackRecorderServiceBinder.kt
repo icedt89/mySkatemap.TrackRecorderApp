@@ -7,19 +7,11 @@ internal final class TrackRecorderServiceBinder(private val trackRecorderService
     public override val currentSession: ITrackRecordingSession?
         get() = this.trackRecorderService.currentSession
 
-    public override fun discardTracking() {
-        this.trackRecorderService.discardTracking()
+    public override fun resumeSession(trackRecording: TrackRecording): ITrackRecordingSession {
+        return this.trackRecorderService.resumeSession(trackRecording)
     }
 
-    public override fun finishTracking(): TrackRecording {
-        return this.trackRecorderService.finishTracking()
-    }
-
-    public override fun createSession(trackRecording: TrackRecording): ITrackRecordingSession {
-        return this.trackRecorderService.createSession(trackRecording)
-    }
-
-    public override fun createSession(name: String): ITrackRecordingSession {
-        return this.trackRecorderService.createSession(name)
+    public override fun createNewSession(name: String): ITrackRecordingSession {
+        return this.trackRecorderService.createNewSession(name)
     }
 }

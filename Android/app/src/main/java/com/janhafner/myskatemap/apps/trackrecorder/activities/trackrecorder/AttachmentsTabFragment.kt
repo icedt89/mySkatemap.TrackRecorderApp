@@ -7,9 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.internal.disposables.DisposableContainer
 
 internal final class AttachmentsTabFragment : ListFragment(), ITrackRecorderActivityDependantFragment {
-    private lateinit var presenter: TrackRecorderActivityPresenter
+    private lateinit var presenter: ITrackRecorderActivityPresenter
+
+    private val subscriptions: DisposableContainer = CompositeDisposable()
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_attachments_tab, container, false)
@@ -18,17 +22,20 @@ internal final class AttachmentsTabFragment : ListFragment(), ITrackRecorderActi
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val items = ArrayList<Attachment>()
-        items.add(Attachment("gfdgfdgdfg"))
-        items.add(Attachment("gfdgfdgdfg3432"))
+        var listAdapter = ObservableAttachmentsItemsAdapter(view.context, R.layout.fragment_attachments_tab_item)
 
-        this.listAdapter = AttachmentsTabItemsAdapter(view.context, R.layout.fragment_attachments_tab_item, items)
-//        val listView = view!!.findViewById<ListViewCompat>(R.id.trackrecorderactivity_fragment_attachments_tab_listview)
+        this.subscriptions.add(listAdapter.subscribeTo(this.presenter.attachmentsChanged))
 
-//        listView.adapter = AttachmentsTabItemsAdapter(this.context, R.layout.fragment_attachments_tab_item, items)
+        this.listAdapter = listAdapter
+
+        val bla1 = view.context.filesDir.absolutePath
+        val bla2 = bla1 + "/drawable-hdpi/ic_contacts_white_48dp.png"
+
+        val newAttachment = Attachment("test", bla2)
+        this.presenter.addAttachment(newAttachment)
     }
 
-    public override fun setPresenter(presenter: TrackRecorderActivityPresenter) {
+    public override fun setPresenter(presenter: ITrackRecorderActivityPresenter) {
         this.presenter = presenter
     }
 }

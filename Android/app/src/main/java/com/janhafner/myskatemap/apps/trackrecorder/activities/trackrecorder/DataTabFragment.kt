@@ -17,7 +17,7 @@ import org.joda.time.DateTime
 import java.util.concurrent.atomic.AtomicInteger
 
 internal final class DataTabFragment : Fragment(), ITrackRecorderActivityDependantFragment {
-    private lateinit var presenter: TrackRecorderActivityPresenter
+    private lateinit var presenter: ITrackRecorderActivityPresenter
 
     private var currentLocationsCount: AtomicInteger = AtomicInteger()
 
@@ -103,7 +103,7 @@ internal final class DataTabFragment : Fragment(), ITrackRecorderActivityDependa
         this.viewHolder.clear()
     }
 
-    public override fun setPresenter(presenter: TrackRecorderActivityPresenter) {
+    public override fun setPresenter(presenter: ITrackRecorderActivityPresenter) {
         this.presenter = presenter
     }
 }

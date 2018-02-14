@@ -1,10 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
+import android.support.v4.util.ArrayMap
+
 internal final class ViewHolder {
-    private val viewCache: kotlin.collections.HashMap<Any, Any> = HashMap<Any, Any>()
+    private val viewCache: MutableMap<Any, Any> = ArrayMap<Any, Any>()
 
     public fun store(key: Any, cachable: Any) {
-        this.viewCache.put(key, cachable)
+        this.viewCache[key] = cachable
     }
 
     public fun clear() {

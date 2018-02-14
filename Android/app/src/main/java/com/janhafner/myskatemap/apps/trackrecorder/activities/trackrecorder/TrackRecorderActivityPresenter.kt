@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import com.janhafner.myskatemap.apps.trackrecorder.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.CurrentTrackRecordingStore
@@ -17,13 +18,14 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import java.io.IOException
 
-internal final class TrackRecorderActivityPresenter(private val context: Context) {
+internal final class TrackRecorderActivityPresenter(private val context: Context) : ITrackRecorderActivityPresenter {
     private var trackRecorderService: ITrackRecorderService? = null
 
     private var trackRecordingSession: ITrackRecordingSession? = null
@@ -43,7 +45,7 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
                 try {
                     val restoredTrackRecording = self.currentTrackRecordingStore.getData()
                     if (restoredTrackRecording != null) {
-                        self.trackRecordingSession = self.trackRecorderService?.createSession(restoredTrackRecording)
+                        self.trackRecordingSession = self.trackRecorderService?.resumeSession(restoredTrackRecording)
                     }
                 } catch(exception: IOException) {
                     self.currentTrackRecordingStore.delete()
@@ -106,7 +108,7 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
         this.trackingStartedAtChangedSubject.onNext(DateTime(0))
     }
 
-    public fun startAndBindService() {
+    override fun startAndBindService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             this.context.startForegroundService(Intent(this.context, TrackRecorderService::class.java))
         } else {
@@ -116,17 +118,11 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
         this.context.bindService(Intent(this.context, TrackRecorderService::class.java), this.trackRecorderServiceConnection, AppCompatActivity.BIND_AUTO_CREATE)
     }
 
-    public fun unbindService() {
+    override fun unbindService() {
         this.context.unbindService(this.trackRecorderServiceConnection)
     }
 
-    public fun terminateService() {
-        this.unbindService()
-
-        this.context.stopService(Intent(this.context, TrackRecorderService::class.java))
-    }
-
-    public fun saveCurrentRecording() {
+    override fun saveCurrentRecording() {
         if(this.trackRecordingSession == null) {
             throw IllegalStateException()
         }
@@ -134,32 +130,60 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
         this.trackRecordingSession!!.saveTracking()
     }
 
+    private val p = PublishSubject.create<List<Attachment>>()
+    private val o = ArrayList<Attachment>()
+    public override val attachmentsChanged: Observable<List<Attachment>>
+        get() {
+            // TODO: Observable as class member instead of returning new isntance everytime this method is called!
+            // onNext(this.trackRecordingSession!!.attachments) is called after every remove/add operation
+            //
+            // TODO: Maybe refactor the observable to the session(/service)...?!
+            return p
+            if (this.trackRecordingSession != null) {
+                return Observable.fromArray(this.trackRecordingSession!!.attachments)
+            } else {
+                return Observable.empty()
+            }
+        }
+
+    override fun addAttachment(attachment: Attachment) {
+        o.add(attachment)
+
+        p.onNext(this.o)
+
+        // this.trackRecordingSession!!.attachments.add(attachment)
+    }
+
+    override fun removeAttachment(attachment: Attachment) {
+        this.trackRecordingSession!!.attachments.remove(attachment)
+    }
+
     private val trackingStartedAtChangedSubject: BehaviorSubject<DateTime> = BehaviorSubject.createDefault(DateTime(0))
-    public val trackingStartedAtChanged: Observable<DateTime> = this.trackingStartedAtChangedSubject
+    override val trackingStartedAtChanged: Observable<DateTime> = this.trackingStartedAtChangedSubject
 
     private val recordingTimeChangedSubject: BehaviorSubject<Period> = BehaviorSubject.createDefault(Period.ZERO)
-    public val recordingTimeChanged: Observable<Period> = this.recordingTimeChangedSubject
+    override val recordingTimeChanged: Observable<Period> = this.recordingTimeChangedSubject
 
     private val trackDistanceChangedSubject: BehaviorSubject<Float> = BehaviorSubject.createDefault(0.0f)
-    public val trackDistanceChanged: Observable<Float> = this.trackDistanceChangedSubject
+    override val trackDistanceChanged: Observable<Float> = this.trackDistanceChangedSubject
 
     private val trackSessionStateChangedSubject: BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault(TrackRecorderServiceState.Initializing)
-    public val trackSessionStateChanged: Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
+    override val trackSessionStateChanged: Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
 
     private val locationChangedAvailableSubject: BehaviorSubject<Observable<Location>> = BehaviorSubject.createDefault<Observable<Location>>(Observable.never())
-    public val locationsChangedAvailable: Observable<Observable<Location>> = this.locationChangedAvailableSubject
+    override val locationsChangedAvailable: Observable<Observable<Location>> = this.locationChangedAvailableSubject
 
     private val canStartResumeRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(true)
-    public val canStartResumeRecordingChanged: Observable<Boolean> = this.canStartResumeRecordingSubject
+    override val canStartResumeRecordingChanged: Observable<Boolean> = this.canStartResumeRecordingSubject
 
-    public fun startResumeRecording() {
+    override fun startResumeRecording() {
         if (this.trackRecordingSession == null) {
             val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
             val nameTemplate = this.context.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
 
             val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
-            this.trackRecordingSession = this.trackRecorderService!!.createSession(trackRecordingName)
+            this.trackRecordingSession = this.trackRecorderService!!.createNewSession(trackRecordingName)
 
             this.subscribeToSession()
         }
@@ -168,16 +192,16 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
     }
 
     private var canPauseRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canPauseRecordingChanged: Observable<Boolean> = this.canPauseRecordingSubject
+    override val canPauseRecordingChanged: Observable<Boolean> = this.canPauseRecordingSubject
 
-    public fun pauseRecording() {
+    override fun pauseRecording() {
         this.trackRecordingSession!!.pauseTracking()
     }
 
     private var canDiscardRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canDiscardRecordingChanged: Observable<Boolean> = this.canDiscardRecordingSubject
+    override val canDiscardRecordingChanged: Observable<Boolean> = this.canDiscardRecordingSubject
 
-    public fun discardRecording() {
+    override fun discardRecording() {
         // TODO:Presenter or Activity?
         val alertBuilder = AlertDialog.Builder(this.context)
         alertBuilder.setTitle(R.string.trackrecorderactivity_discard_confirmation_title)
@@ -187,7 +211,7 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
         alertBuilder.setNegativeButton(R.string.trackrecorderactivity_discard_confirmation_button_no_label, null)
         alertBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
             _, _ ->
-                this.trackRecorderService!!.discardTracking()
+                this.trackRecordingSession!!.discardTracking()
 
                 this.unsubscribeFromSession()
                 this.trackRecordingSession = null
@@ -197,9 +221,9 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
     }
 
     private var canFinishRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val canFinishRecordingChanged: Observable<Boolean> = this.canFinishRecordingSubject
+    override val canFinishRecordingChanged: Observable<Boolean> = this.canFinishRecordingSubject
 
-    public fun finishRecording() {
+    override fun finishRecording() {
         // TODO: Presenter or Activity?
         val alertBuilder = AlertDialog.Builder(this.context)
         alertBuilder.setTitle(R.string.trackrecorderactivity_finish_confirmation_title)
@@ -210,7 +234,7 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
         alertBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
             _,
             _ ->
-                this.trackRecorderService!!.finishTracking()
+                val trackRecording = this.trackRecordingSession!!.finishTracking()
 
                 this.unsubscribeFromSession()
                 this.trackRecordingSession = null

@@ -36,9 +36,9 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
-    private var currentTrackRecording: TrackRecording? = null
-
     private val stateChangedSubject: BehaviorSubject<TrackRecorderServiceState> =  BehaviorSubject.createDefault<TrackRecorderServiceState>(TrackRecorderServiceState.Initializing)
+
+    public var currentTrackRecording: TrackRecording? = null
 
     public override var currentSession: ITrackRecordingSession? = null
         private set
@@ -89,7 +89,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.changeState(TrackRecorderServiceState.Paused)
     }
 
-    public override fun discardTracking() {
+    public fun discardTracking() {
         if (this.stateChangedSubject.value == TrackRecorderServiceState.Running
             || this.stateChangedSubject.value == TrackRecorderServiceState.Initializing) {
             throw IllegalStateException()
@@ -108,8 +108,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.closeCurrentSession()
     }
 
-    public override fun finishTracking(): TrackRecording {
-        // TODO: Check other states to provide meaningful exception messages
+    public fun finishTracking(): TrackRecording {
         if (this.stateChangedSubject.value == TrackRecorderServiceState.Running
             || this.stateChangedSubject.value == TrackRecorderServiceState.Initializing) {
             throw IllegalStateException()
@@ -142,7 +141,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.currentSession = null
     }
 
-    public override fun createSession(name: String): ITrackRecordingSession {
+    public override fun createNewSession(name: String): ITrackRecordingSession {
         if (this.currentSession != null) {
             throw IllegalStateException()
         }
@@ -156,7 +155,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         return this.currentSession!!
     }
 
-    public override fun createSession(trackRecording: TrackRecording): ITrackRecordingSession {
+    public override fun resumeSession(trackRecording: TrackRecording): ITrackRecordingSession {
         if (this.currentSession != null) {
             throw IllegalStateException()
         }
@@ -194,8 +193,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                 recordingTimeChanged,
                 locationsChanged,
                 this.stateChangedSubject,
-                this,
-                trackRecording.trackingStartedAt)
+                this)
 
         this.subscribeToSession()
     }
