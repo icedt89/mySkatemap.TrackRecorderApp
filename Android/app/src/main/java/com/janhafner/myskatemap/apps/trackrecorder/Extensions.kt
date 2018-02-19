@@ -5,10 +5,12 @@ import android.os.Build
 import android.provider.Settings
 import android.view.View
 import com.google.android.gms.maps.model.LatLng
-import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.data.HistoricTrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
-import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
 
@@ -105,4 +107,8 @@ internal fun android.location.Location.toLocation(sequenceNumber: Int): Location
     }
 
     return result
+}
+
+internal fun TrackRecording.toHistoricEntry(uploadedAt: DateTime): HistoricTrackRecording {
+    return HistoricTrackRecording(this.locations.count(), this.attachments.count(), this.trackingStartedAt, this.trackingFinishedAt!!, this.recordingTime, uploadedAt)
 }

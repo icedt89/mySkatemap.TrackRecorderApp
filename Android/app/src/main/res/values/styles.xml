@@ -1,7 +1,10 @@
-<resources>
-    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
 
+    <style name="SplashscreenActivityTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:background">@drawable/splashscreen</item>
     </style>
 </resources>

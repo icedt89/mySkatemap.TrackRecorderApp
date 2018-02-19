@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">mySkatemap Track Recorder</string>
-    <string name="trackrecorderactivity_toolbar_finish_currenttrackrecording_menuitem_text">Finish</string>
-    <string name="trackrecorderactivity_toolbar_discard_currenttrackrecording_menuitem_text">Discard</string>
+    <string name="trackrecorderactivity_toolbar_finish_currenttracking">Finish</string>
+    <string name="trackrecorderactivity_toolbar_discard_currenttracking">Discard</string>
     <string name="trackrecorderactivity_presenter_default_new_trackrecording_name_template">Track %s</string>
     <string name="trackrecorderactivity_toast_recording_running">Recording active</string>
     <string name="trackrecorderactivity_toast_recording_paused">Recording paused</string>
@@ -17,6 +17,13 @@
     <string name="trackrecorderactivity_finish_confirmation_message">All data of the current recording will be saved for later processing by you.\n\nDo you want to proceed?</string>
     <string name="trackrecorderactivity_finish_confirmation_button_yes_label">Finish</string>
     <string name="trackrecorderactivity_finish_confirmation_button_no_label">Cancel</string>
+    <string name="trackrecorderactivity_tab_data_trackname">Name der Strecke</string>
+    <string name="trackrecorderactivity_tab_data_trackdistance">Länge</string>
+    <string name="trackrecorderactivity_tab_data_recordingtime">Dauer</string>
+    <string name="trackrecorderactivity_tab_data_numberofpositions">Anzahl Positionen</string>
+    <string name="trackrecorderactivity_tab_data_startedat">Begonnen</string>
+    <string name="trackrecorderactivity_tab_data_comments">Notizen zur Strecke</string>
+    <string name="trackrecorderactivity_tab_attachments_noattachments">You have currently not attached any images!</string>
 
     <string name="app_trackdistance_template_meter">~%sm</string>
     <string name="app_trackdistance_template_kilometer">~%skm</string>
@@ -32,13 +39,4 @@
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
     <string name="trackrecorderservice_notification_action_terminate">Terminate</string>
     <string name="trackrecorderservice_notification_recordingduration_template">%s</string>
-    <string name="name_der_strecke">Name der Strecke</string>
-    <string name="l_nge">Länge</string>
-    <string name="dauer">Dauer</string>
-    <string name="anzahl_positionen">Anzahl Positionen</string>
-    <string name="begonnen">Begonnen</string>
-    <string name="notizen">Notizen</string>
-    <string name="relevante_notizen_zur_strecke">Relevante Notizen zur Strecke</string>
-    <string name="name">Name</string>
-    <string name="fragmentattachmentstab_no_attachments_label">You have currently not attached any images!</string>
 </resources>

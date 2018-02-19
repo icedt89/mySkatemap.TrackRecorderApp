@@ -6,11 +6,5 @@ import net.danlew.android.joda.JodaTimeAndroid
 internal final class App: Application() {
     public override fun onCreate() {
         super.onCreate()
-
-        JodaTimeAndroid.init(this)
-    }
-
-    override fun onTerminate() {
-        super.onTerminate()
     }
 }

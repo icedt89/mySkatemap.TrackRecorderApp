@@ -5,4 +5,6 @@
     <color name="colorPrimaryDark">#FF01579B</color>
     <color name="colorTrack">#FFFF3A3C</color>
     <color name="colorAccent">#FFB3E5FE</color>
+    <color name="colorAppIconForeground">#FFFFFFFF</color>
+    <color name="colorAppIconBackground">#FF366FFF</color>
 </resources>

@@ -7,125 +7,96 @@
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-
-
         <android.support.design.widget.TextInputEditText
+            android:id="@+id/trackrecorderactivity_tab_data_trackname"
+            android:hint="@string/trackrecorderactivity_tab_data_trackname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:hint="CreditCard"/>
-
+            android:layout_marginBottom="10dp"
+            android:inputType="textShortMessage"
+            android:textSize="18sp" />
     </android.support.design.widget.TextInputLayout>
-
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-
-
-        <android.support.v7.widget.AppCompatTextView
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/trackrecorderactivity_tab_data_trackdistance"
+            android:hint="@string/trackrecorderactivity_tab_data_trackdistance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:focusable="false"
+            android:layout_marginBottom="10dp"
+            android:enabled="false"
             android:clickable="false"
             android:textIsSelectable="false"
-            android:hint="Cskdjlkfjdslkf"
-            android:text="CreditCard1111"/>
-
+            android:focusable="false"
+            android:focusedByDefault="false"
+            android:focusableInTouchMode="false"
+            android:selectAllOnFocus="false"
+            android:textSize="18sp" />
     </android.support.design.widget.TextInputLayout>
-
-    <android.support.v7.widget.AppCompatTextView
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/name"
-        android:textSize="18sp" />
-
-    <android.support.v7.widget.AppCompatEditText
-        android:id="@+id/trackrecorderactivity_fragment_data_tab_name"
+        android:layout_height="wrap_content">
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/trackrecorderactivity_tab_data_recordingtime"
+            android:hint="@string/trackrecorderactivity_tab_data_recordingtime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:enabled="false"
+            android:clickable="false"
+            android:textIsSelectable="false"
+            android:focusable="false"
+            android:focusedByDefault="false"
+            android:focusableInTouchMode="false"
+            android:selectAllOnFocus="false"
+            android:textSize="18sp" />
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:hint="@string/name_der_strecke"
-        android:inputType="textShortMessage"
-        android:textSize="18sp" />
-
-    <android.support.v7.widget.AppCompatTextView
+        android:layout_height="wrap_content">
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/trackrecorderactivity_fragment_data_tab_locationscount"
+            android:hint="@string/trackrecorderactivity_tab_data_numberofpositions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:enabled="false"
+            android:clickable="false"
+            android:textIsSelectable="false"
+            android:focusable="false"
+            android:focusedByDefault="false"
+            android:focusableInTouchMode="false"
+            android:selectAllOnFocus="false"
+            android:textSize="18sp" />
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/trackrecorderactivity_tab_data_startedat"
+            android:hint="@string/trackrecorderactivity_tab_data_startedat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:enabled="false"
+            android:clickable="false"
+            android:textIsSelectable="false"
+            android:focusable="false"
+            android:focusedByDefault="false"
+            android:focusableInTouchMode="false"
+            android:selectAllOnFocus="false"
+            android:textSize="18sp" />
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/l_nge"
-        android:textSize="18sp" />
-
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/trackrecorderactivity_fragment_data_tab_distance"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:inputType="none"
-        android:singleLine="true"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <android.support.v7.widget.AppCompatTextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dauer"
-        android:textSize="18sp" />
-
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/trackrecorderactivity_fragment_data_tab_recordingtime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:inputType="none"
-        android:singleLine="true"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <android.support.v7.widget.AppCompatTextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/anzahl_positionen"
-        android:textSize="18sp" />
-
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/trackrecorderactivity_fragment_data_tab_locationscount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:inputType="none"
-        android:singleLine="true"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <android.support.v7.widget.AppCompatTextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/begonnen"
-        android:textSize="18sp" />
-
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/trackrecorderactivity_fragment_data_tab_trackingstartedat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:inputType="none"
-        android:singleLine="true"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <android.support.v7.widget.AppCompatTextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/notizen"
-        android:textSize="18sp" />
-
-    <android.support.v7.widget.AppCompatEditText
-        android:id="@+id/trackrecorderactivity_fragment_data_tab_notice"
-        android:inputType="textMultiLine"
-        android:hint="@string/relevante_notizen_zur_strecke"
-        android:textSize="18sp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content">
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/trackrecorderactivity_tab_data_comments"
+            android:hint="@string/trackrecorderactivity_tab_data_comments"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:inputType="textMultiLine"
+            android:textSize="18sp" />
+    </android.support.design.widget.TextInputLayout>
 </android.support.v7.widget.LinearLayoutCompat>

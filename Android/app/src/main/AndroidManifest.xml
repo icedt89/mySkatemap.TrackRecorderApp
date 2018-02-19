@@ -17,19 +17,20 @@
     <application
         android:appCategory="maps"
         android:name=".App"
+        android:roundIcon="@drawable/ic_launcher"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_launcher"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.SplashscreenActivity" >
+        <activity android:name=".views.activities.SplashscreenActivity"
+            android:theme="@style/SplashscreenActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.trackrecorder.TrackRecorderActivity"
+        <activity android:name="com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustPan|stateHidden">
         </activity>
 
         <meta-data
@@ -40,7 +41,7 @@
             android:value="@integer/google_play_services_version" />
 
         <service
-            android:name=".location.TrackRecorderService"
+            android:name=".services.trackrecorder.TrackRecorderService"
             android:exported="false" />
     </application>
 
