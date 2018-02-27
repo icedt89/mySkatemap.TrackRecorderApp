@@ -30,15 +30,16 @@ internal fun Period.formatRecordingTime(): String {
     return trackRecordingTimeFormatter.print(this)
 }
 
+@Deprecated("Use ITrackDistanceFormatter instead!")
 internal fun Float.formatTrackDistance(context: Context): String {
     if(this > 1000.0) {
-        return context.getString(R.string.app_trackdistance_template_kilometer, (this / 1000.0f).roundToTwoDecimalPlaces(context))
+        return context.getString(R.string.app_trackdistance_template_kilometers, (this / 1000.0f).roundTrackDistanceForDisplay(context))
     }
 
-    return context.getString(R.string.app_trackdistance_template_meter, this.roundToTwoDecimalPlaces(context))
+    return context.getString(R.string.app_trackdistance_template_meters, this.roundTrackDistanceForDisplay(context))
 }
 
-internal fun Float.roundToTwoDecimalPlaces(context: Context): String {
+internal fun Float.roundTrackDistanceForDisplay(context: Context): String {
     val decimalFormat = DecimalFormat(context.getString(R.string.app_trackdistance_decimalformat))
     decimalFormat.roundingMode = RoundingMode.CEILING
 

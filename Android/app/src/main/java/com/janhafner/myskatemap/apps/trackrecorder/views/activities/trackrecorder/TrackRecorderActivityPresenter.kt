@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
@@ -10,10 +9,11 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.checkAccessFineLocation
 import com.janhafner.myskatemap.apps.trackrecorder.data.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
 import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
@@ -22,21 +22,20 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackR
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import java.io.IOException
 
-internal final class TrackRecorderActivityPresenter(private val context: Context) : ITrackRecorderActivityPresenter {
+internal final class TrackRecorderActivityPresenter(private val activity: AppCompatActivity) : ITrackRecorderActivityPresenter {
     private var trackRecorderService: ITrackRecorderService? = null
 
     private var trackRecordingSession: ITrackRecordingSession? = null
 
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    private val currentTrackRecordingStore: IDataStore<TrackRecording> = CurrentTrackRecordingStore(context)
+    private val currentTrackRecordingStoreFileBased: IFileBasedDataStore<TrackRecording> = CurrentTrackRecordingStore(activity)
 
     private val trackRecorderServiceConnection: ServiceConnection = object: ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -47,12 +46,12 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
 
             if (self.trackRecordingSession == null) {
                 try {
-                    val restoredTrackRecording = self.currentTrackRecordingStore.getData()
+                    val restoredTrackRecording = self.currentTrackRecordingStoreFileBased.getData()
                     if (restoredTrackRecording != null) {
                         self.trackRecordingSession = self.trackRecorderService?.resumeSession(restoredTrackRecording)
                     }
                 } catch(exception: IOException) {
-                    self.currentTrackRecordingStore.delete()
+                    self.currentTrackRecordingStoreFileBased.delete()
 
                     Log.e("TrackRecorderAPresenter", "Unable to restore saved state of current recording! App still works but unfortunately you have lost your last recording :(", exception)
                 }
@@ -72,20 +71,21 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
             self.trackRecorderService = null
         }
 
-        public override fun onBindingDied(name: ComponentName?) {
+        public override fun onBindingDied(name: ComponentName?)
+        {
         }
     }
 
     private fun subscribeToSession() {
         this.trackingStartedAtChangedSubject.onNext(this.trackRecordingSession!!.trackingStartedAt)
+        this.attachmentsChangedSubject.onNext(this.trackRecordingSession!!.attachments)
 
         this.subscriptions.addAll(
             this.trackRecordingSession!!.recordingTimeChanged.subscribe {
                 this.recordingTimeChangedSubject.onNext(it)
             },
 
-            this.trackRecordingSession!!.trackDistanceChanged
-                    .subscribe{
+            this.trackRecordingSession!!.trackDistanceChanged.subscribe {
                 this.trackDistanceChangedSubject.onNext(it)
             },
 
@@ -114,19 +114,19 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
 
     override fun startAndBindService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.context.startForegroundService(Intent(this.context, TrackRecorderService::class.java))
+            this.activity.startForegroundService(Intent(this.activity, TrackRecorderService::class.java))
         } else {
-            this.context.startService(Intent(this.context, TrackRecorderService::class.java))
+            this.activity.startService(Intent(this.activity, TrackRecorderService::class.java))
         }
 
-        this.context.bindService(Intent(this.context, TrackRecorderService::class.java), this.trackRecorderServiceConnection, AppCompatActivity.BIND_AUTO_CREATE)
+        this.activity.bindService(Intent(this.activity, TrackRecorderService::class.java), this.trackRecorderServiceConnection, AppCompatActivity.BIND_AUTO_CREATE)
     }
 
     override fun unbindService() {
-        this.context.unbindService(this.trackRecorderServiceConnection)
+        this.activity.unbindService(this.trackRecorderServiceConnection)
     }
 
-    override fun saveCurrentRecording() {
+    public override fun saveCurrentRecording() {
         if(this.trackRecordingSession == null) {
             throw IllegalStateException()
         }
@@ -134,7 +134,18 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
         this.trackRecordingSession!!.saveTracking()
     }
 
-    private val attachmentsChangedSubject: PublishSubject<List<Attachment>> = PublishSubject.create<List<Attachment>>()
+    public override fun setSelectedAttachments(attachments: List<Attachment>) {
+        val foundAttachments = this.trackRecordingSession!!.attachments.filter {
+            attachments.contains(it)
+        }
+
+        this.attachmentsSelectedSubject.onNext(foundAttachments)
+    }
+
+    private val attachmentsSelectedSubject: BehaviorSubject<List<Attachment>> = BehaviorSubject.createDefault<List<Attachment>>(kotlin.collections.emptyList<Attachment>())
+    public override val attachmentsSelected: Observable<List<Attachment>> = this.attachmentsSelectedSubject
+
+    private val attachmentsChangedSubject: BehaviorSubject<List<Attachment>> = BehaviorSubject.createDefault<List<Attachment>>(kotlin.collections.emptyList<Attachment>())
     public override val attachmentsChanged: Observable<List<Attachment>> = this.attachmentsChangedSubject
 
     public override fun addAttachment(attachment: Attachment) {
@@ -168,9 +179,19 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
     override val canStartResumeRecordingChanged: Observable<Boolean> = this.canStartResumeRecordingSubject
 
     override fun startResumeRecording() {
+        this.activity.checkAccessFineLocation().subscribe { granted ->
+            if (granted) {
+                this.startResumeRecordingUnchecked()
+            } else {
+                throw NotImplementedError()
+            }
+        }
+    }
+
+    private fun startResumeRecordingUnchecked() {
         if (this.trackRecordingSession == null) {
             val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
-            val nameTemplate = this.context.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
+            val nameTemplate = this.activity.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
 
             val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
@@ -194,11 +215,11 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
 
     override fun discardRecording() {
         // TODO:Presenter or Activity?
-        val alertBuilder = AlertDialog.Builder(this.context)
+        val alertBuilder = AlertDialog.Builder(this.activity)
         alertBuilder.setTitle(R.string.trackrecorderactivity_discard_confirmation_title)
         alertBuilder.setCancelable(true)
         alertBuilder.setMessage(R.string.trackrecorderactivity_discard_confirmation_message)
-        alertBuilder.setIcon(android.R.drawable.ic_dialog_alert)
+        alertBuilder.setIcon(R.drawable.ic_dialog_warning)
         alertBuilder.setNegativeButton(R.string.trackrecorderactivity_discard_confirmation_button_no_label, null)
         alertBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
             _, _ ->
@@ -216,11 +237,11 @@ internal final class TrackRecorderActivityPresenter(private val context: Context
 
     override fun finishRecording() {
         // TODO: Presenter or Activity?
-        val alertBuilder = AlertDialog.Builder(this.context)
+        val alertBuilder = AlertDialog.Builder(this.activity)
         alertBuilder.setTitle(R.string.trackrecorderactivity_finish_confirmation_title)
         alertBuilder.setCancelable(true)
         alertBuilder.setMessage(R.string.trackrecorderactivity_finish_confirmation_message)
-        alertBuilder.setIcon(android.R.drawable.ic_dialog_info)
+        alertBuilder.setIcon(R.drawable.ic_dialog_question)
         alertBuilder.setNegativeButton(R.string.trackrecorderactivity_finish_confirmation_button_no_label, null)
         alertBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
             _,

@@ -1,11 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
-import android.Manifest
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,18 +18,12 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnTrackRecorderMapLoadedCallback
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnTrackRecorderMapReadyCallback
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
-internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependantFragment, OnTrackRecorderMapReadyCallback, OnTrackRecorderMapLoadedCallback {
+internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback, OnTrackRecorderMapLoadedCallback {
     private lateinit var presenter: ITrackRecorderActivityPresenter
 
     private var currentLocationsChangedSubscription: Disposable? = null
@@ -67,38 +59,24 @@ internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependant
         val toggleRecordingFloatingActionButton = this.viewHolder.retrieve<FloatingActionButton>(R.id.trackrecorderactivity_tab_map_togglerecording_floatingactionbutton)
 
         this.subscriptions.addAll(
-                this.presenter.canStartResumeRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{
-                    if(it) {
-                        toggleRecordingFloatingActionButton.setImageIcon(Icon.createWithResource(this.context, R.drawable.ic_action_track_recorder_record_startresume))
-                    } else {
-                        toggleRecordingFloatingActionButton.setImageIcon(Icon.createWithResource(this.context, R.drawable.ic_action_track_recorder_recording_pause))
+                this.presenter.canStartResumeRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe {
+                    var iconId = R.drawable.ic_action_track_recorder_record_startresume
+                    if (!it) {
+                        iconId = R.drawable.ic_action_track_recorder_recording_pause
                     }
+
+                    toggleRecordingFloatingActionButton.setImageIcon(Icon.createWithResource(this.context, iconId))
                 },
+
                 toggleRecordingFloatingActionButton.clicks().subscribe {
-                    this.presenter.canStartResumeRecordingChanged.first(false).subscribe{
-                        it1 ->
-                        if (it1) {
-                            Dexter.withActivity(this.activity)
-                                    .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                                    .withListener(object: PermissionListener {
-                                        override final fun onPermissionGranted(response: PermissionGrantedResponse) {
-                                            Log.d("TrackRecorderActivity", "Permission for ACCESS_FINE_LOCATION is granted")
-                                            this@MapTabFragment.presenter.startResumeRecording()
-                                        }
-
-                                        override final fun onPermissionDenied(response: PermissionDeniedResponse) {
-                                            Log.d("TrackRecorderActivity", "Permission for ACCESS_FINE_LOCATION is denied")
-                                        }
-
-                                        override final fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
-                                            Log.d("TrackRecorderActivity", "Permission Rationale should be shown")
-                                        }
-                                    })
-                                    .check()
-                        } else {
-                            this.presenter.pauseRecording()
-                        }
-                    }.dispose()
+                    this.presenter.canStartResumeRecordingChanged.first(false).subscribe {
+                        isGranted ->
+                            if (isGranted) {
+                               this.presenter.startResumeRecording()
+                            } else {
+                                this.presenter.pauseRecording()
+                            }
+                    }
                 }
         )
     }
@@ -110,8 +88,12 @@ internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependant
         this.currentLocationsChangedSubscription?.dispose()
     }
 
-    public override fun setPresenter(presenter: ITrackRecorderActivityPresenter) {
-        this.presenter = presenter
+    public override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        if(this.activity is TrackRecorderActivity) {
+            this.presenter = (this.activity!! as TrackRecorderActivity).presenter
+        }
     }
 
     public override fun onMapReady(trackRecorderMap: ITrackRecorderMap) {
@@ -130,7 +112,7 @@ internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependant
         this.subscriptions.addAll(
                 this.presenter.trackSessionStateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe(trackRecorderMap.consumeReset()),
 
-                this.presenter.locationsChangedAvailable.observeOn(AndroidSchedulers.mainThread()).subscribe{
+                this.presenter.locationsChangedAvailable.observeOn(AndroidSchedulers.mainThread()).subscribe {
                     this.currentLocationsChangedSubscription?.dispose()
 
                     this.currentLocationsChangedSubscription = it
@@ -141,4 +123,3 @@ internal final class MapTabFragment: Fragment(), ITrackRecorderActivityDependant
         )
     }
 }
-

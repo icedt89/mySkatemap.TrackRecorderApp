@@ -17,16 +17,17 @@
     <string name="trackrecorderactivity_finish_confirmation_message">All data of the current recording will be saved for later processing by you.\n\nDo you want to proceed?</string>
     <string name="trackrecorderactivity_finish_confirmation_button_yes_label">Finish</string>
     <string name="trackrecorderactivity_finish_confirmation_button_no_label">Cancel</string>
-    <string name="trackrecorderactivity_tab_data_trackname">Name der Strecke</string>
-    <string name="trackrecorderactivity_tab_data_trackdistance">Länge</string>
-    <string name="trackrecorderactivity_tab_data_recordingtime">Dauer</string>
-    <string name="trackrecorderactivity_tab_data_numberofpositions">Anzahl Positionen</string>
-    <string name="trackrecorderactivity_tab_data_startedat">Begonnen</string>
-    <string name="trackrecorderactivity_tab_data_comments">Notizen zur Strecke</string>
+    <string name="trackrecorderactivity_tab_data_trackname">Name of track</string>
+    <string name="trackrecorderactivity_tab_data_trackdistance">Length</string>
+    <string name="trackrecorderactivity_tab_data_recordingtime">Recording duration</string>
+    <string name="trackrecorderactivity_tab_data_numberofpositions">Number of locations</string>
+    <string name="trackrecorderactivity_tab_data_startedat">Started at</string>
+    <string name="trackrecorderactivity_tab_data_comments">Notices</string>
     <string name="trackrecorderactivity_tab_attachments_noattachments">You have currently not attached any images!</string>
 
-    <string name="app_trackdistance_template_meter">~%sm</string>
-    <string name="app_trackdistance_template_kilometer">~%skm</string>
+    <string name="app_trackdistance_template_meters">~%sm</string>
+    <string name="app_trackdistance_template_kilometers">~%skm</string>
+    <string name="app_trackdistance_template_miles">~%smiles</string>
     <string name="app_trackdistance_decimalformat">#.##</string>
 
     <string name="trackrecorderservice_notification_title">mySkatemap Track Recorder</string>
@@ -39,4 +40,5 @@
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
     <string name="trackrecorderservice_notification_action_terminate">Terminate</string>
     <string name="trackrecorderservice_notification_recordingduration_template">%s</string>
+    <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Delete</string>
 </resources>

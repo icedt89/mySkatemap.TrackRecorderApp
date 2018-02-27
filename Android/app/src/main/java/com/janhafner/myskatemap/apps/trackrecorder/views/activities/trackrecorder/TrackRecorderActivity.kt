@@ -1,9 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.TabLayout
+import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -23,13 +24,11 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
     private var optionsMenuSubscriptions: CompositeDisposable? = null
 
-    private val mapSubscriptions : CompositeDisposable = CompositeDisposable()
+    private val viewHolder: ViewHolder = ViewHolder()
 
-    private lateinit var presenter: ITrackRecorderActivityPresenter
+    public lateinit var presenter: ITrackRecorderActivityPresenter
 
-    private var finishCurrentTrackRecordingMenuItem: MenuItem? = null
-
-    private var discardCurrentTrackRecordingMenuItem: MenuItem? = null
+    private var selectedTabFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,23 +38,20 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
         val trackRecorderToolbar = this.findViewById<Toolbar>(R.id.trackrecorderactivity_toolbar)
         this.setSupportActionBar(trackRecorderToolbar)
 
-        this.supportActionBar!!.setDisplayShowHomeEnabled(true)
-
         val viewPager = this.findViewById<ViewPager>(R.id.trackrecorderactivity_toolbar_viewpager)
         viewPager.adapter = TrackRecorderTabsAdapter(this, this.supportFragmentManager)
         viewPager.offscreenPageLimit = viewPager.adapter!!.count
 
         val tabLayout = this.findViewById<TabLayout>(R.id.trackrecorderactivity_toolbar_tablayout)
         tabLayout.setupWithViewPager(viewPager)
-
-        tabLayout.addOnTabSelectedListener(object:TabLayout.OnTabSelectedListener {
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 val self = this@TrackRecorderActivity
 
-                if(self.currentFocus == null) {
+                if (self.currentFocus == null) {
                     return
                 }
 
@@ -64,6 +60,7 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
             }
 
             override fun onTabSelected(tab: TabLayout.Tab?) {
+                this@TrackRecorderActivity.selectedTabFragment = tab!!.customView as Fragment
             }
         })
 
@@ -71,32 +68,15 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
         this.presenter.startAndBindService()
     }
 
-    override fun onRestart() {
-        super.onRestart()
-    }
-
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         this.menuInflater.inflate(R.menu.track_recorder_activity_toolbar_menu, menu)
 
-        this.discardCurrentTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_discard_currenttracking)
-        this.finishCurrentTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_finish_currenttracking)
+        this.viewHolder.store(R.id.trackrecorderactivity_toolbar_discard_currenttracking, menu.findItem(R.id.trackrecorderactivity_toolbar_discard_currenttracking))
+        this.viewHolder.store(R.id.trackrecorderactivity_toolbar_finish_currenttracking, menu.findItem(R.id.trackrecorderactivity_toolbar_finish_currenttracking))
 
         this.subscribeToOptionsMenu()
 
         return true
-    }
-
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-    }
-
-    public override fun onAttachFragment(fragment: android.support.v4.app.Fragment?) {
-        super.onAttachFragment(fragment)
-
-        if(fragment is ITrackRecorderActivityDependantFragment) {
-            fragment.setPresenter(this.presenter)
-        }
     }
 
     public override fun onSaveInstanceState(outState: Bundle?) {
@@ -120,7 +100,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     override fun onPause() {
         super.onPause()
 
-        this.mapSubscriptions.clear()
         this.subscriptions.clear()
         this.optionsMenuSubscriptions?.clear()
         this.optionsMenuSubscriptions = null
@@ -131,10 +110,10 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
        this.presenter.unbindService()
 
-        this.mapSubscriptions.clear()
         this.subscriptions.clear()
         this.optionsMenuSubscriptions?.clear()
         this.optionsMenuSubscriptions = null
+        this.viewHolder.clear()
     }
 
     private fun subscribeToPresenter() {
@@ -156,21 +135,24 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     }
 
     private fun subscribeToOptionsMenu() {
+        val finishCurrentTrackRecordingMenuItem = this.viewHolder.tryRetrieve<MenuItem>(R.id.trackrecorderactivity_toolbar_finish_currenttracking)
+        val discardCurrentTrackRecordingMenuItem = this.viewHolder.tryRetrieve<MenuItem>(R.id.trackrecorderactivity_toolbar_discard_currenttracking)
+
         if(this.optionsMenuSubscriptions != null ||
-                (this.finishCurrentTrackRecordingMenuItem == null
+                (finishCurrentTrackRecordingMenuItem == null
                       || discardCurrentTrackRecordingMenuItem == null)) {
             return
         }
 
         this.optionsMenuSubscriptions = CompositeDisposable()
         this.optionsMenuSubscriptions!!.addAll(
-                this.presenter.canFinishRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{ this.finishCurrentTrackRecordingMenuItem!!.isEnabled = it },
-                this.finishCurrentTrackRecordingMenuItem!!.clicks().subscribe({
+                this.presenter.canFinishRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{ finishCurrentTrackRecordingMenuItem.isEnabled = it },
+                finishCurrentTrackRecordingMenuItem.clicks().subscribe({
                     this.presenter.finishRecording()
                 }),
 
-                this.presenter.canDiscardRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{ this.discardCurrentTrackRecordingMenuItem!!.isEnabled = it},
-                this.discardCurrentTrackRecordingMenuItem!!.clicks().subscribe({
+                this.presenter.canDiscardRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{ discardCurrentTrackRecordingMenuItem.isEnabled = it},
+                discardCurrentTrackRecordingMenuItem.clicks().subscribe({
                     this.presenter.discardRecording()
                 })
         )

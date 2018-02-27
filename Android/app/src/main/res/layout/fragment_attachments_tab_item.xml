@@ -6,7 +6,6 @@
         android:layout_height="200dp"
         android:layout_width="200dp"
         android:id="@+id/icon"
-        android:requiresFadingEdge="vertical"
         android:maxHeight="200dp"
         android:maxWidth="200dp"
         android:minHeight="100dp"

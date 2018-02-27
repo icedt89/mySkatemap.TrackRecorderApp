@@ -12,9 +12,7 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.lang.reflect.Type
 
-internal abstract class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type): IDataStore<T> {
-    private val lock: Int = 0
-
+internal open class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type): IFileBasedDataStore<T> {
     @Synchronized
     public final override fun save(data: T) {
         val writer = FileWriter(this.file)
@@ -60,3 +58,4 @@ internal abstract class FileBasedDataStore<T>(private val file: File, private va
                 .create()
     }
 }
+

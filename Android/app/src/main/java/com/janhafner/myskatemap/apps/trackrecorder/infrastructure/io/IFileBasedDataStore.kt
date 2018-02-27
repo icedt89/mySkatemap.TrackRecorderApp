@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io
 
-internal interface IDataStore<T> {
+internal interface IFileBasedDataStore<T> {
     fun save(data: T)
 
     fun delete()

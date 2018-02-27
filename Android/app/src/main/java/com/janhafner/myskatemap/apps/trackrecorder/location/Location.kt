@@ -29,14 +29,4 @@ internal final class Location(public val sequenceNumber: Int) {
     public override fun toString(): String {
         return "Location(#${this.sequenceNumber}; lat: ${this.latitude}; lon: ${this.longitude})"
     }
-
-    companion object {
-        public val defaultComparator: Comparator<Location> = Comparator<Location> { o1, o2 ->
-            if(o1 == null || o2 == null) {
-               0
-            } else {
-                o1.sequenceNumber.compareTo(o2.sequenceNumber)
-            }
-        }
-    }
 }

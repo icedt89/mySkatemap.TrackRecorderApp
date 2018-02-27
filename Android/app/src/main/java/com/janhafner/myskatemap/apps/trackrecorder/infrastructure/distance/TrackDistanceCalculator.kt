@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
+package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance
 
 import com.janhafner.myskatemap.apps.trackrecorder.distanceTo
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location

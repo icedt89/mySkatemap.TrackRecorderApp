@@ -5,9 +5,9 @@ import android.content.Intent
 import android.os.IBinder
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.TrackDistanceCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
 import com.janhafner.myskatemap.apps.trackrecorder.location.*
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.FusedLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.ILocationProvider
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 internal final class TrackRecorderService: Service(), ITrackRecorderService {
     private lateinit var locationProvider: ILocationProvider
 
-    private lateinit var trackRecordingStore: IDataStore<TrackRecording>
+    private lateinit var trackRecordingStoreFileBased: IFileBasedDataStore<TrackRecording>
 
     private lateinit var locationChangedBroadcasterReceiver: LocationAvailabilityChangedBroadcastReceiver
 
@@ -106,7 +106,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackDistanceCalculator.clear()
 
-        this.trackRecordingStore.delete()
+        this.trackRecordingStoreFileBased.delete()
         this.currentTrackRecording = null
 
         this.changeState(TrackRecorderServiceState.Initializing)
@@ -130,7 +130,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackDistanceCalculator.clear()
 
-        this.trackRecordingStore.delete()
+        this.trackRecordingStoreFileBased.delete()
         this.currentTrackRecording = null
 
         this.changeState(TrackRecorderServiceState.Initializing)
@@ -248,7 +248,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             throw IllegalStateException()
         }
 
-        this.trackRecordingStore.save(this.currentTrackRecording!!)
+        this.trackRecordingStoreFileBased.save(this.currentTrackRecording!!)
     }
 
     private fun changeState(newState: TrackRecorderServiceState) {
@@ -275,7 +275,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     public override fun onCreate() {
         this.applicationContext
-        this.trackRecordingStore = CurrentTrackRecordingStore(this)
+        this.trackRecordingStoreFileBased = CurrentTrackRecordingStore(this)
         this.locationProvider = this.createLocationProvider(true, false)
         this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this)
 
