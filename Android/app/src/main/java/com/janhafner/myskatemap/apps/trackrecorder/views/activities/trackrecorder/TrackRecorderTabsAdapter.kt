@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.AttachmentsTabFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
 
 internal final class TrackRecorderTabsAdapter(context: Context, fragmentManager: FragmentManager?) : FragmentPagerAdapter(fragmentManager) {
     private val mapTabTitle: String = context.getString(R.string.trackrecorderactivity_tab_map_title)

@@ -4,10 +4,10 @@ import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.roundTrackDistanceForDisplay
 
-internal final class KilometersTrackDistanceFormatter: ITrackDistanceFormatter {
+internal final class KilometersTrackDistanceUnitFormatter : ITrackDistanceUnitFormatter {
     public override fun format(context: Context, distanceInMeters: Float): String {
-        if (distanceInMeters > KilometersTrackDistanceFormatter.MetersToKilometersFactor) {
-            return context.getString(R.string.app_trackdistance_template_kilometers, (distanceInMeters / KilometersTrackDistanceFormatter.MetersToKilometersFactor).roundTrackDistanceForDisplay(context))
+        if (distanceInMeters > KilometersTrackDistanceUnitFormatter.MetersToKilometersFactor) {
+            return context.getString(R.string.app_trackdistance_template_kilometers, (distanceInMeters / KilometersTrackDistanceUnitFormatter.MetersToKilometersFactor).roundTrackDistanceForDisplay(context))
         }
 
         return context.getString(R.string.app_trackdistance_template_meters, distanceInMeters.roundTrackDistanceForDisplay(context))

@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.R
@@ -19,8 +18,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.DiscardRecordingAlertDialogBuilder
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.FinishRecordingAlertDialogBuilder
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
 import org.joda.time.DateTime
 import org.joda.time.Period
@@ -34,6 +36,8 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
     private var trackRecordingSession: ITrackRecordingSession? = null
 
     private val subscriptions: CompositeDisposable = CompositeDisposable()
+
+    private var locationServicesAvailabilitySubscription: Disposable? = null
 
     private val currentTrackRecordingStoreFileBased: IFileBasedDataStore<TrackRecording> = CurrentTrackRecordingStore(activity)
 
@@ -60,6 +64,12 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
             if (self.trackRecordingSession != null) {
                 self.subscribeToSession()
             }
+
+            self.locationServicesAvailabilitySubscription = self.trackRecorderService!!.locationServicesAvailability.subscribe{
+                if(!it) {
+                    ShowLocationServicesSnackbar.make(self.activity, self.activity.currentFocus)
+                }
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -69,6 +79,9 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
 
             self.trackRecordingSession = null
             self.trackRecorderService = null
+
+            self.locationServicesAvailabilitySubscription?.dispose()
+            self.locationServicesAvailabilitySubscription = null
         }
 
         public override fun onBindingDied(name: ComponentName?)
@@ -161,22 +174,22 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
     }
 
     private val trackingStartedAtChangedSubject: BehaviorSubject<DateTime> = BehaviorSubject.createDefault(DateTime(0))
-    override val trackingStartedAtChanged: Observable<DateTime> = this.trackingStartedAtChangedSubject
+    public override val trackingStartedAtChanged: Observable<DateTime> = this.trackingStartedAtChangedSubject
 
     private val recordingTimeChangedSubject: BehaviorSubject<Period> = BehaviorSubject.createDefault(Period.ZERO)
-    override val recordingTimeChanged: Observable<Period> = this.recordingTimeChangedSubject
+    public override val recordingTimeChanged: Observable<Period> = this.recordingTimeChangedSubject
 
     private val trackDistanceChangedSubject: BehaviorSubject<Float> = BehaviorSubject.createDefault(0.0f)
-    override val trackDistanceChanged: Observable<Float> = this.trackDistanceChangedSubject
+    public override val trackDistanceChanged: Observable<Float> = this.trackDistanceChangedSubject
 
     private val trackSessionStateChangedSubject: BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault(TrackRecorderServiceState.Initializing)
-    override val trackSessionStateChanged: Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
+    public override val trackSessionStateChanged: Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
 
     private val locationChangedAvailableSubject: BehaviorSubject<Observable<Location>> = BehaviorSubject.createDefault<Observable<Location>>(Observable.never())
-    override val locationsChangedAvailable: Observable<Observable<Location>> = this.locationChangedAvailableSubject
+    public override val locationsChangedAvailable: Observable<Observable<Location>> = this.locationChangedAvailableSubject
 
     private val canStartResumeRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(true)
-    override val canStartResumeRecordingChanged: Observable<Boolean> = this.canStartResumeRecordingSubject
+    public override val canStartResumeRecordingChanged: Observable<Boolean> = this.canStartResumeRecordingSubject
 
     override fun startResumeRecording() {
         this.activity.checkAccessFineLocation().subscribe { granted ->
@@ -214,14 +227,8 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
     override val canDiscardRecordingChanged: Observable<Boolean> = this.canDiscardRecordingSubject
 
     override fun discardRecording() {
-        // TODO:Presenter or Activity?
-        val alertBuilder = AlertDialog.Builder(this.activity)
-        alertBuilder.setTitle(R.string.trackrecorderactivity_discard_confirmation_title)
-        alertBuilder.setCancelable(true)
-        alertBuilder.setMessage(R.string.trackrecorderactivity_discard_confirmation_message)
-        alertBuilder.setIcon(R.drawable.ic_dialog_warning)
-        alertBuilder.setNegativeButton(R.string.trackrecorderactivity_discard_confirmation_button_no_label, null)
-        alertBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
+        val discardRecordingAlertDialogBuilder = DiscardRecordingAlertDialogBuilder(this.activity)
+        discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
             _, _ ->
                 this.trackRecordingSession!!.discardTracking()
 
@@ -229,29 +236,24 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
                 this.trackRecordingSession = null
         })
 
-        alertBuilder.show()
+        discardRecordingAlertDialogBuilder.show()
     }
 
     private var canFinishRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
     override val canFinishRecordingChanged: Observable<Boolean> = this.canFinishRecordingSubject
 
     override fun finishRecording() {
-        // TODO: Presenter or Activity?
-        val alertBuilder = AlertDialog.Builder(this.activity)
-        alertBuilder.setTitle(R.string.trackrecorderactivity_finish_confirmation_title)
-        alertBuilder.setCancelable(true)
-        alertBuilder.setMessage(R.string.trackrecorderactivity_finish_confirmation_message)
-        alertBuilder.setIcon(R.drawable.ic_dialog_question)
-        alertBuilder.setNegativeButton(R.string.trackrecorderactivity_finish_confirmation_button_no_label, null)
-        alertBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
+        val finishRecordingAlertDialogBuilder = FinishRecordingAlertDialogBuilder(this.activity)
+        finishRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
             _,
             _ ->
+                // TODO: Make something useful with it (history, upload etc...)
                 val trackRecording = this.trackRecordingSession!!.finishTracking()
 
                 this.unsubscribeFromSession()
                 this.trackRecordingSession = null
         })
 
-        alertBuilder.show()
+        finishRecordingAlertDialogBuilder.show()
     }
 }

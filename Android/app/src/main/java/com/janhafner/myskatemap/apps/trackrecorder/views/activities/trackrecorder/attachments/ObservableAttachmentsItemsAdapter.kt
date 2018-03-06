@@ -34,8 +34,3 @@ internal final class ObservableAttachmentsItemsAdapter(context: Context, @Layout
         return itemLayout
     }
 }
-
-internal final class ItemViewCreatedArgs<out TView: View, out TItem: Any>(public val view: TView,
-                                                                          public val item: TItem,
-                                                                          public val position: Int) {
-}

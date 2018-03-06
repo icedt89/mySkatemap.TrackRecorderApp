@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
+package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -7,9 +7,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.jakewharton.rxbinding2.widget.text
-import com.janhafner.myskatemap.apps.trackrecorder.*
+import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.formatDefault
+import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.KilometersTrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.store
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -31,6 +38,9 @@ internal final class DataTabFragment : Fragment() {
 
     private val viewHolder: ViewHolder = ViewHolder()
 
+    @Deprecated("Resolve using ITrackDistanceUnitFormatterFactory by using Dagger")
+    private val trackDistanceUnitFormatter: ITrackDistanceUnitFormatter = KilometersTrackDistanceUnitFormatter()
+
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_data_tab, container, false)
     }
@@ -50,7 +60,7 @@ internal final class DataTabFragment : Fragment() {
 
         this.subscriptions.addAll(
                 this.presenter.trackDistanceChanged.map {
-                    it.formatTrackDistance(this.context!!)
+                    this.trackDistanceUnitFormatter.format(this.context!!, it)
                 }.observeOn(AndroidSchedulers.mainThread()).subscribe(this.viewHolder.retrieve<AppCompatTextView>(R.id.trackrecorderactivity_tab_data_trackdistance).text()),
 
                 this.presenter.recordingTimeChanged.map {

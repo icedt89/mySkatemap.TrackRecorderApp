@@ -46,6 +46,7 @@ internal final class TestLocationProvider(private val context: Context,
 
     public override fun overrideSequenceNumber(sequenceNumber: Int) {
         super.overrideSequenceNumber(-1)
+        this.lastComputedLocation = null
 
         this.referencelessCoordinates.clear()
 
@@ -143,7 +144,7 @@ internal final class TestLocationProvider(private val context: Context,
         }
 
         if (this.simulateDependencyToAndroidLocationServices && !this.context.isLocationServicesEnabled()) {
-            throw IllegalStateException()
+            throw IllegalStateException("Location Services are disabled!")
         }
 
         if (this.postLocationTimerTask == null) {

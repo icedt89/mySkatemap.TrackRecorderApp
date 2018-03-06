@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
+import android.content.ContextWrapper
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
@@ -30,6 +31,10 @@ import org.joda.time.DateTime
 
 internal fun Location.toLatLng(): LatLng {
     return LatLng(this.latitude, this.longitude)
+}
+
+internal fun ContextWrapper.startLocationSourceSettingsActivity() {
+    this.startActivity(android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 }
 
 internal fun Location.clone(sequenceNumber: Int): Location {

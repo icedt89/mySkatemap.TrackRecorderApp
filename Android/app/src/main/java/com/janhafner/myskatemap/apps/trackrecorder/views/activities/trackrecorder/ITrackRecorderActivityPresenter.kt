@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.IAttachmentsTabFragmentPresenter
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.IDataTabFragmentPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.IAttachmentsTabFragmentPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.IDataTabFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.IMapTabFragmentPresenter
 import io.reactivex.Observable
 

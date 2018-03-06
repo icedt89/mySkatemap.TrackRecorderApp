@@ -3,7 +3,6 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -28,8 +27,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
     public lateinit var presenter: ITrackRecorderActivityPresenter
 
-    private var selectedTabFragment: Fragment? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -48,6 +45,9 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
 
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+            }
+
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 val self = this@TrackRecorderActivity
 
@@ -57,10 +57,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
                 val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(self.currentFocus?.windowToken, 0)
-            }
-
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                this@TrackRecorderActivity.selectedTabFragment = tab!!.customView as Fragment
             }
         })
 
@@ -127,8 +123,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
                         TrackRecorderServiceState.Paused,
                         TrackRecorderServiceState.LocationServicesUnavailable ->
                             Toast.makeText(this, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
-                        else -> {
-                        }
                     }
                 }
         )

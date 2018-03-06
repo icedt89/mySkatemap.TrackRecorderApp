@@ -10,6 +10,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.UiSettings
 import com.google.android.gms.maps.model.*
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.AppSettings
 
 internal final class TrackRecorderMapFragment : android.support.v4.app.Fragment(), ITrackRecorderMap {
     private lateinit var polyline: Polyline
@@ -90,7 +91,7 @@ internal final class TrackRecorderMapFragment : android.support.v4.app.Fragment(
 
         this.googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this.context!!, R.raw.mapstyle_fanticmotor))
 
-        this.trackColor = this.context!!.getColor(R.color.colorTrack)
+        this.trackColor = AppSettings.DEFAULT_TRACK_COLOR
     }
 }
 

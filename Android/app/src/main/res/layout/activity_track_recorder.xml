@@ -10,8 +10,7 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/trackrecorderactivity_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:elevation="10dp" />
+            android:layout_height="?attr/actionBarSize" />
         <android.support.v4.view.ViewPager
             android:layout_width="match_parent"
             android:layout_height="match_parent"
