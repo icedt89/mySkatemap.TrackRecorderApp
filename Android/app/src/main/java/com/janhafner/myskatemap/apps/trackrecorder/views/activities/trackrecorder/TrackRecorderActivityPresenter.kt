@@ -18,6 +18,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.start.StartActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.DiscardRecordingAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.FinishRecordingAlertDialogBuilder
 import io.reactivex.Observable
@@ -49,15 +50,26 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
             self.trackRecordingSession = self.trackRecorderService!!.currentSession
 
             if (self.trackRecordingSession == null) {
-                try {
-                    val restoredTrackRecording = self.currentTrackRecordingStoreFileBased.getData()
-                    if (restoredTrackRecording != null) {
-                        self.trackRecordingSession = self.trackRecorderService?.resumeSession(restoredTrackRecording)
-                    }
-                } catch(exception: IOException) {
-                    self.currentTrackRecordingStoreFileBased.delete()
+                val mode = self.activity.intent.getStringExtra("mode")
+                when(mode) {
+                    "startnew" -> {
+                        val newTrackRecording = self.createNewTrackRecording()
 
-                    Log.e("TrackRecorderAPresenter", "Unable to restore saved state of current recording! App still works but unfortunately you have lost your last recording :(", exception)
+                        self.trackRecordingSession = self.trackRecorderService!!.useTrackRecording(newTrackRecording)
+                        self.trackRecordingSession!!.resumeTracking()
+                    }
+                    "resume" -> {
+                        try {
+                            val restoredTrackRecording = self.currentTrackRecordingStoreFileBased.getData()
+                            if (restoredTrackRecording != null) {
+                                self.trackRecordingSession = self.trackRecorderService?.useTrackRecording(restoredTrackRecording)
+                            }
+                        } catch(exception: IOException) {
+                            self.currentTrackRecordingStoreFileBased.delete()
+
+                            Log.e("TrackRecorderAPresenter", "Unable to restore saved state of current recording! App still works but unfortunately you have lost your last recording :(", exception)
+                        }
+                    }
                 }
             }
 
@@ -202,18 +214,16 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
     }
 
     private fun startResumeRecordingUnchecked() {
-        if (this.trackRecordingSession == null) {
-            val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
-            val nameTemplate = this.activity.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
-
-            val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
-
-            this.trackRecordingSession = this.trackRecorderService!!.createNewSession(trackRecordingName)
-
-            this.subscribeToSession()
-        }
-
         this.trackRecordingSession!!.resumeTracking()
+    }
+
+    private fun createNewTrackRecording(): TrackRecording {
+        val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
+        val nameTemplate = this.activity.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
+
+        val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
+
+        return TrackRecording(trackRecordingName)
     }
 
     private var canPauseRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
@@ -234,6 +244,10 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
 
                 this.unsubscribeFromSession()
                 this.trackRecordingSession = null
+
+                this.activity.startActivity(Intent(this.activity, StartActivity::class.java))
+
+                this.activity.finish()
         })
 
         discardRecordingAlertDialogBuilder.show()

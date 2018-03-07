@@ -9,7 +9,5 @@ internal interface ITrackRecorderService {
 
     val locationServicesAvailability: Observable<Boolean>
 
-    fun resumeSession(trackRecording: TrackRecording): ITrackRecordingSession
-
-    fun createNewSession(name: String): ITrackRecordingSession
+    fun useTrackRecording(trackRecording: TrackRecording): ITrackRecordingSession
 }

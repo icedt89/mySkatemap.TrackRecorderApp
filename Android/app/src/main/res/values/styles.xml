@@ -7,4 +7,8 @@
     <style name="SplashscreenActivityTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:background">@drawable/splashscreen</item>
     </style>
+
+    <style name="StartActivityTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:background">@color/colorAppIconBackground</item>
+    </style>
 </resources>

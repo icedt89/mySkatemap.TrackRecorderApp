@@ -10,7 +10,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.UiSettings
 import com.google.android.gms.maps.model.*
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.AppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
 
 internal final class TrackRecorderMapFragment : android.support.v4.app.Fragment(), ITrackRecorderMap {
     private lateinit var polyline: Polyline

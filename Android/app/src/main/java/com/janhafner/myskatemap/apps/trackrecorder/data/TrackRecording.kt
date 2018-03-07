@@ -30,31 +30,28 @@ internal final class TrackRecording(public var name: String) {
 
     public fun finished() {
         this.trackingFinishedAt = DateTime.now()
-        val stateChangeEntry = this.stateChanges.last().finished(this.trackingFinishedAt!!)
+        val stateChangeEntry = this.stateChangeEntries.last().finished(this.trackingFinishedAt!!)
 
         this.stateChangeEntries.add(stateChangeEntry)
     }
 
     public fun paused() {
-        val stateChangeEntry = this.stateChanges.last().paused()
+        val stateChangeEntry = this.stateChangeEntries.last().paused()
 
         this.stateChangeEntries.add(stateChangeEntry)
     }
 
     public fun resumed() {
-        val stateChangeEntry = this.stateChanges.last().resumed()
+        val stateChangeEntry: StateChangeEntry
+
+        val lastChange = this.stateChangeEntries.lastOrNull()
+        if(lastChange == null) {
+            this.trackingStartedAt = DateTime.now()
+            stateChangeEntry = StateChangeEntry.started(this.trackingStartedAt)
+        } else {
+            stateChangeEntry = lastChange.resumed()
+        }
 
         this.stateChangeEntries.add(stateChangeEntry)
-    }
-
-    companion object {
-        public final fun start(name: String): TrackRecording {
-            val result = TrackRecording(name)
-
-            result.trackingStartedAt = DateTime.now()
-            result.stateChangeEntries.add(StateChangeEntry.started(result.trackingStartedAt))
-
-            return result
-        }
     }
 }

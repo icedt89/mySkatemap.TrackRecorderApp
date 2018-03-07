@@ -46,6 +46,8 @@
             android:name=".views.activities.trackrecorder.TrackRecorderActivity"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustPan|stateHidden" />
+        <activity
+            android:name=".views.activities.start.StartActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

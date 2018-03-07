@@ -7,11 +7,11 @@ import android.os.IBinder
 import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.AppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.*
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.FusedLocationProvider
@@ -166,26 +166,8 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.currentSession = null
     }
 
-    public override fun createNewSession(name: String): ITrackRecordingSession {
+    public override fun useTrackRecording(trackRecording: TrackRecording): ITrackRecordingSession {
         if (this.currentSession != null) {
-            throw IllegalStateException()
-        }
-
-        this.createSessionCore(TrackRecording.start(name), this.durationTimer.secondElapsed, this.locationProvider.locations.replay().autoConnect())
-
-        this.saveTracking()
-
-        this.changeState(TrackRecorderServiceState.Ready)
-
-        return this.currentSession!!
-    }
-
-    public override fun resumeSession(trackRecording: TrackRecording): ITrackRecordingSession {
-        if (this.currentSession != null) {
-            throw IllegalStateException()
-        }
-        
-        if (trackRecording.isFinished) {
             throw IllegalStateException()
         }
 
@@ -251,7 +233,11 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                 this.stateChangedSubject.subscribe {
                     this.trackRecorderServiceNotification.state = it
 
-                    this.trackRecorderServiceNotification.update()
+                    if(it == TrackRecorderServiceState.Initializing) {
+                        this.trackRecorderServiceNotification.close()
+                    } else  {
+                        this.trackRecorderServiceNotification.update()
+                    }
                 },
 
             this.currentSession!!.trackDistanceChanged.subscribe{
@@ -274,10 +260,6 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.stateChangedSubject.onNext(newState)
     }
 
-    public override fun onBind(intent: Intent?): IBinder {
-        return TrackRecorderServiceBinder(this)
-    }
-
     public override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if(intent != null) {
             when(intent.action) {
@@ -286,15 +268,19 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                 TrackRecorderServiceNotification.ACTION_PAUSE ->
                     this.pauseTracking()
                 TrackRecorderServiceNotification.ACTION_SHOW_LOCATION_SERVICES -> {
-                    val i = android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    i.addFlags(FLAG_ACTIVITY_NEW_TASK)
-                    this.startActivity(i)
-                    // this.startLocationSourceSettingsActivity()
+                    val intent = android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+
+                    this.startActivity(intent)
                 }
-                TrackRecorderServiceNotification.ACTION_TERMINATE ->
+                TrackRecorderServiceNotification.ACTION_TERMINATE -> {
+                    this.trackRecorderServiceNotification.close()
+
                     this.stopSelf()
+                }
             }
         }
+
         return START_NOT_STICKY
     }
 
@@ -342,6 +328,21 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         }
 
         return FusedLocationProvider(this)
+    }
+
+
+    public override fun onBind(intent: Intent?): IBinder {
+        this.trackRecorderServiceNotification.userInitiatedServiceTerminationAllowed = false
+        this.trackRecorderServiceNotification.update()
+
+        return TrackRecorderServiceBinder(this)
+    }
+
+    public override fun onUnbind(intent: Intent?): Boolean {
+        this.trackRecorderServiceNotification.userInitiatedServiceTerminationAllowed = true
+        this.trackRecorderServiceNotification.update()
+
+        return super.onUnbind(intent)
     }
 
     public override fun onDestroy() {

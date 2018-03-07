@@ -11,8 +11,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.AppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ShowLocationServicesSnackbar
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity

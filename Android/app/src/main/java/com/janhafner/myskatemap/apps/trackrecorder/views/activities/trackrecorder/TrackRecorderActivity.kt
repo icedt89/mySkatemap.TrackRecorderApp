@@ -61,7 +61,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
         })
 
         this.presenter = TrackRecorderActivityPresenter(this)
-        this.presenter.startAndBindService()
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -89,12 +88,16 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        this.presenter.startAndBindService()
+
         this.subscribeToPresenter()
         this.subscribeToOptionsMenu()
     }
 
     override fun onPause() {
         super.onPause()
+
+        this.presenter.unbindService()
 
         this.subscriptions.clear()
         this.optionsMenuSubscriptions?.clear()
@@ -104,11 +107,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-       this.presenter.unbindService()
-
-        this.subscriptions.clear()
-        this.optionsMenuSubscriptions?.clear()
-        this.optionsMenuSubscriptions = null
         this.viewHolder.clear()
     }
 
