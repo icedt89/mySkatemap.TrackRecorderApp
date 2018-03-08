@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import org.joda.time.Period
 import java.util.*
 
-internal final class TrackRecording(public var name: String) {
+internal final class TrackRecording private constructor(public var name: String) {
     private val id: UUID = UUID.randomUUID()
 
     public val locations: MutableMap<Int, Location> = ArrayMap<Int, Location>()
@@ -42,16 +42,19 @@ internal final class TrackRecording(public var name: String) {
     }
 
     public fun resumed() {
-        val stateChangeEntry: StateChangeEntry
-
-        val lastChange = this.stateChangeEntries.lastOrNull()
-        if(lastChange == null) {
-            this.trackingStartedAt = DateTime.now()
-            stateChangeEntry = StateChangeEntry.started(this.trackingStartedAt)
-        } else {
-            stateChangeEntry = lastChange.resumed()
-        }
+        val stateChangeEntry = this.stateChangeEntries.last().resumed()
 
         this.stateChangeEntries.add(stateChangeEntry)
+    }
+
+    companion object {
+        public fun started(name: String): TrackRecording {
+            val result = TrackRecording(name)
+
+            result.trackingStartedAt = DateTime.now()
+            result.stateChangeEntries.add(StateChangeEntry.started(result.trackingStartedAt))
+
+            return result
+        }
     }
 }

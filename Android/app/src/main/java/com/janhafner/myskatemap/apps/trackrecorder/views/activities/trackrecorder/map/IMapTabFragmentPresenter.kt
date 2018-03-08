@@ -9,7 +9,7 @@ internal interface IMapTabFragmentPresenter {
 
     val locationsChangedAvailable: Observable<Observable<Location>>
 
-    fun startResumeRecording()
+    fun resumeRecording()
 
     fun pauseRecording()
 

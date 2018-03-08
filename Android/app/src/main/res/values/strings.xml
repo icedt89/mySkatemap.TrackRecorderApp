@@ -25,22 +25,20 @@
     <string name="trackrecorderactivity_tab_data_comments">Notices</string>
     <string name="trackrecorderactivity_tab_attachments_noattachments">You have currently not attached any images!</string>
 
-    <string name="app_trackdistance_template_meters">~%sm</string>
-    <string name="app_trackdistance_template_kilometers">~%skm</string>
-    <string name="app_trackdistance_template_miles">~%smiles</string>
+    <string name="app_trackdistance_template_meters">%sm</string>
+    <string name="app_trackdistance_template_kilometers">%skm</string>
+    <string name="app_trackdistance_template_miles">%smiles</string>
     <string name="app_trackdistance_decimalformat">#.##</string>
 
-    <string name="trackrecorderservice_notification_title">mySkatemap Track Recorder</string>
     <string name="trackrecorderservice_notification_status_paused">Paused</string>
-    <string name="trackrecorderservice_notification_status_locationservicesunavailable">Location unavailable</string>
+    <string name="trackrecorderservice_notification_status_locationservicesunavailable">Location services unavailable</string>
     <string name="trackrecorderservice_notification_status_runnning">Running</string>
     <string name="trackrecorderservice_notification_status_ready">Ready</string>
     <string name="trackrecorderservice_notification_status_initializing">Initializing</string>
     <string name="trackrecorderservice_notification_action_resume">Resume</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
-    <string name="trackrecorderservice_notification_action_showlocationservices">show location services</string>
     <string name="trackrecorderservice_notification_action_terminate">Terminate</string>
-    <string name="trackrecorderservice_notification_recordingduration_template">%s</string>
+    <string name="trackrecorderservice_notification_contenttext_template">%s in %s, klasse 👍</string>
     <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Delete</string>
     <string name="trackrecorderactivity_snackbar_locationservices_message">Location services not enabled</string>
     <string name="trackrecorderactivity_snackbar_locationservices_action_enable">enable</string>

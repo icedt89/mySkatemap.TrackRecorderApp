@@ -93,7 +93,7 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
                         isGranted ->
                             if (isGranted) {
                                 if(this.context!!.isLocationServicesEnabled()) {
-                                    this.presenter.startResumeRecording()
+                                    this.presenter.resumeRecording()
                                 }else{
                                     ShowLocationServicesSnackbar.make(this.activity!!, this.view!!).show()
                                 }

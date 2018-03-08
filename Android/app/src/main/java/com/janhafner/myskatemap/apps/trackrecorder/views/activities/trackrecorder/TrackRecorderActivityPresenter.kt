@@ -8,11 +8,12 @@ import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.checkAccessFineLocation
+import com.janhafner.myskatemap.apps.trackrecorder.checkAccessFineLocationPermission
 import com.janhafner.myskatemap.apps.trackrecorder.data.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
@@ -49,16 +50,23 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
             self.trackRecorderService = service as ITrackRecorderService
             self.trackRecordingSession = self.trackRecorderService!!.currentSession
 
+            // TODO: IMPORTANT!
+            // TODO: Put the TrackRecording in question (either a new one or restored) into extra, so that the TrackRecorderActivity never instantiates without a TrackRecording!
             if (self.trackRecordingSession == null) {
-                val mode = self.activity.intent.getStringExtra("mode")
+                val mode = ActivityStartMode.valueOf(self.activity.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
                 when(mode) {
-                    "startnew" -> {
+                    ActivityStartMode.StartNew -> {
                         val newTrackRecording = self.createNewTrackRecording()
 
                         self.trackRecordingSession = self.trackRecorderService!!.useTrackRecording(newTrackRecording)
-                        self.trackRecordingSession!!.resumeTracking()
+
+                        if(self.activity.isLocationServicesEnabled()) {
+                            self.trackRecordingSession!!.resumeTracking()
+                        }else{
+                            ShowLocationServicesSnackbar.make(self.activity, self.activity.currentFocus).show()
+                        }
                     }
-                    "resume" -> {
+                    ActivityStartMode.TryResume -> {
                         try {
                             val restoredTrackRecording = self.currentTrackRecordingStoreFileBased.getData()
                             if (restoredTrackRecording != null) {
@@ -203,27 +211,24 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
     private val canStartResumeRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(true)
     public override val canStartResumeRecordingChanged: Observable<Boolean> = this.canStartResumeRecordingSubject
 
-    override fun startResumeRecording() {
-        this.activity.checkAccessFineLocation().subscribe { granted ->
+    override fun resumeRecording() {
+        this.activity.checkAccessFineLocationPermission().subscribe { granted ->
             if (granted) {
-                this.startResumeRecordingUnchecked()
+                this.trackRecordingSession!!.resumeTracking()
             } else {
                 throw NotImplementedError()
             }
         }
     }
 
-    private fun startResumeRecordingUnchecked() {
-        this.trackRecordingSession!!.resumeTracking()
-    }
-
+    // TODO: MOVE TO CALLER OF ACTIVITY!
     private fun createNewTrackRecording(): TrackRecording {
         val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
         val nameTemplate = this.activity.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
 
         val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
-        return TrackRecording(trackRecordingName)
+        return TrackRecording.started(trackRecordingName)
     }
 
     private var canPauseRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
@@ -269,5 +274,9 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
         })
 
         finishRecordingAlertDialogBuilder.show()
+    }
+
+    companion object {
+        public const val ACTIVITY_START_MODE_KEY: String = "mode"
     }
 }

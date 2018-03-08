@@ -128,7 +128,7 @@ internal fun Location.distanceTo(location: Location): Float {
     return androidLocation.distanceTo(otherAndroidLocation)
 }
 
-internal fun Activity.checkAccessFineLocation(): Observable<Boolean> {
+internal fun Activity.checkAccessFineLocationPermission(): Observable<Boolean> {
     return Observable.create { emitter: ObservableEmitter<Boolean> ->
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)

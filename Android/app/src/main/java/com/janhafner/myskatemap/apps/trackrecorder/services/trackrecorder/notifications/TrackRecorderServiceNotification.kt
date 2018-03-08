@@ -32,10 +32,9 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
     private val notificationCompatBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this.trackRecorderService, TrackRecorderServiceNotificationChannel.ID)
 
     init {
-        this.notificationCompatBuilder.setSmallIcon(R.drawable.ic_stat_track_recorder)
         this.notificationCompatBuilder.setBadgeIconType(NotificationCompat.BADGE_ICON_NONE)
-        this.notificationCompatBuilder.setContentTitle(trackRecorderService.getText(R.string.trackrecorderservice_notification_title))
-
+        this.notificationCompatBuilder.setSmallIcon(R.drawable.ic_stat_track_recorder)
+        this.notificationCompatBuilder.setShowWhen(false)
         this.notificationCompatBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         this.notificationCompatBuilder.setOngoing(true)
         this.notificationCompatBuilder.setContentIntent(PendingIntent.getActivity(this.trackRecorderService, 0, Intent(this.trackRecorderService, TrackRecorderActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
@@ -44,11 +43,11 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
     public fun update() {
         when(this.state) {
             TrackRecorderServiceState.Ready ->
-                this.notificationCompatBuilder.setContentText(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_ready))
+                this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_ready))
             TrackRecorderServiceState.Running ->
-                this.notificationCompatBuilder.setContentText(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_runnning))
+                this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_runnning))
             TrackRecorderServiceState.LocationServicesUnavailable -> {
-                this.notificationCompatBuilder.setContentText(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
+                this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
                 if(this.VibrateOnLocationUnavailableState) {
                     this.notificationCompatBuilder.setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
                 } else {
@@ -62,39 +61,40 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
                 }
             }
             TrackRecorderServiceState.Paused ->
-                this.notificationCompatBuilder.setContentText(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_paused))
+                this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_paused))
         }
 
         this.notificationCompatBuilder.mActions.clear()
 
         if (this.state != TrackRecorderServiceState.Initializing) {
-            if (this.durationOfRecording != null) {
-                val durationDisplayTemplate = trackRecorderService.getString(R.string.trackrecorderservice_notification_recordingduration_template, this.durationOfRecording!!.formatRecordingTime())
-                this.notificationCompatBuilder.setSubText(durationDisplayTemplate)
-            }
-
-            if (this.trackDistance != null) {
-                val formattedTrackDistance = this.trackDistanceUnitFormatter.format(this.trackRecorderService, this.trackDistance!!)
-
-                this.notificationCompatBuilder.setContentInfo(formattedTrackDistance)
-            }
+            val contentText = this.buildContentText()
+            this.notificationCompatBuilder.setContentText(contentText)
 
             if (this.state == TrackRecorderServiceState.Paused) {
-                this.notificationCompatBuilder.addAction(R.drawable.ic_action_track_recorder_recording_startresume, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_RESUME, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
-            } else if(this.state == TrackRecorderServiceState.Running) {
-                this.notificationCompatBuilder.addAction(R.drawable.ic_action_track_recorder_recording_pause, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_PAUSE, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
-            } else if(this.state == TrackRecorderServiceState.LocationServicesUnavailable) {
-                this.notificationCompatBuilder.addAction(R.drawable.ic_action_track_recorder_service_showlocationservices, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_showlocationservices), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_SHOW_LOCATION_SERVICES, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+                this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_action_track_recorder_recording_startresume, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_RESUME, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
+            } else if (this.state == TrackRecorderServiceState.Running) {
+                this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_action_track_recorder_recording_pause, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_PAUSE, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
             }
         }
 
         if(this.userInitiatedServiceTerminationAllowed){
-            this.notificationCompatBuilder.addAction(R.drawable.ic_action_track_recorder_service_terminate, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_terminate), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_TERMINATE, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+            this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_action_track_recorder_service_terminate, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_terminate), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_TERMINATE, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
         }
 
         val notification = this.notificationCompatBuilder.build()
 
         this.trackRecorderService.startForeground(TrackRecorderServiceNotification.ID, notification)
+    }
+
+    private fun buildContentText(): String {
+        if(this.durationOfRecording == null || this.trackDistance == null) {
+            return ""
+        }
+
+        val durationDisplayTemplate = this.durationOfRecording!!.formatRecordingTime()
+        val formattedTrackDistance = this.trackDistanceUnitFormatter.format(this.trackRecorderService, this.trackDistance!!)
+
+        return trackRecorderService.getString(R.string.trackrecorderservice_notification_contenttext_template, formattedTrackDistance, durationDisplayTemplate)
     }
 
     public fun close() {
