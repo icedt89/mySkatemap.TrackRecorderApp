@@ -11,7 +11,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ShowLocationServicesSnackbar
@@ -24,6 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 
 internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback, OnTrackRecorderMapLoadedCallback {
@@ -35,14 +35,17 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
 
     private val viewHolder: ViewHolder = ViewHolder()
 
-    @Deprecated("Resolve using Dagger! React to change of flash color and vibrate: set notification properties!")
-    private val appSettings: IAppSettings = AppSettings()
+    @Deprecated("React to change of flash color and vibrate: set notification properties!")
+    @Inject
+    public lateinit var appSettings: IAppSettings
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_map_tab, container, false)
     }
 
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        this.context!!.getApplicationInjector().inject(this)
+
         super.onViewCreated(view, savedInstanceState)
 
         this.viewHolder
@@ -54,7 +57,7 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
 
         this.appSettings.appSettingsChanged.subscribe{
             if(it.propertyName == "trackColor" && it.oldValue != it.newValue) {
-                val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::javaClass.name)
+                val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::class.java.name)
                 if(trackRecorderMap != null) {
                     trackRecorderMap.trackColor = it.newValue as Int
                 }
@@ -73,7 +76,7 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
 
         val toggleRecordingFloatingActionButton = this.viewHolder.retrieve<FloatingActionButton>(R.id.trackrecorderactivity_tab_map_togglerecording_floatingactionbutton)
 
-        val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::javaClass.name)
+        val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::class.java.name)
         if(trackRecorderMap != null) {
             this.subscribeToMap(trackRecorderMap)
         }
@@ -121,7 +124,7 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
     }
 
     public override fun onMapReady(trackRecorderMap: ITrackRecorderMap) {
-        this.viewHolder.store(trackRecorderMap::javaClass.name, trackRecorderMap)
+        this.viewHolder.store(trackRecorderMap::class.java.name, trackRecorderMap)
 
         trackRecorderMap.zoomToLocation(LatLng(50.8357, 12.92922), 12f)
     }

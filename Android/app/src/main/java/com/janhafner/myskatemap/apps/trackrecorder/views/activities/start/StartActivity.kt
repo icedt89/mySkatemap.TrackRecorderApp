@@ -6,18 +6,24 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.ImageButton
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
+import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ActivityStartMode
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
+import javax.inject.Inject
 
 internal final class StartActivity: AppCompatActivity() {
+    @Inject
+    public lateinit var currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>
+
     public override fun onCreate(savedInstanceState: Bundle?) {
+        this.getApplicationInjector().inject(this)
+
         super.onCreate(savedInstanceState)
 
-        val currentTrackRecordingStore = CurrentTrackRecordingStore(this)
-
-        val currentTrackRecording = currentTrackRecordingStore.getData()
+        val currentTrackRecording = this.currentTrackRecordingStore.getData()
         if(currentTrackRecording != null) {
             val intent = Intent(this, TrackRecorderActivity::class.java)
             intent.putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.TryResume.toString())

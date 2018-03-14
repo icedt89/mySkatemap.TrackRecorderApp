@@ -3,20 +3,15 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.*
-import com.janhafner.myskatemap.apps.trackrecorder.location.provider.FusedLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.location.provider.ILocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.location.provider.LegacyLocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.location.provider.TestLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -27,23 +22,19 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 internal final class TrackRecorderService: Service(), ITrackRecorderService {
-    private val logTag: String = this.javaClass.name
+    @Inject
+    public lateinit var locationProvider: ILocationProvider
 
-    @Deprecated("Inject using Dagger")
-    private lateinit var locationProvider: ILocationProvider
+    @Inject
+    public lateinit var currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>
 
-    @Deprecated("Inject using Dagger")
-    private lateinit var trackRecordingStoreFileBased: IFileBasedDataStore<TrackRecording>
+    @Inject
+    public lateinit var locationChangedBroadcasterReceiver: LocationAvailabilityChangedBroadcastReceiver
 
-    @Deprecated("Inject using Dagger")
-    private lateinit var locationChangedBroadcasterReceiver: LocationAvailabilityChangedBroadcastReceiver
-
-    @Deprecated("Inject using Dagger")
     private val durationTimer: ObservableTimer = ObservableTimer()
 
     private lateinit var trackRecorderServiceNotification: TrackRecorderServiceNotification
 
-    @Deprecated("Inject using Dagger")
     @Inject
     public lateinit var trackDistanceCalculator: TrackDistanceCalculator
 
@@ -55,8 +46,9 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     public var currentTrackRecording: TrackRecording? = null
 
-    @Deprecated("Resolve using Dagger! React to change of flash color and vibrate: set notification properties!")
-    private val appSettings: IAppSettings = AppSettings()
+    @Deprecated("React to change of flash color and vibrate: set notification properties!")
+    @Inject
+    public lateinit var appSettings: IAppSettings
 
     public override var currentSession: ITrackRecordingSession? = null
         private set
@@ -65,7 +57,6 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         private set
 
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
-        this.locationChangedBroadcasterReceiver = LocationAvailabilityChangedBroadcastReceiver(this)
         this.registerReceiver(this.locationChangedBroadcasterReceiver, android.content.IntentFilter(LocationAvailabilityChangedBroadcastReceiver.PROVIDERS_CHANGED))
         this.locationServicesAvailabilityChangedSubscription = this.locationChangedBroadcasterReceiver.locationAvailabilityChanged.subscribe{
             if (!it) {
@@ -131,7 +122,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackDistanceCalculator.clear()
 
-        this.trackRecordingStoreFileBased.delete()
+        this.currentTrackRecordingStore.delete()
         this.currentTrackRecording = null
 
         this.changeState(TrackRecorderServiceState.Initializing)
@@ -155,7 +146,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackDistanceCalculator.clear()
 
-        this.trackRecordingStoreFileBased.delete()
+        this.currentTrackRecordingStore.delete()
         this.currentTrackRecording = null
 
         this.changeState(TrackRecorderServiceState.Initializing)
@@ -259,7 +250,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             throw IllegalStateException()
         }
 
-        this.trackRecordingStoreFileBased.save(this.currentTrackRecording!!)
+        this.currentTrackRecordingStore.save(this.currentTrackRecording!!)
     }
 
     private fun changeState(newState: TrackRecorderServiceState) {
@@ -285,10 +276,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     }
 
     public override fun onCreate() {
-        DaggerTrackRecorderServiceComponent.create().inject(this)
-
-        this.trackRecordingStoreFileBased = CurrentTrackRecordingStore(this)
-        this.locationProvider = this.createLocationProvider(TestLocationProvider::javaClass.name)
+        this.getApplicationInjector().inject(this)
 
         this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this)
         this.trackRecorderServiceNotification.flashColorOnLocationUnavailableState = this.appSettings.notificationFlashColorOnBackgroundStop
@@ -308,29 +296,6 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.changeState(TrackRecorderServiceState.Initializing)
     }
-
-    private fun createLocationProvider(locationProviderTypeName: String): ILocationProvider {
-        if (locationProviderTypeName == TestLocationProvider::javaClass.name) {
-            val initialLocation: Location = Location(-1)
-
-            initialLocation.bearing = 1.0f
-            initialLocation.latitude = 50.8333
-            initialLocation.longitude = 12.9167
-
-            return TestLocationProvider(this, initialLocation, interval = 500)
-        }
-
-        if (locationProviderTypeName == LegacyLocationProvider::javaClass.name) {
-            return LegacyLocationProvider(this)
-        }
-
-        if(locationProviderTypeName != FusedLocationProvider::javaClass.name) {
-            Log.wtf(this.logTag, "Not a valid LocationProvider implementation: \"${locationProviderTypeName}\"")
-        }
-
-        return FusedLocationProvider(this)
-    }
-
 
     public override fun onBind(intent: Intent?): IBinder {
         this.trackRecorderServiceNotification.userInitiatedServiceTerminationAllowed = false

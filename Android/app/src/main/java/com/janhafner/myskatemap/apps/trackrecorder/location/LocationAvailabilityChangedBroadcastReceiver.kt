@@ -34,3 +34,4 @@ internal final class LocationAvailabilityChangedBroadcastReceiver(context: Conte
         public val PROVIDERS_CHANGED: String = "android.location.PROVIDERS_CHANGED"
     }
 }
+

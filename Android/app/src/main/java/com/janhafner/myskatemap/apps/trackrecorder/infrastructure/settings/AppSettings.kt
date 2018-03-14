@@ -67,7 +67,7 @@ internal final class AppSettings: IAppSettings {
     public override val appSettingsChanged: Observable<PropertyChangedData> = this.appSettingsChangedSubject
 
     companion object {
-        public val DEFAULT_LOCATION_PROVIDER_TYPE_NAME: String = FusedLocationProvider::javaClass.name
+        public val DEFAULT_LOCATION_PROVIDER_TYPE_NAME: String = FusedLocationProvider::class.java.name
 
         public val DEFAULT_VIBRATE_ON_BACKGROUND_STOP: Boolean = true
 
@@ -77,6 +77,6 @@ internal final class AppSettings: IAppSettings {
         @ColorInt
         public val DEFAULT_TRACK_COLOR: Int = Color.parseColor("#FFFF3A3C")
 
-        public val DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME: String = KilometersTrackDistanceUnitFormatter::javaClass.name
+        public val DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME: String = KilometersTrackDistanceUnitFormatter::class.java.name
     }
 }

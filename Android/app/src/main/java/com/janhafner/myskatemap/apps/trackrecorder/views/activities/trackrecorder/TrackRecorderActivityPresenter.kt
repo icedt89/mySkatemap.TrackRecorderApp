@@ -40,7 +40,7 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
 
     private var locationServicesAvailabilitySubscription: Disposable? = null
 
-    private val currentTrackRecordingStoreFileBased: IFileBasedDataStore<TrackRecording> = CurrentTrackRecordingStore(activity)
+    private val currentTrackRecordingStore: IFileBasedDataStore<TrackRecording> = CurrentTrackRecordingStore(activity)
 
     private val trackRecorderServiceConnection: ServiceConnection = object: ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -91,12 +91,12 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
                 }
                 ActivityStartMode.TryResume -> {
                     try {
-                        val restoredTrackRecording = this.currentTrackRecordingStoreFileBased.getData()
+                        val restoredTrackRecording = this.currentTrackRecordingStore.getData()
                         if (restoredTrackRecording != null) {
                             this.trackRecordingSession = this.trackRecorderService?.useTrackRecording(restoredTrackRecording)
                         }
                     } catch (exception: IOException) {
-                        this.currentTrackRecordingStoreFileBased.delete()
+                        this.currentTrackRecordingStore.delete()
                     }
                 }
             }

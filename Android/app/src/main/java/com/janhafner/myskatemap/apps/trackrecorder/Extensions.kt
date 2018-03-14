@@ -37,6 +37,12 @@ internal fun ContextWrapper.startLocationSourceSettingsActivity() {
     this.startActivity(android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 }
 
+internal fun Context.getApplicationInjector(): ApplicationComponent {
+    val result = this.applicationContext as TrackRecorderApplication
+
+    return result.injector
+}
+
 internal fun Location.clone(sequenceNumber: Int): Location {
     val result = Location(sequenceNumber)
 
