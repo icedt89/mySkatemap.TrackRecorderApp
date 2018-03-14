@@ -2,7 +2,6 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import android.app.Service
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.IBinder
 import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
@@ -25,21 +24,28 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
 import org.joda.time.Period
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 internal final class TrackRecorderService: Service(), ITrackRecorderService {
     private val logTag: String = this.javaClass.name
 
+    @Deprecated("Inject using Dagger")
     private lateinit var locationProvider: ILocationProvider
 
+    @Deprecated("Inject using Dagger")
     private lateinit var trackRecordingStoreFileBased: IFileBasedDataStore<TrackRecording>
 
+    @Deprecated("Inject using Dagger")
     private lateinit var locationChangedBroadcasterReceiver: LocationAvailabilityChangedBroadcastReceiver
 
+    @Deprecated("Inject using Dagger")
     private val durationTimer: ObservableTimer = ObservableTimer()
 
     private lateinit var trackRecorderServiceNotification: TrackRecorderServiceNotification
 
-    private val trackDistanceCalculator: TrackDistanceCalculator = TrackDistanceCalculator()
+    @Deprecated("Inject using Dagger")
+    @Inject
+    public lateinit var trackDistanceCalculator: TrackDistanceCalculator
 
     private lateinit var locationServicesAvailabilityChangedSubscription: Disposable
 
@@ -162,7 +168,6 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     private fun closeCurrentSession() {
         this.sessionSubscriptions.clear()
 
-        // TODO: this.currentSession!!.terminate()
         this.currentSession = null
     }
 
@@ -219,15 +224,16 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             },
 
             this.currentSession!!.locationsChanged
-                    .buffer(5, TimeUnit.SECONDS)
+                    .buffer(1, TimeUnit.SECONDS)
+                    .filter{
+                        it.any()
+                    }
                     .subscribe {
-                        if(it.any()){
-                            this.trackDistanceCalculator.addAll(it)
+                        this.trackDistanceCalculator.addAll(it)
 
-                            this.currentTrackRecording!!.locations.putAll(it.map{
-                                Pair(it.sequenceNumber, it)
-                            })
-                        }
+                        this.currentTrackRecording!!.locations.putAll(it.map{
+                            Pair(it.sequenceNumber, it)
+                        })
                     },
 
                 this.stateChangedSubject.subscribe {
@@ -267,12 +273,6 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                     this.resumeTracking()
                 TrackRecorderServiceNotification.ACTION_PAUSE ->
                     this.pauseTracking()
-                TrackRecorderServiceNotification.ACTION_SHOW_LOCATION_SERVICES -> {
-                    val intent = android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-
-                    this.startActivity(intent)
-                }
                 TrackRecorderServiceNotification.ACTION_TERMINATE -> {
                     this.trackRecorderServiceNotification.close()
 
@@ -285,13 +285,14 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     }
 
     public override fun onCreate() {
-        this.applicationContext
+        DaggerTrackRecorderServiceComponent.create().inject(this)
+
         this.trackRecordingStoreFileBased = CurrentTrackRecordingStore(this)
         this.locationProvider = this.createLocationProvider(TestLocationProvider::javaClass.name)
 
         this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this)
         this.trackRecorderServiceNotification.flashColorOnLocationUnavailableState = this.appSettings.notificationFlashColorOnBackgroundStop
-        this.trackRecorderServiceNotification.VibrateOnLocationUnavailableState = this.appSettings.vibrateOnBackgroundStop
+        this.trackRecorderServiceNotification.vibrateOnLocationUnavailableState = this.appSettings.vibrateOnBackgroundStop
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
 
@@ -299,7 +300,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             if(it.propertyName == "notificationFlashColorOnBackgroundStop" && it.oldValue != it.newValue) {
                 this.trackRecorderServiceNotification.flashColorOnLocationUnavailableState = it.newValue as Int?
             } else if(it.propertyName == "vibrateOnBackgroundStop" && it.oldValue != it.newValue) {
-                this.trackRecorderServiceNotification.VibrateOnLocationUnavailableState = it.newValue as Boolean
+                this.trackRecorderServiceNotification.vibrateOnLocationUnavailableState = it.newValue as Boolean
             }
 
             this.trackRecorderServiceNotification.update()

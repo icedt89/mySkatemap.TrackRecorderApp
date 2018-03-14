@@ -20,7 +20,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
 
     public var trackDistance: Float? = null
 
-    public var VibrateOnLocationUnavailableState: Boolean = AppSettings.DEFAULT_VIBRATE_ON_BACKGROUND_STOP
+    public var vibrateOnLocationUnavailableState: Boolean = AppSettings.DEFAULT_VIBRATE_ON_BACKGROUND_STOP
 
     public var flashColorOnLocationUnavailableState: Int? = AppSettings.DEFAULT_NOTIFICATION_FLASH_COLOR_ON_BACKGROUND_STOP
 
@@ -37,7 +37,11 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
         this.notificationCompatBuilder.setShowWhen(false)
         this.notificationCompatBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         this.notificationCompatBuilder.setOngoing(true)
-        this.notificationCompatBuilder.setContentIntent(PendingIntent.getActivity(this.trackRecorderService, 0, Intent(this.trackRecorderService, TrackRecorderActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+
+        val intent = Intent(this.trackRecorderService, TrackRecorderActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        val pendingIntent = PendingIntent.getActivity(this.trackRecorderService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        this.notificationCompatBuilder.setContentIntent(pendingIntent)
     }
 
     public fun update() {
@@ -48,8 +52,8 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_runnning))
             TrackRecorderServiceState.LocationServicesUnavailable -> {
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
-                if(this.VibrateOnLocationUnavailableState) {
-                    this.notificationCompatBuilder.setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
+                if(this.vibrateOnLocationUnavailableState) {
+                    this.notificationCompatBuilder.setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000))
                 } else {
                     this.notificationCompatBuilder.setVibrate(LongArray(0))
                 }
@@ -62,6 +66,9 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
             }
             TrackRecorderServiceState.Paused ->
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_paused))
+            else -> {
+                // Nothing happens here. Else branch exist only to prevent warning on compile Oo
+            }
         }
 
         this.notificationCompatBuilder.mActions.clear()
@@ -87,7 +94,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
     }
 
     private fun buildContentText(): String {
-        if(this.durationOfRecording == null || this.trackDistance == null) {
+        if(this.durationOfRecording == null || this.trackDistance == null || this.durationOfRecording?.seconds == 0 || this.trackDistance == 0f) {
             return ""
         }
 
@@ -107,8 +114,6 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
         public const val ACTION_PAUSE = "trackrecorderservice.action.pause"
 
         public const val ACTION_TERMINATE = "trackrecorderservice.action.terminate"
-
-        public const val ACTION_SHOW_LOCATION_SERVICES = "trackrecorderservice.action.showlocationservices"
 
         private const val ID: Int = 1
     }

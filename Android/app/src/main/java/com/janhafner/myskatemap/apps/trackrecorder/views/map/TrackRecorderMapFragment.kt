@@ -71,7 +71,7 @@ internal final class TrackRecorderMapFragment : android.support.v4.app.Fragment(
 
         val cameraBounds = cameraBoundsBuilder.build()
 
-        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(cameraBounds, 50)
+        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(cameraBounds, 100)
 
         this.googleMap.animateCamera(cameraUpdate)
     }

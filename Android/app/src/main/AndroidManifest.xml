@@ -32,10 +32,10 @@
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/MySkatemap.TrackRecorder.AppTheme">
         <activity
             android:name=".views.activities.SplashscreenActivity"
-            android:theme="@style/SplashscreenActivityTheme">
+            android:theme="@style/MySkatemap.TrackRecorder.SplashscreenActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -47,7 +47,8 @@
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
-            android:name=".views.activities.start.StartActivity" />
+            android:name=".views.activities.start.StartActivity"
+            android:theme="@style/MySkatemap.TrackRecorder.StartActivityTheme"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

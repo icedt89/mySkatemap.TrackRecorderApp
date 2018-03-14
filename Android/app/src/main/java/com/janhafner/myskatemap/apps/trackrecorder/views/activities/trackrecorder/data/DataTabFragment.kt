@@ -78,7 +78,8 @@ internal final class DataTabFragment : Fragment() {
                 this.presenter.locationsChangedAvailable.subscribe{
                     this.currentLocationsChangedSubscription?.dispose()
 
-                    this.currentLocationsChangedSubscription = it.buffer(5, TimeUnit.SECONDS)
+                    this.currentLocationsChangedSubscription = it
+                            .buffer(1, TimeUnit.SECONDS)
                             .map {
                                 val count = it.count()
                                 if(count > 0) {

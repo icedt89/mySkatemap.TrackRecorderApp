@@ -77,7 +77,7 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     public override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
 
-        this.presenter.trackSessionStateChanged.first(TrackRecorderServiceState.Initializing)!!.subscribe{
+        this.presenter.trackSessionStateChanged.last(TrackRecorderServiceState.Initializing)!!.subscribe{
             it ->
                 if(it != TrackRecorderServiceState.Initializing) {
                     this.presenter.saveCurrentRecording()
@@ -121,6 +121,9 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
                         TrackRecorderServiceState.Paused,
                         TrackRecorderServiceState.LocationServicesUnavailable ->
                             Toast.makeText(this, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
+                        else -> {
+                            // Nothing happens here. Else branch exist only to prevent warning on compile Oo
+                        }
                     }
                 }
         )

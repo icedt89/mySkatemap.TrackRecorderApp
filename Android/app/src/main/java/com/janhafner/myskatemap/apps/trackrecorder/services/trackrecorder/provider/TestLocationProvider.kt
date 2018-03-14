@@ -14,9 +14,9 @@ import kotlin.collections.ArrayList
 
 internal final class TestLocationProvider(private val context: Context,
                                           private val initialLocation: Location,
-                                          private val bearingStepping: Float = 0.01f,
-                                          private val latitudeStepping: Double = 0.01,
-                                          private val longitudeStepping: Double = 0.01,
+                                          private val bearingStepping: Float = 0.0001f,
+                                          private val latitudeStepping: Double = 0.001,
+                                          private val longitudeStepping: Double = 0.001,
                                           private val delay: Long = 0,
                                           private val interval: Long = 5000,
                                           private val simulateDependencyToAndroidLocationServices: Boolean = true): LocationProvider() {

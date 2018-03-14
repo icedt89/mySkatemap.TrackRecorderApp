@@ -6,7 +6,6 @@ import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.checkAccessFineLocationPermission
 import com.janhafner.myskatemap.apps.trackrecorder.data.Attachment
@@ -49,50 +48,16 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
 
             self.trackRecorderService = service as ITrackRecorderService
             self.trackRecordingSession = self.trackRecorderService!!.currentSession
-
-            // TODO: IMPORTANT!
-            // TODO: Put the TrackRecording in question (either a new one or restored) into extra, so that the TrackRecorderActivity never instantiates without a TrackRecording!
-            if (self.trackRecordingSession == null) {
-                val mode = ActivityStartMode.valueOf(self.activity.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
-                when(mode) {
-                    ActivityStartMode.StartNew -> {
-                        val newTrackRecording = self.createNewTrackRecording()
-
-                        self.trackRecordingSession = self.trackRecorderService!!.useTrackRecording(newTrackRecording)
-
-                        if(self.activity.isLocationServicesEnabled()) {
-                            self.trackRecordingSession!!.resumeTracking()
-                        }else{
-                            ShowLocationServicesSnackbar.make(self.activity, self.activity.currentFocus).show()
-                        }
-                    }
-                    ActivityStartMode.TryResume -> {
-                        try {
-                            val restoredTrackRecording = self.currentTrackRecordingStoreFileBased.getData()
-                            if (restoredTrackRecording != null) {
-                                self.trackRecordingSession = self.trackRecorderService?.useTrackRecording(restoredTrackRecording)
-                            }
-                        } catch(exception: IOException) {
-                            self.currentTrackRecordingStoreFileBased.delete()
-
-                            Log.e("TrackRecorderAPresenter", "Unable to restore saved state of current recording! App still works but unfortunately you have lost your last recording :(", exception)
-                        }
-                    }
-                }
-            }
-
-            if (self.trackRecordingSession != null) {
-                self.subscribeToSession()
-            }
-
             self.locationServicesAvailabilitySubscription = self.trackRecorderService!!.locationServicesAvailability.subscribe{
                 if(!it) {
                     ShowLocationServicesSnackbar.make(self.activity, self.activity.currentFocus)
                 }
             }
+
+            self.initializeSession()
         }
 
-        override fun onServiceDisconnected(name: ComponentName) {
+        public override fun onServiceDisconnected(name: ComponentName) {
             val self = this@TrackRecorderActivityPresenter
 
             self.unsubscribeFromSession()
@@ -109,9 +74,72 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
         }
     }
 
+    private fun initializeSession() {
+        if(this.trackRecordingSession == null) {
+            val mode = ActivityStartMode.valueOf(this.activity.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
+            when (mode) {
+                ActivityStartMode.StartNew -> {
+                    val newTrackRecording = this.createNewTrackRecording()
+
+                    this.trackRecordingSession = this.trackRecorderService!!.useTrackRecording(newTrackRecording)
+
+                    if (this.activity.isLocationServicesEnabled()) {
+                        this.trackRecordingSession!!.resumeTracking()
+                    } else {
+                        ShowLocationServicesSnackbar.make(this.activity, this.activity.currentFocus).show()
+                    }
+                }
+                ActivityStartMode.TryResume -> {
+                    try {
+                        val restoredTrackRecording = this.currentTrackRecordingStoreFileBased.getData()
+                        if (restoredTrackRecording != null) {
+                            this.trackRecordingSession = this.trackRecorderService?.useTrackRecording(restoredTrackRecording)
+                        }
+                    } catch (exception: IOException) {
+                        this.currentTrackRecordingStoreFileBased.delete()
+                    }
+                }
+            }
+        }
+
+        if (this.trackRecordingSession != null) {
+            this.subscribeToSession()
+        }
+    }
+
+    private fun updateFromSession() {
+        this.trackingStartedAtChangedSubject.onNext(this.trackRecordingSession!!.trackingStartedAt)
+        this.attachmentsChangedSubject.onNext(this.trackRecordingSession!!.attachments)
+        this.locationChangedAvailableSubject.onNext(this.trackRecordingSession!!.locationsChanged)
+
+        this.trackRecordingSession!!.recordingTimeChanged.last(Period.ZERO).subscribe {
+            period ->
+                this.recordingTimeChangedSubject.onNext(period)
+        }
+
+        this.trackRecordingSession!!.trackDistanceChanged.last(0f).subscribe {
+            distance ->
+                this.trackDistanceChangedSubject.onNext(distance)
+        }
+
+        this.trackRecordingSession!!.stateChanged.last(TrackRecorderServiceState.Initializing).subscribe {
+            state ->
+                this.trackSessionStateChangedSubject.onNext(state)
+
+                val isRunning = state == TrackRecorderServiceState.Running
+                val isPaused = state == TrackRecorderServiceState.Paused
+
+                this.canStartResumeRecordingSubject.onNext(!isRunning)
+                this.canPauseRecordingSubject.onNext(isRunning)
+                this.canDiscardRecordingSubject.onNext(isPaused)
+                this.canFinishRecordingSubject.onNext(isPaused)
+        }
+    }
+
     private fun subscribeToSession() {
         this.trackingStartedAtChangedSubject.onNext(this.trackRecordingSession!!.trackingStartedAt)
         this.attachmentsChangedSubject.onNext(this.trackRecordingSession!!.attachments)
+        this.locationChangedAvailableSubject.onNext(this.trackRecordingSession!!.locationsChanged)
 
         this.subscriptions.addAll(
             this.trackRecordingSession!!.recordingTimeChanged.subscribe {
@@ -134,8 +162,6 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
                 this.canFinishRecordingSubject.onNext(isPaused)
             }
         )
-
-        this.locationChangedAvailableSubject.onNext(this.trackRecordingSession!!.locationsChanged)
     }
 
     private fun unsubscribeFromSession() {
@@ -221,7 +247,6 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
         }
     }
 
-    // TODO: MOVE TO CALLER OF ACTIVITY!
     private fun createNewTrackRecording(): TrackRecording {
         val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
         val nameTemplate = this.activity.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)

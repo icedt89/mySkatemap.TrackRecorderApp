@@ -89,7 +89,7 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
                 },
 
                 toggleRecordingFloatingActionButton.clicks().subscribe {
-                    this.presenter.canStartResumeRecordingChanged.first(false).subscribe {
+                    this.presenter.canStartResumeRecordingChanged.last(false).subscribe {
                         isGranted ->
                             if (isGranted) {
                                 if(this.context!!.isLocationServicesEnabled()) {
@@ -138,7 +138,10 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
                     this.currentLocationsChangedSubscription?.dispose()
 
                     this.currentLocationsChangedSubscription = it
-                            .buffer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                            .buffer(1, TimeUnit.SECONDS)
+                            .filter {
+                                it.any()
+                            }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(trackRecorderMap.consumeLocations())
                 }

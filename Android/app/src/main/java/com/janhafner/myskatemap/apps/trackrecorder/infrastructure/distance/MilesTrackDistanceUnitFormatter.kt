@@ -5,6 +5,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.roundTrackDistanceForDisplay
 
 internal final class MilesTrackDistanceUnitFormatter : ITrackDistanceUnitFormatter {
+    // TODO: Inject Context using Dagger
     public override fun format(context: Context, distanceInMeters: Float): String {
         if (distanceInMeters > MilesTrackDistanceUnitFormatter.MetersToMiles) {
             return context.getString(R.string.app_trackdistance_template_kilometers, (distanceInMeters / MilesTrackDistanceUnitFormatter.MetersToMiles).roundTrackDistanceForDisplay(context))

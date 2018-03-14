@@ -1,14 +1,14 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="MySkatemap.TrackRecorder.AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="SplashscreenActivityTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="MySkatemap.TrackRecorder.SplashscreenActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@drawable/splashscreen</item>
     </style>
 
-    <style name="StartActivityTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="MySkatemap.TrackRecorder.StartActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@color/colorAppIconBackground</item>
     </style>
 </resources>

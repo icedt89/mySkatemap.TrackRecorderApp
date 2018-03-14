@@ -7,7 +7,9 @@ import android.widget.ImageButton
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ActivityStartMode
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
 
 internal final class StartActivity: AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,19 +20,18 @@ internal final class StartActivity: AppCompatActivity() {
         val currentTrackRecording = currentTrackRecordingStore.getData()
         if(currentTrackRecording != null) {
             val intent = Intent(this, TrackRecorderActivity::class.java)
-            intent.putExtra("mode", "resume")
+            intent.putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.TryResume.toString())
 
             this.startActivity(intent, savedInstanceState)
 
             this.finish()
         } else {
-            // TODO: SHOW INFO FOR STARTING A NEW TRACKING
             this.setContentView(R.layout.activity_start)
 
             val button = this.findViewById<ImageButton>(R.id.startactivity_button_start_new_recording)
             button.clicks().subscribe{
                 val intent = Intent(this, TrackRecorderActivity::class.java)
-                intent.putExtra("mode", "startnew")
+                intent.putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.StartNew.toString())
 
                 this.startActivity(intent, savedInstanceState)
 

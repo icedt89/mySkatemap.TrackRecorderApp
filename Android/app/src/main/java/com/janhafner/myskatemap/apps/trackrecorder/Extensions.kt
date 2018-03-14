@@ -90,15 +90,10 @@ internal fun android.location.Location.toLocation(sequenceNumber: Int): Location
 
 internal fun ITrackRecorderMap.consumeLocations(): Consumer<Iterable<Location>> {
     return Consumer({
-            val locationsCount = it.count()
-            if (locationsCount > 0) {
-                val points = this.track.toMutableList()
-                points.addAll(it
-                        .map { it.toLatLng() }
-                )
+            val points = this.track.toMutableList()
+            points.addAll(it.map { it.toLatLng() })
 
-                this.track = points
-            }
+            this.track = points
     })
 }
 

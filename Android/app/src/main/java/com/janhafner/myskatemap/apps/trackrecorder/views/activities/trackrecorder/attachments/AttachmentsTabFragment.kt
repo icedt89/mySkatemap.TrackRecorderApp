@@ -65,7 +65,7 @@ internal final class AttachmentsTabFragment : Fragment() {
                         icon.setImageURI(Uri.parse(itemViewCreatedArgs.item.filePath))
 
                         itemViewCreatedArgs.view.longClicks().subscribe {
-                            this.presenter.attachmentsSelected.first(kotlin.collections.emptyList()).subscribe {
+                            this.presenter.attachmentsSelected.last(kotlin.collections.emptyList()).subscribe {
                                 selectedAttachmemts ->
                                     val o = selectedAttachmemts.toMutableList()
 
