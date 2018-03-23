@@ -8,5 +8,4 @@ internal final class HistoricTrackRecording(public val numberOfLocations: Int,
                                             public val trackingStartedAt: DateTime,
                                             public val trackingFinishedAt: DateTime,
                                             public val recordingTime: Period,
-                                            public val uploadedAt: DateTime) {
-}
+                                            public val uploadedAt: DateTime)

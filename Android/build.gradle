@@ -5,7 +5,7 @@ buildscript {
     ext.rxandroid_version = "2.1.1"
     ext.dagger_version = "2.15"
     ext.playservices_version = "11.8.0"
-    ext.supportlibrary_version = "26.1.0"
+    ext.supportlibrary_version = "27.1.0"
 
     repositories {
         google()

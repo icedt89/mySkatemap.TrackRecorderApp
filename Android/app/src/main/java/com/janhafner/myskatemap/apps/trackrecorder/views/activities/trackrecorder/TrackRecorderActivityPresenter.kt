@@ -10,7 +10,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.checkAccessFineLocationPermission
 import com.janhafner.myskatemap.apps.trackrecorder.data.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
@@ -31,7 +30,7 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import java.io.IOException
 
-internal final class TrackRecorderActivityPresenter(private val activity: AppCompatActivity) : ITrackRecorderActivityPresenter {
+internal final class TrackRecorderActivityPresenter(private val currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>) : ITrackRecorderActivityPresenter {
     private var trackRecorderService: ITrackRecorderService? = null
 
     private var trackRecordingSession: ITrackRecordingSession? = null
@@ -40,7 +39,13 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
 
     private var locationServicesAvailabilitySubscription: Disposable? = null
 
-    private val currentTrackRecordingStore: IFileBasedDataStore<TrackRecording> = CurrentTrackRecordingStore(activity)
+    private lateinit var activity: AppCompatActivity
+
+    public override fun bindToActivity(trackRecorderActivity: TrackRecorderActivity) {
+        this.activity = trackRecorderActivity
+    }
+
+    // private val currentTrackRecordingStore: IFileBasedDataStore<TrackRecording> = CurrentTrackRecordingStore(activity)
 
     private val trackRecorderServiceConnection: ServiceConnection = object: ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -201,10 +206,10 @@ internal final class TrackRecorderActivityPresenter(private val activity: AppCom
         this.attachmentsSelectedSubject.onNext(foundAttachments)
     }
 
-    private val attachmentsSelectedSubject: BehaviorSubject<List<Attachment>> = BehaviorSubject.createDefault<List<Attachment>>(kotlin.collections.emptyList<Attachment>())
+    private val attachmentsSelectedSubject: BehaviorSubject<List<Attachment>> = BehaviorSubject.createDefault<List<Attachment>>(kotlin.collections.emptyList())
     public override val attachmentsSelected: Observable<List<Attachment>> = this.attachmentsSelectedSubject
 
-    private val attachmentsChangedSubject: BehaviorSubject<List<Attachment>> = BehaviorSubject.createDefault<List<Attachment>>(kotlin.collections.emptyList<Attachment>())
+    private val attachmentsChangedSubject: BehaviorSubject<List<Attachment>> = BehaviorSubject.createDefault<List<Attachment>>(kotlin.collections.emptyList())
     public override val attachmentsChanged: Observable<List<Attachment>> = this.attachmentsChangedSubject
 
     public override fun addAttachment(attachment: Attachment) {

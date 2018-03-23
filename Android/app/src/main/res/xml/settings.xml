@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+    <PreferenceCategory
+        android:title="Karte"
+        android:key="preference_map">
+        <ListPreference
+            android:key="preference_map_style"
+            android:title="Stil"
+            android:summary="Darstellungsstil der Karte"
+            android:entries="@array/settingsactivity_map_style_names"
+            android:entryValues="@array/settingsactivity_map_style_values"
+            android:defaultValue="mapstyle_fanticmotor"/>
+        <ListPreference
+            android:key="preference_map_track_color"
+            android:title="Farbe der Strecke"
+            android:summary="Farbe in welcher die aufgezeichnete Strecke auf der Karte dargestellt wird"
+            android:enabled="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Einheiten"
+        android:key="preference_units">
+        <ListPreference
+            android:key="preference_units_distance"
+            android:title="Entfernung"
+            android:summary="Einheit welche zur Anzeige von Entfernungen verwendet wird"
+            android:entries="@array/settingsactivity_units_distance_names"
+            android:entryValues="@array/settingsactivity_units_distance_values"
+            android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.KilometersTrackDistanceUnitFormatter" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Streckenerfassung"
+        android:key="preference_tracking">
+        <ListPreference
+            android:key="preference_tracking_location_provider"
+            android:title="Standort-Provider"
+            android:summary="Implementierung welche zur Ermittlung der Standortdaten verwendet wird"
+            android:entries="@array/settingsactivity_tracking_location_provider_names"
+            android:entryValues="@array/settingsactivity_tracking_location_provider_values"
+            android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Benachrichtigungen"
+        android:key="preference_notifications">
+        <CheckBoxPreference
+            android:key="preference_notifications_vibrate_on_background_stop"
+            android:summary="Bei verlust der Aufnahme im Hintergrund vibrieren"
+            android:title="Vibrieren bei Stopp"
+            android:defaultValue="true" />
+        <ListPreference
+            android:key="preference_notifications_notification_flash_color_on_background_stop"
+            android:title="Farbe der Benachrichtigungsleuchte"
+            android:summary="Farbe der Benachrichtigungsleuchte bei verlust der Aufnahme im Hintergrund"
+            android:enabled="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

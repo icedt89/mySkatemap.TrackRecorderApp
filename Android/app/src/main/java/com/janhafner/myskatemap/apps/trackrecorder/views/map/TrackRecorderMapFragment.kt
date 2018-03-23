@@ -52,6 +52,11 @@ internal final class TrackRecorderMapFragment : android.support.v4.app.Fragment(
         get() = this.polyline.color
         set(value){ this.polyline.color = value }
 
+    private var _mapStyleResourceName: String = AppSettings.DEFAULT_MAP_STYLE_RESOURCE_NAME
+    public override var mapStyleResourceName: String
+        get() = _mapStyleResourceName
+        set(value){ this.applyMapStyleByResourceName(value) }
+
     public override var track: Iterable<LatLng>
         get() = this.polyline.points.asIterable()
         set(value) {
@@ -89,9 +94,26 @@ internal final class TrackRecorderMapFragment : android.support.v4.app.Fragment(
 
         this.googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
-        this.googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this.context!!, R.raw.mapstyle_fanticmotor))
+        this.applyMapStyleByResourceName(AppSettings.DEFAULT_MAP_STYLE_RESOURCE_NAME)
 
         this.trackColor = AppSettings.DEFAULT_TRACK_COLOR
+    }
+
+    private fun applyMapStyleByResourceName(mapStyleResourceName: String) {
+        val id = this.getApplicableMapStyleResourceId(mapStyleResourceName)
+
+        this.googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this.context!!, id))
+
+        this._mapStyleResourceName = mapStyleResourceName
+    }
+
+    private fun getApplicableMapStyleResourceId(mapStyleResourceName: String): Int {
+        var id = this.context!!.resources.getIdentifier(mapStyleResourceName, "raw", this.context!!.packageName)
+        if(id == 0) {
+            id = this.getApplicableMapStyleResourceId(AppSettings.DEFAULT_MAP_STYLE_RESOURCE_NAME)
+        }
+
+        return id
     }
 }
 

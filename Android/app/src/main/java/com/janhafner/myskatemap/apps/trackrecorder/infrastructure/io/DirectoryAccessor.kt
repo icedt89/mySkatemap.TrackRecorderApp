@@ -5,7 +5,6 @@ import android.net.Uri
 import android.support.v4.content.MimeTypeFilter
 import android.util.Log
 import java.io.File
-import java.io.FileFilter
 
 internal open class DirectoryAccessor(private val directory: File, private val contentResolver: ContentResolver): IDirectoryAccessor {
     public override fun directory(childDirectoryName: String): IDirectoryAccessor {
@@ -52,7 +51,7 @@ internal open class DirectoryAccessor(private val directory: File, private val c
             this.directory.createNewFile()
         }
 
-        return this.directory.listFiles(FileFilter{
+        return this.directory.listFiles({
             file ->
                 val fileMimeType = this.contentResolver.getType(Uri.fromFile(file))
 

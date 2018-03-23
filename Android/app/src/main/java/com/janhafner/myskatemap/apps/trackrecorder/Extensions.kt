@@ -147,9 +147,9 @@ internal fun Activity.checkAccessFineLocationPermission(): Observable<Boolean> {
                     }
 
                     public override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {
-                        emitter.onError(Throwable("onPermissionRationaleShouldBeShown not supported :)"))
+                       emitter.onError(Throwable("onPermissionRationaleShouldBeShown not supported :)"))
 
-                        emitter.onComplete()
+                       emitter.onComplete()
                     }
                 })
                 .check()

@@ -10,6 +10,8 @@ internal interface ITrackRecorderMap {
 
     var trackColor: Int
 
+    var mapStyleResourceName: String
+
     var track: Iterable<LatLng>
 
     fun zoomToLocation(location: LatLng, zoom: Float)

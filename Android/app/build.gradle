@@ -8,11 +8,11 @@ android {
         config {
         }
     }
-    compileSdkVersion 26
+    compileSdkVersion 27
     defaultConfig {
         applicationId 'com.janhafner.myskatemap.apps.trackrecorder'
         minSdkVersion 23
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         resConfigs "en", "de"
@@ -43,6 +43,7 @@ dependencies {
     implementation "net.danlew:android.joda:2.9.9.1"
     implementation "com.karumi:dexter:4.2.0"
     implementation "com.google.code.gson:gson:2.8.2"
+    // Updating to v12.0.0 breaks maps on emulator!
     implementation "com.google.android.gms:play-services-location:$playservices_version"
     implementation "com.google.android.gms:play-services-maps:$playservices_version"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -54,6 +55,7 @@ dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     implementation "com.google.dagger:dagger-android:$dagger_version"
     implementation "com.google.dagger:dagger-android-support:$dagger_version"
+    implementation 'com.android.support:support-v4:27.1.0'
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 }

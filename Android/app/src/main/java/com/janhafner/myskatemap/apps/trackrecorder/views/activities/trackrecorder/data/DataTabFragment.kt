@@ -7,14 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.jakewharton.rxbinding2.widget.text
-import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.formatDefault
-import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
+import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.KilometersTrackDistanceUnitFormatter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
-import com.janhafner.myskatemap.apps.trackrecorder.store
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -24,6 +22,7 @@ import io.reactivex.subjects.BehaviorSubject
 import org.joda.time.DateTime
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import javax.inject.Inject
 
 internal final class DataTabFragment : Fragment() {
     private lateinit var presenter: ITrackRecorderActivityPresenter
@@ -38,14 +37,23 @@ internal final class DataTabFragment : Fragment() {
 
     private val viewHolder: ViewHolder = ViewHolder()
 
-    @Deprecated("Resolve using ITrackDistanceUnitFormatterFactory by using Dagger")
-    private val trackDistanceUnitFormatter: ITrackDistanceUnitFormatter = KilometersTrackDistanceUnitFormatter()
+    @Inject
+    public lateinit var appSettings: IAppSettings
+
+    @Inject
+    public lateinit var trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
+
+    private lateinit var trackDistanceUnitFormatter: ITrackDistanceUnitFormatter
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_data_tab, container, false)
     }
 
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        this.context!!.getApplicationInjector().inject(this)
+
+        this.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
+
         super.onViewCreated(view, savedInstanceState)
 
         this.viewHolder
@@ -59,8 +67,14 @@ internal final class DataTabFragment : Fragment() {
         super.onStart()
 
         this.subscriptions.addAll(
+                this.appSettings.appSettingsChanged.subscribe{
+                    if(it.propertyName == "trackDistanceUnitFormatterTypeName" && it.hasChanged) {
+                        this.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
+                    }
+                },
+
                 this.presenter.trackDistanceChanged.map {
-                    this.trackDistanceUnitFormatter.format(this.context!!, it)
+                    this.trackDistanceUnitFormatter.format(it)
                 }.observeOn(AndroidSchedulers.mainThread()).subscribe(this.viewHolder.retrieve<AppCompatTextView>(R.id.trackrecorderactivity_tab_data_trackdistance).text()),
 
                 this.presenter.recordingTimeChanged.map {

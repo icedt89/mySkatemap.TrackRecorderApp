@@ -1,12 +1,11 @@
-package com.janhafner.myskatemap.apps.trackrecorder.location.provider
+package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 
 internal abstract class LocationProvider: ILocationProvider {
-    protected var currentSequenceNumber: Int = -1
-        private set
+    private var currentSequenceNumber: Int = -1
 
     private val locationsSubject: Subject<Location> = PublishSubject.create<Location>()
     public final override val locations: io.reactivex.Observable<Location> = this.locationsSubject

@@ -1,11 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io
 
 import android.content.Context
+import com.google.gson.Gson
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import java.io.File
 
-internal final class CurrentTrackRecordingStore(context: Context)
-   : FileBasedDataStore<TrackRecording>(File(context.filesDir, CurrentTrackRecordingStore.FILENAME), TrackRecording::class.java) {
+internal final class CurrentTrackRecordingStore(context: Context, gson: Gson)
+   : FileBasedDataStore<TrackRecording>(File(context.filesDir, CurrentTrackRecordingStore.FILENAME), TrackRecording::class.java, gson) {
 
    companion object {
        public const val FILENAME: String = "CurrentTrackRecording.json"

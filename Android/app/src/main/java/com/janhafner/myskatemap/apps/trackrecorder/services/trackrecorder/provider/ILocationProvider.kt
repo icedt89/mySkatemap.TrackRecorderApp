@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.location.provider
+package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import io.reactivex.Observable

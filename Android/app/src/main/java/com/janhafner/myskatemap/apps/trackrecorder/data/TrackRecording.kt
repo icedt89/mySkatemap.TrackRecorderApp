@@ -11,9 +11,9 @@ internal final class TrackRecording private constructor(public var name: String)
 
     public val locations: MutableMap<Int, Location> = ArrayMap<Int, Location>()
 
-    public val attachments: MutableList<Attachment> = ArrayList<Attachment>()
+    public val attachments: MutableList<Attachment> = ArrayList()
 
-    private val stateChangeEntries: MutableList<StateChangeEntry> = ArrayList<StateChangeEntry>()
+    private val stateChangeEntries: MutableList<StateChangeEntry> = ArrayList()
     public val stateChanges: List<StateChangeEntry>
         get() = this.stateChangeEntries
 

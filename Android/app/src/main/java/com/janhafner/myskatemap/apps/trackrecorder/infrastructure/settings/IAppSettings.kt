@@ -10,4 +10,6 @@ internal interface IAppSettings: IAppSettingsChanged {
     var locationProviderTypeName: String
 
     var notificationFlashColorOnBackgroundStop: Int
+
+    var mapStyleResourceName: String
 }

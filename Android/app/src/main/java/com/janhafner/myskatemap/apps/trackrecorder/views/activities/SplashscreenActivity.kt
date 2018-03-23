@@ -12,6 +12,7 @@ internal final class SplashscreenActivity: AppCompatActivity() {
 
         JodaTimeAndroid.init(this)
 
+        //this.startActivity(Intent(this, SettingsActivity::class.java), savedInstanceState)
         this.startActivity(Intent(this, StartActivity::class.java), savedInstanceState)
 
         this.finish()

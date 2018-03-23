@@ -35,7 +35,6 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
 
     private val viewHolder: ViewHolder = ViewHolder()
 
-    @Deprecated("React to change of flash color and vibrate: set notification properties!")
     @Inject
     public lateinit var appSettings: IAppSettings
 
@@ -54,15 +53,6 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
         val mapFragment = this.childFragmentManager.findFragmentById(R.id.trackrecorderactivity_tab_map_googlemap) as TrackRecorderMapFragment
 
         mapFragment.getMapAsync(this)
-
-        this.appSettings.appSettingsChanged.subscribe{
-            if(it.propertyName == "trackColor" && it.oldValue != it.newValue) {
-                val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::class.java.name)
-                if(trackRecorderMap != null) {
-                    trackRecorderMap.trackColor = it.newValue as Int
-                }
-            }
-        }
     }
 
     public override fun onDestroy() {
@@ -82,6 +72,22 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
         }
 
         this.subscriptions.addAll(
+                this.appSettings.appSettingsChanged.subscribe{
+                    if(it.propertyName == "trackColor" && it.hasChanged) {
+                        val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::class.java.name)
+                        if(trackRecorderMap != null) {
+                            trackRecorderMap.trackColor = it.newValue as Int
+                        }
+                    }
+
+                    if(it.propertyName == "mapStyleResourceName" && it.hasChanged) {
+                        val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::class.java.name)
+                        if(trackRecorderMap != null) {
+                            trackRecorderMap.mapStyleResourceName = it.newValue as String
+                        }
+                    }
+                },
+
                 this.presenter.canStartResumeRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe {
                     var iconId = R.drawable.ic_action_track_recorder_recording_startresume
                     if (!it) {
@@ -92,7 +98,7 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
                 },
 
                 toggleRecordingFloatingActionButton.clicks().subscribe {
-                    this.presenter.canStartResumeRecordingChanged.last(false).subscribe {
+                    this.presenter.canStartResumeRecordingChanged.first(false).subscribe {
                         isGranted ->
                             if (isGranted) {
                                 if(this.context!!.isLocationServicesEnabled()) {

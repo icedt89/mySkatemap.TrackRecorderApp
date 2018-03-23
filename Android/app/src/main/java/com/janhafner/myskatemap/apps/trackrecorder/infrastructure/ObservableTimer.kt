@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
 
 import android.os.SystemClock
-import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject

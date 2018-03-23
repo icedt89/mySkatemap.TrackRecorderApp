@@ -21,4 +21,6 @@ internal interface ITrackRecorderActivityPresenter: IMapTabFragmentPresenter, ID
     fun discardRecording()
 
     fun finishRecording()
+
+    fun bindToActivity(trackRecorderActivity: TrackRecorderActivity)
 }

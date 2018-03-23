@@ -19,13 +19,13 @@ internal final class ViewHolder {
 
     public fun <T> retrieve(key: Any): T {
         @Suppress("UNCHECKED_CAST")
-        return this.viewCache.get(key) as T
+        return this.viewCache[key] as T
     }
 
     public fun <T> tryRetrieve(key: Any): T? {
         if(this.viewCache.containsKey(key)) {
             @Suppress("UNCHECKED_CAST")
-            return this.viewCache.get(key) as T?
+            return this.viewCache[key] as T?
         }
 
         return null

@@ -1,7 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
@@ -12,10 +14,13 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings.SettingsActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import javax.inject.Inject
 
 
 internal final class TrackRecorderActivity: AppCompatActivity() {
@@ -25,6 +30,7 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
     private val viewHolder: ViewHolder = ViewHolder()
 
+    @Inject
     public lateinit var presenter: ITrackRecorderActivityPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +66,8 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
             }
         })
 
-        this.presenter = TrackRecorderActivityPresenter(this)
+        this.getApplicationInjector().inject(this)
+        this.presenter.bindToActivity(this)
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -127,6 +134,14 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
                     }
                 }
         )
+
+        // TODO
+        val navigationView = this.findViewById<NavigationView>(R.id.trackrecorderactivity_navigation)
+        navigationView.setNavigationItemSelectedListener({
+            this@TrackRecorderActivity.startActivity(Intent(this, SettingsActivity::class.java))
+
+            true
+        })
     }
 
     private fun subscribeToOptionsMenu() {

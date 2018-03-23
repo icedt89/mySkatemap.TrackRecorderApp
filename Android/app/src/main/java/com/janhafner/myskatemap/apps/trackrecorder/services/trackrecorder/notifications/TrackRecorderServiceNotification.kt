@@ -6,14 +6,13 @@ import android.support.v4.app.NotificationCompat
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.KilometersTrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import org.joda.time.Period
 
-internal final class TrackRecorderServiceNotification(private val trackRecorderService: TrackRecorderService) {
+internal final class TrackRecorderServiceNotification(private val trackRecorderService: TrackRecorderService, public var trackDistanceUnitFormatter: ITrackDistanceUnitFormatter) {
     public var state: TrackRecorderServiceState = TrackRecorderServiceState.Initializing
 
     public var durationOfRecording: Period? = null
@@ -25,9 +24,6 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
     public var flashColorOnLocationUnavailableState: Int? = AppSettings.DEFAULT_NOTIFICATION_FLASH_COLOR_ON_BACKGROUND_STOP
 
     public var userInitiatedServiceTerminationAllowed: Boolean = false
-
-    @Deprecated("Resolve using ITrackDistanceUnitFormatterFactory by using Dagger")
-    private val trackDistanceUnitFormatter: ITrackDistanceUnitFormatter = KilometersTrackDistanceUnitFormatter()
 
     private val notificationCompatBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this.trackRecorderService, TrackRecorderServiceNotificationChannel.ID)
 
@@ -49,7 +45,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
             TrackRecorderServiceState.Ready ->
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_ready))
             TrackRecorderServiceState.Running ->
-                this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_runnning))
+                this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_running))
             TrackRecorderServiceState.LocationServicesUnavailable -> {
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
                 if(this.vibrateOnLocationUnavailableState) {
@@ -99,7 +95,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
         }
 
         val durationDisplayTemplate = this.durationOfRecording!!.formatRecordingTime()
-        val formattedTrackDistance = this.trackDistanceUnitFormatter.format(this.trackRecorderService, this.trackDistance!!)
+        val formattedTrackDistance = this.trackDistanceUnitFormatter.format(this.trackDistance!!)
 
         return trackRecorderService.getString(R.string.trackrecorderservice_notification_contenttext_template, formattedTrackDistance, durationDisplayTemplate)
     }

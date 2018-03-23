@@ -10,7 +10,7 @@
     <string name="trackrecorderactivity_tab_attachments_title">Attachments</string>
     <string name="trackrecorderactivity_fragment_data_tab_trackingstartedat_none">No recording in progress</string>
     <string name="trackrecorderactivity_discard_confirmation_title">Discard</string>
-    <string name="trackrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost!\n\nDo you want to proceed?</string>
+    <string name="trackrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost!  Do you want to proceed?</string>
     <string name="trackrecorderactivity_discard_confirmation_button_yes_label">Discard</string>
     <string name="trackrecorderactivity_discard_confirmation_button_no_label">Cancel</string>
     <string name="trackrecorderactivity_finish_confirmation_title">Finish</string>
@@ -30,16 +30,48 @@
     <string name="app_trackdistance_template_miles">%s miles</string>
     <string name="app_trackdistance_decimalformat">#.##</string>
 
-    <string name="trackrecorderservice_notification_status_paused">Paused</string>
+    <string name="trackrecorderservice_notification_status_paused">Recording paused</string>
     <string name="trackrecorderservice_notification_status_locationservicesunavailable">Location services unavailable</string>
-    <string name="trackrecorderservice_notification_status_runnning">Running</string>
-    <string name="trackrecorderservice_notification_status_ready">Ready</string>
-    <string name="trackrecorderservice_notification_status_initializing">Initializing</string>
+    <string name="trackrecorderservice_notification_status_running">Running</string>
+    <string name="trackrecorderservice_notification_status_ready">Ready for recording</string>
     <string name="trackrecorderservice_notification_action_resume">Resume</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
     <string name="trackrecorderservice_notification_action_terminate">Terminate</string>
-    <string name="trackrecorderservice_notification_contenttext_template">%s in %s, klasse 👍</string>
+    <string name="trackrecorderservice_notification_contenttext_template">%s in %s, cool 👍</string>
     <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Delete</string>
     <string name="trackrecorderactivity_snackbar_locationservices_message">Location services not enabled</string>
     <string name="trackrecorderactivity_snackbar_locationservices_action_enable">enable</string>
+
+    <string-array name="settingsactivity_tracking_location_provider_values">
+        <item>com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider</item>
+        <item>com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LegacyLocationProvider</item>
+        <item>com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider</item>
+    </string-array>
+    <string-array name="settingsactivity_tracking_location_provider_names">
+        <item>Default</item>
+        <item>Interval</item>
+        <item>Simulated</item>
+    </string-array>
+
+    <string-array name="settingsactivity_units_distance_values">
+        <item>com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.KilometersTrackDistanceUnitFormatter</item>
+        <item>com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.MilesTrackDistanceUnitFormatter</item>
+    </string-array>
+    <string-array name="settingsactivity_units_distance_names">
+        <item>Kilometers</item>
+        <item>Miles</item>
+    </string-array>
+
+    <string-array name="settingsactivity_map_style_values">
+        <item></item>
+        <item>mapstyle_fanticmotor</item>
+        <item>mapstyle_graynblue</item>
+        <item>mapstyle_lightgray</item>
+    </string-array>
+    <string-array name="settingsactivity_map_style_names">
+        <item>Default</item>
+        <item>Fantic Motor</item>
+        <item>Gray 'n Blue</item>
+        <item>Light Gray</item>
+    </string-array>
 </resources>

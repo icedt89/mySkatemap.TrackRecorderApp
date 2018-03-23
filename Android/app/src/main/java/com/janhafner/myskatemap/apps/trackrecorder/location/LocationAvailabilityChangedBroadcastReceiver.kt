@@ -31,7 +31,7 @@ internal final class LocationAvailabilityChangedBroadcastReceiver(context: Conte
     }
 
     companion object {
-        public val PROVIDERS_CHANGED: String = "android.location.PROVIDERS_CHANGED"
+        public const val PROVIDERS_CHANGED: String = "android.location.PROVIDERS_CHANGED"
     }
 }
 

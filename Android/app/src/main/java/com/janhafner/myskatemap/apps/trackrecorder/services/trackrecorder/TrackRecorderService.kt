@@ -6,16 +6,16 @@ import android.os.IBinder
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.*
-import com.janhafner.myskatemap.apps.trackrecorder.location.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
 import org.joda.time.Period
 import java.util.concurrent.TimeUnit
@@ -38,7 +38,10 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     @Inject
     public lateinit var trackDistanceCalculator: TrackDistanceCalculator
 
-    private lateinit var locationServicesAvailabilityChangedSubscription: Disposable
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
+
+    @Inject
+    public lateinit var trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
 
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
@@ -46,7 +49,6 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     public var currentTrackRecording: TrackRecording? = null
 
-    @Deprecated("React to change of flash color and vibrate: set notification properties!")
     @Inject
     public lateinit var appSettings: IAppSettings
 
@@ -58,7 +60,8 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
         this.registerReceiver(this.locationChangedBroadcasterReceiver, android.content.IntentFilter(LocationAvailabilityChangedBroadcastReceiver.PROVIDERS_CHANGED))
-        this.locationServicesAvailabilityChangedSubscription = this.locationChangedBroadcasterReceiver.locationAvailabilityChanged.subscribe{
+
+        this.subscriptions.add(this.locationChangedBroadcasterReceiver.locationAvailabilityChanged.subscribe{
             if (!it) {
                 if (this.stateChangedSubject.value != TrackRecorderServiceState.Initializing) {
                     this.pauseTrackingAndSetState(com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState.LocationServicesUnavailable)
@@ -68,7 +71,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                     this.resumeTracking()
                 }
             }
-        }
+        })
         
         this.locationServicesAvailability = this.locationChangedBroadcasterReceiver.locationAvailabilityChanged
     }
@@ -278,21 +281,29 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     public override fun onCreate() {
         this.getApplicationInjector().inject(this)
 
-        this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this)
+        this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this, this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter())
         this.trackRecorderServiceNotification.flashColorOnLocationUnavailableState = this.appSettings.notificationFlashColorOnBackgroundStop
         this.trackRecorderServiceNotification.vibrateOnLocationUnavailableState = this.appSettings.vibrateOnBackgroundStop
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
 
-        this.appSettings.appSettingsChanged.subscribe {
-            if(it.propertyName == "notificationFlashColorOnBackgroundStop" && it.oldValue != it.newValue) {
+        this.subscriptions.add(this.appSettings.appSettingsChanged.subscribe {
+            if(it.propertyName == "notificationFlashColorOnBackgroundStop" && it.hasChanged) {
                 this.trackRecorderServiceNotification.flashColorOnLocationUnavailableState = it.newValue as Int?
-            } else if(it.propertyName == "vibrateOnBackgroundStop" && it.oldValue != it.newValue) {
+
+                this.trackRecorderServiceNotification.update()
+            } else if(it.propertyName == "vibrateOnBackgroundStop" && it.hasChanged) {
                 this.trackRecorderServiceNotification.vibrateOnLocationUnavailableState = it.newValue as Boolean
+
+                this.trackRecorderServiceNotification.update()
             }
 
-            this.trackRecorderServiceNotification.update()
-        }
+            if(it.propertyName == "trackDistanceUnitFormatterTypeName" && it.hasChanged) {
+                this.trackRecorderServiceNotification.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
+
+                this.trackRecorderServiceNotification.update()
+            }
+        })
 
         this.changeState(TrackRecorderServiceState.Initializing)
     }
@@ -325,6 +336,6 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.closeCurrentSession()
 
         this.trackRecorderServiceNotification.close()
-        this.locationServicesAvailabilityChangedSubscription.dispose()
+        this.subscriptions.clear()
     }
 }

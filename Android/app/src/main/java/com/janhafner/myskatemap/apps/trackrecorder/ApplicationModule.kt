@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.content.Context
+import android.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.data.HistoricTrackRecording
@@ -17,12 +18,16 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSe
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.LocationAvailabilityChangedBroadcastReceiver
-import com.janhafner.myskatemap.apps.trackrecorder.location.provider.FusedLocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.location.provider.ILocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.location.provider.LegacyLocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.location.provider.TestLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LegacyLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
 import dagger.Module
 import dagger.Provides
+import org.joda.time.DateTime
+import org.joda.time.Period
 import javax.inject.Singleton
 
 @Module
@@ -33,7 +38,7 @@ internal final class ApplicationModule(private val applicationContext: Context) 
         val locationProviderTypeName = TestLocationProvider::class.java.name
 
         if (locationProviderTypeName == TestLocationProvider::class.java.name) {
-            val initialLocation: Location = Location(-1)
+            val initialLocation = Location(-1)
 
             initialLocation.bearing = 1.0f
             initialLocation.latitude = 50.8333
@@ -63,40 +68,51 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
+    public fun provideTrackRecorderActivityPresenter(currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>): ITrackRecorderActivityPresenter {
+        return TrackRecorderActivityPresenter(currentTrackRecordingStore)
+    }
+
+    @Provides
+    @Singleton
     public fun provideAppSettings(): IAppSettings {
-        return AppSettings()
+        val sharedPreferences  =PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+
+        val appSettings = AppSettings.bindToSharedPreferences(sharedPreferences)
+
+        return appSettings
+        // return AppSettings()
     }
 
     @Singleton
     @Provides
-    public fun provideCurrentTrackRecordingStore(): IFileBasedDataStore<TrackRecording> {
-        return CurrentTrackRecordingStore(this.applicationContext)
+    public fun provideCurrentTrackRecordingStore(gson: Gson): IFileBasedDataStore<TrackRecording> {
+        return CurrentTrackRecordingStore(this.applicationContext, gson)
     }
 
     @Singleton
     @Provides
-    public fun provideTrackRecordingHistoryStore(): IFileBasedDataStore<List<HistoricTrackRecording>> {
-        return TrackRecordingHistoryStore(this.applicationContext)
+    public fun provideTrackRecordingHistoryStore(gson: Gson): IFileBasedDataStore<List<HistoricTrackRecording>> {
+        return TrackRecordingHistoryStore(this.applicationContext, gson)
     }
 
     @Singleton
     @Provides
-    public fun providesGson(): Gson {
+    public fun provideGson(): Gson {
         return GsonBuilder()
-                .registerTypeAdapter(JodaTimeDateTimeGsonAdapter::class.java, JodaTimeDateTimeGsonAdapter())
-                .registerTypeAdapter(JodaTimePeriodGsonAdapter::class.java, JodaTimePeriodGsonAdapter())
+                .registerTypeAdapter(DateTime::class.java, JodaTimeDateTimeGsonAdapter())
+                .registerTypeAdapter(Period::class.java, JodaTimePeriodGsonAdapter())
                 .create()
     }
 
     @Provides
     @Singleton
-    public fun providesTrackDistanceCalculator(): TrackDistanceCalculator {
+    public fun provideTrackDistanceCalculator(): TrackDistanceCalculator {
         return TrackDistanceCalculator()
     }
 
     @Provides
     @Singleton
-    public fun providesTrackDistanceUnitFormatterFactory(appSettings: IAppSettings): ITrackDistanceUnitFormatterFactory {
-        return TrackDistanceUnitFormatterFactory(appSettings)
+    public fun provideTrackDistanceUnitFormatterFactory(appSettings: IAppSettings): ITrackDistanceUnitFormatterFactory {
+        return TrackDistanceUnitFormatterFactory(appSettings, this.applicationContext)
     }
 }

@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.location.provider
+package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import android.content.Context
 import android.os.SystemClock
@@ -22,7 +22,7 @@ internal final class TestLocationProvider(private val context: Context,
                                           private val simulateDependencyToAndroidLocationServices: Boolean = true): LocationProvider() {
     private val timer: Timer = Timer()
 
-    private val referencelessCoordinates: MutableList<PointD> = ArrayList<PointD>()
+    private val genericCoordinates: MutableList<PointD> = ArrayList()
 
     private var lastComputedLocation: Location? = null
 
@@ -48,7 +48,7 @@ internal final class TestLocationProvider(private val context: Context,
         super.overrideSequenceNumber(-1)
         this.lastComputedLocation = null
 
-        this.referencelessCoordinates.clear()
+        this.genericCoordinates.clear()
 
         for (i in 0..sequenceNumber) {
             this.computeLocation()
@@ -58,7 +58,7 @@ internal final class TestLocationProvider(private val context: Context,
     }
 
     private fun computeNextLocation(counter: Int, initialLocation: LatLng, offsetLatitude: Double, offsetLongitude: Double): LatLng {
-        val previousCoordinates = referencelessCoordinates[counter - 1]
+        val previousCoordinates = genericCoordinates[counter - 1]
 
         var x = previousCoordinates.x
         var y = previousCoordinates.y
@@ -77,7 +77,7 @@ internal final class TestLocationProvider(private val context: Context,
             }
         }
 
-        referencelessCoordinates.add(PointD(x, y))
+        genericCoordinates.add(PointD(x, y))
 
         return LatLng(x + initialLocation.latitude, y + initialLocation.longitude)
     }
@@ -96,7 +96,7 @@ internal final class TestLocationProvider(private val context: Context,
             this.lastComputedLocation?.longitude = initialLocation.longitude
             this.lastComputedLocation?.speed = initialLocation.speed
 
-            this.referencelessCoordinates.add(PointD(0.0, 0.0))
+            this.genericCoordinates.add(PointD(0.0, 0.0))
         } else {
             this.lastComputedLocation = this.lastComputedLocation?.clone(sequenceNumber)
 

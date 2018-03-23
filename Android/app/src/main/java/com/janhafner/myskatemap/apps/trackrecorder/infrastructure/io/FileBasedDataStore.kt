@@ -2,17 +2,12 @@ package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io
 
 import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gson.JodaTimeDateTimeGsonAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gson.JodaTimePeriodGsonAdapter
-import org.joda.time.DateTime
-import org.joda.time.Period
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.lang.reflect.Type
 
-internal open class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type): IFileBasedDataStore<T> {
+internal open class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type, private val gson: Gson): IFileBasedDataStore<T> {
     @Synchronized
     public final override fun save(data: T) {
         val writer = FileWriter(this.file)
@@ -49,13 +44,6 @@ internal open class FileBasedDataStore<T>(private val file: File, private val ty
         reader.close()
 
         return result as T
-    }
-
-    companion object {
-        private val gson: Gson = GsonBuilder()
-                .registerTypeAdapter(DateTime::class.java, JodaTimeDateTimeGsonAdapter())
-                .registerTypeAdapter(Period::class.java, JodaTimePeriodGsonAdapter())
-                .create()
     }
 }
 
