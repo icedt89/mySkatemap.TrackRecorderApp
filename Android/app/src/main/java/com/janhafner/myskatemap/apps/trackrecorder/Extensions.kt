@@ -11,10 +11,11 @@ import android.provider.OpenableColumns
 import android.provider.Settings
 import android.view.View
 import com.google.android.gms.maps.model.LatLng
-import com.janhafner.myskatemap.apps.trackrecorder.data.HistoricTrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.google.gson.Gson
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.ContentInfo
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.FileBasedDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
@@ -28,6 +29,8 @@ import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
+import java.io.File
+import java.lang.reflect.Type
 
 internal fun Location.toLatLng(): LatLng {
     return LatLng(this.latitude, this.longitude)
@@ -109,6 +112,10 @@ internal fun ViewHolder.store(view: View): ViewHolder {
     return this
 }
 
+internal fun <T> File.asFileBasedDatastore(typeOfT: Type, gson: Gson): IFileBasedDataStore<T> {
+    return FileBasedDataStore(this, typeOfT, gson)
+}
+
 internal fun ITrackRecorderMap.consumeReset(): Consumer<TrackRecorderServiceState> {
     return Consumer({
         currentState ->
@@ -171,8 +178,4 @@ internal fun ContentResolver.getContentInfo(uri: Uri): ContentInfo {
     cursor.close()
 
     return ContentInfo(displayName, size, uri, mimeType)
-}
-
-internal fun TrackRecording.toHistoricEntry(uploadedAt: DateTime): HistoricTrackRecording {
-    return HistoricTrackRecording(this.locations.count(), this.attachments.count(), this.trackingStartedAt, this.trackingFinishedAt!!, this.recordingTime, uploadedAt)
 }

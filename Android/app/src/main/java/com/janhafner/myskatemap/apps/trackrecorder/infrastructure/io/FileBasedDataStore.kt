@@ -2,12 +2,13 @@ package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io
 
 import android.util.Log
 import com.google.gson.Gson
+import com.squareup.moshi.Moshi
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.lang.reflect.Type
 
-internal open class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type, private val gson: Gson): IFileBasedDataStore<T> {
+internal open class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type, private val moshi: Moshi): IFileBasedDataStore<T> {
     @Synchronized
     public final override fun save(data: T) {
         val writer = FileWriter(this.file)

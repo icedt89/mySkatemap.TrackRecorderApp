@@ -41,6 +41,7 @@
     <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Delete</string>
     <string name="trackrecorderactivity_snackbar_locationservices_message">Location services not enabled</string>
     <string name="trackrecorderactivity_snackbar_locationservices_action_enable">enable</string>
+    <string name="startactivity_start_new_recording_button_label">Start new recording</string>
 
     <string-array name="settingsactivity_tracking_location_provider_values">
         <item>com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider</item>

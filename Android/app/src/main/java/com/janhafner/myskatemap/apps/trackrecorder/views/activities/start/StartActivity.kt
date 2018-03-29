@@ -10,19 +10,29 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ActivityStartMode
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
+import java.util.*
 import javax.inject.Inject
+
 
 internal final class StartActivity: AppCompatActivity() {
     @Inject
     public lateinit var currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>
 
+    @Inject
+    public lateinit var appSettings: IAppSettings
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.setDefaultValues(this, R.xml.settings, true)
 
         this.getApplicationInjector().inject(this)
+
+        // TODO: Right place?
+        val currentLocale = Locale(this.appSettings.appUiLocale)
+        Locale.setDefault(currentLocale)
 
         super.onCreate(savedInstanceState)
 

@@ -14,7 +14,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:gravity="center_horizontal"
-            android:text="Start new recording"
+            android:text="@string/startactivity_start_new_recording_button_label"
             android:textColor="@color/colorAppIconForeground"
             android:textSize="36sp" />
 

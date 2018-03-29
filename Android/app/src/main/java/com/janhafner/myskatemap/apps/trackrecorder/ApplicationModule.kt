@@ -2,18 +2,14 @@ package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.content.Context
 import android.preference.PreferenceManager
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.janhafner.myskatemap.apps.trackrecorder.data.HistoricTrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimeDateTimeMoshaAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimePeriodMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gson.JodaTimeDateTimeGsonAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gson.JodaTimePeriodGsonAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.TrackRecordingHistoryStore
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
@@ -24,10 +20,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provid
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
+import com.squareup.moshi.KotlinJsonAdapterFactory
+import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
-import org.joda.time.DateTime
-import org.joda.time.Period
 import javax.inject.Singleton
 
 @Module
@@ -80,28 +76,22 @@ internal final class ApplicationModule(private val applicationContext: Context) 
         val appSettings = AppSettings.bindToSharedPreferences(sharedPreferences)
 
         return appSettings
-        // return AppSettings()
     }
 
     @Singleton
     @Provides
-    public fun provideCurrentTrackRecordingStore(gson: Gson): IFileBasedDataStore<TrackRecording> {
-        return CurrentTrackRecordingStore(this.applicationContext, gson)
+    public fun provideCurrentTrackRecordingStore(moshi: Moshi): IFileBasedDataStore<TrackRecording> {
+        return CurrentTrackRecordingStore(this.applicationContext, moshi)
     }
 
     @Singleton
     @Provides
-    public fun provideTrackRecordingHistoryStore(gson: Gson): IFileBasedDataStore<List<HistoricTrackRecording>> {
-        return TrackRecordingHistoryStore(this.applicationContext, gson)
-    }
-
-    @Singleton
-    @Provides
-    public fun provideGson(): Gson {
-        return GsonBuilder()
-                .registerTypeAdapter(DateTime::class.java, JodaTimeDateTimeGsonAdapter())
-                .registerTypeAdapter(Period::class.java, JodaTimePeriodGsonAdapter())
-                .create()
+    public fun provideGson(): Moshi {
+        return Moshi.Builder()
+                .add(JodaTimeDateTimeMoshaAdapter())
+                .add(JodaTimePeriodMoshaAdapter())
+                .add(KotlinJsonAdapterFactory())
+                .build()
     }
 
     @Provides

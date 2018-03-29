@@ -42,7 +42,8 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:2.1.9"
     implementation "net.danlew:android.joda:2.9.9.1"
     implementation "com.karumi:dexter:4.2.0"
-    implementation "com.google.code.gson:gson:2.8.2"
+    implementation 'com.squareup.moshi:moshi:1.5.0'
+    implementation 'com.squareup.moshi:moshi-kotlin:1.5.0'
     // Updating to v12.0.0 breaks maps on emulator!
     implementation "com.google.android.gms:play-services-location:$playservices_version"
     implementation "com.google.android.gms:play-services-maps:$playservices_version"

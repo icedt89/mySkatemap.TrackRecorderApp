@@ -7,8 +7,18 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.Kilom
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import java.util.*
 
 internal final class AppSettings: IAppSettings {
+    public override var appUiLocale: String = DEFAULT_APP_UI_LOCALE
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.appSettingsChangedSubject.onNext(PropertyChangedData("appUiLocale", oldValue, value))
+        }
+
     public override var trackDistanceUnitFormatterTypeName: String = DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME
         set(value) {
             val oldValue = field
@@ -71,6 +81,8 @@ internal final class AppSettings: IAppSettings {
 
         public const val DEFAULT_MAP_STYLE_RESOURCE_NAME: String = "mapstyle_fanticmotor"
 
+        public val DEFAULT_APP_UI_LOCALE: String = Locale.getDefault().language
+
         public const val DEFAULT_VIBRATE_ON_BACKGROUND_STOP: Boolean = true
 
         @ColorInt
@@ -107,6 +119,10 @@ internal final class AppSettings: IAppSettings {
                     }
                     "preference_notifications_notification_flash_color_on_background_stop" -> {
 
+                    }
+                    "preference_app_ui_locale" -> {
+                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_APP_UI_LOCALE)
+                        result.appUiLocale = currentValue
                     }
                 }
             }
