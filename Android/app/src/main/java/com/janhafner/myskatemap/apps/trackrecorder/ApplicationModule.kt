@@ -5,6 +5,7 @@ import android.preference.PreferenceManager
 import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimeDateTimeMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimePeriodMoshaAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.UuidMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceUnitFormatterFactory
@@ -20,7 +21,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provid
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
-import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -90,7 +90,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
         return Moshi.Builder()
                 .add(JodaTimeDateTimeMoshaAdapter())
                 .add(JodaTimePeriodMoshaAdapter())
-                .add(KotlinJsonAdapterFactory())
+                .add(UuidMoshaAdapter())
+                //.add(KotlinJsonAdapterFactory())
                 .build()
     }
 

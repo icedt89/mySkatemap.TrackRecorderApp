@@ -11,7 +11,6 @@ import android.provider.OpenableColumns
 import android.provider.Settings
 import android.view.View
 import com.google.android.gms.maps.model.LatLng
-import com.google.gson.Gson
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.ContentInfo
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.FileBasedDataStore
@@ -25,6 +24,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import com.squareup.moshi.Moshi
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.functions.Consumer
@@ -112,8 +112,8 @@ internal fun ViewHolder.store(view: View): ViewHolder {
     return this
 }
 
-internal fun <T> File.asFileBasedDatastore(typeOfT: Type, gson: Gson): IFileBasedDataStore<T> {
-    return FileBasedDataStore(this, typeOfT, gson)
+internal fun <T> File.asFileBasedDatastore(typeOfT: Type, moshi: Moshi): IFileBasedDataStore<T> {
+    return FileBasedDataStore(this, typeOfT, moshi)
 }
 
 internal fun ITrackRecorderMap.consumeReset(): Consumer<TrackRecorderServiceState> {

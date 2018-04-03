@@ -31,7 +31,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     @Inject
     public lateinit var locationChangedBroadcasterReceiver: LocationAvailabilityChangedBroadcastReceiver
 
-    private val durationTimer: ObservableTimer = ObservableTimer()
+    private val durationTimer: com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer = com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer()
 
     private lateinit var trackRecorderServiceNotification: TrackRecorderServiceNotification
 

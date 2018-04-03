@@ -1,19 +1,22 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io
 
 import android.util.Log
-import com.google.gson.Gson
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.lang.reflect.Type
 
-internal open class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type, private val moshi: Moshi): IFileBasedDataStore<T> {
+internal open class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type, moshi: Moshi): IFileBasedDataStore<T> {
+    private val adapter: JsonAdapter<T> = moshi.adapter<T>(this.typeOfT)
+
     @Synchronized
     public final override fun save(data: T) {
         val writer = FileWriter(this.file)
 
-        gson.toJson(data, writer)
+        val jsonData = this.adapter.toJson(data)
+        writer.write(jsonData)
 
         writer.flush()
         writer.close()
@@ -40,11 +43,12 @@ internal open class FileBasedDataStore<T>(private val file: File, private val ty
 
         val reader = FileReader(this.file)
 
-        val result = gson.fromJson<T>(reader, this.typeOfT)
+        val content =reader.readText()
+        val result = this.adapter.fromJson(content)
 
         reader.close()
 
-        return result as T
+        return result
     }
 }
 
