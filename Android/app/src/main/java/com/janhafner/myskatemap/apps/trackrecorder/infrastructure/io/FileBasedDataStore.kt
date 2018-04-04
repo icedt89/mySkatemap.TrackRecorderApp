@@ -11,7 +11,10 @@ import java.lang.reflect.Type
 internal open class FileBasedDataStore<T>(private val file: File, private val typeOfT: Type, moshi: Moshi): IFileBasedDataStore<T> {
     private val adapter: JsonAdapter<T> = moshi.adapter<T>(this.typeOfT)
 
-    @Synchronized
+    public final override fun exists(): Boolean {
+        return this.file.exists()
+    }
+
     public final override fun save(data: T) {
         val writer = FileWriter(this.file)
 
@@ -22,7 +25,6 @@ internal open class FileBasedDataStore<T>(private val file: File, private val ty
         writer.close()
     }
 
-    @Synchronized
     public final override fun delete() {
         if (!this.file.exists()) {
             return
@@ -35,7 +37,6 @@ internal open class FileBasedDataStore<T>(private val file: File, private val ty
         }
     }
 
-    @Synchronized
     public final override fun getData(): T? {
         if (!this.file.exists()) {
             return null

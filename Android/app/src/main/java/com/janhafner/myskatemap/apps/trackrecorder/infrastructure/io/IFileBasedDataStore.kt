@@ -6,4 +6,6 @@ internal interface IFileBasedDataStore<T> {
     fun delete()
 
     fun getData(): T?
+
+    fun exists(): Boolean
 }
