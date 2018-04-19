@@ -1,13 +1,14 @@
-package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.refactored
+package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io
 
 import java.io.File
 
 internal final class FileSystemFileAccessor(public override val nativeFile: File): IFileAccessor {
-    public override val directory: IDirectoryNavigator
-
-    init {
-        this.directory = FileSystemDirectoryNavigator(this.nativeFile.parentFile)
+    private val lazyDirectory: Lazy<IDirectoryNavigator> = lazy {
+        FileSystemDirectoryNavigator(this.nativeFile.parentFile)
     }
+
+    public override val directory: IDirectoryNavigator
+        get() = this.lazyDirectory.value
 
     public override val name: String
         get() = this.nativeFile.name

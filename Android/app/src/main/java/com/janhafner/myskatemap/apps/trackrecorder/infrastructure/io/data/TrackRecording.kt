@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.data
+package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data
 
 import android.support.v4.util.ArrayMap
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
@@ -28,31 +28,31 @@ internal final class TrackRecording private constructor(public var name: String)
 
     public var recordingTime: Period = Period.ZERO
 
-    public fun finished() {
+    public fun finish() {
         this.trackingFinishedAt = DateTime.now()
-        val stateChangeEntry = this.stateChangeEntries.last().finished(this.trackingFinishedAt!!)
+        val stateChangeEntry = this.stateChangeEntries.last().finish(this.trackingFinishedAt!!)
 
         this.stateChangeEntries.add(stateChangeEntry)
     }
 
-    public fun paused() {
-        val stateChangeEntry = this.stateChangeEntries.last().paused()
+    public fun pause() {
+        val stateChangeEntry = this.stateChangeEntries.last().pause()
 
         this.stateChangeEntries.add(stateChangeEntry)
     }
 
-    public fun resumed() {
-        val stateChangeEntry = this.stateChangeEntries.last().resumed()
+    public fun resume() {
+        val stateChangeEntry = this.stateChangeEntries.last().resume()
 
         this.stateChangeEntries.add(stateChangeEntry)
     }
 
     companion object {
-        public fun started(name: String): TrackRecording {
+        public fun start(name: String): TrackRecording {
             val result = TrackRecording(name)
 
             result.trackingStartedAt = DateTime.now()
-            result.stateChangeEntries.add(StateChangeEntry.started(result.trackingStartedAt))
+            result.stateChangeEntries.add(StateChangeEntry.start(result.trackingStartedAt))
 
             return result
         }

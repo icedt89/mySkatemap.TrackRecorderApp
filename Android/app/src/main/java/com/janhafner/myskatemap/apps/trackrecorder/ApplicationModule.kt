@@ -2,16 +2,17 @@ package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.content.Context
 import android.preference.PreferenceManager
-import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimeDateTimeMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimePeriodMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.UuidMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.CurrentTrackRecordingStore
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.FileSystemDirectoryNavigator
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IDirectoryNavigator
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.LocationAvailabilityChangedBroadcastReceiver
@@ -21,6 +22,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provid
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragmentFactory
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -52,8 +55,34 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
+    public fun provideAppConfig(moshi: Moshi): IAppConfig {
+        return AppConfig.fromAppConfigJson(this.applicationContext, moshi)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideTrackRecorderMapFactory(appConfig: IAppConfig): ITrackRecorderMapFragmentFactory {
+        return TrackRecorderMapFragmentFactory(this.applicationContext, appConfig)
+    }
+
+    @Singleton
+    @Provides
     public fun provideLocationAvailabilityChangedBroadcastReceiver(): LocationAvailabilityChangedBroadcastReceiver {
         return LocationAvailabilityChangedBroadcastReceiver(this.applicationContext)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideTrackService(appBaseDirectoryNavigator: IDirectoryNavigator, moshi: Moshi): ITrackService {
+        return TrackService(appBaseDirectoryNavigator, moshi)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideAppBaseDirectoryNavigator(): IDirectoryNavigator {
+        val baseDirectory = this.applicationContext.filesDir
+
+        return FileSystemDirectoryNavigator.baseDirectory(baseDirectory)
     }
 
     @Provides
@@ -64,8 +93,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
-    public fun provideTrackRecorderActivityPresenter(currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>): ITrackRecorderActivityPresenter {
-        return TrackRecorderActivityPresenter(currentTrackRecordingStore)
+    public fun provideTrackRecorderActivityPresenter(trackService: ITrackService): ITrackRecorderActivityPresenter {
+        return TrackRecorderActivityPresenter(trackService)
     }
 
     @Provides
@@ -80,13 +109,7 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
-    public fun provideCurrentTrackRecordingStore(moshi: Moshi): IFileBasedDataStore<TrackRecording> {
-        return CurrentTrackRecordingStore(this.applicationContext, moshi)
-    }
-
-    @Singleton
-    @Provides
-    public fun provideGson(): Moshi {
+    public fun provideMoshi(): Moshi {
         return Moshi.Builder()
                 .add(JodaTimeDateTimeMoshaAdapter())
                 .add(JodaTimePeriodMoshaAdapter())

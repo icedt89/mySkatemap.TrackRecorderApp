@@ -3,12 +3,11 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.*
@@ -26,7 +25,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     public lateinit var locationProvider: ILocationProvider
 
     @Inject
-    public lateinit var currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>
+    public lateinit var trackService: ITrackService
 
     @Inject
     public lateinit var locationChangedBroadcasterReceiver: LocationAvailabilityChangedBroadcastReceiver
@@ -87,7 +86,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.locationProvider.startLocationUpdates()
         this.durationTimer.start()
 
-        this.currentTrackRecording!!.resumed()
+        this.currentTrackRecording!!.resume()
 
         this.changeState(TrackRecorderServiceState.Running)
     }
@@ -106,7 +105,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             this.locationProvider.stopLocationUpdates()
             this.durationTimer.stop()
 
-            this.currentTrackRecording!!.paused()
+            this.currentTrackRecording!!.pause()
 
             this.saveTracking()
         }
@@ -125,7 +124,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackDistanceCalculator.clear()
 
-        this.currentTrackRecordingStore.delete()
+        this.trackService.deleteCurrentTrackRecording()
         this.currentTrackRecording = null
 
         this.changeState(TrackRecorderServiceState.Initializing)
@@ -141,7 +140,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         val finishedTrackRecording = this.currentTrackRecording!!
 
-        finishedTrackRecording.finished()
+        finishedTrackRecording.finish()
         this.saveTracking()
 
         this.durationTimer.reset()
@@ -149,7 +148,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackDistanceCalculator.clear()
 
-        this.currentTrackRecordingStore.delete()
+        this.trackService.deleteCurrentTrackRecording()
         this.currentTrackRecording = null
 
         this.changeState(TrackRecorderServiceState.Initializing)
@@ -253,7 +252,11 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             throw IllegalStateException()
         }
 
-        this.currentTrackRecordingStore.save(this.currentTrackRecording!!)
+        if(this.trackService.hasCurrentTrackRecording()) {
+            this.trackService.saveCurrentTrackRecording()
+        } else {
+            this.trackService.saveAsCurrentTrackRecording(this.currentTrackRecording!!)
+        }
     }
 
     private fun changeState(newState: TrackRecorderServiceState) {

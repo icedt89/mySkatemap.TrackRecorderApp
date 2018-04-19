@@ -1,14 +1,18 @@
-package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.refactored
+package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io
 
 import java.io.File
+import java.io.IOException
 
 internal final class FileSystemDirectoryNavigator(public override val nativeDirectory: File): IDirectoryNavigator {
+    private val lazyParentDirectory: Lazy<IDirectoryNavigator> = lazy {
+        FileSystemDirectoryNavigator(this.nativeDirectory.parentFile)
+    }
+
     public override val parentDirectory: IDirectoryNavigator
+        get() = this.lazyParentDirectory.value
 
     init {
         this.ensureDirectoryExists()
-
-        this.parentDirectory = FileSystemDirectoryNavigator(this.nativeDirectory.parentFile)
     }
 
     public override val name: String
@@ -76,7 +80,15 @@ internal final class FileSystemDirectoryNavigator(public override val nativeDire
         public fun baseDirectory(basePath: String): IDirectoryNavigator {
             val directory = File(basePath)
 
-            return FileSystemDirectoryNavigator(directory)
+            return baseDirectory(directory)
+        }
+
+        public fun baseDirectory(basePath: File): IDirectoryNavigator {
+            if(basePath.isFile) {
+                throw IOException("\"basePath\" must lead to a directory")
+            }
+
+            return FileSystemDirectoryNavigator(basePath)
         }
     }
 }

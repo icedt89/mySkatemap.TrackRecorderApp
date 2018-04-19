@@ -6,11 +6,11 @@ import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
+import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.checkAccessFineLocationPermission
-import com.janhafner.myskatemap.apps.trackrecorder.data.Attachment
-import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.Attachment
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
@@ -30,7 +30,7 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import java.io.IOException
 
-internal final class TrackRecorderActivityPresenter(private val currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>) : ITrackRecorderActivityPresenter {
+internal final class TrackRecorderActivityPresenter(private val trackService: ITrackService) : ITrackRecorderActivityPresenter {
     private var trackRecorderService: ITrackRecorderService? = null
 
     private var trackRecordingSession: ITrackRecordingSession? = null
@@ -44,8 +44,6 @@ internal final class TrackRecorderActivityPresenter(private val currentTrackReco
     public override fun bindToActivity(trackRecorderActivity: TrackRecorderActivity) {
         this.activity = trackRecorderActivity
     }
-
-    // private val currentTrackRecordingStore: IFileBasedDataStore<TrackRecording> = CurrentTrackRecordingStore(activity)
 
     private val trackRecorderServiceConnection: ServiceConnection = object: ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -95,13 +93,14 @@ internal final class TrackRecorderActivityPresenter(private val currentTrackReco
                     }
                 }
                 ActivityStartMode.TryResume -> {
-                    try {
-                        val restoredTrackRecording = this.currentTrackRecordingStore.getData()
-                        if (restoredTrackRecording != null) {
+                    if(this.trackService.hasCurrentTrackRecording()) {
+                        try {
+                            val restoredTrackRecording = this.trackService.getCurrentTrackRecording()
+
                             this.trackRecordingSession = this.trackRecorderService?.useTrackRecording(restoredTrackRecording)
+                        } catch (exception: IOException) {
+                            this.trackService.deleteCurrentTrackRecording()
                         }
-                    } catch (exception: IOException) {
-                        this.currentTrackRecordingStore.delete()
                     }
                 }
             }
@@ -258,7 +257,7 @@ internal final class TrackRecorderActivityPresenter(private val currentTrackReco
 
         val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
-        return TrackRecording.started(trackRecordingName)
+        return TrackRecording.start(trackRecordingName)
     }
 
     private var canPauseRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)

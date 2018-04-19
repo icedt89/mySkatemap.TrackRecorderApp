@@ -12,19 +12,19 @@ import android.view.ViewGroup
 import android.widget.GridView
 import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.view.longClicks
-import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.data.Attachment
-import com.janhafner.myskatemap.apps.trackrecorder.getContentInfo
+import com.janhafner.myskatemap.apps.trackrecorder.*
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
-import com.janhafner.myskatemap.apps.trackrecorder.store
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.DateTime
+import javax.inject.Inject
 
 
 internal final class AttachmentsTabFragment : Fragment() {
-    private lateinit var presenter: ITrackRecorderActivityPresenter
+    @Inject
+    public lateinit var presenter: ITrackRecorderActivityPresenter
 
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
@@ -41,6 +41,8 @@ internal final class AttachmentsTabFragment : Fragment() {
     }
 
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        this.context!!.getApplicationInjector().inject(this)
+
         super.onViewCreated(view, savedInstanceState)
 
         this.viewHolder
@@ -109,14 +111,6 @@ internal final class AttachmentsTabFragment : Fragment() {
             val contentInfo = this.context!!.contentResolver.getContentInfo(intent.data)
 
             this.presenter.addAttachment(Attachment(contentInfo.displayName, contentInfo.uri.toString(), DateTime.now()))
-        }
-    }
-
-    public override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        if(this.activity is TrackRecorderActivity) {
-            this.presenter = (this.activity!! as TrackRecorderActivity).presenter
         }
     }
 }

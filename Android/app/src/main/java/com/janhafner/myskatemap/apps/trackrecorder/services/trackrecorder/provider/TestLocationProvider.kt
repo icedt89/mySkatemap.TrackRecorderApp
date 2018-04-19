@@ -6,7 +6,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
-import com.janhafner.myskatemap.apps.trackrecorder.toLatLng
 import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
@@ -57,7 +56,7 @@ internal final class TestLocationProvider(private val context: Context,
         super.overrideSequenceNumber(sequenceNumber)
     }
 
-    private fun computeNextLocation(counter: Int, initialLocation: LatLng, offsetLatitude: Double, offsetLongitude: Double): LatLng {
+    private fun computeNextLocation(counter: Int, initialLocation: Location, offsetLatitude: Double, offsetLongitude: Double): LatLng {
         val previousCoordinates = genericCoordinates[counter - 1]
 
         var x = previousCoordinates.x
@@ -102,7 +101,7 @@ internal final class TestLocationProvider(private val context: Context,
 
             this.lastComputedLocation?.bearing = this.lastComputedLocation?.bearing?.plus(this.bearingStepping)
 
-            val nextComputedLocation = this.computeNextLocation(sequenceNumber, this.initialLocation.toLatLng(), this.latitudeStepping, this.longitudeStepping)
+            val nextComputedLocation = this.computeNextLocation(sequenceNumber, this.initialLocation, this.latitudeStepping, this.longitudeStepping)
 
             this.lastComputedLocation?.latitude = nextComputedLocation.latitude
             this.lastComputedLocation?.longitude = nextComputedLocation.longitude

@@ -7,18 +7,14 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.gms.maps.model.LatLng
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ShowLocationServicesSnackbar
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnTrackRecorderMapLoadedCallback
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnTrackRecorderMapReadyCallback
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -27,7 +23,8 @@ import javax.inject.Inject
 
 
 internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback, OnTrackRecorderMapLoadedCallback {
-    private lateinit var presenter: ITrackRecorderActivityPresenter
+    @Inject
+    public lateinit var presenter: ITrackRecorderActivityPresenter
 
     private var currentLocationsChangedSubscription: Disposable? = null
 
@@ -49,10 +46,6 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
 
         this.viewHolder
                 .store(view.findViewById(R.id.trackrecorderactivity_tab_map_togglerecording_floatingactionbutton))
-
-        val mapFragment = this.childFragmentManager.findFragmentById(R.id.trackrecorderactivity_tab_map_googlemap) as TrackRecorderMapFragment
-
-        mapFragment.getMapAsync(this)
     }
 
     public override fun onDestroy() {
@@ -64,30 +57,18 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
     public override fun onStart() {
         super.onStart()
 
+        val mapFragment = this.childFragmentManager.findFragmentById(R.id.trackrecorderactivity_tab_map_map) as ITrackRecorderMapWithDelayedInitialization
+
+        mapFragment.getMapAsync(this)
+
         val toggleRecordingFloatingActionButton = this.viewHolder.retrieve<FloatingActionButton>(R.id.trackrecorderactivity_tab_map_togglerecording_floatingactionbutton)
 
-        val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::class.java.name)
+        val trackRecorderMap = this.viewHolder.tryRetrieve<com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap>(Fragment::class.java.name)
         if(trackRecorderMap != null) {
             this.subscribeToMap(trackRecorderMap)
         }
 
         this.subscriptions.addAll(
-                this.appSettings.appSettingsChanged.subscribe{
-                    if(it.propertyName == "trackColor" && it.hasChanged) {
-                        val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::class.java.name)
-                        if(trackRecorderMap != null) {
-                            trackRecorderMap.trackColor = it.newValue as Int
-                        }
-                    }
-
-                    if(it.propertyName == "mapStyleResourceName" && it.hasChanged) {
-                        val trackRecorderMap = this.viewHolder.tryRetrieve<ITrackRecorderMap>(ITrackRecorderMap::class.java.name)
-                        if(trackRecorderMap != null) {
-                            trackRecorderMap.mapStyleResourceName = it.newValue as String
-                        }
-                    }
-                },
-
                 this.presenter.canStartResumeRecordingChanged.observeOn(AndroidSchedulers.mainThread()).subscribe {
                     var iconId = R.drawable.ic_action_track_recorder_recording_startresume
                     if (!it) {
@@ -121,25 +102,17 @@ internal final class MapTabFragment: Fragment(), OnTrackRecorderMapReadyCallback
         this.currentLocationsChangedSubscription?.dispose()
     }
 
-    public override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        if(this.activity is TrackRecorderActivity) {
-            this.presenter = (this.activity!! as TrackRecorderActivity).presenter
-        }
-    }
-
-    public override fun onMapReady(trackRecorderMap: ITrackRecorderMap) {
+    public override fun onMapReady(trackRecorderMap: com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap) {
         this.viewHolder.store(trackRecorderMap::class.java.name, trackRecorderMap)
 
-        trackRecorderMap.zoomToLocation(LatLng(50.8357, 12.92922), 12f)
+        trackRecorderMap.zoomToLocation(SimpleLocation(50.8357, 12.92922), 12f)
     }
 
-    public override fun onMapLoaded(trackRecorderMap: ITrackRecorderMap) {
+    public override fun onMapLoaded(trackRecorderMap: com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap) {
         this.subscribeToMap(trackRecorderMap)
     }
 
-    private fun subscribeToMap(trackRecorderMap: ITrackRecorderMap) {
+    private fun subscribeToMap(trackRecorderMap: com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap) {
         this.subscriptions.addAll(
                 this.presenter.trackSessionStateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe(trackRecorderMap.consumeReset()),
 

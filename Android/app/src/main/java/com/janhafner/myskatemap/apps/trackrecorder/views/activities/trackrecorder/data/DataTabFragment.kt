@@ -25,7 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 internal final class DataTabFragment : Fragment() {
-    private lateinit var presenter: ITrackRecorderActivityPresenter
+    @Inject
+    public lateinit var presenter: ITrackRecorderActivityPresenter
 
     private var currentLocationsCount: AtomicInteger = AtomicInteger()
 
@@ -135,13 +136,5 @@ internal final class DataTabFragment : Fragment() {
         super.onDestroy()
 
         this.viewHolder.clear()
-    }
-
-    public override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        if(this.activity is TrackRecorderActivity) {
-            this.presenter = (this.activity!! as TrackRecorderActivity).presenter
-        }
     }
 }

@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
-import com.janhafner.myskatemap.apps.trackrecorder.data.Attachment
-import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.Attachment
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import io.reactivex.Observable
 import org.joda.time.DateTime

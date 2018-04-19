@@ -2,7 +2,7 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
-    <fragment android:id="@+id/trackrecorderactivity_tab_map_googlemap"
+    <fragment android:id="@+id/trackrecorderactivity_tab_map_map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         class="com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment" />

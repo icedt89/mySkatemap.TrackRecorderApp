@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.data
+package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data
 
 import org.joda.time.DateTime
 

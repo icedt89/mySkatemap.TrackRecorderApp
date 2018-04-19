@@ -5,7 +5,7 @@ import android.support.annotation.LayoutRes
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.janhafner.myskatemap.apps.trackrecorder.data.Attachment
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.views.ObservableArrayAdapter
 import io.reactivex.Observable

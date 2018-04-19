@@ -3,23 +3,6 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
     <PreferenceCategory
-        android:title="Karte"
-        android:key="preference_map">
-        <ListPreference
-            android:key="preference_map_style"
-            android:title="Stil"
-            android:summary="Darstellungsstil der Karte"
-            android:entries="@array/settingsactivity_map_style_names"
-            android:entryValues="@array/settingsactivity_map_style_values"
-            android:defaultValue="mapstyle_fanticmotor"/>
-        <ListPreference
-            android:key="preference_map_track_color"
-            android:title="Farbe der Strecke"
-            android:summary="Farbe in welcher die aufgezeichnete Strecke auf der Karte dargestellt wird"
-            android:enabled="false"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="Einheiten"
         android:key="preference_units">
         <ListPreference

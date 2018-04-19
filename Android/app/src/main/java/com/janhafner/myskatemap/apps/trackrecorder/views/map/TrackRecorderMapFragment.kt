@@ -1,119 +1,63 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.map
 
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.UiSettings
-import com.google.android.gms.maps.model.*
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
+import javax.inject.Inject
 
-internal final class TrackRecorderMapFragment : android.support.v4.app.Fragment(), ITrackRecorderMap {
-    private lateinit var polyline: Polyline
+internal final class TrackRecorderMapFragment : Fragment(), ITrackRecorderMapWithDelayedInitialization {
+    @Inject
+    public lateinit var trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory
 
-    private lateinit var googleMap: GoogleMap
+    private lateinit var map: ITrackRecorderMap
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_track_recorder_map, container, false)
     }
 
-    public fun getMapAsync(callback: OnTrackRecorderMapReadyCallback) {
-        val mapFragment = this.childFragmentManager.findFragmentById(R.id.trackrecordermapfragment_googlemap_mapfragment) as SupportMapFragment
+    public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        this.context!!.getApplicationInjector().inject(this)
 
-        mapFragment.getMapAsync({
-            this.googleMap = it
+        super.onViewCreated(view, savedInstanceState)
 
-            this.polyline = this.googleMap.addPolyline(PolylineOptions())
+        val mapFragment = this.trackRecorderMapFragmentFactory.getFragment()
 
-            this.applyDefaults()
+        this.map = mapFragment as ITrackRecorderMap
 
+        this.childFragmentManager.beginTransaction()
+                .replace(R.id.fragment_track_recorder_map_placeholder, mapFragment)
+                .commit()
+    }
+
+    public override fun getMapAsync(callback: OnTrackRecorderMapReadyCallback) {
+        if(this.map is ITrackRecorderMapWithDelayedInitialization) {
+            (this.map as ITrackRecorderMapWithDelayedInitialization).getMapAsync(callback)
+        } else {
             if(callback is OnTrackRecorderMapLoadedCallback) {
-                it.setOnMapLoadedCallback {
-                    callback.onMapLoaded(this)
-                }
+                callback.onMapLoaded(this)
             }
 
             callback.onMapReady(this)
-        })
-    }
-
-    public override val uiSettings: UiSettings
-        get() = this.googleMap.uiSettings
-
-    public override var mapType: Int
-        get() = this.googleMap.mapType
-        set(value){ this.googleMap.mapType = value }
-
-    public override var trackColor: Int
-        get() = this.polyline.color
-        set(value){ this.polyline.color = value }
-
-    private var _mapStyleResourceName: String = AppSettings.DEFAULT_MAP_STYLE_RESOURCE_NAME
-    public override var mapStyleResourceName: String
-        get() = _mapStyleResourceName
-        set(value){ this.applyMapStyleByResourceName(value) }
-
-    public override var track: Iterable<LatLng>
-        get() = this.polyline.points.asIterable()
-        set(value) {
-            this.polyline.points = value.toList()
-
-            this.moveTrackIntoView()
         }
-
-    private fun moveTrackIntoView() {
-        val points = this.polyline.points
-        if (!points.any()) {
-            return
-        }
-
-        val cameraBoundsBuilder = LatLngBounds.builder()
-        points.forEach { cameraBoundsBuilder.include(it) }
-
-        val cameraBounds = cameraBoundsBuilder.build()
-
-        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(cameraBounds, 100)
-
-        this.googleMap.animateCamera(cameraUpdate)
     }
 
-    public override fun zoomToLocation(location: LatLng, zoom: Float) {
-        this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, zoom))
+    public override val track: List<SimpleLocation>
+        get() = this.map.track
+
+    public override fun addLocations(locations: List<SimpleLocation>) {
+        this.map.addLocations(locations)
     }
 
-    private fun applyDefaults()  {
-        val uiSettings = this.googleMap.uiSettings
-        uiSettings.setAllGesturesEnabled(false)
-        uiSettings.isCompassEnabled = false
-        uiSettings.isZoomControlsEnabled = false
-        uiSettings.isMapToolbarEnabled = false
-
-        this.googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-
-        this.applyMapStyleByResourceName(AppSettings.DEFAULT_MAP_STYLE_RESOURCE_NAME)
-
-        this.trackColor = AppSettings.DEFAULT_TRACK_COLOR
+    public override fun clearTrack() {
+        this.map.clearTrack()
     }
 
-    private fun applyMapStyleByResourceName(mapStyleResourceName: String) {
-        val id = this.getApplicableMapStyleResourceId(mapStyleResourceName)
-
-        this.googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this.context!!, id))
-
-        this._mapStyleResourceName = mapStyleResourceName
-    }
-
-    private fun getApplicableMapStyleResourceId(mapStyleResourceName: String): Int {
-        var id = this.context!!.resources.getIdentifier(mapStyleResourceName, "raw", this.context!!.packageName)
-        if(id == 0) {
-            id = this.getApplicableMapStyleResourceId(AppSettings.DEFAULT_MAP_STYLE_RESOURCE_NAME)
-        }
-
-        return id
+    public override fun zoomToLocation(location: SimpleLocation, zoom: Float) {
+        this.map.zoomToLocation(location, zoom)
     }
 }
-

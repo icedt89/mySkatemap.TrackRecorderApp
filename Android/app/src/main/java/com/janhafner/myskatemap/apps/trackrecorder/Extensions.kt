@@ -10,12 +10,10 @@ import android.os.Build
 import android.provider.OpenableColumns
 import android.provider.Settings
 import android.view.View
-import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.ContentInfo
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.FileBasedDataStore
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
+import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
 import com.karumi.dexter.Dexter
@@ -24,17 +22,10 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
-import com.squareup.moshi.Moshi
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
-import java.io.File
-import java.lang.reflect.Type
-
-internal fun Location.toLatLng(): LatLng {
-    return LatLng(this.latitude, this.longitude)
-}
 
 internal fun ContextWrapper.startLocationSourceSettingsActivity() {
     this.startActivity(android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
@@ -97,12 +88,19 @@ internal fun android.location.Location.toLocation(sequenceNumber: Int): Location
     return result
 }
 
+internal fun Location.toSimpleLocation(): SimpleLocation {
+    var altitude = 0.0
+    if(this.altitude != null){
+        altitude = this.altitude!!
+    }
+
+    return SimpleLocation(this.latitude, this.longitude, altitude)
+}
+
 internal fun ITrackRecorderMap.consumeLocations(): Consumer<Iterable<Location>> {
     return Consumer({
-            val points = this.track.toMutableList()
-            points.addAll(it.map { it.toLatLng() })
-
-            this.track = points
+        val locations = it.map { it.toSimpleLocation() }
+        this.addLocations(locations)
     })
 }
 
@@ -112,15 +110,11 @@ internal fun ViewHolder.store(view: View): ViewHolder {
     return this
 }
 
-internal fun <T> File.asFileBasedDatastore(typeOfT: Type, moshi: Moshi): IFileBasedDataStore<T> {
-    return FileBasedDataStore(this, typeOfT, moshi)
-}
-
 internal fun ITrackRecorderMap.consumeReset(): Consumer<TrackRecorderServiceState> {
     return Consumer({
         currentState ->
             if (currentState == TrackRecorderServiceState.Initializing) {
-                this.track = kotlin.collections.emptyList()
+                this.clearTrack()
             }
     })
 }
@@ -157,6 +151,33 @@ internal fun Activity.checkAccessFineLocationPermission(): Observable<Boolean> {
                        emitter.onError(Throwable("onPermissionRationaleShouldBeShown not supported :)"))
 
                        emitter.onComplete()
+                    }
+                })
+                .check()
+    }
+}
+
+internal fun Activity.checkWriteExternalStoragePermission(): Observable<Boolean> {
+    return Observable.create { emitter: ObservableEmitter<Boolean> ->
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(object : PermissionListener {
+                    public override fun onPermissionGranted(response: PermissionGrantedResponse?) {
+                        emitter.onNext(true)
+
+                        emitter.onComplete()
+                    }
+
+                    public override fun onPermissionDenied(response: PermissionDeniedResponse?) {
+                        emitter.onNext(false)
+
+                        emitter.onComplete()
+                    }
+
+                    public override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {
+                        emitter.onError(Throwable("onPermissionRationaleShouldBeShown not supported :)"))
+
+                        emitter.onComplete()
                     }
                 })
                 .check()

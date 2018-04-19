@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.refactored
+package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io
 
 import java.io.File
 

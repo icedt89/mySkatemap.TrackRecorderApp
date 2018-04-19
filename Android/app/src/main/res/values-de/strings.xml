@@ -41,19 +41,15 @@
     <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Löschen</string>
     <string name="trackrecorderactivity_finish_confirmation_message">Alle Daten der derzeitigen Aufnahme werden zur späteren Verarbeitung gespeichert! Möchtest du fortfahren?</string>
     <string name="startactivity_start_new_recording_button_label">neue Aufnahme beginnen</string>
+
     <string-array name="settingsactivity_tracking_location_provider_names">
         <item>Standard</item>
         <item>Intervall</item>
         <item>Simuliert</item>
     </string-array>
+
     <string-array name="settingsactivity_units_distance_names">
         <item>Kilometer</item>
         <item>Meilen</item>
-    </string-array>
-    <string-array name="settingsactivity_map_style_names">
-        <item>Standard</item>
-        <item>Fantic Motor</item>
-        <item>Gray 'n Blue</item>
-        <item>Light Gray</item>
     </string-array>
 </resources>

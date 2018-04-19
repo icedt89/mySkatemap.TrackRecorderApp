@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
-import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
 import io.reactivex.Observable
 

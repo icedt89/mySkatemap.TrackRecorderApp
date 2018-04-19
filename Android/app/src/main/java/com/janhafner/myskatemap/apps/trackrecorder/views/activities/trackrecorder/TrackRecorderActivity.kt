@@ -1,5 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -14,6 +15,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.checkAccessFineLocationPermission
+import com.janhafner.myskatemap.apps.trackrecorder.checkWriteExternalStoragePermission
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
@@ -34,6 +37,9 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     public lateinit var presenter: ITrackRecorderActivityPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        this.getApplicationInjector().inject(this)
+        this.presenter.bindToActivity(this)
+
         super.onCreate(savedInstanceState)
 
         this.setContentView(R.layout.activity_track_recorder)
@@ -65,9 +71,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
                 inputMethodManager.hideSoftInputFromWindow(self.currentFocus?.windowToken, 0)
             }
         })
-
-        this.getApplicationInjector().inject(this)
-        this.presenter.bindToActivity(this)
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {

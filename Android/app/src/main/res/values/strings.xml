@@ -62,17 +62,4 @@
         <item>Kilometers</item>
         <item>Miles</item>
     </string-array>
-
-    <string-array name="settingsactivity_map_style_values">
-        <item></item>
-        <item>mapstyle_fanticmotor</item>
-        <item>mapstyle_graynblue</item>
-        <item>mapstyle_lightgray</item>
-    </string-array>
-    <string-array name="settingsactivity_map_style_names">
-        <item>Default</item>
-        <item>Fantic Motor</item>
-        <item>Gray 'n Blue</item>
-        <item>Light Gray</item>
-    </string-array>
 </resources>

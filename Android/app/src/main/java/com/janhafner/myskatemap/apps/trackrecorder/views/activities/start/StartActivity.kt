@@ -6,10 +6,11 @@ import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.widget.ImageButton
 import com.jakewharton.rxbinding2.view.clicks
+import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.checkWriteExternalStoragePermission
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileBasedDataStore
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ActivityStartMode
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
@@ -20,10 +21,11 @@ import javax.inject.Inject
 
 internal final class StartActivity: AppCompatActivity() {
     @Inject
-    public lateinit var currentTrackRecordingStore: IFileBasedDataStore<TrackRecording>
+    public lateinit var appSettings: IAppSettings
 
     @Inject
-    public lateinit var appSettings: IAppSettings
+    public lateinit var trackService: ITrackService
+
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.setDefaultValues(this, R.xml.settings, true)
@@ -36,8 +38,18 @@ internal final class StartActivity: AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        val currentTrackRecording = this.currentTrackRecordingStore.getData()
-        if(currentTrackRecording != null) {
+        this.checkWriteExternalStoragePermission().subscribe { granted ->
+            if (granted) {
+                this.forwardToTrackRecorderIfNecessary(savedInstanceState)
+            } else {
+                this.finishAndRemoveTask()
+            }
+        }
+    }
+
+    private fun forwardToTrackRecorderIfNecessary(savedInstanceState: Bundle?) {
+        val hasCurrentTrackRecording = this.trackService.hasCurrentTrackRecording()
+        if(hasCurrentTrackRecording) {
             val intent = Intent(this, TrackRecorderActivity::class.java)
             intent.putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.TryResume.toString())
 
