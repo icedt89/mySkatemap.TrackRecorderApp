@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
-import android.content.ContextWrapper
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
@@ -17,17 +16,17 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
 import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
+import com.karumi.dexter.listener.multi.BaseMultiplePermissionsListener
+import com.karumi.dexter.listener.single.BasePermissionListener
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
 
-internal fun ContextWrapper.startLocationSourceSettingsActivity() {
+internal fun Context.startLocationSourceSettingsActivity() {
     this.startActivity(android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 }
 
@@ -97,7 +96,7 @@ internal fun Location.toSimpleLocation(): SimpleLocation {
     return SimpleLocation(this.latitude, this.longitude, altitude)
 }
 
-internal fun ITrackRecorderMap.consumeLocations(): Consumer<Iterable<Location>> {
+internal fun ITrackRecorderMap.consumeLocations(): Consumer<List<Location>> {
     return Consumer({
         val locations = it.map { it.toSimpleLocation() }
         this.addLocations(locations)
@@ -130,11 +129,26 @@ internal fun Location.distanceTo(location: Location): Float {
     return androidLocation.distanceTo(otherAndroidLocation)
 }
 
+internal fun Activity.checkAllAppPermissions(): Observable<Boolean> {
+    return Observable.create { emitter: ObservableEmitter<Boolean> ->
+        Dexter.withActivity(this)
+                .withPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(object : BaseMultiplePermissionsListener() {
+                    public override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                        emitter.onNext(report!!.areAllPermissionsGranted())
+
+                        emitter.onComplete()
+                    }
+                })
+                .check()
+    }
+}
+
 internal fun Activity.checkAccessFineLocationPermission(): Observable<Boolean> {
     return Observable.create { emitter: ObservableEmitter<Boolean> ->
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                .withListener(object : PermissionListener {
+                .withListener(object : BasePermissionListener() {
                     public override fun onPermissionGranted(response: PermissionGrantedResponse?) {
                         emitter.onNext(true)
 
@@ -145,12 +159,6 @@ internal fun Activity.checkAccessFineLocationPermission(): Observable<Boolean> {
                         emitter.onNext(false)
 
                         emitter.onComplete()
-                    }
-
-                    public override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {
-                       emitter.onError(Throwable("onPermissionRationaleShouldBeShown not supported :)"))
-
-                       emitter.onComplete()
                     }
                 })
                 .check()
@@ -161,7 +169,7 @@ internal fun Activity.checkWriteExternalStoragePermission(): Observable<Boolean>
     return Observable.create { emitter: ObservableEmitter<Boolean> ->
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .withListener(object : PermissionListener {
+                .withListener(object : BasePermissionListener() {
                     public override fun onPermissionGranted(response: PermissionGrantedResponse?) {
                         emitter.onNext(true)
 
@@ -170,12 +178,6 @@ internal fun Activity.checkWriteExternalStoragePermission(): Observable<Boolean>
 
                     public override fun onPermissionDenied(response: PermissionDeniedResponse?) {
                         emitter.onNext(false)
-
-                        emitter.onComplete()
-                    }
-
-                    public override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {
-                        emitter.onError(Throwable("onPermissionRationaleShouldBeShown not supported :)"))
 
                         emitter.onComplete()
                     }

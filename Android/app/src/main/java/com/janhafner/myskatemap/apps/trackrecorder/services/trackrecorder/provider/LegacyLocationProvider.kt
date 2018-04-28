@@ -24,7 +24,7 @@ internal final class LegacyLocationProvider(context: Context): LocationProvider(
 
             val location = receivedLocation.toLocation(sequenceNumber)
 
-            self.postLocationUpdate(location)
+            self.publishLocationUpdate(location)
         }
 
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {

@@ -2,6 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import android.app.Service
 import android.content.Intent
+import android.os.Handler
 import android.os.IBinder
 import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
@@ -107,7 +108,12 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
             this.currentTrackRecording!!.pause()
 
-            this.saveTracking()
+            Handler().postDelayed({
+                // Hack: Because processing of locationsReceived is buffered every second,
+                // it can happen that by the time the tracking is saved the list of locationsReceived is still being updated.
+                // To prevent exceptions, delay saving 1 second and hope updates are done; until I find a better solution!
+                this.saveTracking()
+            }, 1000)
         }
 
         this.changeState(state)
@@ -169,7 +175,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             throw IllegalStateException()
         }
 
-        var locationsChanged = this.locationProvider.locations.replay().autoConnect()
+        var locationsChanged = this.locationProvider.locationsReceived.replay().autoConnect()
         if (trackRecording.locations.any()) {
             val sortedLocations = trackRecording.locations.toSortedMap().values
 
@@ -222,22 +228,28 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                         it.any()
                     }
                     .subscribe {
-                        this.trackDistanceCalculator.addAll(it)
-
                         this.currentTrackRecording!!.locations.putAll(it.map{
                             Pair(it.sequenceNumber, it)
                         })
                     },
-
-                this.stateChangedSubject.subscribe {
-                    this.trackRecorderServiceNotification.state = it
-
-                    if(it == TrackRecorderServiceState.Initializing) {
-                        this.trackRecorderServiceNotification.close()
-                    } else  {
-                        this.trackRecorderServiceNotification.update()
+            this.currentSession!!.locationsChanged
+                    .buffer(1, TimeUnit.SECONDS)
+                    .filter{
+                        it.any()
                     }
-                },
+                    .subscribe {
+                        this.trackDistanceCalculator.addAll(it)
+                    },
+
+            this.stateChangedSubject.subscribe {
+                this.trackRecorderServiceNotification.state = it
+
+                if(it == TrackRecorderServiceState.Initializing) {
+                    this.trackRecorderServiceNotification.close()
+                } else  {
+                    this.trackRecorderServiceNotification.update()
+                }
+            },
 
             this.currentSession!!.trackDistanceChanged.subscribe{
                 this.trackRecorderServiceNotification.trackDistance = it
@@ -322,7 +334,9 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.trackRecorderServiceNotification.userInitiatedServiceTerminationAllowed = true
         this.trackRecorderServiceNotification.update()
 
-        return super.onUnbind(intent)
+        super.onUnbind(intent)
+
+        return true
     }
 
     public override fun onDestroy() {

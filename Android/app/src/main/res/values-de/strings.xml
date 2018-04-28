@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">mySkatemap Track Recorder</string>
+    <string name="trackrecorderactivity_title">Streckenaufnahme</string>
     <string name="trackrecorderactivity_toolbar_finish_currenttracking">Abschließen</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttracking">Verwerfen</string>
     <string name="trackrecorderactivity_presenter_default_new_trackrecording_name_template">Strecke %s</string>

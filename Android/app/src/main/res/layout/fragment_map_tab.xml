@@ -2,16 +2,8 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
-    <fragment android:id="@+id/trackrecorderactivity_tab_map_map"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment" />
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/trackrecorderactivity_tab_map_togglerecording_floatingactionbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="15dp"
-        android:layout_margin="15dp"
-        android:src="@drawable/ic_action_track_recorder_recording_pause" />
+        android:id="@+id/fragment_track_recorder_map_map_placeholder"/>
 </android.support.design.widget.CoordinatorLayout>

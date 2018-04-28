@@ -1,4 +1,4 @@
 {
-  "forceUsingOpenStreetMap": true,
+  "forceUsingOpenStreetMap": false,
   "trackColor": "#FFFF3A3C"
 }

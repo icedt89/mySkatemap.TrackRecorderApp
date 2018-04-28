@@ -6,7 +6,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.AttachmentsTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment
 import dagger.Component
 import javax.inject.Singleton
 
@@ -20,8 +19,6 @@ internal interface ApplicationComponent {
     fun inject(trackRecorderActivity: TrackRecorderActivity)
 
     fun inject(mapTabFragment: MapTabFragment)
-
-    fun inject(trackRecorderMapFragmentFragment: TrackRecorderMapFragment)
 
     fun inject(dataTabFragment: DataTabFragment)
 

@@ -7,7 +7,9 @@ import org.joda.time.Period
 import java.util.*
 
 internal final class TrackRecording private constructor(public var name: String) {
-    private val id: UUID = UUID.randomUUID()
+    public val id: UUID = UUID.randomUUID()
+
+    public var comment: String = ""
 
     public val locations: MutableMap<Int, Location> = ArrayMap<Int, Location>()
 
@@ -21,6 +23,7 @@ internal final class TrackRecording private constructor(public var name: String)
         get() = this.trackingFinishedAt != null
 
     public lateinit var trackingStartedAt: DateTime
+
         private set
 
     public var trackingFinishedAt: DateTime? = null

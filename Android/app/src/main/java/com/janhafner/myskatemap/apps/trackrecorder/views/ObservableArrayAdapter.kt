@@ -3,16 +3,43 @@ package com.janhafner.myskatemap.apps.trackrecorder.views
 import android.content.Context
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.ItemViewCreatedArgs
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.subjects.PublishSubject
 
 internal open class ObservableArrayAdapter<T>(context: Context, @LayoutRes private val itemLayoutId: Int)
     : ArrayAdapter<T>(context, itemLayoutId, ArrayList<T>()) {
     protected val itemLayoutInflater: LayoutInflater = LayoutInflater.from(context)
 
+    protected val viewHolder: ViewHolder = ViewHolder()
+
+    protected val itemViewCreatedSubject: PublishSubject<ItemViewCreatedArgs<View, T>> = PublishSubject.create<ItemViewCreatedArgs<View, T>>()
+    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject
+
     init {
         this.setNotifyOnChange(false)
+    }
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val inflater = this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        var itemLayout = this.viewHolder.tryRetrieve<View>(position)
+        if(itemLayout == null) {
+            itemLayout = inflater.inflate(this.itemLayoutId, parent, false)
+
+            viewHolder.store(position, itemLayout)
+        }
+
+        val item = this.getItem(position)
+
+        this.itemViewCreatedSubject.onNext(ItemViewCreatedArgs<View, T>(itemLayout!!, item, position))
+
+        return itemLayout
     }
 
     public fun subscribeTo(items: Observable<List<T>>): Disposable {

@@ -2,22 +2,22 @@ package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
-import org.joda.time.Period
+import java.util.*
 
-internal final class JodaTimePeriodMoshaAdapter {
+internal final class UuidMoshaAdapter {
     @ToJson
-    public fun toJson(value: Period?): String? {
+    public fun toJson(value: UUID?): String? {
         if(value != null) {
-            return value.seconds.toString()
+            return value.toString()
         } else {
             return null
         }
     }
 
     @FromJson
-    public fun fromJson(value: String?): Period? {
+    public fun fromJson(value: String?): UUID? {
         if(value != null) {
-            return Period.seconds(value.toInt())
+            return UUID.fromString(value)
         } else {
             return null
         }

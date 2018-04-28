@@ -3,6 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder
 import android.content.Context
 import org.joda.time.DateTime
 import org.joda.time.Period
+import org.joda.time.PeriodType
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.PeriodFormatter
@@ -27,7 +28,7 @@ internal fun DateTime.formatDefault(): String {
 }
 
 internal fun Period.formatRecordingTime(): String {
-    return trackRecordingTimeFormatter.print(this)
+    return trackRecordingTimeFormatter.print(this.normalizedStandard(PeriodType.time()))
 }
 
 internal fun Float.roundTrackDistanceForDisplay(context: Context): String {

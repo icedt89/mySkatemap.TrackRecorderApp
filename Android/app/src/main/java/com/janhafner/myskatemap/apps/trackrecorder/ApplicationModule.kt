@@ -16,12 +16,12 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppC
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.LocationAvailabilityChangedBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LegacyLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ITrackRecorderActivityPresenter
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragmentFactory
 import com.squareup.moshi.Moshi
@@ -92,9 +92,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     }
 
     @Provides
-    @Singleton
-    public fun provideTrackRecorderActivityPresenter(trackService: ITrackService): ITrackRecorderActivityPresenter {
-        return TrackRecorderActivityPresenter(trackService)
+    public fun provideTrackRecorderServiceController(): ServiceController<TrackRecorderServiceBinder>  {
+        return ServiceController(this.applicationContext)
     }
 
     @Provides
@@ -119,7 +118,6 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     }
 
     @Provides
-    @Singleton
     public fun provideTrackDistanceCalculator(): TrackDistanceCalculator {
         return TrackDistanceCalculator()
     }

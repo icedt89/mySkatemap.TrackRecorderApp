@@ -1,20 +1,30 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
+import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 
 internal abstract class LocationProvider: ILocationProvider {
     private var currentSequenceNumber: Int = -1
 
-    private val locationsSubject: Subject<Location> = PublishSubject.create<Location>()
-    public final override val locations: io.reactivex.Observable<Location> = this.locationsSubject
+    private val locationReceivedSubject: Subject<Location> = PublishSubject.create<Location>()
+    public final override val locationsReceived: io.reactivex.Observable<Location> = this.locationReceivedSubject
+
+    private val sequenceNumberOverriddenSubject: Subject<Int> = PublishSubject.create<Int>()
+    public final override val sequenceNumberOverridden: io.reactivex.Observable<Int> = this.sequenceNumberOverriddenSubject
+
+    private val activityChangedSubject: Subject<Boolean> = BehaviorSubject.createDefault(false)
+    public final override val activityChanged: io.reactivex.Observable<Boolean> = this.activityChangedSubject
 
     public override var isActive: Boolean = false
-        protected set
+        protected set(value) {
+            field = value
+            this.activityChangedSubject.onNext(value)
+        }
 
-    protected fun postLocationUpdate(location: Location) {
-        this.locationsSubject.onNext(location)
+    protected fun publishLocationUpdate(location: Location) {
+        this.locationReceivedSubject.onNext(location)
     }
 
     protected fun generateSequenceNumber(): Int {
@@ -35,5 +45,6 @@ internal abstract class LocationProvider: ILocationProvider {
         }
 
         this.currentSequenceNumber = sequenceNumber
+        this.sequenceNumberOverriddenSubject.onNext(sequenceNumber)
     }
 }

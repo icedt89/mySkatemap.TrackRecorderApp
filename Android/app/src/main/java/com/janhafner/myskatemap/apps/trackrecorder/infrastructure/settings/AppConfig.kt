@@ -1,8 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings
 
 import android.content.Context
-import android.content.res.AssetManager
-import com.google.android.gms.maps.model.MapStyleOptions
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.squareup.moshi.Moshi
 import okio.ByteString

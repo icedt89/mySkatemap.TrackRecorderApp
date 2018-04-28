@@ -19,7 +19,7 @@ internal final class TrackDistanceCalculator {
         this.distanceSubject.onNext(0f)
     }
 
-    public fun addAll(locations: Iterable<Location>) {
+    public fun addAll(locations: List<Location>) {
         var newDistance: Float = this.distance
         for(location in locations) {
             val actualDistance = this.computeDistance(newDistance, location)

@@ -18,12 +18,12 @@ internal final class FusedLocationProvider(context: Context): LocationProvider()
 
                 val location = sourceLocation.toLocation(sequenceNumber)
 
-                self.postLocationUpdate(location)
+                self.publishLocationUpdate(location)
             }
         }
     }
 
-    private val locationRequest: LocationRequest = LocationRequest()
+    private val locationRequest: LocationRequest = LocationRequest.create()
 
     init {
         locationRequest.interval = 8000

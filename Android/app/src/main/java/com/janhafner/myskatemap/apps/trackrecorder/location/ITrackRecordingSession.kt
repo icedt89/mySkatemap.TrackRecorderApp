@@ -1,6 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import io.reactivex.Observable
 import org.joda.time.DateTime
@@ -19,7 +18,7 @@ internal interface ITrackRecordingSession {
 
     var name: String
 
-    val attachments: MutableList<Attachment>
+    var comment: String
 
     fun resumeTracking()
 

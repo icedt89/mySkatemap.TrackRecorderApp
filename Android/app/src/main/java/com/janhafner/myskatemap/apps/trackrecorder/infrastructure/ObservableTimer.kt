@@ -27,7 +27,7 @@ internal final class ObservableTimer {
     private val timerResetSubject: Subject<Long> = PublishSubject.create<Long>()
     public val timerReset: Observable<Long> = this.timerResetSubject
 
-    private val elapsedSeconds: MutablePeriod = MutablePeriod(PeriodType.seconds())
+    private val elapsedSeconds: MutablePeriod = MutablePeriod(PeriodType.time())
 
     private fun createTimerTask(): TimerTask {
         return object: TimerTask() {

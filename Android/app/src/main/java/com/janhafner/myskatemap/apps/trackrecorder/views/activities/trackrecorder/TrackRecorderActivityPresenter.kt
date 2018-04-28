@@ -1,308 +1,207 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
-import android.os.Build
-import android.os.IBinder
-import android.support.v7.app.AppCompatActivity
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.checkAccessFineLocationPermission
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecorderService
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.start.StartActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.DiscardRecordingAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.FinishRecordingAlertDialogBuilder
-import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.subjects.BehaviorSubject
+import kotlinx.android.synthetic.main.activity_track_recorder.*
 import org.joda.time.DateTime
-import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
-import java.io.IOException
 
-internal final class TrackRecorderActivityPresenter(private val trackService: ITrackService) : ITrackRecorderActivityPresenter {
-    private var trackRecorderService: ITrackRecorderService? = null
+internal final class TrackRecorderActivityPresenter(private val trackRecorderActivity: TrackRecorderActivity,
+                                                    private val trackService: ITrackService,
+                                                    private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>) {
+    private val trackRecorderServiceControllerSubscription: Disposable
 
-    private var trackRecordingSession: ITrackRecordingSession? = null
+    private var trackRecorderSession: ITrackRecordingSession? = null
 
-    private val subscriptions: CompositeDisposable = CompositeDisposable()
+    private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
-    private var locationServicesAvailabilitySubscription: Disposable? = null
+    private var finishTrackRecordingMenuItem: MenuItem? = null
 
-    private lateinit var activity: AppCompatActivity
+    private var discardTrackRecordingMenuItem: MenuItem? = null
 
-    public override fun bindToActivity(trackRecorderActivity: TrackRecorderActivity) {
-        this.activity = trackRecorderActivity
-    }
+    init {
+        this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe{
+            if(it) {
+                val binder = this.trackRecorderServiceController.currentBinder!!
 
-    private val trackRecorderServiceConnection: ServiceConnection = object: ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val self = this@TrackRecorderActivityPresenter
+                val uninitializedSession: ITrackRecordingSession
 
-            self.trackRecorderService = service as ITrackRecorderService
-            self.trackRecordingSession = self.trackRecorderService!!.currentSession
-            self.locationServicesAvailabilitySubscription = self.trackRecorderService!!.locationServicesAvailability.subscribe{
-                if(!it) {
-                    ShowLocationServicesSnackbar.make(self.activity, self.activity.currentFocus)
-                }
-            }
-
-            self.initializeSession()
-        }
-
-        public override fun onServiceDisconnected(name: ComponentName) {
-            val self = this@TrackRecorderActivityPresenter
-
-            self.unsubscribeFromSession()
-
-            self.trackRecordingSession = null
-            self.trackRecorderService = null
-
-            self.locationServicesAvailabilitySubscription?.dispose()
-            self.locationServicesAvailabilitySubscription = null
-        }
-
-        public override fun onBindingDied(name: ComponentName?)
-        {
-        }
-    }
-
-    private fun initializeSession() {
-        if(this.trackRecordingSession == null) {
-            val mode = ActivityStartMode.valueOf(this.activity.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
-            when (mode) {
-                ActivityStartMode.StartNew -> {
+                val mode = ActivityStartMode.valueOf(this.trackRecorderActivity.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
+                val newTrackRecordingCreated = mode == ActivityStartMode.StartNew || (mode == ActivityStartMode.TryResume && !this.trackService.hasCurrentTrackRecording())
+                if (newTrackRecordingCreated) {
                     val newTrackRecording = this.createNewTrackRecording()
 
-                    this.trackRecordingSession = this.trackRecorderService!!.useTrackRecording(newTrackRecording)
+                    uninitializedSession = binder.useTrackRecording(newTrackRecording)
+                } else {
+                    val restoredTrackRecording = this.trackService.getCurrentTrackRecording()
 
-                    if (this.activity.isLocationServicesEnabled()) {
-                        this.trackRecordingSession!!.resumeTracking()
+                    uninitializedSession = binder.useTrackRecording(restoredTrackRecording)
+                }
+
+                this.trackRecorderSession = this.getInitializedSession(uninitializedSession)
+
+                if(newTrackRecordingCreated){
+                    if (this.trackRecorderActivity.isLocationServicesEnabled()) {
+                        this.trackRecorderSession!!.resumeTracking()
                     } else {
-                        ShowLocationServicesSnackbar.make(this.activity, this.activity.currentFocus).show()
+                        ShowLocationServicesSnackbar.make(this.trackRecorderActivity, this.trackRecorderActivity.currentFocus).show()
                     }
                 }
-                ActivityStartMode.TryResume -> {
-                    if(this.trackService.hasCurrentTrackRecording()) {
-                        try {
-                            val restoredTrackRecording = this.trackService.getCurrentTrackRecording()
-
-                            this.trackRecordingSession = this.trackRecorderService?.useTrackRecording(restoredTrackRecording)
-                        } catch (exception: IOException) {
-                            this.trackService.deleteCurrentTrackRecording()
-                        }
-                    }
-                }
-            }
-        }
-
-        if (this.trackRecordingSession != null) {
-            this.subscribeToSession()
-        }
-    }
-
-    private fun updateFromSession() {
-        this.trackingStartedAtChangedSubject.onNext(this.trackRecordingSession!!.trackingStartedAt)
-        this.attachmentsChangedSubject.onNext(this.trackRecordingSession!!.attachments)
-        this.locationChangedAvailableSubject.onNext(this.trackRecordingSession!!.locationsChanged)
-
-        this.trackRecordingSession!!.recordingTimeChanged.last(Period.ZERO).subscribe {
-            period ->
-                this.recordingTimeChangedSubject.onNext(period)
-        }
-
-        this.trackRecordingSession!!.trackDistanceChanged.last(0f).subscribe {
-            distance ->
-                this.trackDistanceChangedSubject.onNext(distance)
-        }
-
-        this.trackRecordingSession!!.stateChanged.last(TrackRecorderServiceState.Initializing).subscribe {
-            state ->
-                this.trackSessionStateChangedSubject.onNext(state)
-
-                val isRunning = state == TrackRecorderServiceState.Running
-                val isPaused = state == TrackRecorderServiceState.Paused
-
-                this.canStartResumeRecordingSubject.onNext(!isRunning)
-                this.canPauseRecordingSubject.onNext(isRunning)
-                this.canDiscardRecordingSubject.onNext(isPaused)
-                this.canFinishRecordingSubject.onNext(isPaused)
-        }
-    }
-
-    private fun subscribeToSession() {
-        this.trackingStartedAtChangedSubject.onNext(this.trackRecordingSession!!.trackingStartedAt)
-        this.attachmentsChangedSubject.onNext(this.trackRecordingSession!!.attachments)
-        this.locationChangedAvailableSubject.onNext(this.trackRecordingSession!!.locationsChanged)
-
-        this.subscriptions.addAll(
-            this.trackRecordingSession!!.recordingTimeChanged.subscribe {
-                this.recordingTimeChangedSubject.onNext(it)
-            },
-
-            this.trackRecordingSession!!.trackDistanceChanged.subscribe {
-                this.trackDistanceChangedSubject.onNext(it)
-            },
-
-            this.trackRecordingSession!!.stateChanged.subscribe {
-                this.trackSessionStateChangedSubject.onNext(it)
-
-                val isRunning = it == TrackRecorderServiceState.Running
-                val isPaused = it == TrackRecorderServiceState.Paused
-
-                this.canStartResumeRecordingSubject.onNext(!isRunning)
-                this.canPauseRecordingSubject.onNext(isRunning)
-                this.canDiscardRecordingSubject.onNext(isPaused)
-                this.canFinishRecordingSubject.onNext(isPaused)
-            }
-        )
-    }
-
-    private fun unsubscribeFromSession() {
-        this.subscriptions.clear()
-
-        this.locationChangedAvailableSubject.onNext(Observable.never())
-        this.trackingStartedAtChangedSubject.onNext(DateTime(0))
-    }
-
-    override fun startAndBindService() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.activity.startForegroundService(Intent(this.activity, TrackRecorderService::class.java))
-        } else {
-            this.activity.startService(Intent(this.activity, TrackRecorderService::class.java))
-        }
-
-        this.activity.bindService(Intent(this.activity, TrackRecorderService::class.java), this.trackRecorderServiceConnection, AppCompatActivity.BIND_AUTO_CREATE)
-    }
-
-    override fun unbindService() {
-        this.activity.unbindService(this.trackRecorderServiceConnection)
-    }
-
-    public override fun saveCurrentRecording() {
-        if(this.trackRecordingSession == null) {
-            throw IllegalStateException()
-        }
-
-        this.trackRecordingSession!!.saveTracking()
-    }
-
-    public override fun setSelectedAttachments(attachments: List<Attachment>) {
-        val foundAttachments = this.trackRecordingSession!!.attachments.filter {
-            attachments.contains(it)
-        }
-
-        this.attachmentsSelectedSubject.onNext(foundAttachments)
-    }
-
-    private val attachmentsSelectedSubject: BehaviorSubject<List<Attachment>> = BehaviorSubject.createDefault<List<Attachment>>(kotlin.collections.emptyList())
-    public override val attachmentsSelected: Observable<List<Attachment>> = this.attachmentsSelectedSubject
-
-    private val attachmentsChangedSubject: BehaviorSubject<List<Attachment>> = BehaviorSubject.createDefault<List<Attachment>>(kotlin.collections.emptyList())
-    public override val attachmentsChanged: Observable<List<Attachment>> = this.attachmentsChangedSubject
-
-    public override fun addAttachment(attachment: Attachment) {
-        this.trackRecordingSession!!.attachments.add(attachment)
-
-        this.attachmentsChangedSubject.onNext(this.trackRecordingSession!!.attachments)
-    }
-
-    public override fun removeAttachment(attachment: Attachment) {
-        this.trackRecordingSession!!.attachments.remove(attachment)
-
-        this.attachmentsChangedSubject.onNext(this.trackRecordingSession!!.attachments)
-    }
-
-    private val trackingStartedAtChangedSubject: BehaviorSubject<DateTime> = BehaviorSubject.createDefault(DateTime(0))
-    public override val trackingStartedAtChanged: Observable<DateTime> = this.trackingStartedAtChangedSubject
-
-    private val recordingTimeChangedSubject: BehaviorSubject<Period> = BehaviorSubject.createDefault(Period.ZERO)
-    public override val recordingTimeChanged: Observable<Period> = this.recordingTimeChangedSubject
-
-    private val trackDistanceChangedSubject: BehaviorSubject<Float> = BehaviorSubject.createDefault(0.0f)
-    public override val trackDistanceChanged: Observable<Float> = this.trackDistanceChangedSubject
-
-    private val trackSessionStateChangedSubject: BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault(TrackRecorderServiceState.Initializing)
-    public override val trackSessionStateChanged: Observable<TrackRecorderServiceState> = this.trackSessionStateChangedSubject
-
-    private val locationChangedAvailableSubject: BehaviorSubject<Observable<Location>> = BehaviorSubject.createDefault<Observable<Location>>(Observable.never())
-    public override val locationsChangedAvailable: Observable<Observable<Location>> = this.locationChangedAvailableSubject
-
-    private val canStartResumeRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(true)
-    public override val canStartResumeRecordingChanged: Observable<Boolean> = this.canStartResumeRecordingSubject
-
-    override fun resumeRecording() {
-        this.activity.checkAccessFineLocationPermission().subscribe { granted ->
-            if (granted) {
-                this.trackRecordingSession!!.resumeTracking()
             } else {
-                throw NotImplementedError()
+                this.uninitializeSession()
             }
         }
     }
 
     private fun createNewTrackRecording(): TrackRecording {
         val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
-        val nameTemplate = this.activity.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
+        val nameTemplate = this.trackRecorderActivity.getString(R.string.trackrecorderactivity_presenter_default_new_trackrecording_name_template)
 
         val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
         return TrackRecording.start(trackRecordingName)
     }
 
-    private var canPauseRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    override val canPauseRecordingChanged: Observable<Boolean> = this.canPauseRecordingSubject
+    private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
+        this.sessionSubscriptions.addAll(
+            this.trackRecorderActivity.trackrecorderactivity_togglerecording_floatingactionbutton.clicks()
+                  .subscribe {
+                      trackRecorderSession.stateChanged.first(TrackRecorderServiceState.Initializing).subscribe {
+                          state ->
+                          if(state == TrackRecorderServiceState.Paused) {
+                              if(this.trackRecorderActivity.isLocationServicesEnabled()) {
+                                  trackRecorderSession.resumeTracking()
+                              }else{
+                                  ShowLocationServicesSnackbar.make(this.trackRecorderActivity, this.trackRecorderActivity.currentFocus).show()
+                              }
+                          } else {
+                              trackRecorderSession.pauseTracking()
+                          }
+                      }
+                  },
 
-    override fun pauseRecording() {
-        this.trackRecordingSession!!.pauseTracking()
+
+                trackRecorderSession.stateChanged
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            this.trackRecorderActivity.trackrecorderactivity_togglerecording_floatingactionbutton.isEnabled = it == TrackRecorderServiceState.Running || it == TrackRecorderServiceState.Paused
+
+                            var iconId = R.drawable.ic_action_track_recorder_recording_startresume
+                            if (it == TrackRecorderServiceState.Running) {
+                                iconId = R.drawable.ic_action_track_recorder_recording_pause
+                            }
+
+                            this.trackRecorderActivity.trackrecorderactivity_togglerecording_floatingactionbutton.setImageResource(iconId)
+                        },
+
+                trackRecorderSession.stateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{
+                    currentState ->
+                    when (currentState) {
+                        TrackRecorderServiceState.Running -> {
+                            Toast.makeText(this.trackRecorderActivity, R.string.trackrecorderactivity_toast_recording_running, Toast.LENGTH_LONG).show()
+                        }
+                        TrackRecorderServiceState.Paused,
+                        TrackRecorderServiceState.LocationServicesUnavailable ->
+                            Toast.makeText(this.trackRecorderActivity, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
+                        else -> {
+                            // Nothing happens here. Else branch exist only to prevent warning on compile Oo
+                        }
+                    }
+
+                    if(this.discardTrackRecordingMenuItem != null) {
+                        this.discardTrackRecordingMenuItem!!.isEnabled = currentState != TrackRecorderServiceState.Running
+                    }
+
+                    if(this.finishTrackRecordingMenuItem != null) {
+                        this.finishTrackRecordingMenuItem!!.isEnabled = currentState != TrackRecorderServiceState.Running
+                    }
+                }
+        )
+
+        return trackRecorderSession
     }
 
-    private var canDiscardRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    override val canDiscardRecordingChanged: Observable<Boolean> = this.canDiscardRecordingSubject
+    private fun uninitializeSession() {
+        this.sessionSubscriptions.clear()
 
-    override fun discardRecording() {
-        val discardRecordingAlertDialogBuilder = DiscardRecordingAlertDialogBuilder(this.activity)
-        discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
-            _, _ ->
-                this.trackRecordingSession!!.discardTracking()
-
-                this.unsubscribeFromSession()
-                this.trackRecordingSession = null
-
-                this.activity.startActivity(Intent(this.activity, StartActivity::class.java))
-
-                this.activity.finish()
-        })
-
-        discardRecordingAlertDialogBuilder.show()
+        this.trackRecorderSession = null
     }
 
-    private var canFinishRecordingSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    override val canFinishRecordingChanged: Observable<Boolean> = this.canFinishRecordingSubject
+    public fun menuReady(menu: Menu) {
+        if(this.finishTrackRecordingMenuItem == null) {
+            this.finishTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_finish_currenttracking)
 
-    override fun finishRecording() {
-        val finishRecordingAlertDialogBuilder = FinishRecordingAlertDialogBuilder(this.activity)
-        finishRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
-            _,
-            _ ->
-                // TODO: Make something useful with it (history, upload etc...)
-                val trackRecording = this.trackRecordingSession!!.finishTracking()
+            this.sessionSubscriptions.add(this.finishTrackRecordingMenuItem!!.clicks().subscribe{
+                val finishRecordingAlertDialogBuilder = FinishRecordingAlertDialogBuilder(this.trackRecorderActivity)
+                finishRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
+                    _,
+                    _ ->
+                    // TODO: Make something useful with it (history, upload etc...)
+                    val trackRecording = this.trackRecorderSession!!.finishTracking()
 
-                this.unsubscribeFromSession()
-                this.trackRecordingSession = null
-        })
+                    this.uninitializeSession()
 
-        finishRecordingAlertDialogBuilder.show()
+                    this.trackRecorderActivity.startActivity(Intent(this.trackRecorderActivity, StartActivity::class.java))
+
+                    this.trackRecorderActivity.finish()
+                })
+
+                finishRecordingAlertDialogBuilder.show()
+            })
+        }
+
+        if(this.discardTrackRecordingMenuItem == null) {
+            this.discardTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_discard_currenttracking)
+
+            this.sessionSubscriptions.add(this.discardTrackRecordingMenuItem!!.clicks().subscribe{
+                        val discardRecordingAlertDialogBuilder = DiscardRecordingAlertDialogBuilder(this.trackRecorderActivity)
+                        discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
+                            _, _ ->
+                            this.trackRecorderSession!!.discardTracking()
+
+                            this.uninitializeSession()
+
+                            this.trackRecorderActivity.startActivity(Intent(this.trackRecorderActivity, StartActivity::class.java))
+
+                            this.trackRecorderActivity.finish()
+                        })
+
+                        discardRecordingAlertDialogBuilder.show()
+                    })
+        }
+    }
+
+    public fun destroy() {
+        this.trackRecorderServiceControllerSubscription.dispose()
+
+        this.uninitializeSession()
+    }
+
+    fun save() {
+        this.trackRecorderSession?.stateChanged?.last(TrackRecorderServiceState.Initializing)!!.subscribe{
+            it ->
+            if(it != TrackRecorderServiceState.Initializing) {
+                this.trackRecorderSession!!.saveTracking()
+            }
+        }
     }
 
     companion object {

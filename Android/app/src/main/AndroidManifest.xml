@@ -39,6 +39,7 @@
         <activity
             android:name=".views.activities.trackrecorder.TrackRecorderActivity"
             android:launchMode="singleTask"
+            android:label="@string/trackrecorderactivity_title"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
             android:name=".views.activities.start.StartActivity"

@@ -16,5 +16,9 @@ internal interface ILocationProvider {
 
     val isActive: Boolean
 
-    val locations: Observable<Location>
+    val activityChanged: Observable<Boolean>
+
+    val sequenceNumberOverridden: Observable<Int>
+
+    val locationsReceived: Observable<Location>
 }

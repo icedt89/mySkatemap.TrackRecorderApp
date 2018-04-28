@@ -1,6 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.Attachment
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import io.reactivex.Observable
@@ -21,8 +20,11 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
             this.trackRecorderService.currentTrackRecording!!.name = value
         }
 
-    public override val attachments: MutableList<Attachment>
-        get() = this.trackRecorderService.currentTrackRecording!!.attachments
+    public override var comment: String
+        get() = this.trackRecorderService.currentTrackRecording!!.comment
+        set(value) {
+            this.trackRecorderService.currentTrackRecording!!.comment = value
+        }
 
     public override fun resumeTracking() {
         this.trackRecorderService.resumeTracking()

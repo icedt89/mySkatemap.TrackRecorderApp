@@ -38,7 +38,7 @@ internal final class TestLocationProvider(private val context: Context,
 
                 val computedLocation = self.computeLocation()
 
-                self.postLocationUpdate(computedLocation)
+                self.publishLocationUpdate(computedLocation)
             }
         }
     }

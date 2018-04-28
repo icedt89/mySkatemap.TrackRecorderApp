@@ -13,19 +13,11 @@ internal final class LocationAvailabilityChangedBroadcastReceiver(context: Conte
     public val locationAvailabilityChanged: Observable<Boolean> = this.locationAvailabilityChangedSubject
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (context == null) {
-            throw IllegalArgumentException("context")
-        }
-
-        if (intent == null) {
-            throw IllegalArgumentException("intent")
-        }
-
-        if (intent.action != LocationAvailabilityChangedBroadcastReceiver.PROVIDERS_CHANGED) {
+        if (intent!!.action != LocationAvailabilityChangedBroadcastReceiver.PROVIDERS_CHANGED) {
             return
         }
 
-        val isLocationModeEnabled = context.isLocationServicesEnabled()
+        val isLocationModeEnabled = context!!.isLocationServicesEnabled()
 
         this.locationAvailabilityChangedSubject.onNext(isLocationModeEnabled)
     }
