@@ -31,7 +31,6 @@
     <string name="trackrecorderservice_notification_status_paused">Aufnahme pausiert</string>
     <string name="trackrecorderservice_notification_status_locationservicesunavailable">Standort nicht verfügbar</string>
     <string name="trackrecorderservice_notification_status_running">Läuft</string>
-    <string name="trackrecorderservice_notification_status_ready">Für Aufnahme bereit</string>
     <string name="trackrecorderservice_notification_action_resume">Fortfahren</string>
     <string name="trackrecorderservice_notification_action_pause">Pausieren</string>
     <string name="trackrecorderservice_notification_action_terminate">Beenden</string>

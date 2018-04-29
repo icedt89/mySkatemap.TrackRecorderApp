@@ -8,6 +8,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.UuidMoshaAdapt
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.GpxFileWriter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.GpxTrackWriter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.IGpxFileWriter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.IGpxTrackWriter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.FileSystemDirectoryNavigator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IDirectoryNavigator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppConfig
@@ -51,6 +55,18 @@ internal final class ApplicationModule(private val applicationContext: Context) 
         }
 
         return FusedLocationProvider(this.applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    public fun provideGpxFileWriter(gpxTrackWriter: IGpxTrackWriter): IGpxFileWriter {
+        return GpxFileWriter(gpxTrackWriter)
+    }
+
+    @Singleton
+    @Provides
+    public fun provideGpxTrackWriter(): IGpxTrackWriter {
+        return GpxTrackWriter()
     }
 
     @Singleton

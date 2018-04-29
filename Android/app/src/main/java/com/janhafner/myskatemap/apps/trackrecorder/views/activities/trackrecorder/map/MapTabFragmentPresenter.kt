@@ -64,6 +64,8 @@ internal final class MapTabFragmentPresenter(private val mapTabFragment: MapTabF
     }
 
     public fun destroy() {
+        this.trackRecorderServiceController.unbindService()
+
         this.trackRecorderServiceControllerSubscription.dispose()
 
         this.uninitializeSession()

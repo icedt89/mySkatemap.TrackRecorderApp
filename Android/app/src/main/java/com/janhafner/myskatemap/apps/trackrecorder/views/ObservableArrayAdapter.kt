@@ -2,11 +2,11 @@ package com.janhafner.myskatemap.apps.trackrecorder.views
 
 import android.content.Context
 import android.support.annotation.LayoutRes
+import android.util.ArrayMap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.ItemViewCreatedArgs
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -16,7 +16,7 @@ internal open class ObservableArrayAdapter<T>(context: Context, @LayoutRes priva
     : ArrayAdapter<T>(context, itemLayoutId, ArrayList<T>()) {
     protected val itemLayoutInflater: LayoutInflater = LayoutInflater.from(context)
 
-    protected val viewHolder: ViewHolder = ViewHolder()
+    protected val viewCache: MutableMap<Int, View> = ArrayMap<Int, View>()
 
     protected val itemViewCreatedSubject: PublishSubject<ItemViewCreatedArgs<View, T>> = PublishSubject.create<ItemViewCreatedArgs<View, T>>()
     public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject
@@ -28,11 +28,11 @@ internal open class ObservableArrayAdapter<T>(context: Context, @LayoutRes priva
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val inflater = this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-        var itemLayout = this.viewHolder.tryRetrieve<View>(position)
+        var itemLayout = this.viewCache[position]
         if(itemLayout == null) {
             itemLayout = inflater.inflate(this.itemLayoutId, parent, false)
 
-            viewHolder.store(position, itemLayout)
+            this.viewCache[position] = itemLayout
         }
 
         val item = this.getItem(position)

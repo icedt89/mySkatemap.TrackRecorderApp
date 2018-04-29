@@ -8,8 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
 import android.provider.Settings
-import android.view.View
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ViewHolder
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.ContentInfo
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
@@ -103,16 +101,10 @@ internal fun ITrackRecorderMap.consumeLocations(): Consumer<List<Location>> {
     })
 }
 
-internal fun ViewHolder.store(view: View): ViewHolder {
-    this.store(view.id, view)
-
-    return this
-}
-
 internal fun ITrackRecorderMap.consumeReset(): Consumer<TrackRecorderServiceState> {
     return Consumer({
         currentState ->
-            if (currentState == TrackRecorderServiceState.Initializing) {
+            if (currentState == TrackRecorderServiceState.Idle) {
                 this.clearTrack()
             }
     })

@@ -56,7 +56,7 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
         this.sessionSubscriptions.addAll(
             Observable.switchOnNext(Observable.fromArray(trackRecorderSession.stateChanged
                     .filter {
-                        it == TrackRecorderServiceState.Initializing
+                        it == TrackRecorderServiceState.Idle
                     }
                     .map {
                         0
@@ -111,6 +111,8 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
     }
 
     public fun destroy() {
+        this.trackRecorderServiceController.unbindService()
+
         this.trackRecorderServiceControllerSubscription.dispose()
 
         this.uninitializeSession()

@@ -45,20 +45,24 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
                 val uninitializedSession: ITrackRecordingSession
 
                 val mode = ActivityStartMode.valueOf(this.trackRecorderActivity.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
-                val newTrackRecordingCreated = mode == ActivityStartMode.StartNew || (mode == ActivityStartMode.TryResume && !this.trackService.hasCurrentTrackRecording())
-                if (newTrackRecordingCreated) {
+                val createNewtrackRecording = mode == ActivityStartMode.StartNew || (mode == ActivityStartMode.TryResume && !this.trackService.hasCurrentTrackRecording())
+                if (createNewtrackRecording) {
                     val newTrackRecording = this.createNewTrackRecording()
 
                     uninitializedSession = binder.useTrackRecording(newTrackRecording)
                 } else {
-                    val restoredTrackRecording = this.trackService.getCurrentTrackRecording()
+                    if(binder.currentSession == null) {
+                        val restoredTrackRecording = this.trackService.getCurrentTrackRecording()
 
-                    uninitializedSession = binder.useTrackRecording(restoredTrackRecording)
+                        uninitializedSession = binder.useTrackRecording(restoredTrackRecording)
+                    } else {
+                        uninitializedSession = binder.currentSession!!
+                    }
                 }
 
                 this.trackRecorderSession = this.getInitializedSession(uninitializedSession)
 
-                if(newTrackRecordingCreated){
+                if(createNewtrackRecording){
                     if (this.trackRecorderActivity.isLocationServicesEnabled()) {
                         this.trackRecorderSession!!.resumeTracking()
                     } else {
@@ -84,7 +88,7 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
         this.sessionSubscriptions.addAll(
             this.trackRecorderActivity.trackrecorderactivity_togglerecording_floatingactionbutton.clicks()
                   .subscribe {
-                      trackRecorderSession.stateChanged.first(TrackRecorderServiceState.Initializing).subscribe {
+                      trackRecorderSession.stateChanged.first(TrackRecorderServiceState.Idle).subscribe {
                           state ->
                           if(state == TrackRecorderServiceState.Paused) {
                               if(this.trackRecorderActivity.isLocationServicesEnabled()) {
@@ -190,21 +194,23 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
     }
 
     public fun destroy() {
+        this.trackRecorderServiceController.unbindService()
+
         this.trackRecorderServiceControllerSubscription.dispose()
 
         this.uninitializeSession()
     }
 
     fun save() {
-        this.trackRecorderSession?.stateChanged?.last(TrackRecorderServiceState.Initializing)!!.subscribe{
+        this.trackRecorderSession?.stateChanged?.last(TrackRecorderServiceState.Idle)!!.subscribe{
             it ->
-            if(it != TrackRecorderServiceState.Initializing) {
+            if(it != TrackRecorderServiceState.Idle) {
                 this.trackRecorderSession!!.saveTracking()
             }
         }
     }
 
     companion object {
-        public const val ACTIVITY_START_MODE_KEY: String = "mode"
+        public const val ACTIVITY_START_MODE_KEY: String = "ActivityStartMode"
     }
 }

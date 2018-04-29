@@ -34,7 +34,6 @@
     <string name="trackrecorderservice_notification_status_paused">Recording paused</string>
     <string name="trackrecorderservice_notification_status_locationservicesunavailable">Location services unavailable</string>
     <string name="trackrecorderservice_notification_status_running">Running</string>
-    <string name="trackrecorderservice_notification_status_ready">Ready for recording</string>
     <string name="trackrecorderservice_notification_action_resume">Resume</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
     <string name="trackrecorderservice_notification_action_terminate">Terminate</string>

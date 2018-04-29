@@ -9,11 +9,13 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrac
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ActivityStartMode
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
 import org.joda.time.Period
 
 internal final class TrackRecorderServiceNotification(private val trackRecorderService: TrackRecorderService, public var trackDistanceUnitFormatter: ITrackDistanceUnitFormatter) {
-    public var state: TrackRecorderServiceState = TrackRecorderServiceState.Initializing
+    public var state: TrackRecorderServiceState = TrackRecorderServiceState.Idle
 
     public var durationOfRecording: Period? = null
 
@@ -23,7 +25,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
 
     public var flashColorOnLocationUnavailableState: Int? = AppSettings.DEFAULT_NOTIFICATION_FLASH_COLOR_ON_BACKGROUND_STOP
 
-    public var userInitiatedServiceTerminationAllowed: Boolean = false
+    public var isBound: Boolean = false
 
     private val notificationCompatBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this.trackRecorderService, TrackRecorderServiceNotificationChannel.ID)
 
@@ -35,6 +37,8 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
         this.notificationCompatBuilder.setOngoing(true)
 
         val intent = Intent(this.trackRecorderService, TrackRecorderActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        intent.putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.TryResume.toString())
+
         val pendingIntent = PendingIntent.getActivity(this.trackRecorderService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         this.notificationCompatBuilder.setContentIntent(pendingIntent)
@@ -42,8 +46,6 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
 
     public fun update() {
         when(this.state) {
-            TrackRecorderServiceState.Ready ->
-                this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_ready))
             TrackRecorderServiceState.Running ->
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_running))
             TrackRecorderServiceState.LocationServicesUnavailable -> {
@@ -69,7 +71,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
 
         this.notificationCompatBuilder.mActions.clear()
 
-        if (this.state != TrackRecorderServiceState.Initializing) {
+        if (this.state != TrackRecorderServiceState.Idle) {
             val contentText = this.buildContentText()
             this.notificationCompatBuilder.setContentText(contentText)
 
@@ -80,7 +82,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
             }
         }
 
-        if(this.userInitiatedServiceTerminationAllowed){
+        if(this.isBound && this.state != TrackRecorderServiceState.Running){
             this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_action_track_recorder_service_terminate, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_terminate), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_TERMINATE, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
         }
 
@@ -108,6 +110,10 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
         public const val ACTION_RESUME = "trackrecorderservice.action.resume"
 
         public const val ACTION_PAUSE = "trackrecorderservice.action.pause"
+
+        public const val ACTION_FINISH = "traclrecorderservoce.action.finish"
+
+        public const val ACTION_DISCARD = "traclrecorderservoce.action.discard"
 
         public const val ACTION_TERMINATE = "trackrecorderservice.action.terminate"
 
