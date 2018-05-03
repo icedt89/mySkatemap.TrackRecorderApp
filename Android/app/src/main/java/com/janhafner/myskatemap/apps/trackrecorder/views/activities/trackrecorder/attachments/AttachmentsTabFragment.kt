@@ -8,11 +8,11 @@ import android.support.v7.widget.AppCompatImageView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.view.longClicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.getContentInfo
+import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_attachments_tab.*
 
@@ -24,6 +24,14 @@ internal final class AttachmentsTabFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // this.setHasOptionsMenu(true)
+    }
+
+    public override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+
+        if(this.activity is INeedFragmentVisibilityInfo) {
+            (this.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this, isVisibleToUser)
+        }
     }
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -63,17 +71,9 @@ internal final class AttachmentsTabFragment : Fragment() {
                                     presenter.setSelectedAttachments(o)
                             }*/
                         }
-                },
-
-                //listAdapter.subscribeTo(this.presenter.attachmentsChanged),
-
-                this.trackrecorderactivity_tab_attachments_chooseimage_floatingactionbutton.clicks().subscribe {
-                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                    intent.type = "image/*"
-                    intent.addCategory(Intent.CATEGORY_OPENABLE)
-
-                    this.startActivityForResult(intent, 1)
                 }
+
+                // listAdapter.subscribeTo(this.presenter.attachmentsChanged),
         )
     }
 

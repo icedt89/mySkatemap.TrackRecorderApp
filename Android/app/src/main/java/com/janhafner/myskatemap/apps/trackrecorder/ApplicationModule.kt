@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.content.Context
+import android.nfc.NfcAdapter
 import android.preference.PreferenceManager
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimeDateTimeMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimePeriodMoshaAdapter
@@ -67,6 +68,12 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     @Provides
     public fun provideGpxTrackWriter(): IGpxTrackWriter {
         return GpxTrackWriter()
+    }
+
+    @Singleton
+    @Provides
+    public fun provideNfcAdapter(): NfcAdapter? {
+        return NfcAdapter.getDefaultAdapter(this.applicationContext)
     }
 
     @Singleton

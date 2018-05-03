@@ -76,6 +76,7 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
                     this.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
                 }
             },
+
             this.dataTabFragment.trackrecorderactivity_tab_data_trackname.textChanges().subscribe{
                 trackRecorderSession.name = it.toString()
             },

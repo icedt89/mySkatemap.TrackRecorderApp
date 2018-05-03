@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
 import android.content.Intent
+import android.support.v4.app.Fragment
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -13,9 +14,13 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSessi
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.start.StartActivity
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.AttachmentsTabFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.DiscardRecordingAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.FinishRecordingAlertDialogBuilder
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -26,7 +31,11 @@ import org.joda.time.format.DateTimeFormatter
 
 internal final class TrackRecorderActivityPresenter(private val trackRecorderActivity: TrackRecorderActivity,
                                                     private val trackService: ITrackService,
-                                                    private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>) {
+                                                    private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>) : INeedFragmentVisibilityInfo {
+    private val mainFloatingActionButtonSubscriptions: CompositeDisposable = CompositeDisposable()
+
+    private var fragment: Fragment? = null
+
     private val trackRecorderServiceControllerSubscription: Disposable
 
     private var trackRecorderSession: ITrackRecordingSession? = null
@@ -69,6 +78,10 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
                         ShowLocationServicesSnackbar.make(this.trackRecorderActivity, this.trackRecorderActivity.currentFocus).show()
                     }
                 }
+
+                if(this.fragment != null) {
+                    this.setupMainFloatingActionButton(this.fragment!!, true)
+                }
             } else {
                 this.uninitializeSession()
             }
@@ -86,37 +99,7 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
         this.sessionSubscriptions.addAll(
-            this.trackRecorderActivity.trackrecorderactivity_togglerecording_floatingactionbutton.clicks()
-                  .subscribe {
-                      trackRecorderSession.stateChanged.first(TrackRecorderServiceState.Idle).subscribe {
-                          state ->
-                          if(state == TrackRecorderServiceState.Paused) {
-                              if(this.trackRecorderActivity.isLocationServicesEnabled()) {
-                                  trackRecorderSession.resumeTracking()
-                              }else{
-                                  ShowLocationServicesSnackbar.make(this.trackRecorderActivity, this.trackRecorderActivity.currentFocus).show()
-                              }
-                          } else {
-                              trackRecorderSession.pauseTracking()
-                          }
-                      }
-                  },
-
-
-                trackRecorderSession.stateChanged
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            this.trackRecorderActivity.trackrecorderactivity_togglerecording_floatingactionbutton.isEnabled = it == TrackRecorderServiceState.Running || it == TrackRecorderServiceState.Paused
-
-                            var iconId = R.drawable.ic_action_track_recorder_recording_startresume
-                            if (it == TrackRecorderServiceState.Running) {
-                                iconId = R.drawable.ic_action_track_recorder_recording_pause
-                            }
-
-                            this.trackRecorderActivity.trackrecorderactivity_togglerecording_floatingactionbutton.setImageResource(iconId)
-                        },
-
-                trackRecorderSession.stateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{
+            trackRecorderSession.stateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{
                     currentState ->
                     when (currentState) {
                         TrackRecorderServiceState.Running -> {
@@ -145,6 +128,7 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
 
     private fun uninitializeSession() {
         this.sessionSubscriptions.clear()
+        this.mainFloatingActionButtonSubscriptions.clear()
 
         this.trackRecorderSession = null
     }
@@ -208,6 +192,60 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
                 this.trackRecorderSession!!.saveTracking()
             }
         }
+    }
+
+
+    private fun setupMainFloatingActionButton(fragment: Fragment, isVisibleToUser: Boolean){
+        this.mainFloatingActionButtonSubscriptions.clear()
+        this.fragment = fragment
+
+        if(this.trackRecorderSession != null && isVisibleToUser) {
+            if(fragment is DataTabFragment || fragment is MapTabFragment) {
+                this.mainFloatingActionButtonSubscriptions.addAll(
+                        this.trackRecorderSession!!.stateChanged
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.isEnabled = it == TrackRecorderServiceState.Running || it == TrackRecorderServiceState.Paused
+
+                                    var iconId = R.drawable.ic_action_track_recorder_recording_startresume
+                                    if (it == TrackRecorderServiceState.Running) {
+                                        iconId = R.drawable.ic_action_track_recorder_recording_pause
+                                    }
+
+                                    this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.setImageResource(iconId)
+                                },
+                        this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.clicks()
+                                .subscribe {
+                                    this.trackRecorderSession!!.stateChanged.first(TrackRecorderServiceState.Idle).subscribe {
+                                        state ->
+                                        if(state == TrackRecorderServiceState.Paused) {
+                                            if(this.trackRecorderActivity.isLocationServicesEnabled()) {
+                                                this.trackRecorderSession!!.resumeTracking()
+                                            }else{
+                                                ShowLocationServicesSnackbar.make(this.trackRecorderActivity, this.trackRecorderActivity.currentFocus).show()
+                                            }
+                                        } else {
+                                            this.trackRecorderSession!!.pauseTracking()
+                                        }
+                                    }
+                                }
+                )
+
+            } else if(fragment is AttachmentsTabFragment) {
+                this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.setImageResource(R.drawable.ic_action_track_recorder_attachments_addfromlibrary)
+
+                this.mainFloatingActionButtonSubscriptions.addAll(
+                        this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.clicks()
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                }
+                )
+            }
+        }
+    }
+
+    public override fun onFragmentVisibilityChange(fragment: Fragment, isVisibleToUser: Boolean) {
+        this.setupMainFloatingActionButton(fragment, isVisibleToUser)
     }
 
     companion object {
