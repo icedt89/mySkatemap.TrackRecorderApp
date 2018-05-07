@@ -22,8 +22,6 @@ internal final class AttachmentsTabFragment : Fragment() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // this.setHasOptionsMenu(true)
     }
 
     public override fun setUserVisibleHint(isVisibleToUser: Boolean) {

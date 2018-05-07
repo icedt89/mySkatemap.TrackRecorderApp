@@ -16,4 +16,6 @@ internal interface IFileAccessor {
     fun getContent(): ByteArray?
 
     fun delete(): IDirectoryNavigator
+
+    fun copyTo(directoryNavigator: IDirectoryNavigator): IFileAccessor
 }

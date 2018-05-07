@@ -1,5 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
+import android.app.Activity
 import android.content.Intent
 import android.support.v4.app.Fragment
 import android.view.Menu
@@ -8,6 +9,7 @@ import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.getContentInfo
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
@@ -28,6 +30,8 @@ import kotlinx.android.synthetic.main.activity_track_recorder.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
+
+
 
 internal final class TrackRecorderActivityPresenter(private val trackRecorderActivity: TrackRecorderActivity,
                                                     private val trackService: ITrackService,
@@ -214,14 +218,15 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
 
                                     this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.setImageResource(iconId)
                                 },
+
                         this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.clicks()
                                 .subscribe {
                                     this.trackRecorderSession!!.stateChanged.first(TrackRecorderServiceState.Idle).subscribe {
                                         state ->
                                         if(state == TrackRecorderServiceState.Paused) {
-                                            if(this.trackRecorderActivity.isLocationServicesEnabled()) {
+                                            if (this.trackRecorderActivity.isLocationServicesEnabled()) {
                                                 this.trackRecorderSession!!.resumeTracking()
-                                            }else{
+                                            } else {
                                                 ShowLocationServicesSnackbar.make(this.trackRecorderActivity, this.trackRecorderActivity.currentFocus).show()
                                             }
                                         } else {
@@ -230,7 +235,6 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
                                     }
                                 }
                 )
-
             } else if(fragment is AttachmentsTabFragment) {
                 this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.setImageResource(R.drawable.ic_action_track_recorder_attachments_addfromlibrary)
 
@@ -238,9 +242,22 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
                         this.trackRecorderActivity.trackrecorderactivity_main_floatingactionbutton.clicks()
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe {
+                                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                                    intent.addCategory(Intent.CATEGORY_OPENABLE)
+                                    intent.type = "image/*"
+
+                                    this.trackRecorderActivity.startActivityForResult(intent, 42)
                                 }
                 )
             }
+        }
+    }
+
+    public fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == 42 && resultCode == Activity.RESULT_OK) {
+            val contentInfo = this.trackRecorderActivity.contentResolver.getContentInfo(data!!.data)
+            val o = contentInfo
+            val p = o
         }
     }
 

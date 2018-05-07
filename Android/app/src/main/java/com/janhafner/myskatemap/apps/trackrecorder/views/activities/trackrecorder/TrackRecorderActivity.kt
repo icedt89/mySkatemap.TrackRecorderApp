@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
@@ -99,6 +100,9 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
         return true
     }
 
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        this.presenter.onActivityResult(requestCode, resultCode, data)
+    }
 
     public override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)

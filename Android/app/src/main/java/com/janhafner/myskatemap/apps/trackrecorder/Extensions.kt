@@ -9,6 +9,7 @@ import android.os.Build
 import android.provider.OpenableColumns
 import android.provider.Settings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.ContentInfo
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.JsonRestApiClient
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
@@ -22,7 +23,38 @@ import com.karumi.dexter.listener.single.BasePermissionListener
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.functions.Consumer
+import okhttp3.Response
 import org.joda.time.DateTime
+
+internal fun <TResponse> JsonRestApiClient.get(url: String, responseBodyClassType: Class<TResponse>): TResponse? {
+    val response = this.send(url, "GET", null)
+
+    return this.fromJsonResponseBody(response.body(), responseBodyClassType)
+}
+
+internal fun JsonRestApiClient.delete(url: String): Response {
+    return this.send(url, "DELETE", null)
+}
+
+internal fun <TRequest: Any, TResponse> JsonRestApiClient.post(url: String, body: TRequest, responseBodyClassType: Class<TResponse>): TResponse? {
+    val response = this.send(url, "POST", body)
+
+    return this.fromJsonResponseBody(response.body(), responseBodyClassType)
+}
+
+internal fun <TRequest: Any> JsonRestApiClient.post(url: String, body: TRequest? = null): Response {
+    return this.send(url, "POST", body)
+}
+
+internal fun <TRequest: Any, TResponse> JsonRestApiClient.put(url: String, body: TRequest, responseBodyClassType: Class<TResponse>): TResponse? {
+    val response = this.send(url, "PUT", body)
+
+    return this.fromJsonResponseBody(response.body(), responseBodyClassType)
+}
+
+internal fun <TRequest: Any> JsonRestApiClient.put(url: String, body: TRequest? = null): Response {
+    return this.send(url, "PUT", body)
+}
 
 internal fun Context.startLocationSourceSettingsActivity() {
     this.startActivity(android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
@@ -179,7 +211,7 @@ internal fun Activity.checkWriteExternalStoragePermission(): Observable<Boolean>
 }
 
 internal fun ContentResolver.getContentInfo(uri: Uri): ContentInfo {
-    val cursor = this.query(uri, null, null, null, null)
+    val cursor = this.query(uri, arrayListOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE).toTypedArray(), null, null, null)
 
     val displayNameColumnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
     val sizeColumnIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
