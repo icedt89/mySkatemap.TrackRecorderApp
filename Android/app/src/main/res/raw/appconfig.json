@@ -1,4 +1,5 @@
 {
   "forceUsingOpenStreetMap": false,
-  "trackColor": "#FFFF3A3C"
+  "trackColor": "#FFFF3A3C",
+  "useFakeLiveLocationTrackingService": true
 }

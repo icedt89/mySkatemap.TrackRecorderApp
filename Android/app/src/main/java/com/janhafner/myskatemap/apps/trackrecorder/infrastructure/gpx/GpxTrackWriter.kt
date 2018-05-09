@@ -1,13 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx
 
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
-import java.io.OutputStream
-import java.io.OutputStreamWriter
+import java.io.Writer
 
 internal final class GpxTrackWriter : IGpxTrackWriter {
-    public override fun writeGpxTrack(trackRecording: TrackRecording, stream: OutputStream) {
-        val streamWriter = OutputStreamWriter(stream, Charsets.UTF_8)
-
+    public override fun writeGpxTrack(trackRecording: TrackRecording, streamWriter: Writer) {
         streamWriter.write("<trk>")
         streamWriter.write("<name>${trackRecording.name}</name>")
         streamWriter.write("<desc>${trackRecording.comment}</desc>")

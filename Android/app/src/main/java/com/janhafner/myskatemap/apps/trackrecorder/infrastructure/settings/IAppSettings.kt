@@ -10,4 +10,6 @@ internal interface IAppSettings: IAppSettingsChanged {
     var notificationFlashColorOnBackgroundStop: Int
 
     var appUiLocale: String
+
+    var allowLiveTracking: Boolean
 }

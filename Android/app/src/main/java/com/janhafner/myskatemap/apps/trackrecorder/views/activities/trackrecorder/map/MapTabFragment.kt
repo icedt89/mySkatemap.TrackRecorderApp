@@ -12,20 +12,17 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.Servic
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment
 import javax.inject.Inject
 
 
 internal final class MapTabFragment: Fragment() {
-    private lateinit var presenter: MapTabFragmentPresenter
+    private var presenter: MapTabFragmentPresenter? = null
 
     @Inject
     public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>
 
     @Inject
     public lateinit var trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory
-
-    public lateinit var trackRecorderMapFragment: TrackRecorderMapFragment
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_map_tab, container, false)
@@ -34,8 +31,8 @@ internal final class MapTabFragment: Fragment() {
     public override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
 
-        if(this.activity is INeedFragmentVisibilityInfo) {
-            (this.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this, isVisibleToUser)
+        if(this.presenter != null) {
+            this.presenter!!.setUserVisibleHint(isVisibleToUser)
         }
     }
 
@@ -44,16 +41,10 @@ internal final class MapTabFragment: Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.trackRecorderMapFragment = this.trackRecorderMapFragmentFactory.getFragment()
-
-        this.childFragmentManager.beginTransaction()
-                .replace(R.id.fragment_track_recorder_map_map_placeholder, this.trackRecorderMapFragment)
-                .commit()
-
-        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController)
+        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragmentFactory)
     }
 
-    override fun onAttach(context: Context?) {
+    public override fun onAttach(context: Context?) {
         super.onAttach(context)
 
         if(this.activity is INeedFragmentVisibilityInfo) {
@@ -64,6 +55,6 @@ internal final class MapTabFragment: Fragment() {
     public override fun onDestroyView() {
         super.onDestroyView()
 
-        this.presenter.destroy()
+        this.presenter!!.destroy()
     }
 }

@@ -1,8 +1,11 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.content.Context
+import android.location.LocationManager
 import android.nfc.NfcAdapter
 import android.preference.PreferenceManager
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimeDateTimeMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimePeriodMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.UuidMoshaAdapter
@@ -15,6 +18,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.IGpxFileWr
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.IGpxTrackWriter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.FileSystemDirectoryNavigator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IDirectoryNavigator
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.FakeLiveLocationTrackingService
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveLocationTrackingService
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.JsonRestApiClient
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.LiveLocationTrackingService
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppConfig
@@ -32,14 +39,26 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFra
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
 internal final class ApplicationModule(private val applicationContext: Context) {
     @Singleton
     @Provides
-    public fun provideLocationProvider(): ILocationProvider {
-        val locationProviderTypeName = TestLocationProvider::class.java.name
+    public fun provideLocationManager() : LocationManager {
+        return this.applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    }
+
+    @Singleton
+    @Provides
+    public fun provideFusedLocationProviderClient() : FusedLocationProviderClient {
+        return LocationServices.getFusedLocationProviderClient(this.applicationContext)
+    }
+
+    @Provides
+    public fun provideLocationProvider(fusedLocationProviderClient: FusedLocationProviderClient, locationManager: LocationManager, appSettings: IAppSettings): ILocationProvider {
+        val locationProviderTypeName = appSettings.locationProviderTypeName
 
         if (locationProviderTypeName == TestLocationProvider::class.java.name) {
             val initialLocation = Location(-1)
@@ -52,10 +71,29 @@ internal final class ApplicationModule(private val applicationContext: Context) 
         }
 
         if (locationProviderTypeName == LegacyLocationProvider::class.java.name) {
-            return LegacyLocationProvider(this.applicationContext)
+            return LegacyLocationProvider(locationManager)
         }
 
-        return FusedLocationProvider(this.applicationContext)
+        return FusedLocationProvider(fusedLocationProviderClient)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideLiveLocationTrackingService(jsonRestApiClient: JsonRestApiClient, appConfig: IAppConfig) : ILiveLocationTrackingService {
+        if(appConfig.useFakeLiveLocationTrackingService) {
+            return FakeLiveLocationTrackingService()
+        }
+
+        return LiveLocationTrackingService(jsonRestApiClient)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideJsonRestApiClient(moshi: Moshi) : JsonRestApiClient {
+        val okHttpClient = OkHttpClient.Builder()
+                .build()
+
+        return JsonRestApiClient(okHttpClient, moshi)
     }
 
     @Singleton
@@ -122,7 +160,7 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     @Provides
     @Singleton
     public fun provideAppSettings(): IAppSettings {
-        val sharedPreferences  =PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
 
         val appSettings = AppSettings.bindToSharedPreferences(sharedPreferences)
 

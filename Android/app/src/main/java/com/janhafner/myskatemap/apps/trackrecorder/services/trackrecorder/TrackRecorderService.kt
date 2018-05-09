@@ -9,13 +9,17 @@ import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveLocationTrackingService
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveTrackingSession
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.*
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.toSimpleLocation
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
 import org.joda.time.Period
 import java.util.concurrent.TimeUnit
@@ -51,6 +55,13 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     @Inject
     public lateinit var appSettings: IAppSettings
+
+    @Inject
+    public lateinit var liveLocationTrackingService: ILiveLocationTrackingService
+
+    private var liveTrackingSession: ILiveTrackingSession? = null
+
+    private var liveTrackingSessionSubscription: Disposable? = null
 
     public override var currentSession: ITrackRecordingSession? = null
         private set
@@ -164,6 +175,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     private fun closeCurrentSession() {
         this.sessionSubscriptions.clear()
+        this.deactiveLiveTracking()
 
         this.currentSession = null
     }
@@ -212,6 +224,8 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     }
 
     private fun subscribeToSession() {
+        this.tryActivateLiveTracking(this.appSettings.allowLiveTracking)
+
         this.sessionSubscriptions.addAll(
             this.currentSession!!.recordingTimeChanged.subscribe {
                 currentRecordingTime ->
@@ -231,7 +245,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                         })
                     },
             this.currentSession!!.locationsChanged
-                    .buffer(1, TimeUnit.SECONDS)
+                    .buffer(5, TimeUnit.SECONDS)
                     .filter{
                         it.any()
                     }
@@ -301,24 +315,65 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
 
         this.subscriptions.add(this.appSettings.appSettingsChanged.subscribe {
-            if(it.propertyName == "notificationFlashColorOnBackgroundStop" && it.hasChanged) {
+            if(it.hasChanged && it.propertyName == "notificationFlashColorOnBackgroundStop") {
                 this.trackRecorderServiceNotification.flashColorOnLocationUnavailableState = it.newValue as Int?
 
                 this.trackRecorderServiceNotification.update()
-            } else if(it.propertyName == "vibrateOnBackgroundStop" && it.hasChanged) {
+            } else if(it.hasChanged && it.propertyName == "vibrateOnBackgroundStop") {
                 this.trackRecorderServiceNotification.vibrateOnLocationUnavailableState = it.newValue as Boolean
 
                 this.trackRecorderServiceNotification.update()
             }
 
-            if(it.propertyName == "trackDistanceUnitFormatterTypeName" && it.hasChanged) {
+            if(it.hasChanged && it.propertyName == "trackDistanceUnitFormatterTypeName") {
                 this.trackRecorderServiceNotification.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
 
                 this.trackRecorderServiceNotification.update()
             }
+
+            if(it.hasChanged && it.propertyName == "allowLiveTracking") {
+                val value = it.newValue as Boolean
+
+                if(!value && this.liveTrackingSession != null) {
+                    this.liveTrackingSession!!.endSession()
+
+                    this.liveTrackingSession = null
+                    this.liveTrackingSessionSubscription?.dispose()
+                } else {
+                    this.tryActivateLiveTracking(value)
+                }
+            }
         })
 
         this.changeState(TrackRecorderServiceState.Idle)
+    }
+
+    private fun tryActivateLiveTracking(allowLiveTracking: Boolean): Boolean {
+        if(allowLiveTracking && this.liveTrackingSession == null && this.currentSession != null) {
+            this.liveTrackingSession = this.liveLocationTrackingService.createSession()
+
+            this.liveTrackingSessionSubscription = this.currentSession!!.locationsChanged
+                    .buffer(5, TimeUnit.SECONDS)
+                    .filter{
+                        it.any()
+                    }
+                    .map {
+                        it.map {
+                            it.toSimpleLocation()
+                        }
+                    }
+                    .subscribe {
+                        this.liveTrackingSession!!.sendLocations(it)
+                    }
+
+            return true
+        }
+
+        return false
+    }
+
+    private fun deactiveLiveTracking() {
+        this.liveTrackingSessionSubscription?.dispose()
     }
 
     public override fun onBind(intent: Intent?): IBinder {

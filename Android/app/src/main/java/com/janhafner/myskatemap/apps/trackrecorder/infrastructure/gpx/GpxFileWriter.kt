@@ -16,10 +16,10 @@ internal final class GpxFileWriter(private val gpxTrackWriter: IGpxTrackWriter) 
         streamWriter.write("<author>")
         streamWriter.write("<name>?CREATED WITH DUMMY (NAME OF APP)?</name>")
         streamWriter.write("</author>")
-        streamWriter.write("<metadata>")
+        streamWriter.write("</metadata>")
 
         for(trackRecording in trackRecordings) {
-            this.gpxTrackWriter.writeGpxTrack(trackRecording, stream)
+            this.gpxTrackWriter.writeGpxTrack(trackRecording, streamWriter)
         }
 
         streamWriter.write("</gpx>")

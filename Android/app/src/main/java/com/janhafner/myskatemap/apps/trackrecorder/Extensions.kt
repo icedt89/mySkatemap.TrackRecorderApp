@@ -9,7 +9,6 @@ import android.os.Build
 import android.provider.OpenableColumns
 import android.provider.Settings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.ContentInfo
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.JsonRestApiClient
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
@@ -23,38 +22,7 @@ import com.karumi.dexter.listener.single.BasePermissionListener
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.functions.Consumer
-import okhttp3.Response
 import org.joda.time.DateTime
-
-internal fun <TResponse> JsonRestApiClient.get(url: String, responseBodyClassType: Class<TResponse>): TResponse? {
-    val response = this.send(url, "GET", null)
-
-    return this.fromJsonResponseBody(response.body(), responseBodyClassType)
-}
-
-internal fun JsonRestApiClient.delete(url: String): Response {
-    return this.send(url, "DELETE", null)
-}
-
-internal fun <TRequest: Any, TResponse> JsonRestApiClient.post(url: String, body: TRequest, responseBodyClassType: Class<TResponse>): TResponse? {
-    val response = this.send(url, "POST", body)
-
-    return this.fromJsonResponseBody(response.body(), responseBodyClassType)
-}
-
-internal fun <TRequest: Any> JsonRestApiClient.post(url: String, body: TRequest? = null): Response {
-    return this.send(url, "POST", body)
-}
-
-internal fun <TRequest: Any, TResponse> JsonRestApiClient.put(url: String, body: TRequest, responseBodyClassType: Class<TResponse>): TResponse? {
-    val response = this.send(url, "PUT", body)
-
-    return this.fromJsonResponseBody(response.body(), responseBodyClassType)
-}
-
-internal fun <TRequest: Any> JsonRestApiClient.put(url: String, body: TRequest? = null): Response {
-    return this.send(url, "PUT", body)
-}
 
 internal fun Context.startLocationSourceSettingsActivity() {
     this.startActivity(android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
@@ -81,6 +49,43 @@ internal fun Location.clone(sequenceNumber: Int): Location {
     result.altitude = this.altitude
 
     return result
+}
+
+internal fun <TSource> Observable<TSource>.pairWithPrevious() : Observable<Pair<TSource?, TSource?>> {
+    return this.scan(Pair<TSource?, TSource?>(null, null), {
+        t1, t2 ->
+            Pair(t1.second, t2!!)
+    })
+    .filter {
+        // Filter seed [Pair(null, null)]
+        it.second != null
+    }
+}
+
+internal fun Observable<Location>.dropLocationsNotInDistance(maximumDistance: Double, includeEdge: Boolean = true): Observable<Location> {
+    return this.pairWithPrevious()
+            .filter{
+                if (it.first == null) {
+                    // Dont filter first real value [Pair(null, location)]
+                    true
+                } else {
+                    // Apply distance filter to suppress emitting values to close
+                    !it.second!!.isInDistance(it.first!!, maximumDistance, includeEdge)
+                }
+            }
+            .map {
+                it.second
+            }
+}
+
+internal fun Location.isInDistance(location: Location, maximumDistance: Double, includeEdge: Boolean = true): Boolean {
+    val distance = this.distanceTo(location)
+
+    if (includeEdge) {
+        return distance <= maximumDistance
+    }
+
+    return distance < maximumDistance
 }
 
 private fun Location.toLiteAndroidLocation(): android.location.Location {
@@ -118,12 +123,7 @@ internal fun android.location.Location.toLocation(sequenceNumber: Int): Location
 }
 
 internal fun Location.toSimpleLocation(): SimpleLocation {
-    var altitude = 0.0
-    if(this.altitude != null){
-        altitude = this.altitude!!
-    }
-
-    return SimpleLocation(this.latitude, this.longitude, altitude)
+    return SimpleLocation(this.latitude, this.longitude)
 }
 
 internal fun ITrackRecorderMap.consumeLocations(): Consumer<List<Location>> {

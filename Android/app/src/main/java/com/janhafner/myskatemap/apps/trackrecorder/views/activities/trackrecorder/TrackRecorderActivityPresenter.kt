@@ -1,10 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.support.design.widget.NavigationView
+import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
+import android.support.v4.view.ViewPager
+import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
@@ -17,6 +23,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings.SettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.start.StartActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.AttachmentsTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
@@ -30,7 +37,6 @@ import kotlinx.android.synthetic.main.activity_track_recorder.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
-
 
 
 internal final class TrackRecorderActivityPresenter(private val trackRecorderActivity: TrackRecorderActivity,
@@ -51,6 +57,46 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
     private var discardTrackRecordingMenuItem: MenuItem? = null
 
     init {
+        this.trackRecorderActivity.setContentView(R.layout.activity_track_recorder)
+
+        val trackRecorderToolbar = this.trackRecorderActivity.findViewById<Toolbar>(R.id.trackrecorderactivity_toolbar)
+        this.trackRecorderActivity.setSupportActionBar(trackRecorderToolbar)
+
+        val viewPager = this.trackRecorderActivity.findViewById<ViewPager>(R.id.trackrecorderactivity_toolbar_viewpager)
+        viewPager.adapter = TrackRecorderTabsAdapter(this.trackRecorderActivity, this.trackRecorderActivity.supportFragmentManager)
+        viewPager.offscreenPageLimit = viewPager.adapter!!.count
+
+        val tabLayout = this.trackRecorderActivity.findViewById<TabLayout>(R.id.trackrecorderactivity_toolbar_tablayout)
+        tabLayout.setupWithViewPager(viewPager)
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                val self = this@TrackRecorderActivityPresenter.trackRecorderActivity
+
+                if (self.currentFocus == null) {
+                    return
+                }
+
+                val inputMethodManager = trackRecorderActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(self.currentFocus?.windowToken, 0)
+            }
+        })
+
+        val navigationView = this.trackRecorderActivity.findViewById<NavigationView>(R.id.trackrecorderactivity_navigation)
+        navigationView.setNavigationItemSelectedListener(
+                object : NavigationView.OnNavigationItemSelectedListener {
+                    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+                        this@TrackRecorderActivityPresenter.trackRecorderActivity.startActivity(Intent(this@TrackRecorderActivityPresenter.trackRecorderActivity, SettingsActivity::class.java))
+
+                        return true
+                    }
+                })
+
         this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe{
             if(it) {
                 val binder = this.trackRecorderServiceController.currentBinder!!
@@ -137,7 +183,9 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
         this.trackRecorderSession = null
     }
 
-    public fun menuReady(menu: Menu) {
+    public fun onCreateOptionsMenu(menu: Menu) : Boolean {
+        this.trackRecorderActivity.menuInflater.inflate(R.menu.track_recorder_activity_toolbar_menu, menu)
+
         if(this.finishTrackRecordingMenuItem == null) {
             this.finishTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_finish_currenttracking)
 
@@ -179,6 +227,8 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
                         discardRecordingAlertDialogBuilder.show()
                     })
         }
+
+        return true
     }
 
     public fun destroy() {

@@ -11,6 +11,8 @@ internal final class AppConfig : IAppConfig {
 
     public override val trackColor: String = "#FFFF3A3C"
 
+    public override val useFakeLiveLocationTrackingService: Boolean = true
+
     companion object {
         public fun fromAppConfigJson(context: Context, moshi: Moshi): IAppConfig {
             val inputStream = context.resources.openRawResource(R.raw.appconfig)

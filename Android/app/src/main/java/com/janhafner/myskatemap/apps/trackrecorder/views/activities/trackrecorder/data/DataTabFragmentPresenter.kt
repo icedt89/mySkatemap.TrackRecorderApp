@@ -12,6 +12,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSessi
 import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -99,6 +100,12 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
         )
 
         return trackRecorderSession
+    }
+
+    public fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        if(this.dataTabFragment.activity is INeedFragmentVisibilityInfo) {
+            (this.dataTabFragment.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.dataTabFragment, isVisibleToUser)
+        }
     }
 
     private fun uninitializeSession() {

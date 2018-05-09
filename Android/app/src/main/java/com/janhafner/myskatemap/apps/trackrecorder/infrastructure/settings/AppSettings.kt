@@ -10,6 +10,15 @@ import io.reactivex.subjects.PublishSubject
 import java.util.*
 
 internal final class AppSettings: IAppSettings {
+    public override var allowLiveTracking: Boolean = DEFAULT_ALLOW_LIVE_TRACKING
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.appSettingsChangedSubject.onNext(PropertyChangedData("allowLiveTracking", oldValue, value))
+        }
+
     public override var appUiLocale: String = DEFAULT_APP_UI_LOCALE
         set(value) {
             val oldValue = field
@@ -61,6 +70,8 @@ internal final class AppSettings: IAppSettings {
     companion object {
         public val DEFAULT_LOCATION_PROVIDER_TYPE_NAME: String = FusedLocationProvider::class.java.name
 
+        public val DEFAULT_ALLOW_LIVE_TRACKING: Boolean = false
+
         public val DEFAULT_APP_UI_LOCALE: String = Locale.getDefault().language
 
         public const val DEFAULT_VIBRATE_ON_BACKGROUND_STOP: Boolean = true
@@ -70,10 +81,12 @@ internal final class AppSettings: IAppSettings {
 
         public val DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME: String = KilometersTrackDistanceUnitFormatter::class.java.name
 
+        public lateinit var sharedPreferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
+
         public fun bindToSharedPreferences(targetSharedPreferences: SharedPreferences): IAppSettings {
             val result = AppSettings()
 
-            targetSharedPreferences.registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
+            AppSettings.sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
                 when(key) {
                     "preference_units_distance" -> {
                         val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME)
@@ -94,8 +107,20 @@ internal final class AppSettings: IAppSettings {
                         val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_APP_UI_LOCALE)
                         result.appUiLocale = currentValue
                     }
+                    "preference_tracking_allow_live_tracking" -> {
+                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
+                        result.allowLiveTracking = currentValue
+                    }
                 }
             }
+
+            targetSharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
+
+            result.trackDistanceUnitFormatterTypeName = targetSharedPreferences.getString("preference_units_distance", AppSettings.DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME)
+            result.locationProviderTypeName = targetSharedPreferences.getString("preference_tracking_location_provider", AppSettings.DEFAULT_LOCATION_PROVIDER_TYPE_NAME)
+            result.vibrateOnBackgroundStop = targetSharedPreferences.getBoolean("preference_notifications_vibrate_on_background_stop", AppSettings.DEFAULT_VIBRATE_ON_BACKGROUND_STOP)
+            result.appUiLocale = targetSharedPreferences.getString("preference_app_ui_locale", AppSettings.DEFAULT_APP_UI_LOCALE)
+            result.allowLiveTracking = targetSharedPreferences.getBoolean("preference_tracking_allow_live_tracking", AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
 
             return result
         }

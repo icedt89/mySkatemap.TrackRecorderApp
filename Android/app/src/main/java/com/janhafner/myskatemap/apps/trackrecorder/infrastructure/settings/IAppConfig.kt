@@ -4,4 +4,6 @@ internal interface IAppConfig {
     val forceUsingOpenStreetMap: Boolean
 
     val trackColor: String
+
+    val useFakeLiveLocationTrackingService: Boolean
 }

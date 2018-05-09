@@ -1,14 +1,14 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import android.annotation.SuppressLint
-import android.content.Context
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
 
-internal final class FusedLocationProvider(context: Context): LocationProvider() {
-    private val fusedLocationProviderClient: FusedLocationProviderClient
-
+internal final class FusedLocationProvider(private val fusedLocationProviderClient: FusedLocationProviderClient): LocationProvider() {
     private val locationCallback: LocationCallback = object: LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val self = this@FusedLocationProvider
@@ -29,8 +29,6 @@ internal final class FusedLocationProvider(context: Context): LocationProvider()
         locationRequest.interval = 8000
         locationRequest.fastestInterval = 4000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-        this.fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
     }
 
     @SuppressLint("MissingPermission")

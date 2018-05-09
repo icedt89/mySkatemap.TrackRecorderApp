@@ -9,9 +9,7 @@ import android.location.LocationManager
 import android.os.Bundle
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
 
-internal final class LegacyLocationProvider(context: Context): LocationProvider() {
-    private val locationManager: LocationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
-
+internal final class LegacyLocationProvider(private val locationManager: LocationManager): LocationProvider() {
     private val locationListener = object: LocationListener {
         override fun onLocationChanged(receivedLocation: Location?) {
             if (receivedLocation == null) {

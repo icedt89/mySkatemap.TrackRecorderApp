@@ -11,12 +11,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrac
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import javax.inject.Inject
 
 internal final class DataTabFragment : Fragment() {
-    private lateinit var presenter: DataTabFragmentPresenter
+    private var presenter: DataTabFragmentPresenter? = null
 
     @Inject
     public lateinit var appSettings: IAppSettings
@@ -26,8 +24,6 @@ internal final class DataTabFragment : Fragment() {
 
     @Inject
     public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>
-
-    private var trackRecorderActivity: TrackRecorderActivity? = null
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_data_tab, container, false)
@@ -44,14 +40,14 @@ internal final class DataTabFragment : Fragment() {
     public override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
 
-        if(this.activity is INeedFragmentVisibilityInfo) {
-            (this.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this, isVisibleToUser)
+        if(this.presenter != null) {
+            this.presenter!!.setUserVisibleHint(isVisibleToUser)
         }
     }
 
     public override fun onDestroyView() {
         super.onDestroyView()
 
-        this.presenter.destroy()
+        this.presenter!!.destroy()
     }
 }

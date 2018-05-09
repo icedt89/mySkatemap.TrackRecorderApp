@@ -24,6 +24,11 @@
             android:entries="@array/settingsactivity_tracking_location_provider_names"
             android:entryValues="@array/settingsactivity_tracking_location_provider_values"
             android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider" />
+        <CheckBoxPreference
+            android:key="preference_tracking_allow_live_tracking"
+            android:summary="Deine derzeitig aufgezeichnete Strecke wird anonym an MySkatemap übertragen"
+            android:title="Live-Tracking aktivieren"
+            android:defaultValue="false" />
     </PreferenceCategory>
 
     <PreferenceCategory
