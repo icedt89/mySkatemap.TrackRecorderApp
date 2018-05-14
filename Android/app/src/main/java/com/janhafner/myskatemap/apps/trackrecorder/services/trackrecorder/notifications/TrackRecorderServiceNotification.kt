@@ -36,8 +36,9 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
         this.notificationCompatBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         this.notificationCompatBuilder.setOngoing(true)
 
-        val intent = Intent(this.trackRecorderService, TrackRecorderActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-        intent.putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.TryResume.toString())
+        val intent = Intent(this.trackRecorderService, TrackRecorderActivity::class.java)
+                .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                .putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.TryResume.toString())
 
         val pendingIntent = PendingIntent.getActivity(this.trackRecorderService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
@@ -46,6 +47,8 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
 
     public fun update() {
         when(this.state) {
+            TrackRecorderServiceState.Idle ->
+                return
             TrackRecorderServiceState.Running ->
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_running))
             TrackRecorderServiceState.LocationServicesUnavailable -> {
@@ -64,9 +67,6 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
             }
             TrackRecorderServiceState.Paused ->
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_paused))
-            else -> {
-                // Nothing happens here. Else branch exist only to prevent warning on compile Oo
-            }
         }
 
         this.notificationCompatBuilder.mActions.clear()
@@ -82,7 +82,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
             }
         }
 
-        if(this.isBound && this.state != TrackRecorderServiceState.Running){
+        if(!this.isBound && this.state != TrackRecorderServiceState.Running){
             this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_action_track_recorder_service_terminate, this.trackRecorderService.getString(R.string.trackrecorderservice_notification_action_terminate), PendingIntent.getService(this.trackRecorderService, 0, Intent(ACTION_TERMINATE, null, this.trackRecorderService, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
         }
 
@@ -110,10 +110,6 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
         public const val ACTION_RESUME = "trackrecorderservice.action.resume"
 
         public const val ACTION_PAUSE = "trackrecorderservice.action.pause"
-
-        public const val ACTION_FINISH = "traclrecorderservoce.action.finish"
-
-        public const val ACTION_DISCARD = "traclrecorderservoce.action.discard"
 
         public const val ACTION_TERMINATE = "trackrecorderservice.action.terminate"
 

@@ -37,13 +37,17 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".views.activities.start.StartActivity"
+            android:theme="@style/MySkatemap.TrackRecorder.StartActivityTheme" />
+        <activity
             android:name=".views.activities.trackrecorder.TrackRecorderActivity"
             android:launchMode="singleTask"
             android:label="@string/trackrecorderactivity_title"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
-            android:name=".views.activities.start.StartActivity"
-            android:theme="@style/MySkatemap.TrackRecorder.StartActivityTheme" />
+            android:name=".views.activities.tracklist.TrackListActivity"
+            android:label="Aufgenommene Strecken"/>
+
         <activity
             android:name=".views.activities.settings.SettingsActivity" />
 
@@ -53,6 +57,7 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
         <service
             android:name=".services.trackrecorder.TrackRecorderService"
             android:exported="false" />

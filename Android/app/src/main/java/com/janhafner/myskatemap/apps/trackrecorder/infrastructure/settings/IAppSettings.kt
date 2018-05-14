@@ -1,5 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings
 
+import java.util.*
+
 internal interface IAppSettings: IAppSettingsChanged {
     var trackDistanceUnitFormatterTypeName: String
 
@@ -12,4 +14,6 @@ internal interface IAppSettings: IAppSettingsChanged {
     var appUiLocale: String
 
     var allowLiveTracking: Boolean
+
+    var currentTrackRecordingId: UUID?
 }

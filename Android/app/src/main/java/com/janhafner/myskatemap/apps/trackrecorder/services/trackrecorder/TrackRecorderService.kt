@@ -6,12 +6,15 @@ import android.os.Handler
 import android.os.IBinder
 import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.calories.BurnedEnergyCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.calories.Sex
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveLocationTrackingService
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveTrackingSession
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics.TrackRecordingStatistic
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.location.*
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
@@ -52,6 +55,10 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     private val stateChangedSubject: BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault<TrackRecorderServiceState>(TrackRecorderServiceState.Idle)
 
     public var currentTrackRecording: TrackRecording? = null
+
+    public var currentTrackRecordingStatistic: TrackRecordingStatistic? = null
+
+    public var burnedEnergyCalculator: BurnedEnergyCalculator? = null
 
     @Inject
     public lateinit var appSettings: IAppSettings
@@ -139,8 +146,11 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackDistanceCalculator.clear()
 
-        this.trackService.deleteCurrentTrackRecording()
+        this.trackService.deleteTrackRecording(this.currentTrackRecording!!.id.toString())
+        // TODO
         this.currentTrackRecording = null
+        this.currentTrackRecordingStatistic = null
+        this.burnedEnergyCalculator = null
 
         this.changeState(TrackRecorderServiceState.Idle)
 
@@ -163,8 +173,10 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
         this.trackDistanceCalculator.clear()
 
-        this.trackService.deleteCurrentTrackRecording()
+        // TODO
         this.currentTrackRecording = null
+        this.currentTrackRecordingStatistic = null
+        this.burnedEnergyCalculator = null
 
         this.changeState(TrackRecorderServiceState.Idle)
 
@@ -178,12 +190,16 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.deactiveLiveTracking()
 
         this.currentSession = null
+
+        this.appSettings.currentTrackRecordingId = null
     }
 
     public override fun useTrackRecording(trackRecording: TrackRecording): ITrackRecordingSession {
         if (this.currentSession != null) {
             throw IllegalStateException()
         }
+
+        this.appSettings.currentTrackRecordingId = trackRecording.id
 
         var locationsChanged = this.locationProvider.locationsReceived.replay().autoConnect()
         if (trackRecording.locations.any()) {
@@ -212,6 +228,9 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     private fun createSessionCore(trackRecording: TrackRecording, recordingTimeChanged: Observable<Period>, locationsChanged: Observable<Location>) {
         this.currentTrackRecording = trackRecording
+        this.currentTrackRecordingStatistic = TrackRecordingStatistic()
+        // TODO
+        this.burnedEnergyCalculator  = BurnedEnergyCalculator(65.5f, 171, 28, Sex.Male, 7.5f)
 
         this.currentSession = TrackRecordingSession(
                 this.trackDistanceCalculator.distanceCalculated,
@@ -233,6 +252,22 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
                     this.trackRecorderServiceNotification.durationOfRecording = currentRecordingTime
             },
+
+            this.currentSession!!.locationsChanged
+                    .buffer(1, TimeUnit.SECONDS)
+                    .filter{
+                        it.any()
+                    }
+                    .subscribe {
+                        this.currentTrackRecordingStatistic!!.addAll(it)
+                    },
+
+            this.currentSession!!.recordingTimeChanged
+                    // TODO: .sample(5, TimeUnit.MINUTES)
+                    .sample(1, TimeUnit.SECONDS)
+                    .subscribe {
+                        this.burnedEnergyCalculator!!.calculate(it.seconds / 60)
+                    },
 
             this.currentSession!!.locationsChanged
                     .buffer(1, TimeUnit.SECONDS)
@@ -276,11 +311,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             throw IllegalStateException()
         }
 
-        if(this.trackService.hasCurrentTrackRecording()) {
-            this.trackService.saveCurrentTrackRecording()
-        } else {
-            this.trackService.saveAsCurrentTrackRecording(this.currentTrackRecording!!)
-        }
+        this.trackService.saveTrackRecording(this.currentTrackRecording!!)
     }
 
     private fun changeState(newState: TrackRecorderServiceState) {
@@ -377,19 +408,29 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     }
 
     public override fun onBind(intent: Intent?): IBinder {
-        this.trackRecorderServiceNotification.isBound = false
-        this.trackRecorderServiceNotification.update()
+        this.serviceBound()
 
         return TrackRecorderServiceBinder(this)
     }
 
-    public override fun onUnbind(intent: Intent?): Boolean {
+    public override fun onRebind(intent: Intent?) {
+        this.serviceBound()
+    }
+
+    private fun serviceBound() {
         this.trackRecorderServiceNotification.isBound = true
         this.trackRecorderServiceNotification.update()
+    }
 
-        super.onUnbind(intent)
+    public override fun onUnbind(intent: Intent?): Boolean {
+        this.serviceUnbind()
 
         return true
+    }
+
+    private fun serviceUnbind() {
+        this.trackRecorderServiceNotification.isBound = false
+        this.trackRecorderServiceNotification.update()
     }
 
     public override fun onDestroy() {

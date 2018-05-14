@@ -62,4 +62,7 @@
         <item>Kilometers</item>
         <item>Miles</item>
     </string-array>
+
+    <string name="metdefinition_name_01015">Biking</string>
+    <string name="metdefinition_name_15591">Inline Skating</string>
 </resources>

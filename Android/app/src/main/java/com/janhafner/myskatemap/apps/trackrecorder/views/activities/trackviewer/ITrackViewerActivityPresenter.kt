@@ -5,7 +5,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.Attach
 import com.janhafner.myskatemap.apps.trackrecorder.location.Location
 import org.joda.time.DateTime
 import org.joda.time.Period
-import java.util.*
 
 internal interface ITrackViewerActivityPresenter {
     val trackingStartedAt: DateTime
@@ -41,15 +40,13 @@ internal final class TrackViewerActivityPresenter(private val trackService: ITra
     public override lateinit var attachments: List<Attachment>
 
     public override fun bindToActivity(trackViewerActivity: TrackViewerActivity) {
-        val trackRecordingId = UUID.fromString(trackViewerActivity.intent.getStringExtra("ID"))
+        val trackRecordingId = trackViewerActivity.intent.getStringExtra("ID")
 
-        val hasTrackRecording = this.trackService.hasTrackRecording(trackRecordingId)
-        if(hasTrackRecording)
+        val trackRecording = this.trackService.getTrackRecording(trackRecordingId)
+        if(trackRecording != null)
         {
-            var trackRecording = this.trackService.getTrackRecording(trackRecordingId)
 
-        }
-        else {
+        } else {
 
         }
     }

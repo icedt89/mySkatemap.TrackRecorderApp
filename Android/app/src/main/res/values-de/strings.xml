@@ -52,4 +52,7 @@
         <item>Kilometer</item>
         <item>Meilen</item>
     </string-array>
+
+    <string name="metdefinition_name_01015">Radfahren</string>
+    <string name="metdefinition_name_15591">Inline Skaten</string>
 </resources>

@@ -29,15 +29,6 @@
             android:shadowDy="2"
             android:shadowRadius="10"
             android:src="@drawable/ic_action_track_recorder_recording_startresume" />
-
-        <GridView android:id="@+id/startactivity_trackrecordings_grid"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:numColumns="1"
-            android:verticalSpacing="10dp"
-            android:horizontalSpacing="10dp"
-            android:stretchMode="columnWidth"
-            android:gravity="center" />
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

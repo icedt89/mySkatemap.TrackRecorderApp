@@ -18,10 +18,6 @@ internal final class TrackService(private val appBaseDirectoryNavigator: IDirect
 
     private val trackRecordingAdapter: JsonAdapter<TrackRecording> = this.moshi.adapter<TrackRecording>(TrackRecording::class.java)
 
-    private var currentTrackRecordingLazy: Lazy<TrackRecording?> = lazy {
-        this.getCurrentTrackRecordingOrNull()
-    }
-
     init {
         this.trackRecordingsDirectoryNavigator = this.appBaseDirectoryNavigator.getDirectory(TrackService.RECORDINGS_BASEDIRECTORY_NAME)
         val currentTrackRecordingDirectoryNavigator = this.trackRecordingsDirectoryNavigator.getDirectory(TrackService.CURRENT_RECORDINGDIRECTORY_NAME)
@@ -30,22 +26,49 @@ internal final class TrackService(private val appBaseDirectoryNavigator: IDirect
         this.currentTrackRecordingAttachmentsDirectoryNavigator = currentTrackRecordingDirectoryNavigator.getDirectory(TrackService.RECORDING_ATTACHMENTS_DIRECTORYNAME)
     }
 
-    public override fun hasCurrentTrackRecording(): Boolean {
-        return this.currentTrackRecordingLazy.value != null
-    }
+    public override fun getAllTrackRecordings(): List<TrackRecording> {
+        val directories = this.trackRecordingsDirectoryNavigator.getDirectories()
 
-    public override fun getCurrentTrackRecording(): TrackRecording {
-        return this.currentTrackRecordingLazy.value!!
-    }
+        val result = ArrayList<TrackRecording>()
 
-    private fun getCurrentTrackRecordingOrNull(): TrackRecording? {
-        val dataFileContent = this.currentTrackRecordingFileAccessor.getContent()
+        directories.forEach {
+            val dataFile = it.getFile(RECORDING_DATAFILE_NAME)
+            val dataFileContent = dataFile.getContent()
+            if(dataFileContent != null) {
+                val trackRecording = this.getTrackRecording(dataFileContent)
 
-        if(dataFileContent != null) {
-            return this.getTrackRecording(dataFileContent)
+                result.add(trackRecording)
+            }
         }
 
-        return null
+        return result
+    }
+
+    public override fun hasTrackRecording(id: String): Boolean {
+        val trackRecordingDirectoryAccessor = this.trackRecordingsDirectoryNavigator.getDirectory(id.toString())
+
+        val dataFile = trackRecordingDirectoryAccessor.getFile(RECORDING_DATAFILE_NAME)
+
+        return dataFile.exists()
+    }
+
+    public override fun saveTrackRecording(trackRecording: TrackRecording) {
+        val trackRecordingDirectoryAccessor = this.trackRecordingsDirectoryNavigator.getDirectory(trackRecording.id.toString())
+
+        val dataFile = trackRecordingDirectoryAccessor.getFile(RECORDING_DATAFILE_NAME)
+
+        val json = this.trackRecordingAdapter.toJson(trackRecording)
+
+        val byteString = ByteString.encodeUtf8(json)
+        val buffer = byteString.toByteArray()
+
+        dataFile.saveContent(buffer)
+    }
+
+    public override fun deleteTrackRecording(id: String) {
+        val trackRecordingDirectoryAccessor = this.trackRecordingsDirectoryNavigator.getDirectory(id)
+
+        trackRecordingDirectoryAccessor.delete()
     }
 
     private fun getTrackRecording(content: ByteArray) : TrackRecording {
@@ -55,84 +78,17 @@ internal final class TrackService(private val appBaseDirectoryNavigator: IDirect
         return this.trackRecordingAdapter.fromJson(json)!!
     }
 
-    public override fun saveCurrentTrackRecording() {
-        val json = this.trackRecordingAdapter.toJson(this.currentTrackRecordingLazy.value!!)
-
-        val byteString = ByteString.encodeUtf8(json)
-        val buffer = byteString.toByteArray()
-
-        this.currentTrackRecordingFileAccessor.saveContent(buffer)
-    }
-
-    public override fun saveAsCurrentTrackRecording(trackRecording: TrackRecording) {
-        this.currentTrackRecordingLazy = lazy {
-            trackRecording
-        }
-
-        this.saveCurrentTrackRecording()
-    }
-
-    public override fun deleteCurrentTrackRecording() {
-        this.currentTrackRecordingFileAccessor.delete()
-
-        this.currentTrackRecordingLazy = lazy {
-            this.getCurrentTrackRecordingOrNull()
-        }
-    }
-
-    public override fun getAllTrackRecordings(includeCurrent: Boolean): List<TrackRecording> {
-        val directories = this.trackRecordingsDirectoryNavigator.getDirectories()
-
-        val result = ArrayList<TrackRecording>()
-
-        directories.forEach {
-            if (!it.name.equals(CURRENT_RECORDINGDIRECTORY_NAME, true) || includeCurrent) {
-                val dataFile = it.getFile(RECORDING_DATAFILE_NAME)
-                val dataFileContent = dataFile.getContent()
-                if(dataFileContent != null) {
-                    val trackRecording = this.getTrackRecording(dataFileContent)
-
-                    result.add(trackRecording)
-                }
-            }
-        }
-
-        return result
-    }
-
-    public override fun saveTrackRecording(trackRecording: TrackRecording) {
-        val trackRecordingDirectoryAccessor = this.trackRecordingsDirectoryNavigator.getDirectory(trackRecording.id.toString())
+    public override fun getTrackRecording(id: String): TrackRecording? {
+        val trackRecordingDirectoryAccessor = this.trackRecordingsDirectoryNavigator.getDirectory(id)
 
         val dataFile = trackRecordingDirectoryAccessor.getFile(RECORDING_DATAFILE_NAME)
 
-        val json = this.trackRecordingAdapter.toJson(this.currentTrackRecordingLazy.value!!)
+        val dataFileContent = dataFile.getContent()
+        if(dataFileContent != null) {
+            return this.getTrackRecording(dataFileContent)
+        }
 
-        val byteString = ByteString.encodeUtf8(json)
-        val buffer = byteString.toByteArray()
-
-        dataFile.saveContent(buffer)
-    }
-
-    public override fun deleteTrackRecording(id: UUID) {
-        val trackRecordingDirectoryAccessor = this.trackRecordingsDirectoryNavigator.getDirectory(id.toString())
-
-        trackRecordingDirectoryAccessor.delete()
-    }
-
-    public override fun hasTrackRecording(id: UUID): Boolean {
-        val trackRecordingDirectoryAccessor = this.trackRecordingsDirectoryNavigator.getDirectory(id.toString())
-
-        return trackRecordingDirectoryAccessor.exists()
-    }
-
-    public override fun getTrackRecording(id: UUID): TrackRecording {
-        val trackRecordingDirectoryAccessor = this.trackRecordingsDirectoryNavigator.getDirectory(id.toString())
-
-        val dataFile = trackRecordingDirectoryAccessor.getFile(RECORDING_DATAFILE_NAME)
-
-        val dataFileContent = dataFile.getContent()!!
-
-        return this.getTrackRecording(dataFileContent)
+        return null
     }
 
     companion object {

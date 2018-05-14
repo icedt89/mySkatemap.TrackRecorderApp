@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live
+package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
 
 import com.squareup.moshi.Moshi
 import okhttp3.*

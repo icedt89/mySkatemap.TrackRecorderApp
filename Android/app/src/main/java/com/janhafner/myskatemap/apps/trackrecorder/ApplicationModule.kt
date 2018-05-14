@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.location.LocationManager
 import android.nfc.NfcAdapter
 import android.preference.PreferenceManager
@@ -8,6 +9,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimeDateTimeMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimePeriodMoshaAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JsonRestApiClient
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.UuidMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
@@ -20,7 +22,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.FileSystemD
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IDirectoryNavigator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.FakeLiveLocationTrackingService
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveLocationTrackingService
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.JsonRestApiClient
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.LiveLocationTrackingService
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
@@ -159,12 +160,14 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
-    public fun provideAppSettings(): IAppSettings {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+    public fun provideAppSettings(sharedPreferences: SharedPreferences): IAppSettings {
+        return AppSettings().bindToSharedPreferences(sharedPreferences)
+    }
 
-        val appSettings = AppSettings.bindToSharedPreferences(sharedPreferences)
-
-        return appSettings
+    @Provides
+    @Singleton
+    public fun provideSharedPreferences() : SharedPreferences {
+        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
     }
 
     @Singleton

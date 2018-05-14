@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
@@ -19,6 +20,9 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
 
     @Inject
     public lateinit var trackService: ITrackService
+
+    @Inject
+    public lateinit var appSettings: IAppSettings
 
     private lateinit var presenter: TrackRecorderActivityPresenter
 
@@ -53,7 +57,7 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
 
         super.onCreate(savedInstanceState)
 
-        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController)
+        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController, this.appSettings)
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {

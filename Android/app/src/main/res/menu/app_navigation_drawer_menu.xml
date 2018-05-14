@@ -1,5 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/trackrecorderactivity_navigation_drawer_action_currentactiverecording"
+        android:title="Aktive Aufnahme"  />
+    <item android:id="@+id/trackrecorderactivity_navigation_drawer_action_trackrecordings"
+        android:title="Meine Aufnahmen"  />
     <item android:id="@+id/trackrecorderactivity_navigation_drawer_action_settings"
         android:title="Settings"  />
 </menu>

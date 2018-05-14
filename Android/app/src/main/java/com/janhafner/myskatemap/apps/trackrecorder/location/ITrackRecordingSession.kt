@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.location
 
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics.TrackRecordingStatistic
 import io.reactivex.Observable
 import org.joda.time.DateTime
 import org.joda.time.Period
@@ -15,6 +16,8 @@ internal interface ITrackRecordingSession {
     val stateChanged: Observable<TrackRecorderServiceState>
 
     val trackingStartedAt: DateTime
+
+    val statistic: TrackRecordingStatistic
 
     var name: String
 

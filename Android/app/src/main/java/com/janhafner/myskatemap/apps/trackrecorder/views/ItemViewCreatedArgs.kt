@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments
+package com.janhafner.myskatemap.apps.trackrecorder.views
 
 import android.view.View
 

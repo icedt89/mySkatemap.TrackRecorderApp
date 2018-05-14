@@ -1,6 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
 
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.JsonRestApiClient
 import okhttp3.Response
 
 internal fun <TResponse> JsonRestApiClient.get(url: String, responseBodyClassType: Class<TResponse>): TResponse? {
