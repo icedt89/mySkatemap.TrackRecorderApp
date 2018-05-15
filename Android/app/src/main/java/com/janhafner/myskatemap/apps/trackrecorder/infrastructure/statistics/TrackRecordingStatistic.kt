@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics
 
-import com.janhafner.myskatemap.apps.trackrecorder.location.Location
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 
 internal final class TrackRecordingStatistic {
     public val speed: Statistic = Statistic()

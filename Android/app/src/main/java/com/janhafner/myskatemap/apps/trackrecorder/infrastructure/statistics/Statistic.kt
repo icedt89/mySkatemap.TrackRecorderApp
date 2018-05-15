@@ -1,5 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics
 
+import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
@@ -82,16 +83,18 @@ internal final class Statistic {
             lastValue = value
         }
 
-        if(newMinimumValue < currentMinimumValue) {
+        if((currentMinimumValue == null && newMinimumValue != null) || (newMinimumValue < currentMinimumValue)) {
             this.minimumValueChangedSubject.onNext(newMinimumValue)
         }
 
-        if(newMaximumValue > currentMaximumValue) {
+        if((currentMaximumValue == null && newMaximumValue != null) || (newMaximumValue > currentMaximumValue)) {
             this.maximumValueChangedSubject.onNext(newMaximumValue)
         }
 
         this.averageValueChangedSubject.onNext(newAverageValue)
         this.lastValueChangedSubject.onNext(lastValue!!)
+
+        Log.v("Statistic", this.toString())
     }
 
     public fun add(value: Float) {
@@ -126,9 +129,11 @@ internal final class Statistic {
         currentAverage = (currentAverage + value) / this.totalCountOfSamples
 
         this.averageValueChangedSubject.onNext(currentAverage)
+
+        Log.v("Statistic", this.toString())
     }
 
     public override fun toString(): String {
-        return "Statistic[min:${this.minimumValue}; max:${this.maximumValue}; avg:${this.averageValue}; first:${this.firstValue}; last:${this.lastValue}"
+        return "Statistic[min:${this.minimumValue};max:${this.maximumValue};avg:${this.averageValue};first:${this.firstValue};last:${this.lastValue}"
     }
 }

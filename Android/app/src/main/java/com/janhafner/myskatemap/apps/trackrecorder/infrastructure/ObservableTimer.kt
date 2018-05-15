@@ -62,7 +62,7 @@ internal final class ObservableTimer {
 
     public fun start() {
         if (this.isRunning) {
-            throw IllegalStateException()
+            throw IllegalStateException("Timer is already started!")
         }
 
         if (this.timerTask == null) {
@@ -76,7 +76,7 @@ internal final class ObservableTimer {
 
     public fun stop() {
         if (!this.isRunning) {
-            throw IllegalStateException()
+            throw IllegalStateException("Timer is already stopped!")
         }
 
         this.timerTask!!.cancel()

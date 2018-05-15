@@ -23,7 +23,6 @@
     <string name="trackrecorderactivity_tab_data_numberofpositions">Anzahl ermittelter Positionen</string>
     <string name="trackrecorderactivity_tab_data_startedat">Begonnen um</string>
     <string name="trackrecorderactivity_tab_data_comments">Notizen</string>
-    <string name="trackrecorderactivity_tab_attachments_noattachments">Bisher hast du keine Anhänge hinzugefügt!</string>
     <string name="app_trackdistance_template_meters">%s m</string>
     <string name="app_trackdistance_template_kilometers">%s km</string>
     <string name="app_trackdistance_template_miles">%s miles</string>

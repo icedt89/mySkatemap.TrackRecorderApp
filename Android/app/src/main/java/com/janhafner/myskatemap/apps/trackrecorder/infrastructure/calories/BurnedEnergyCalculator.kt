@@ -1,5 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.calories
 
+import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
@@ -8,7 +9,7 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
                                             ageInYears: Int,
                                             sex: Sex,
                                             activityMetabolicEquivalent: Float) {
-    private val partiallyCompleteFormula: Double
+    private val partiallyCompleteFormula: Float
 
     private val calculatedValueSubject: BehaviorSubject<BurnedEnergy> = BehaviorSubject.create<BurnedEnergy>()
     public val calculatedValueChanged: Observable<BurnedEnergy> = this.calculatedValueSubject
@@ -17,29 +18,54 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
         get() = this.calculatedValueSubject.value
 
     init {
-        var factor1 = 9.56
-        var factor2 = 1.85
-        var factor3 =  4.68
-        var factor4 = 655
-        if(sex == Sex.Male) {
-            factor1 = 13.75
-            factor2 = 5.0
-            factor3 = 6.67
-            factor4 = 66
+        val basalMetabolicFactorset: BasalMetabolicFactorSet
+        if (sex == Sex.Male) {
+            basalMetabolicFactorset = BasalMetabolicFactorSet.male
+        } else {
+            basalMetabolicFactorset = BasalMetabolicFactorSet.female
         }
 
         // https://www.blitzresults.com/en/calories-burned/
-        val basalMetabolicRate = (factor1 * weightInKilograms) + (factor2 * heightInCentimeters) - (factor3 * ageInYears) + factor4
+        val basalMetabolicRate = (basalMetabolicFactorset.factor1 * weightInKilograms) + (basalMetabolicFactorset.factor2 * heightInCentimeters) - (basalMetabolicFactorset.factor3 * ageInYears) + basalMetabolicFactorset.factor4
 
-        this.partiallyCompleteFormula = (basalMetabolicRate / 24) * activityMetabolicEquivalent
+        this.partiallyCompleteFormula = (basalMetabolicRate / 24.0f) * activityMetabolicEquivalent
     }
 
+    public fun calculate(activityDurationInSeconds: Int) {
+        if (this.isDestroyed) {
+            throw IllegalStateException("Instance is already destroyed!")
+        }
 
-    public fun calculate(activityDurationInMinutes: Int) {
-        val kiloCalories = this.partiallyCompleteFormula * (activityDurationInMinutes / 60)
+        val kiloCalories = this.partiallyCompleteFormula * ((activityDurationInSeconds / 60.0f) / 60.0f)
 
         val burnedEnergy = BurnedEnergy(kiloCalories)
 
+        Log.v("BurnedEnergyCalculator", burnedEnergy.toString())
+
         this.calculatedValueSubject.onNext(burnedEnergy)
+    }
+
+    private var isDestroyed: Boolean = false
+    public fun destroy() {
+        this.calculatedValueSubject.onComplete()
+
+        this.isDestroyed = true
+    }
+
+    private final class BasalMetabolicFactorSet(public val factor1: Float,
+                                                              public val factor2: Float,
+                                                              public val factor3: Float,
+                                                              public val factor4: Float) {
+        companion object {
+            public val male: BasalMetabolicFactorSet = BasalMetabolicFactorSet(13.75f,
+                    5.0f,
+                    6.67f,
+                    66.0f)
+
+            public val female: BasalMetabolicFactorSet = BasalMetabolicFactorSet(9.56f,
+                    1.85f,
+                    4.68f,
+                    655.0f)
+        }
     }
 }

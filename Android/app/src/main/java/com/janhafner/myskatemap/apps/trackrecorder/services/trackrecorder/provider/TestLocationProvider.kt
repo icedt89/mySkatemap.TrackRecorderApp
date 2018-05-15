@@ -5,7 +5,7 @@ import android.os.SystemClock
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
-import com.janhafner.myskatemap.apps.trackrecorder.location.Location
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
@@ -128,7 +128,7 @@ internal final class TestLocationProvider(private val context: Context,
 
     override fun stopLocationUpdates() {
         if (!this.isActive) {
-            throw IllegalStateException()
+            throw IllegalStateException("LocationProvider must be started first!")
         }
 
         this.postLocationTimerTask!!.cancel()
@@ -139,7 +139,7 @@ internal final class TestLocationProvider(private val context: Context,
 
     override fun startLocationUpdates() {
         if (this.isActive) {
-            throw IllegalStateException()
+            throw IllegalStateException("LocationProvider must be stopped first!")
         }
 
         if (this.simulateDependencyToAndroidLocationServices && !this.context.isLocationServicesEnabled()) {

@@ -7,10 +7,10 @@ import android.nfc.NfcAdapter
 import android.preference.PreferenceManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimeDateTimeMoshaAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JodaTimePeriodMoshaAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.jodatime.JodaTimeDateTimeMoshaAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.jodatime.JodaTimePeriodMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JsonRestApiClient
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.UuidMoshaAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.jodatime.UuidMoshaAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceUnitFormatterFactory
@@ -27,8 +27,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppCo
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.location.Location
-import com.janhafner.myskatemap.apps.trackrecorder.location.LocationAvailabilityChangedBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.TrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider

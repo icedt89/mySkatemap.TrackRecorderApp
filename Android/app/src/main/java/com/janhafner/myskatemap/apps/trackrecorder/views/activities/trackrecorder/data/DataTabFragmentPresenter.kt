@@ -8,8 +8,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo

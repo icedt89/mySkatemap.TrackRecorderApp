@@ -1,8 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Context.LOCATION_SERVICE
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -36,9 +34,9 @@ internal final class LegacyLocationProvider(private val locationManager: Locatio
     }
 
     @SuppressLint("MissingPermission")
-    override fun startLocationUpdates() {
+    public override fun startLocationUpdates() {
         if (this.isActive) {
-            throw IllegalStateException()
+            throw IllegalStateException("LocationProvider must be stopped first!")
         }
 
         this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2500, 5f, this.locationListener, null)
@@ -46,9 +44,9 @@ internal final class LegacyLocationProvider(private val locationManager: Locatio
         this.isActive = true
     }
 
-    override fun stopLocationUpdates() {
+    public override fun stopLocationUpdates() {
         if (!this.isActive) {
-            throw IllegalStateException()
+            throw IllegalStateException("LocationProvider must be started first!")
         }
 
         this.locationManager.removeUpdates(this.locationListener)
@@ -57,7 +55,7 @@ internal final class LegacyLocationProvider(private val locationManager: Locatio
     }
 
     @SuppressLint("MissingPermission")
-    public override fun getCurrentLocation(): com.janhafner.myskatemap.apps.trackrecorder.location.Location {
+    public override fun getCurrentLocation(): com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location {
         return this.locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toLocation(-1)
     }
 }

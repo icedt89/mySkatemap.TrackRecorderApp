@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance
 
 import com.janhafner.myskatemap.apps.trackrecorder.distanceTo
-import com.janhafner.myskatemap.apps.trackrecorder.location.Location
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 

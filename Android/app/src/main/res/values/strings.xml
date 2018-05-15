@@ -24,7 +24,6 @@
     <string name="trackrecorderactivity_tab_data_numberofpositions">Number of locations</string>
     <string name="trackrecorderactivity_tab_data_startedat">Started at</string>
     <string name="trackrecorderactivity_tab_data_comments">Notices</string>
-    <string name="trackrecorderactivity_tab_attachments_noattachments">You have currently not attached any images!</string>
 
     <string name="app_trackdistance_template_meters">%s m</string>
     <string name="app_trackdistance_template_kilometers">%s km</string>

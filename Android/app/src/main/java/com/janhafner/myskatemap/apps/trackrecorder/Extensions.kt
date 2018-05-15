@@ -9,9 +9,9 @@ import android.os.Build
 import android.provider.OpenableColumns
 import android.provider.Settings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.ContentInfo
-import com.janhafner.myskatemap.apps.trackrecorder.location.Location
-import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
-import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport

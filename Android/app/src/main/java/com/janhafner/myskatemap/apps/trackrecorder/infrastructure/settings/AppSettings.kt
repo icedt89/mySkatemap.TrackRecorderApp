@@ -1,8 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings
 
 import android.content.SharedPreferences
-import android.graphics.Color
-import android.support.annotation.ColorInt
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.calories.Sex
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.KilometersTrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider
 import io.reactivex.Observable
@@ -24,7 +23,48 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("currentTrackRecordingId", oldValue, value))
         }
 
-    public override var allowLiveTracking: Boolean = DEFAULT_ALLOW_LIVE_TRACKING
+    public override var enableFitnessActivityTracking: Boolean = DefaultEnableFitnessActivityTracking
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.appSettingsChangedSubject.onNext(PropertyChangedData("enableFitnessActivityTracking", oldValue, value))
+        }
+    public override var userAge: Int = DefaultUserAge
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.appSettingsChangedSubject.onNext(PropertyChangedData("userAge", oldValue, value))
+        }
+    public override var userWeightInKilograms: Float = DefaultUserWeightInKilograms
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.appSettingsChangedSubject.onNext(PropertyChangedData("userWeightInKilograms", oldValue, value))
+        }
+    public override var userHeightInCentimeters: Float = DefaultUserHeightInCentimeters
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.appSettingsChangedSubject.onNext(PropertyChangedData("userHeightInCentimeters", oldValue, value))
+        }
+    public override var userSex: Sex = DefaultUserSex
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.appSettingsChangedSubject.onNext(PropertyChangedData("userSex", oldValue, value))
+        }
+
+    public override var allowLiveTracking: Boolean = DefaultAllowLiveTracking
         set(value) {
             val oldValue = field
 
@@ -33,7 +73,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("allowLiveTracking", oldValue, value))
         }
 
-    public override var appUiLocale: String = DEFAULT_APP_UI_LOCALE
+    public override var appUiLocale: String = DefaultAppUiLocale
         set(value) {
             val oldValue = field
 
@@ -42,7 +82,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("appUiLocale", oldValue, value))
         }
 
-    public override var trackDistanceUnitFormatterTypeName: String = DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME
+    public override var trackDistanceUnitFormatterTypeName: String = DefaultTrackDistanceUnitFormatterTypeName
         set(value) {
             val oldValue = field
 
@@ -51,7 +91,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("trackDistanceUnitFormatterTypeName", oldValue, value))
         }
 
-    public override var vibrateOnBackgroundStop: Boolean = DEFAULT_VIBRATE_ON_BACKGROUND_STOP
+    public override var vibrateOnBackgroundStop: Boolean = DefaultVibrateOnBackgroundStop
         set(value) {
             val oldValue = field
 
@@ -60,16 +100,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("vibrateOnBackgroundStop", oldValue, value))
         }
 
-    public override var notificationFlashColorOnBackgroundStop: Int = DEFAULT_NOTIFICATION_FLASH_COLOR_ON_BACKGROUND_STOP
-        set(value) {
-            val oldValue = field
-
-            field = value
-
-            this.appSettingsChangedSubject.onNext(PropertyChangedData("notificationFlashColorOnBackgroundStop", oldValue, value))
-        }
-
-    public override var locationProviderTypeName: String = DEFAULT_LOCATION_PROVIDER_TYPE_NAME
+    public override var locationProviderTypeName: String = DefaultLocationProviderTypeName
         set(value) {
             val oldValue = field
 
@@ -87,6 +118,36 @@ internal final class AppSettings: IAppSettings {
 
         private val appSettingsChangedSubscription: Disposable
 
+        public override var enableFitnessActivityTracking: Boolean
+            get() = this.appSettings.enableFitnessActivityTracking
+            set(value) {
+                this.appSettings.enableFitnessActivityTracking = value
+            }
+
+        public override var userAge: Int
+            get() = this.appSettings.userAge
+            set(value) {
+                this.appSettings.userAge = value
+            }
+
+        public override var userWeightInKilograms: Float
+            get() = this.appSettings.userWeightInKilograms
+            set(value) {
+                this.appSettings.userWeightInKilograms = value
+            }
+
+        public override var userHeightInCentimeters: Float
+            get() = this.appSettings.userHeightInCentimeters
+            set(value) {
+                this.appSettings.userHeightInCentimeters = value
+            }
+
+        public override var userSex: Sex
+            get() = this.appSettings.userSex
+            set(value) {
+                this.appSettings.userSex = value
+            }
+
         public override var trackDistanceUnitFormatterTypeName: String
             get() = this.appSettings.trackDistanceUnitFormatterTypeName
             set(value) {
@@ -103,12 +164,6 @@ internal final class AppSettings: IAppSettings {
             get() = this.appSettings.locationProviderTypeName
             set(value) {
                 this.appSettings.locationProviderTypeName = value
-            }
-
-        public override var notificationFlashColorOnBackgroundStop: Int
-            get() = this.appSettings.notificationFlashColorOnBackgroundStop
-            set(value) {
-                this.appSettings.notificationFlashColorOnBackgroundStop = value
             }
 
         public override var appUiLocale: String
@@ -133,13 +188,14 @@ internal final class AppSettings: IAppSettings {
             get() = this.appSettings.appSettingsChanged
 
         init {
-            val currentTrackRecordingId = sharedPreferences.getString("currentTrackRecordingId", null)
+            val currentTrackRecordingIdKey = "currentTrackRecordingId"
+            val currentTrackRecordingId = sharedPreferences.getString(currentTrackRecordingIdKey, null)
             if(currentTrackRecordingId != null) {
                 this.appSettings.currentTrackRecordingId = UUID.fromString(currentTrackRecordingId)
             }
 
             this.appSettingsChangedSubscription = this.appSettings.appSettingsChanged.subscribe {
-                if(it.hasChanged && it.propertyName == "currentTrackRecordingId") {
+                if(it.hasChanged && it.propertyName == currentTrackRecordingIdKey) {
                     val sharedPreferenceEditor = sharedPreferences.edit()
                     if(it.newValue != null) {
                         sharedPreferenceEditor.putString(it.propertyName, it.newValue.toString())
@@ -151,56 +207,66 @@ internal final class AppSettings: IAppSettings {
                 }
             }
 
+            // TODO: Extract keys into local val's
             this.sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
                 when(key) {
                     "preference_units_distance" -> {
-                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME)
+                        val currentValue = sharedPreferences.getString(key, AppSettings.DefaultTrackDistanceUnitFormatterTypeName)
                         this.appSettings.trackDistanceUnitFormatterTypeName = currentValue
                     }
                     "preference_tracking_location_provider" -> {
-                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_LOCATION_PROVIDER_TYPE_NAME)
+                        val currentValue = sharedPreferences.getString(key, AppSettings.DefaultLocationProviderTypeName)
                         this.appSettings.locationProviderTypeName = currentValue
                     }
                     "preference_notifications_vibrate_on_background_stop" -> {
-                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DEFAULT_VIBRATE_ON_BACKGROUND_STOP)
+                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DefaultVibrateOnBackgroundStop)
                         this.appSettings.vibrateOnBackgroundStop = currentValue
                     }
-                    "preference_notifications_notification_flash_color_on_background_stop" -> {
-
-                    }
                     "preference_app_ui_locale" -> {
-                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_APP_UI_LOCALE)
+                        val currentValue = sharedPreferences.getString(key, AppSettings.DefaultAppUiLocale)
                         this.appSettings.appUiLocale = currentValue
                     }
                     "preference_tracking_allow_live_tracking" -> {
-                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
+                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DefaultAllowLiveTracking)
                         this.appSettings.allowLiveTracking = currentValue
+                    }
+                    "preference_fitness_enable_fitness_activity_tracking" -> {
+                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DefaultEnableFitnessActivityTracking)
+                        this.appSettings.enableFitnessActivityTracking = currentValue
                     }
                 }
             }
 
             sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
 
-            this.appSettings.trackDistanceUnitFormatterTypeName = sharedPreferences.getString("preference_units_distance", AppSettings.DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME)
-            this.appSettings.locationProviderTypeName = sharedPreferences.getString("preference_tracking_location_provider", AppSettings.DEFAULT_LOCATION_PROVIDER_TYPE_NAME)
-            this.appSettings.vibrateOnBackgroundStop = sharedPreferences.getBoolean("preference_notifications_vibrate_on_background_stop", AppSettings.DEFAULT_VIBRATE_ON_BACKGROUND_STOP)
-            this.appSettings.appUiLocale = sharedPreferences.getString("preference_app_ui_locale", AppSettings.DEFAULT_APP_UI_LOCALE)
-            this.appSettings.allowLiveTracking = sharedPreferences.getBoolean("preference_tracking_allow_live_tracking", AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
+            this.appSettings.trackDistanceUnitFormatterTypeName = sharedPreferences.getString("preference_units_distance", AppSettings.DefaultTrackDistanceUnitFormatterTypeName)
+            this.appSettings.locationProviderTypeName = sharedPreferences.getString("preference_tracking_location_provider", AppSettings.DefaultLocationProviderTypeName)
+            this.appSettings.vibrateOnBackgroundStop = sharedPreferences.getBoolean("preference_notifications_vibrate_on_background_stop", AppSettings.DefaultVibrateOnBackgroundStop)
+            this.appSettings.appUiLocale = sharedPreferences.getString("preference_app_ui_locale", AppSettings.DefaultAppUiLocale)
+            this.appSettings.allowLiveTracking = sharedPreferences.getBoolean("preference_tracking_allow_live_tracking", AppSettings.DefaultAllowLiveTracking)
+            this.appSettings.enableFitnessActivityTracking = sharedPreferences.getBoolean("preference_fitness_enable_fitness_activity_tracking", AppSettings.DefaultEnableFitnessActivityTracking)
         }
     }
 
     companion object {
-        public val DEFAULT_LOCATION_PROVIDER_TYPE_NAME: String = FusedLocationProvider::class.java.name
+        public val DefaultLocationProviderTypeName: String = FusedLocationProvider::class.java.name
 
-        public val DEFAULT_ALLOW_LIVE_TRACKING: Boolean = false
+        public const val DefaultAllowLiveTracking: Boolean = false
 
-        public val DEFAULT_APP_UI_LOCALE: String = Locale.getDefault().language
+        public val DefaultAppUiLocale: String = Locale.getDefault().language
 
-        public const val DEFAULT_VIBRATE_ON_BACKGROUND_STOP: Boolean = true
+        public const val DefaultVibrateOnBackgroundStop: Boolean = true
 
-        @ColorInt
-        public const val DEFAULT_NOTIFICATION_FLASH_COLOR_ON_BACKGROUND_STOP: Int = Color.RED
+        public val DefaultTrackDistanceUnitFormatterTypeName: String = KilometersTrackDistanceUnitFormatter::class.java.name
 
-        public val DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPE_NAME: String = KilometersTrackDistanceUnitFormatter::class.java.name
+        public const val DefaultEnableFitnessActivityTracking: Boolean = false
+
+        public const val DefaultUserAge: Int = 18
+
+        public const val DefaultUserWeightInKilograms: Float = 0.0f
+
+        public const val DefaultUserHeightInCentimeters: Float = 0.0f
+
+        public val DefaultUserSex: Sex = Sex.Male
     }
 }

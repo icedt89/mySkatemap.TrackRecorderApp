@@ -4,8 +4,9 @@ import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
-import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.calories.BurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.calories.Sex
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
@@ -16,7 +17,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveTrac
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics.TrackRecordingStatistic
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
-import com.janhafner.myskatemap.apps.trackrecorder.location.*
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.toSimpleLocation
@@ -73,16 +73,13 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     public override var currentSession: ITrackRecordingSession? = null
         private set
 
-    public override lateinit var locationServicesAvailability: Observable<Boolean>
-        private set
-
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
         this.registerReceiver(this.locationChangedBroadcasterReceiver, android.content.IntentFilter(LocationAvailabilityChangedBroadcastReceiver.PROVIDERS_CHANGED))
 
         this.subscriptions.add(this.locationChangedBroadcasterReceiver.locationAvailabilityChanged.subscribe{
             if (!it) {
                 if (this.stateChangedSubject.value != TrackRecorderServiceState.Idle) {
-                    this.pauseTrackingAndSetState(com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState.LocationServicesUnavailable)
+                    this.pauseTrackingAndSetState(TrackRecorderServiceState.LocationServicesUnavailable)
                 }
             } else {
                 if (this.stateChangedSubject.value == TrackRecorderServiceState.LocationServicesUnavailable) {
@@ -90,15 +87,13 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                 }
             }
         })
-        
-        this.locationServicesAvailability = this.locationChangedBroadcasterReceiver.locationAvailabilityChanged
     }
 
     public fun resumeTracking() {
         val state = this.stateChangedSubject.value
         if (state != TrackRecorderServiceState.Paused
                 && state != TrackRecorderServiceState.LocationServicesUnavailable) {
-            throw IllegalStateException()
+            throw IllegalStateException("Tracking must be paused first!")
         }
 
         this.locationProvider.startLocationUpdates()
@@ -110,12 +105,12 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     }
 
     public fun pauseTracking() {
-        this.pauseTrackingAndSetState(com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState.Paused)
+        this.pauseTrackingAndSetState(TrackRecorderServiceState.Paused)
     }
 
     private fun pauseTrackingAndSetState(state: TrackRecorderServiceState) {
         if (this.stateChangedSubject.value == TrackRecorderServiceState.Idle) {
-            throw IllegalStateException()
+            throw IllegalStateException("Tracking must be started first!")
         }
 
         if(this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
@@ -138,7 +133,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     public fun discardTracking() {
         if (this.stateChangedSubject.value == TrackRecorderServiceState.Running
             || this.stateChangedSubject.value == TrackRecorderServiceState.Idle) {
-            throw IllegalStateException()
+            throw IllegalStateException("Tracking must be paused first!")
         }
 
         this.durationTimer.reset()
@@ -160,7 +155,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     public fun finishTracking(): TrackRecording {
         if (this.stateChangedSubject.value == TrackRecorderServiceState.Running
             || this.stateChangedSubject.value == TrackRecorderServiceState.Idle) {
-            throw IllegalStateException()
+            throw IllegalStateException("Tracking must be paused first!")
         }
 
         val finishedTrackRecording = this.currentTrackRecording!!
@@ -196,7 +191,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     public override fun useTrackRecording(trackRecording: TrackRecording): ITrackRecordingSession {
         if (this.currentSession != null) {
-            throw IllegalStateException()
+            throw IllegalStateException("Tracking already in progress!")
         }
 
         this.appSettings.currentTrackRecordingId = trackRecording.id
@@ -266,7 +261,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                     // TODO: .sample(5, TimeUnit.MINUTES)
                     .sample(1, TimeUnit.SECONDS)
                     .subscribe {
-                        this.burnedEnergyCalculator!!.calculate(it.seconds / 60)
+                        this.burnedEnergyCalculator!!.calculate(it.seconds)
                     },
 
             this.currentSession!!.locationsChanged
@@ -308,7 +303,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     public fun saveTracking() {
         if (this.currentTrackRecording == null) {
-            throw IllegalStateException()
+            throw IllegalStateException("No tracking in progress!")
         }
 
         this.trackService.saveTrackRecording(this.currentTrackRecording!!)
@@ -340,17 +335,12 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.getApplicationInjector().inject(this)
 
         this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this, this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter())
-        this.trackRecorderServiceNotification.flashColorOnLocationUnavailableState = this.appSettings.notificationFlashColorOnBackgroundStop
         this.trackRecorderServiceNotification.vibrateOnLocationUnavailableState = this.appSettings.vibrateOnBackgroundStop
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
 
         this.subscriptions.add(this.appSettings.appSettingsChanged.subscribe {
-            if(it.hasChanged && it.propertyName == "notificationFlashColorOnBackgroundStop") {
-                this.trackRecorderServiceNotification.flashColorOnLocationUnavailableState = it.newValue as Int?
-
-                this.trackRecorderServiceNotification.update()
-            } else if(it.hasChanged && it.propertyName == "vibrateOnBackgroundStop") {
+            if(it.hasChanged && it.propertyName == "vibrateOnBackgroundStop") {
                 this.trackRecorderServiceNotification.vibrateOnLocationUnavailableState = it.newValue as Boolean
 
                 this.trackRecorderServiceNotification.update()

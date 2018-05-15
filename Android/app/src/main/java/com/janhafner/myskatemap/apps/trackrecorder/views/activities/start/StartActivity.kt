@@ -6,7 +6,7 @@ import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.widget.ImageButton
 import com.jakewharton.rxbinding2.view.clicks
-import com.janhafner.myskatemap.apps.trackrecorder.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.checkAllAppPermissions
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector

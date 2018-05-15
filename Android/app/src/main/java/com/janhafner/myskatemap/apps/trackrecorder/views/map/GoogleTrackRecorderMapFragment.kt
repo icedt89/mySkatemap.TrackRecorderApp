@@ -10,7 +10,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.SimpleLocation
 
 internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
     private lateinit var polyline: Polyline

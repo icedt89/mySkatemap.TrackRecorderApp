@@ -85,7 +85,7 @@ internal final class FileSystemDirectoryNavigator(public override val nativeDire
 
         public fun baseDirectory(basePath: File): IDirectoryNavigator {
             if(basePath.isFile) {
-                throw IOException("\"basePath\" must lead to a directory")
+                throw IOException("\"basePath\" must lead to a directory!")
             }
 
             return FileSystemDirectoryNavigator(basePath)

@@ -5,7 +5,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.janhafner.myskatemap.apps.trackrecorder.location.Location
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
 
 internal final class FusedLocationProvider(private val fusedLocationProviderClient: FusedLocationProviderClient): LocationProvider() {
@@ -34,7 +34,7 @@ internal final class FusedLocationProvider(private val fusedLocationProviderClie
     @SuppressLint("MissingPermission")
     public override fun startLocationUpdates() {
         if (this.isActive) {
-            throw IllegalStateException()
+            throw IllegalStateException("LocationProvider must be stopped first!")
         }
 
         this.fusedLocationProviderClient.requestLocationUpdates(this.locationRequest, this.locationCallback, null)
@@ -44,7 +44,7 @@ internal final class FusedLocationProvider(private val fusedLocationProviderClie
 
     public override fun stopLocationUpdates() {
         if (!this.isActive) {
-            throw IllegalStateException()
+            throw IllegalStateException("LocationProvider must be started first!")
         }
 
         this.fusedLocationProviderClient.removeLocationUpdates(this.locationCallback)

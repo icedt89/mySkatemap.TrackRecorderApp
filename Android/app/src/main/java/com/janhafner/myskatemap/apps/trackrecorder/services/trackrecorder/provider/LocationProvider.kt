@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
-import com.janhafner.myskatemap.apps.trackrecorder.location.Location
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
@@ -37,7 +37,7 @@ internal abstract class LocationProvider: ILocationProvider {
 
     public override fun overrideSequenceNumber(sequenceNumber: Int) {
         if (this.isActive) {
-            throw IllegalStateException()
+            throw IllegalStateException("LocationProvider must be stopped first!")
         }
 
         if (sequenceNumber < -1) {

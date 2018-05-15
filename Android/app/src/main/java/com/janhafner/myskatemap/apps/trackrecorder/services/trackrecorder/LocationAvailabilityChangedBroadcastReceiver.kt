@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.location
+package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,7 +13,7 @@ internal final class LocationAvailabilityChangedBroadcastReceiver(context: Conte
     public val locationAvailabilityChanged: Observable<Boolean> = this.locationAvailabilityChangedSubject
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent!!.action != LocationAvailabilityChangedBroadcastReceiver.PROVIDERS_CHANGED) {
+        if (intent!!.action != PROVIDERS_CHANGED) {
             return
         }
 

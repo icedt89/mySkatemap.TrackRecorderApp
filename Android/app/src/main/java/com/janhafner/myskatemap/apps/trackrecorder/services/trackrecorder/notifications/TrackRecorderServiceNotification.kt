@@ -7,7 +7,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.location.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ActivityStartMode
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
@@ -21,9 +21,7 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
 
     public var trackDistance: Float? = null
 
-    public var vibrateOnLocationUnavailableState: Boolean = AppSettings.DEFAULT_VIBRATE_ON_BACKGROUND_STOP
-
-    public var flashColorOnLocationUnavailableState: Int? = AppSettings.DEFAULT_NOTIFICATION_FLASH_COLOR_ON_BACKGROUND_STOP
+    public var vibrateOnLocationUnavailableState: Boolean = AppSettings.DefaultVibrateOnBackgroundStop
 
     public var isBound: Boolean = false
 
@@ -57,12 +55,6 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
                     this.notificationCompatBuilder.setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000))
                 } else {
                     this.notificationCompatBuilder.setVibrate(LongArray(0))
-                }
-
-                if(this.flashColorOnLocationUnavailableState != null) {
-                    this.notificationCompatBuilder.setLights(this.flashColorOnLocationUnavailableState!!, 1000, 1000)
-                } else {
-                    this.notificationCompatBuilder.setLights(0,0,0)
                 }
             }
             TrackRecorderServiceState.Paused ->

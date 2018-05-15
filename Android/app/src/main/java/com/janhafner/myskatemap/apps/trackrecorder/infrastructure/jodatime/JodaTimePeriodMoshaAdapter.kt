@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
+package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.jodatime
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson

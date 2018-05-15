@@ -1,7 +1,8 @@
-package com.janhafner.myskatemap.apps.trackrecorder.location
+package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics.TrackRecordingStatistic
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 import io.reactivex.Observable
 import org.joda.time.DateTime
 import org.joda.time.Period
@@ -21,7 +22,7 @@ internal interface ITrackRecordingSession {
 
     var name: String
 
-    var comment: String
+    var comment: String?
 
     fun resumeTracking()
 

@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data
 
-enum class TrackState {
+enum class StateChangeReason {
     Running,
 
     Paused,

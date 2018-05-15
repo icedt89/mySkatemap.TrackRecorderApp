@@ -8,6 +8,7 @@ internal final class GpxFileWriter(private val gpxTrackWriter: IGpxTrackWriter) 
     public override fun writeGpxContent(trackRecordings: List<TrackRecording>, stream: OutputStream) {
         val streamWriter = OutputStreamWriter(stream, Charsets.UTF_8)
 
+        // TODO: Write correct metadata
         streamWriter.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>")
         streamWriter.write("<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" version=\"1.1\" creator=\"Wikipedia\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">")
         streamWriter.write("<metadata>")

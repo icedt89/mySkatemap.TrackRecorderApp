@@ -27,4 +27,15 @@ internal final class AttachmentHandler(private val trackRecording: TrackRecordin
 
         fileAccessor.delete()
     }
+
+    public fun getAttachments() : List<Attachment> {
+        val attachments = this.trackRecording.attachments.toList()
+        for (attachment in attachments) {
+            if(!this.attachmentDirectoryNavigator.getFile(attachment.displayName).exists()) {
+                this.trackRecording.attachments.remove(attachment)
+            }
+        }
+
+        return this.trackRecording.attachments
+    }
 }

@@ -26,8 +26,8 @@
             android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider" />
         <CheckBoxPreference
             android:key="preference_tracking_allow_live_tracking"
-            android:summary="Deine derzeitig aufgezeichnete Strecke wird anonym an MySkatemap übertragen"
             android:title="Live-Tracking aktivieren"
+            android:summary="Deine derzeitig aufgezeichnete Strecke wird anonym an MySkatemap übertragen"
             android:defaultValue="false" />
     </PreferenceCategory>
 
@@ -36,14 +36,19 @@
         android:key="preference_notifications">
         <CheckBoxPreference
             android:key="preference_notifications_vibrate_on_background_stop"
-            android:summary="Bei verlust der Aufnahme im Hintergrund vibrieren"
             android:title="Vibrieren bei Stopp"
+            android:summary="Bei verlust der Aufnahme im Hintergrund vibrieren"
             android:defaultValue="true" />
-        <ListPreference
-            android:key="preference_notifications_notification_flash_color_on_background_stop"
-            android:title="Farbe der Benachrichtigungsleuchte"
-            android:summary="Farbe der Benachrichtigungsleuchte bei verlust der Aufnahme im Hintergrund"
-            android:enabled="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Fitness"
+        android:key="preference_fitness">
+        <CheckBoxPreference
+            android:key="preference_fitness_enable_fitness_activity_tracking"
+            android:summary="Ermitteln von Fitness-Daten zur Kalorienverbrauchsberechnung aktivieren"
+            android:title="Fitness-Daten aktivieren"
+            android:defaultValue="false" />
     </PreferenceCategory>
 
 </PreferenceScreen>

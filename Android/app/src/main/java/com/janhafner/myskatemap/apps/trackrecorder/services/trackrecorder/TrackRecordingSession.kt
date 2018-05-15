@@ -1,8 +1,8 @@
-package com.janhafner.myskatemap.apps.trackrecorder.location
+package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics.TrackRecordingStatistic
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 import io.reactivex.Observable
 import org.joda.time.DateTime
 import org.joda.time.Period
@@ -24,7 +24,7 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
             this.trackRecorderService.currentTrackRecording!!.name = value
         }
 
-    public override var comment: String
+    public override var comment: String?
         get() = this.trackRecorderService.currentTrackRecording!!.comment
         set(value) {
             this.trackRecorderService.currentTrackRecording!!.comment = value

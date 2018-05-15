@@ -7,12 +7,20 @@ internal final class GpxTrackWriter : IGpxTrackWriter {
     public override fun writeGpxTrack(trackRecording: TrackRecording, streamWriter: Writer) {
         streamWriter.write("<trk>")
         streamWriter.write("<name>${trackRecording.name}</name>")
-        streamWriter.write("<desc>${trackRecording.comment}</desc>")
+
+        if(trackRecording.comment != null) {
+            streamWriter.write("<desc>${trackRecording.comment}</desc>")
+        }
+
         streamWriter.write("<trkseg>")
 
         for(point in trackRecording.locations.values) {
             streamWriter.write("<trkpt lat=\"${point.latitude}\" lon=\"${point.longitude}\">")
-            streamWriter.write("<ele>${point.altitude}</ele>")
+
+            if(point.altitude != null) {
+                streamWriter.write("<ele>${point.altitude}</ele>")
+            }
+
             streamWriter.write("<time>${point.capturedAt}</time>")
             streamWriter.write("</trkpt>")
         }

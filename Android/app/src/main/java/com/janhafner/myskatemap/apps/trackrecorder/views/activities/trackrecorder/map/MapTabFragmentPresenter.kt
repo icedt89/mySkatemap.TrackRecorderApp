@@ -4,8 +4,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.consumeLocations
 import com.janhafner.myskatemap.apps.trackrecorder.consumeReset
 import com.janhafner.myskatemap.apps.trackrecorder.dropLocationsNotInDistance
-import com.janhafner.myskatemap.apps.trackrecorder.location.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.location.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo

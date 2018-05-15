@@ -1,7 +1,7 @@
-package com.janhafner.myskatemap.apps.trackrecorder
+package com.janhafner.myskatemap.apps.trackrecorder.services
 
+import com.janhafner.myskatemap.apps.trackrecorder.AttachmentHandler
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IDirectoryNavigator
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IFileAccessor
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -10,20 +10,12 @@ import java.nio.ByteBuffer
 import java.util.*
 
 internal final class TrackService(private val appBaseDirectoryNavigator: IDirectoryNavigator, private val moshi: Moshi) : ITrackService {
-    private val currentTrackRecordingFileAccessor: IFileAccessor
-
-    private val currentTrackRecordingAttachmentsDirectoryNavigator: IDirectoryNavigator
-
     private val trackRecordingsDirectoryNavigator: IDirectoryNavigator
 
     private val trackRecordingAdapter: JsonAdapter<TrackRecording> = this.moshi.adapter<TrackRecording>(TrackRecording::class.java)
 
     init {
-        this.trackRecordingsDirectoryNavigator = this.appBaseDirectoryNavigator.getDirectory(TrackService.RECORDINGS_BASEDIRECTORY_NAME)
-        val currentTrackRecordingDirectoryNavigator = this.trackRecordingsDirectoryNavigator.getDirectory(TrackService.CURRENT_RECORDINGDIRECTORY_NAME)
-
-        this.currentTrackRecordingFileAccessor = currentTrackRecordingDirectoryNavigator.getFile(TrackService.RECORDING_DATAFILE_NAME)
-        this.currentTrackRecordingAttachmentsDirectoryNavigator = currentTrackRecordingDirectoryNavigator.getDirectory(TrackService.RECORDING_ATTACHMENTS_DIRECTORYNAME)
+        this.trackRecordingsDirectoryNavigator = this.appBaseDirectoryNavigator.getDirectory(RECORDINGS_BASEDIRECTORY_NAME)
     }
 
     public override fun getAllTrackRecordings(): List<TrackRecording> {
@@ -91,10 +83,17 @@ internal final class TrackService(private val appBaseDirectoryNavigator: IDirect
         return null
     }
 
+    public override fun getAttachmentHandler(trackRecording: TrackRecording): AttachmentHandler {
+        val directoryNavigator = this.trackRecordingsDirectoryNavigator
+                .getDirectory(trackRecording.id.toString())
+                .getDirectory(RECORDING_ATTACHMENTS_DIRECTORYNAME)
+
+        return AttachmentHandler(trackRecording, directoryNavigator)
+    }
+
     companion object {
         private const val RECORDING_DATAFILE_NAME: String = "data.json"
         private const val RECORDING_ATTACHMENTS_DIRECTORYNAME: String = "attachments"
         private const val RECORDINGS_BASEDIRECTORY_NAME: String = "recordings"
-        private const val CURRENT_RECORDINGDIRECTORY_NAME: String = "current"
     }
 }
