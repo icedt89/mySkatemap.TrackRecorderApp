@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
 
 internal abstract class TrackRecorderMapFragment : Fragment(), ITrackRecorderMap {
     public abstract override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View

@@ -5,7 +5,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
 
 internal final class FusedLocationProvider(private val fusedLocationProviderClient: FusedLocationProviderClient): LocationProvider() {

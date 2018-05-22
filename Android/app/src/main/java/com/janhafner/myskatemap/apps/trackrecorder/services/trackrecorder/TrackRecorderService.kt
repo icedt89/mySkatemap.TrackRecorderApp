@@ -4,33 +4,41 @@ import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.calories.BurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.calories.Sex
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveLocationTrackingService
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveTrackingSession
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics.TrackRecordingStatistic
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
+import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergyCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.MetActivityDefinitionFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingService
+import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveTrackingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LocationProviderFactory
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.statistics.TrackRecordingStatistic
 import com.janhafner.myskatemap.apps.trackrecorder.toSimpleLocation
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import org.joda.time.Period
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 internal final class TrackRecorderService: Service(), ITrackRecorderService {
+    private var locationProvider: ILocationProvider? = null
+
     @Inject
-    public lateinit var locationProvider: ILocationProvider
+    public lateinit var locationProviderFactory: LocationProviderFactory
+
+    @Inject
+    public lateinit var metActivityDefinitionFactory: MetActivityDefinitionFactory
 
     @Inject
     public lateinit var trackService: ITrackService
@@ -38,7 +46,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     @Inject
     public lateinit var locationChangedBroadcasterReceiver: LocationAvailabilityChangedBroadcastReceiver
 
-    private val durationTimer: com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer = com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ObservableTimer()
+    private val durationTimer: com.janhafner.myskatemap.apps.trackrecorder.ObservableTimer = com.janhafner.myskatemap.apps.trackrecorder.ObservableTimer()
 
     private lateinit var trackRecorderServiceNotification: TrackRecorderServiceNotification
 
@@ -53,6 +61,8 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private val stateChangedSubject: BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault<TrackRecorderServiceState>(TrackRecorderServiceState.Idle)
+
+    private val recordingSavedSubject: Subject<ITrackRecorderService> = PublishSubject.create<ITrackRecorderService>()
 
     public var currentTrackRecording: TrackRecording? = null
 
@@ -96,7 +106,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             throw IllegalStateException("Tracking must be paused first!")
         }
 
-        this.locationProvider.startLocationUpdates()
+        this.locationProvider!!.startLocationUpdates()
         this.durationTimer.start()
 
         this.currentTrackRecording!!.resume()
@@ -114,7 +124,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         }
 
         if(this.stateChangedSubject.value == TrackRecorderServiceState.Running) {
-            this.locationProvider.stopLocationUpdates()
+            this.locationProvider!!.stopLocationUpdates()
             this.durationTimer.stop()
 
             this.currentTrackRecording!!.pause()
@@ -137,7 +147,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         }
 
         this.durationTimer.reset()
-        this.locationProvider.resetSequenceNumber()
+        this.locationProvider!!.resetSequenceNumber()
 
         this.trackDistanceCalculator.clear()
 
@@ -146,6 +156,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.currentTrackRecording = null
         this.currentTrackRecordingStatistic = null
         this.burnedEnergyCalculator = null
+        this.locationProvider = null
 
         this.changeState(TrackRecorderServiceState.Idle)
 
@@ -164,7 +175,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.saveTracking()
 
         this.durationTimer.reset()
-        this.locationProvider.resetSequenceNumber()
+        this.locationProvider!!.resetSequenceNumber()
 
         this.trackDistanceCalculator.clear()
 
@@ -172,6 +183,7 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.currentTrackRecording = null
         this.currentTrackRecordingStatistic = null
         this.burnedEnergyCalculator = null
+        this.locationProvider = null
 
         this.changeState(TrackRecorderServiceState.Idle)
 
@@ -194,13 +206,14 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
             throw IllegalStateException("Tracking already in progress!")
         }
 
+        this.locationProvider = this.locationProviderFactory.getLocationProvider(trackRecording.locationProviderTypeName)
         this.appSettings.currentTrackRecordingId = trackRecording.id
 
-        var locationsChanged = this.locationProvider.locationsReceived.replay().autoConnect()
+        var locationsChanged = this.locationProvider!!.locationsReceived.replay().autoConnect()
         if (trackRecording.locations.any()) {
             val sortedLocations = trackRecording.locations.toSortedMap().values
 
-            this.locationProvider.overrideSequenceNumber(sortedLocations.last().sequenceNumber)
+            this.locationProvider!!.overrideSequenceNumber(sortedLocations.last().sequenceNumber)
 
             locationsChanged = locationsChanged.startWith(sortedLocations)
         }
@@ -224,14 +237,27 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     private fun createSessionCore(trackRecording: TrackRecording, recordingTimeChanged: Observable<Period>, locationsChanged: Observable<Location>) {
         this.currentTrackRecording = trackRecording
         this.currentTrackRecordingStatistic = TrackRecordingStatistic()
-        // TODO
-        this.burnedEnergyCalculator  = BurnedEnergyCalculator(65.5f, 171, 28, Sex.Male, 7.5f)
+
+        if(this.appSettings.enableFitnessActivityTracking) {
+            // TODO: Activity?
+            val metActivityDefinition = this.metActivityDefinitionFactory.getMetActivityDefinitionByCode(this.appSettings.defaultMetActivityCode)
+            if(metActivityDefinition != null) {
+                this.burnedEnergyCalculator  = BurnedEnergyCalculator(this.appSettings.userWeightInKilograms,
+                        this.appSettings.userHeightInCentimeters,
+                        this.appSettings.userAge,
+                        this.appSettings.userSex,
+                        metActivityDefinition.metValue)
+            } else {
+                // TODO
+            }
+        }
 
         this.currentSession = TrackRecordingSession(
                 this.trackDistanceCalculator.distanceCalculated,
                 recordingTimeChanged,
                 locationsChanged,
                 this.stateChangedSubject,
+                this.recordingSavedSubject,
                 this)
 
         this.subscribeToSession()
@@ -239,6 +265,15 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     private fun subscribeToSession() {
         this.tryActivateLiveTracking(this.appSettings.allowLiveTracking)
+
+        if(this.burnedEnergyCalculator != null) {
+            this.sessionSubscriptions.add(this.currentSession!!.recordingTimeChanged
+                    // TODO: .sample(1, TimeUnit.MINUTES)
+                    .sample(1, TimeUnit.SECONDS)
+                    .subscribe {
+                        this.burnedEnergyCalculator!!.calculate(it.seconds)
+                    })
+        }
 
         this.sessionSubscriptions.addAll(
             this.currentSession!!.recordingTimeChanged.subscribe {
@@ -255,13 +290,6 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                     }
                     .subscribe {
                         this.currentTrackRecordingStatistic!!.addAll(it)
-                    },
-
-            this.currentSession!!.recordingTimeChanged
-                    // TODO: .sample(5, TimeUnit.MINUTES)
-                    .sample(1, TimeUnit.SECONDS)
-                    .subscribe {
-                        this.burnedEnergyCalculator!!.calculate(it.seconds)
                     },
 
             this.currentSession!!.locationsChanged
@@ -307,6 +335,8 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         }
 
         this.trackService.saveTrackRecording(this.currentTrackRecording!!)
+
+        this.recordingSavedSubject.onNext(this)
     }
 
     private fun changeState(newState: TrackRecorderServiceState) {
@@ -424,8 +454,8 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
     }
 
     public override fun onDestroy() {
-        if (this.locationProvider.isActive) {
-            this.locationProvider.stopLocationUpdates()
+        if (this.locationProvider!!.isActive) {
+            this.locationProvider!!.stopLocationUpdates()
         }
 
         if (this.durationTimer.isRunning) {

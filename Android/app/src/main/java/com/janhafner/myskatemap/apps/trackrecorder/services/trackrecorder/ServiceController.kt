@@ -13,6 +13,7 @@ import io.reactivex.subjects.BehaviorSubject
 internal final class ServiceController<TBinder: IBinder>(private val context: Context, completeOnDisconnect: Boolean = false) {
     private val trackRecorderServiceConnection = object : ServiceConnection {
         public override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            @Suppress("UNCHECKED_CAST")
             this@ServiceController.currentBinder = service!! as TBinder
 
             this@ServiceController.isBoundChangedSubject.onNext(true)

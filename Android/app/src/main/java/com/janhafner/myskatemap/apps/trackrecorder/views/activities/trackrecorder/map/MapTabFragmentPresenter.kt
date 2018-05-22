@@ -1,15 +1,13 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map
 
-import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.consumeLocations
-import com.janhafner.myskatemap.apps.trackrecorder.consumeReset
-import com.janhafner.myskatemap.apps.trackrecorder.dropLocationsNotInDistance
+import android.graphics.Bitmap
+import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnMapSnapshotReadyCallback
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnTrackRecorderMapReadyCallback
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -20,18 +18,16 @@ import java.util.concurrent.TimeUnit
 internal final class MapTabFragmentPresenter(private val mapTabFragment: MapTabFragment,
                                              private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>,
                                              private val trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory)
-    : OnTrackRecorderMapReadyCallback {
+    : OnTrackRecorderMapReadyCallback, OnMapSnapshotReadyCallback {
     private val trackRecorderServiceControllerSubscription: Disposable
 
     private var trackRecorderSession: ITrackRecordingSession? = null
 
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
-    private var trackRecorderMapFragment: TrackRecorderMapFragment
+    private var trackRecorderMapFragment: TrackRecorderMapFragment = this.trackRecorderMapFragmentFactory.getFragment()
 
     init {
-        this.trackRecorderMapFragment = this.trackRecorderMapFragmentFactory.getFragment()
-
         this.mapTabFragment.childFragmentManager.beginTransaction()
                 .replace(R.id.fragment_track_recorder_map_map_placeholder, this.trackRecorderMapFragment)
                 .commit()
@@ -48,7 +44,6 @@ internal final class MapTabFragmentPresenter(private val mapTabFragment: MapTabF
             }
         }
     }
-
 
     public fun setUserVisibleHint(isVisibleToUser: Boolean) {
         if(this.mapTabFragment.activity is INeedFragmentVisibilityInfo) {
@@ -69,7 +64,14 @@ internal final class MapTabFragmentPresenter(private val mapTabFragment: MapTabF
                         it.any()
                     }
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(trackRecorderMapFragment.consumeLocations())
+                    .subscribe(trackRecorderMapFragment.consumeLocations()),
+
+            trackRecorderSession.recordingSaved
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe{
+                        // TODO
+                        // this.trackRecorderMapFragment.getSnapshotAsync(this)
+                    }
         )
 
         return trackRecorderSession
@@ -83,6 +85,13 @@ internal final class MapTabFragmentPresenter(private val mapTabFragment: MapTabF
 
     public override fun onMapReady(trackRecorderMap: com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap) {
         trackRecorderMap.zoomToLocation(SimpleLocation(50.8357, 12.92922), 1.0f)
+    }
+
+    public override fun onSnapshotReady(bitmap: Bitmap) {
+        val ooo = bitmap
+        val ppp = ooo
+
+        bitmap.recycle()
     }
 
     public fun destroy() {

@@ -40,7 +40,34 @@
     <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Delete</string>
     <string name="trackrecorderactivity_snackbar_locationservices_message">Location services not enabled</string>
     <string name="trackrecorderactivity_snackbar_locationservices_action_enable">enable</string>
+
     <string name="startactivity_start_new_recording_button_label">Start new recording</string>
+
+    <string name="settingsfragment_preference_units">Units</string>
+    <string name="settingsfragment_preference_units_distance_label">Distance</string>
+    <string name="settingsfragment_preference_units_distance_summary">Distances will be display and formatted as %s</string>
+    <string name="settingsfragment_preference_tracking">Recording</string>
+    <string name="settingsfragment_preference_tracking_location_provider_label">Location Provider implementation</string>
+    <string name="settingsfragment_preference_tracking_location_provider_summary">Implementation used to retrieve your location</string>
+    <string name="settingsfragment_preference_tracking_allow_live_tracking_label">Live tracking</string>
+    <string name="settingsfragment_preference_tracking_allow_live_tracking_summary">Sends the currently recorded track anonymously to MySkatemap</string>
+    <string name="settingsfragment_preference_notifications">Notifications</string>
+    <string name="settingsfragment_preference_notifications_vibrate_on_background_stop_label">Vibrate on background stop</string>
+    <string name="settingsfragment_preference_notifications_vibrate_on_background_stop_summary">Let your phone vibrate if receiving locations was disabled e.g. due to connectivity issues</string>
+    <string name="settingsfragment_preference_fitness">Fitness</string>
+    <string name="settingsfragment_preference_fitness_enable_fitness_activity_tracking_label">Enable fitness tracking</string>
+    <string name="settingsfragment_preference_fitness_enable_fitness_activity_tracking_summary">All information must be provided to calculate your burned calories</string>
+    <string name="settingsfragment_preference_fitness_user_age_label">Your age</string>
+    <string name="settingsfragment_preference_fitness_user_age_summary">In years</string>
+    <string name="settingsfragment_preference_fitness_user_weight_in_kilograms_label">Your weight</string>
+    <string name="settingsfragment_preference_fitness_user_weight_in_kilograms_summary">In kilograms</string>
+    <string name="settingsfragment_preference_fitness_user_height_in_centimeters_label">Your height</string>
+    <string name="settingsfragment_preference_fitness_user_height_in_centimeters_summary">In centimeters</string>
+    <string name="settingsfragment_preference_fitness_user_sex_label">Your sex</string>
+    <string name="settingsfragment_preference_fitness_user_sex_summary">Your are %s</string>
+    <string name="settingsfragment_preference_fitness_default_met_activity_code_label">Default activity type</string>
+    <string name="settingsfragment_preference_fitness_default_met_activity_code_summary">You prefer %s as default activity type for new trackings</string>
+    <string name="tracklistactivity_title">Recorded tracks</string>
 
     <string-array name="settingsactivity_tracking_location_provider_values">
         <item>com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider</item>
@@ -62,6 +89,21 @@
         <item>Miles</item>
     </string-array>
 
-    <string name="metdefinition_name_01015">Biking</string>
-    <string name="metdefinition_name_15591">Inline Skating</string>
+    <string-array name="settingsactivity_fitness_user_sex_names">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+    <string-array name="settingsactivity_fitness_user_sex_values">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+
+    <string-array name="settingsactivity_fitness_default_met_activity_code_names">
+        <item>Biking</item>
+        <item>Inline Skating</item>
+    </string-array>
+    <string-array name="settingsactivity_fitness_default_met_activity_code_values">
+        <item>01015</item>
+        <item>15591</item>
+    </string-array>
 </resources>

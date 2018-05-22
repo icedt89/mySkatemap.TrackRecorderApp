@@ -5,38 +5,37 @@ import android.content.SharedPreferences
 import android.location.LocationManager
 import android.nfc.NfcAdapter
 import android.preference.PreferenceManager
+import com.couchbase.lite.Database
+import com.couchbase.lite.DatabaseConfiguration
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.jodatime.JodaTimeDateTimeMoshaAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.jodatime.JodaTimePeriodMoshaAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.JsonRestApiClient
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.jodatime.UuidMoshaAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.ITrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.TrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.GpxFileWriter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.GpxTrackWriter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.IGpxFileWriter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.gpx.IGpxTrackWriter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.FileSystemDirectoryNavigator
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.IDirectoryNavigator
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.FakeLiveLocationTrackingService
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.ILiveLocationTrackingService
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.live.LiveLocationTrackingService
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppConfig
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.AppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppConfig
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
+import com.janhafner.myskatemap.apps.trackrecorder.io.FileSystemDirectoryNavigator
+import com.janhafner.myskatemap.apps.trackrecorder.io.IDirectoryNavigator
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.GpxFileWriter
+import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.GpxTrackWriter
+import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.IGpxFileWriter
+import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.IGpxTrackWriter
+import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimeDateTimeMoshiAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimePeriodMoshiAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.jodatime.UuidMoshiAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.services.CouchDbTrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.services.TrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.MetActivityDefinitionFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.live.FakeLiveLocationTrackingService
+import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingService
+import com.janhafner.myskatemap.apps.trackrecorder.services.live.LiveLocationTrackingService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LegacyLocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.*
+import com.janhafner.myskatemap.apps.trackrecorder.settings.AppConfig
+import com.janhafner.myskatemap.apps.trackrecorder.settings.AppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragmentFactory
 import com.squareup.moshi.Moshi
@@ -55,10 +54,23 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
+    public fun provideMetActivityDefinitionFactory(moshi: Moshi) : MetActivityDefinitionFactory {
+        return MetActivityDefinitionFactory(this.applicationContext, moshi)
+    }
+
+    @Singleton
+    @Provides
     public fun provideFusedLocationProviderClient() : FusedLocationProviderClient {
         return LocationServices.getFusedLocationProviderClient(this.applicationContext)
     }
 
+    @Provides
+    @Singleton
+    public fun provideLocationProviderFactory(fusedLocationProviderClient: FusedLocationProviderClient, locationManager: LocationManager, appSettings: IAppSettings) : LocationProviderFactory {
+        return LocationProviderFactory(this.applicationContext, appSettings, fusedLocationProviderClient, locationManager)
+    }
+
+    @Deprecated("Use method above instead!")
     @Provides
     public fun provideLocationProvider(fusedLocationProviderClient: FusedLocationProviderClient, locationManager: LocationManager, appSettings: IAppSettings): ILocationProvider {
         val locationProviderTypeName = appSettings.locationProviderTypeName
@@ -137,8 +149,9 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
-    public fun provideTrackService(appBaseDirectoryNavigator: IDirectoryNavigator, moshi: Moshi): ITrackService {
-        return TrackService(appBaseDirectoryNavigator, moshi)
+    public fun provideTrackService(appBaseDirectoryNavigator: IDirectoryNavigator, moshi: Moshi, couchDb: Database, appSettings: IAppSettings): ITrackService {
+        return CouchDbTrackService(couchDb, appBaseDirectoryNavigator, appSettings)
+        //return TrackService(appBaseDirectoryNavigator, moshi)
     }
 
     @Provides
@@ -176,10 +189,10 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     @Provides
     public fun provideMoshi(): Moshi {
         return Moshi.Builder()
-                .add(JodaTimeDateTimeMoshaAdapter())
-                .add(JodaTimePeriodMoshaAdapter())
-                .add(UuidMoshaAdapter())
-                //.add(KotlinJsonAdapterFactory())
+                .add(JodaTimeDateTimeMoshiAdapter())
+                .add(JodaTimePeriodMoshiAdapter())
+                .add(UuidMoshiAdapter())
+                // .add(KotlinJsonAdapterFactory())
                 .build()
     }
 
@@ -192,5 +205,13 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     @Singleton
     public fun provideTrackDistanceUnitFormatterFactory(appSettings: IAppSettings): ITrackDistanceUnitFormatterFactory {
         return TrackDistanceUnitFormatterFactory(appSettings, this.applicationContext)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideCouchDb() : Database {
+        val databaseConfiguration = DatabaseConfiguration(this.applicationContext)
+
+        return Database("track-recordings", databaseConfiguration)
     }
 }

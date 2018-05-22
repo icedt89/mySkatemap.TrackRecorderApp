@@ -2,44 +2,39 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
-import android.widget.ListView
-import android.widget.TextView
-import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import io.reactivex.Observable
+import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import javax.inject.Inject
 
 internal final class TrackListActivity : AppCompatActivity() {
     @Inject
     public lateinit var trackService: ITrackService
 
+    @Inject
+    public lateinit var appSettings: IAppSettings
+
+    @Inject
+    public lateinit var trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
+
+    @Inject
+    public lateinit var trackDistanceCalculator: TrackDistanceCalculator
+
+    private lateinit var presenter: TrackListActivityPresenter
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         this.getApplicationInjector().inject(this)
 
         super.onCreate(savedInstanceState)
 
-        // Presenter
-        this.setContentView(R.layout.activity_track_list)
+        this.presenter = TrackListActivityPresenter(this, this.trackService, this.appSettings, this.trackDistanceCalculator, this.trackDistanceUnitFormatterFactory)
+    }
 
-        val trackRecorderToolbar = this.findViewById<Toolbar>(R.id.trackrecorderactivity_toolbar)
-        this.setSupportActionBar(trackRecorderToolbar)
+    public override fun onDestroy() {
+        super.onDestroy()
 
-        val items = this.trackService.getAllTrackRecordings()
-
-        val itemsObservable = Observable.fromArray(items)
-
-        val itemsAdapter = TrackListItemsAdapter(this)
-
-        itemsAdapter.itemViewCreated.subscribe{
-            val textView = it.view.findViewById<TextView>(R.id.info_text)
-            textView.text = it.item.name
-        }
-
-        val listView = this.findViewById<ListView>(R.id.tracklistactivity_trackrecordings_grid)
-        listView.adapter = itemsAdapter
-
-        itemsAdapter.subscribeTo(itemsObservable)
+        this.presenter.destroy()
     }
 }

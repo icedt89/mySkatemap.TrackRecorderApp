@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services
 
-import com.janhafner.myskatemap.apps.trackrecorder.AttachmentHandler
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
 
 internal interface ITrackService {
     fun getAllTrackRecordings(): List<TrackRecording>
@@ -14,5 +13,5 @@ internal interface ITrackService {
 
     fun hasTrackRecording(id: String): Boolean
 
-    fun getAttachmentHandler(trackRecording: TrackRecording): AttachmentHandler
+    fun getAttachmentHandler(trackRecording: TrackRecording): IAttachmentHandler
 }

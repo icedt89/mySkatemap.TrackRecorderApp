@@ -3,9 +3,9 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 import android.content.Context
 import android.os.SystemClock
 import com.google.android.gms.maps.model.LatLng
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.clone
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
 import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom

@@ -55,7 +55,7 @@ internal final class LegacyLocationProvider(private val locationManager: Locatio
     }
 
     @SuppressLint("MissingPermission")
-    public override fun getCurrentLocation(): com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location {
+    public override fun getCurrentLocation(): com.janhafner.myskatemap.apps.trackrecorder.io.data.Location {
         return this.locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toLocation(-1)
     }
 }

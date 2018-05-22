@@ -8,11 +8,7 @@
         <item name="android:background">@drawable/splashscreen</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.StartActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:background">@color/colorAppIconBackground</item>
-    </style>
-
-    <style name="MyCardViewStyle" parent="Theme.AppCompat.Light">
+    <style name="MySkatemap.TrackList.ItemTheme" parent="Theme.AppCompat.Light">
         <item name="cardCornerRadius">3dp</item>
         <item name="cardElevation">2dp</item>
         <item name="contentPaddingBottom">20dp</item>

@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import io.reactivex.Observable
 
 internal interface ILocationProvider {

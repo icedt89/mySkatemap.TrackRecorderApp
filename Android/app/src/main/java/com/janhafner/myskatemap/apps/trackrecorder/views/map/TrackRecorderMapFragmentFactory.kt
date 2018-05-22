@@ -3,7 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.map
 import android.content.Context
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppConfig
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
 
 internal final class TrackRecorderMapFragmentFactory(private val context: Context, private val appConfig: IAppConfig) : ITrackRecorderMapFragmentFactory {
     public override fun getFragment(): TrackRecorderMapFragment {

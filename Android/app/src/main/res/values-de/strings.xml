@@ -39,7 +39,34 @@
     <string name="trackrecorderactivity_snackbar_locationservices_message">Standort nicht aktiviert</string>
     <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Löschen</string>
     <string name="trackrecorderactivity_finish_confirmation_message">Alle Daten der derzeitigen Aufnahme werden zur späteren Verarbeitung gespeichert! Möchtest du fortfahren?</string>
+
     <string name="startactivity_start_new_recording_button_label">neue Aufnahme beginnen</string>
+
+    <string name="settingsfragment_preference_units">Einheiten</string>
+    <string name="settingsfragment_preference_units_distance_label">Entfernung</string>
+    <string name="settingsfragment_preference_units_distance_summary">Entfernungen werden angezeigt und formatiert als %s</string>
+    <string name="settingsfragment_preference_tracking">Aufnahme</string>
+    <string name="settingsfragment_preference_tracking_location_provider_label">Standortprovider Implementierung</string>
+    <string name="settingsfragment_preference_tracking_location_provider_summary">Implementierung welche zur bereitstellung von Standortdaten verwendet wird</string>
+    <string name="settingsfragment_preference_tracking_allow_live_tracking_label">Live Tracking</string>
+    <string name="settingsfragment_preference_tracking_allow_live_tracking_summary">Sendet die Strecke während der Aufnahme anonym an MySkatemap</string>
+    <string name="settingsfragment_preference_notifications">Benachrichtigungen</string>
+    <string name="settingsfragment_preference_notifications_vibrate_on_background_stop_label">Vibrieren bei Stopp</string>
+    <string name="settingsfragment_preference_notifications_vibrate_on_background_stop_summary">Vibrieren wenn die Standortsermittlung/Tracking im Hintergrund deaktiviert wurde, beispielsweise durch verlust der Standortdienst</string>
+    <string name="settingsfragment_preference_fitness">Fitness</string>
+    <string name="settingsfragment_preference_fitness_enable_fitness_activity_tracking_label">Fitnessdaten aktivieren</string>
+    <string name="settingsfragment_preference_fitness_enable_fitness_activity_tracking_summary">Bitte gib alles Informationen an um deine verbrannten Kalorien während der Aufnahme zu berechnen</string>
+    <string name="settingsfragment_preference_fitness_user_age_label">Dein Alter</string>
+    <string name="settingsfragment_preference_fitness_user_age_summary">In Jahren</string>
+    <string name="settingsfragment_preference_fitness_user_weight_in_kilograms_label">Dein Gwicht</string>
+    <string name="settingsfragment_preference_fitness_user_weight_in_kilograms_summary">In Kilogramm</string>
+    <string name="settingsfragment_preference_fitness_user_height_in_centimeters_label">Deine Größe</string>
+    <string name="settingsfragment_preference_fitness_user_height_in_centimeters_summary">In Zentimetern</string>
+    <string name="settingsfragment_preference_fitness_user_sex_label">Dein Geschlecht</string>
+    <string name="settingsfragment_preference_fitness_user_sex_summary">Du bist %s</string>
+    <string name="settingsfragment_preference_fitness_default_met_activity_code_label">Standard Aktivitätstyp</string>
+    <string name="settingsfragment_preference_fitness_default_met_activity_code_summary">Du bevorzugst %s als standard Aktivitätstyp für neue Aufnahmen</string>
+    <string name="tracklistactivity_title">Aufgenommene Strecken</string>
 
     <string-array name="settingsactivity_tracking_location_provider_names">
         <item>Standard</item>
@@ -52,6 +79,13 @@
         <item>Meilen</item>
     </string-array>
 
-    <string name="metdefinition_name_01015">Radfahren</string>
-    <string name="metdefinition_name_15591">Inline Skaten</string>
+    <string-array name="settingsactivity_fitness_user_sex_names">
+        <item>Männlich</item>
+        <item>Weiblich</item>
+    </string-array>
+
+    <string-array name="settingsactivity_fitness_default_met_activity_code_names">
+        <item>Radfahren</item>
+        <item>Inline Skaten</item>
+    </string-array>
 </resources>

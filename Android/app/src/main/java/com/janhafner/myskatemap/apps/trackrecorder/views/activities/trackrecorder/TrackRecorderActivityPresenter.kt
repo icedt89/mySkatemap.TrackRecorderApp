@@ -8,24 +8,24 @@ import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
-import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getContentInfo
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
+import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings.SettingsActivity
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.start.StartActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist.TrackListActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.AttachmentsTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
@@ -67,7 +67,7 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
 
         val actionBar = this.trackRecorderActivity.supportActionBar
         actionBar!!.setDisplayHomeAsUpEnabled(true)
-        actionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu)
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu)
 
         val viewPager = this.trackRecorderActivity.findViewById<ViewPager>(R.id.trackrecorderactivity_toolbar_viewpager)
         viewPager.adapter = TrackRecorderTabsAdapter(this.trackRecorderActivity, this.trackRecorderActivity.supportFragmentManager)
@@ -94,6 +94,7 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
             }
         })
 
+        // TODO:
         val navigationView = this.trackRecorderActivity.findViewById<NavigationView>(R.id.trackrecorderactivity_navigation)
         navigationView.setNavigationItemSelectedListener(
                 object : NavigationView.OnNavigationItemSelectedListener {
@@ -116,30 +117,36 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
 
                 val uninitializedSession: ITrackRecordingSession
 
-                val currentTrackRecording: TrackRecording?
-                if(this.appSettings.currentTrackRecordingId != null) {
-                    currentTrackRecording = this.trackService.getTrackRecording(this.appSettings.currentTrackRecordingId!!.toString())
-                } else {
-                    currentTrackRecording = null
+                var currentTrackRecording: TrackRecording? = null
+                if (this.appSettings.currentTrackRecordingId != null) {
+                    try {
+                        currentTrackRecording = this.trackService.getTrackRecording(this.appSettings.currentTrackRecordingId!!.toString())
+                    } catch(exception: Throwable) {
+                        // TODO
+                        Log.e("RecorderPresenter", "Could not load track recording (Id=\"${this.appSettings.currentTrackRecordingId!!}\")!${exception}")
+                    }
                 }
 
-                val mode = ActivityStartMode.valueOf(this.trackRecorderActivity.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
-                val createNewtrackRecording = mode == ActivityStartMode.StartNew || (mode == ActivityStartMode.TryResume && currentTrackRecording == null)
-                if (createNewtrackRecording) {
-                    val newTrackRecording = this.createNewTrackRecording()
+                val createNewTrackRecording: Boolean
+                if(binder.currentSession == null) {
+                    val mode = ActivityStartMode.valueOf(this.trackRecorderActivity.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
+                    createNewTrackRecording = mode == ActivityStartMode.StartNew || (mode == ActivityStartMode.TryResume && currentTrackRecording == null)
+                    if (createNewTrackRecording) {
+                        val newTrackRecording = this.createNewTrackRecording()
 
-                    uninitializedSession = binder.useTrackRecording(newTrackRecording)
-                } else {
-                    if(binder.currentSession == null) {
-                        uninitializedSession = binder.useTrackRecording(currentTrackRecording!!)
+                        uninitializedSession = binder.useTrackRecording(newTrackRecording)
                     } else {
-                        uninitializedSession = binder.currentSession!!
+                        uninitializedSession = binder.useTrackRecording(currentTrackRecording!!)
                     }
+                } else {
+                    uninitializedSession = binder.currentSession!!
+
+                    createNewTrackRecording = false
                 }
 
                 this.trackRecorderSession = this.getInitializedSession(uninitializedSession)
 
-                if(createNewtrackRecording){
+                if(createNewTrackRecording){
                     if (this.trackRecorderActivity.isLocationServicesEnabled()) {
                         this.trackRecorderSession!!.resumeTracking()
                     } else {
@@ -162,7 +169,7 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
 
         val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
-        return TrackRecording.start(trackRecordingName)
+        return TrackRecording.start(trackRecordingName, this.appSettings.locationProviderTypeName)
     }
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
@@ -217,7 +224,7 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
 
                     this.uninitializeSession()
 
-                    this.trackRecorderActivity.startActivity(Intent(this.trackRecorderActivity, StartActivity::class.java))
+                    this.trackRecorderActivity.startActivity(Intent(this.trackRecorderActivity, TrackListActivity::class.java))
 
                     this.trackRecorderActivity.finish()
                 })
@@ -237,7 +244,7 @@ internal final class TrackRecorderActivityPresenter(private val trackRecorderAct
 
                             this.uninitializeSession()
 
-                            this.trackRecorderActivity.startActivity(Intent(this.trackRecorderActivity, StartActivity::class.java))
+                            this.trackRecorderActivity.startActivity(Intent(this.trackRecorderActivity, TrackListActivity::class.java))
 
                             this.trackRecorderActivity.finish()
                         })

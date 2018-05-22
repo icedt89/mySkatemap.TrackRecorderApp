@@ -1,8 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.io.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.statistics.TrackRecordingStatistic
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.Location
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.statistics.TrackRecordingStatistic
 import io.reactivex.Observable
 import org.joda.time.DateTime
 import org.joda.time.Period
@@ -15,6 +15,8 @@ internal interface ITrackRecordingSession {
     val locationsChanged: Observable<Location>
 
     val stateChanged: Observable<TrackRecorderServiceState>
+
+    val recordingSaved: Observable<ITrackRecorderService>
 
     val trackingStartedAt: DateTime
 

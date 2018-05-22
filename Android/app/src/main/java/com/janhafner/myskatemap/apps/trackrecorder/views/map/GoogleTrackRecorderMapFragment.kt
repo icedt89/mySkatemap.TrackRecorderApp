@@ -2,6 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.map
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
 
 internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
     private lateinit var polyline: Polyline
@@ -21,6 +22,12 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_google_track_recorder_map, container, false)
+    }
+
+    public override fun getSnapshotAsync(callback: OnMapSnapshotReadyCallback) {
+        this.map.snapshot {
+            callback.onSnapshotReady(it)
+        }
     }
 
     public override fun getMapAsync(callback: OnTrackRecorderMapReadyCallback) {
@@ -74,6 +81,8 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
         val cameraUpdate = CameraUpdateFactory.newLatLngBounds(cameraBounds, 100)
 
         this.map.animateCamera(cameraUpdate)
+
+        Log.v("GoogleMap", "Moved view of Google map to new bounds")
     }
 
     public override fun zoomToLocation(location: SimpleLocation, zoom: Float) {

@@ -1,12 +1,14 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.map
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
@@ -22,6 +24,12 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
 
     public override val track: List<SimpleLocation>
         get() = this.locations
+
+    public override fun getSnapshotAsync(callback: OnMapSnapshotReadyCallback) {
+        val cached = this.map.drawingCache
+
+        callback.onSnapshotReady(cached)
+    }
 
     public override fun getMapAsync(callback: OnTrackRecorderMapReadyCallback) {
         if(callback is OnTrackRecorderMapLoadedCallback) {
@@ -53,6 +61,8 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
         val boundingBox = BoundingBox.fromGeoPoints(this.polyline.points)
 
         this.map.zoomToBoundingBox(boundingBox.increaseByScale(1.1f), false,0)
+
+        Log.v("OpenStreetMap", "Moved view of OpenStreet map to new bounds")
     }
 
     public override fun zoomToLocation(location: SimpleLocation, zoom: Float) {
@@ -75,13 +85,15 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
         this.applyDefaults()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun applyDefaults() {
         this.map.setBuiltInZoomControls(false)
         this.map.setMultiTouchControls(false)
         this.map.isVerticalMapRepetitionEnabled = false
         this.map.isHorizontalMapRepetitionEnabled = false
+        // Inhibit touch gestures which could possibly move/drag the map view around
         this.map.setOnTouchListener {
-            view, motionEvent ->
+            _, _ ->
                 true
         }
         this.map.setTileSource(TileSourceFactory.MAPNIK)
