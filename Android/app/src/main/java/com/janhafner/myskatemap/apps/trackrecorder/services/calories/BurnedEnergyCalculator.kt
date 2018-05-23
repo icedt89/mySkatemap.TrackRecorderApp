@@ -19,24 +19,20 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
         get() = this.calculatedValueSubject.value
 
     init {
-        val basalMetabolicFactorset: BasalMetabolicFactorSet
+        val basalMetabolicFactorSet: BasalMetabolicFactorSet
         if (sex == Sex.Male) {
-            basalMetabolicFactorset = BasalMetabolicFactorSet.male
+            basalMetabolicFactorSet = BasalMetabolicFactorSet.male
         } else {
-            basalMetabolicFactorset = BasalMetabolicFactorSet.female
+            basalMetabolicFactorSet = BasalMetabolicFactorSet.female
         }
 
         // https://www.blitzresults.com/en/calories-burned/
-        val basalMetabolicRate = (basalMetabolicFactorset.factor1 * weightInKilograms) + (basalMetabolicFactorset.factor2 * heightInCentimeters) - (basalMetabolicFactorset.factor3 * ageInYears) + basalMetabolicFactorset.factor4
+        val basalMetabolicRate = (basalMetabolicFactorSet.factor1 * weightInKilograms) + (basalMetabolicFactorSet.factor2 * heightInCentimeters) - (basalMetabolicFactorSet.factor3 * ageInYears) + basalMetabolicFactorSet.factor4
 
         this.partiallyCompleteFormula = (basalMetabolicRate / 24.0f) * metValue
     }
 
     public fun calculate(activityDurationInSeconds: Int) {
-        if (this.isDestroyed) {
-            throw IllegalStateException("Instance is already destroyed!")
-        }
-
         val kiloCalories = this.partiallyCompleteFormula * ((activityDurationInSeconds / 60.0f) / 60.0f)
 
         val burnedEnergy = BurnedEnergy(kiloCalories)
@@ -44,13 +40,6 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
         Log.v("BurnedEnergyCalculator", burnedEnergy.toString())
 
         this.calculatedValueSubject.onNext(burnedEnergy)
-    }
-
-    private var isDestroyed: Boolean = false
-    public fun destroy() {
-        this.calculatedValueSubject.onComplete()
-
-        this.isDestroyed = true
     }
 
     private final class BasalMetabolicFactorSet(public val factor1: Float,

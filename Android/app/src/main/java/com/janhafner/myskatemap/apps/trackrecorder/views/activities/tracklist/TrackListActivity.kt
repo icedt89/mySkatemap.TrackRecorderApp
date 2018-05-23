@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.MetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -20,7 +21,7 @@ internal final class TrackListActivity : AppCompatActivity() {
     public lateinit var trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
 
     @Inject
-    public lateinit var trackDistanceCalculator: TrackDistanceCalculator
+    public lateinit var metActivityDefinitionFactory: MetActivityDefinitionFactory
 
     private lateinit var presenter: TrackListActivityPresenter
 
@@ -29,7 +30,11 @@ internal final class TrackListActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        this.presenter = TrackListActivityPresenter(this, this.trackService, this.appSettings, this.trackDistanceCalculator, this.trackDistanceUnitFormatterFactory)
+        this.presenter = TrackListActivityPresenter(this,
+                this.trackService,
+                this.appSettings,
+                this.trackDistanceUnitFormatterFactory,
+                this.metActivityDefinitionFactory)
     }
 
     public override fun onDestroy() {

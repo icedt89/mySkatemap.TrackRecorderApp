@@ -15,11 +15,13 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
-internal final class MapTabFragmentPresenter(private val mapTabFragment: MapTabFragment,
+internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                                              private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>,
                                              private val trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory)
     : OnTrackRecorderMapReadyCallback, OnMapSnapshotReadyCallback {
     private val trackRecorderServiceControllerSubscription: Disposable
+
+    private var sessionAvailabilityChangedSubscription: Disposable? = null
 
     private var trackRecorderSession: ITrackRecordingSession? = null
 
@@ -28,26 +30,34 @@ internal final class MapTabFragmentPresenter(private val mapTabFragment: MapTabF
     private var trackRecorderMapFragment: TrackRecorderMapFragment = this.trackRecorderMapFragmentFactory.getFragment()
 
     init {
-        this.mapTabFragment.childFragmentManager.beginTransaction()
+        this.view.childFragmentManager.beginTransaction()
                 .replace(R.id.fragment_track_recorder_map_map_placeholder, this.trackRecorderMapFragment)
                 .commit()
 
         this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe{
             if(it) {
-                val binder = this.trackRecorderServiceController.currentBinder!!
+                this.sessionAvailabilityChangedSubscription = this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged.subscribe{
+                    if(it) {
+                        val binder = this.trackRecorderServiceController.currentBinder!!
 
-                this.trackRecorderSession = this.getInitializedSession(binder.currentSession!!)
+                        this.trackRecorderMapFragment.getMapAsync(this)
 
-                this.trackRecorderMapFragment.getMapAsync(this)
+                        this.trackRecorderSession = this.getInitializedSession(binder.currentSession!!)
+                    } else {
+                        this.uninitializeSession()
+                    }
+                }
             } else {
                 this.uninitializeSession()
+
+                this.sessionAvailabilityChangedSubscription?.dispose()
             }
         }
     }
 
     public fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        if(this.mapTabFragment.activity is INeedFragmentVisibilityInfo) {
-            (this.mapTabFragment.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.mapTabFragment, isVisibleToUser)
+        if(this.view.activity is INeedFragmentVisibilityInfo) {
+            (this.view.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.view, isVisibleToUser)
         }
     }
 
@@ -98,6 +108,7 @@ internal final class MapTabFragmentPresenter(private val mapTabFragment: MapTabF
         this.trackRecorderServiceController.unbindService()
 
         this.trackRecorderServiceControllerSubscription.dispose()
+        this.sessionAvailabilityChangedSubscription?.dispose()
 
         this.uninitializeSession()
     }

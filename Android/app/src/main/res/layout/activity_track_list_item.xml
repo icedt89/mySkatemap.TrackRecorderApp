@@ -22,7 +22,7 @@
                 android:id="@+id/activity_track_list_item_tracking_menu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_more_vert_black_24dp" />
+                android:src="@drawable/ic_more" />
         </android.support.v7.widget.LinearLayoutCompat>
         <android.support.v7.widget.LinearLayoutCompat
             android:layout_width="match_parent"

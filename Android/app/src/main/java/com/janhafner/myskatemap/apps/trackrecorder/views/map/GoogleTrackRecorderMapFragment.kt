@@ -102,7 +102,7 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
 
         this.map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this.context!!, R.raw.mapstyle_fanticmotor))
 
-        this.polyline.color = Color.parseColor("#FFFF3A3C")
+        this.polyline!!.color = Color.parseColor("#FFFF3A3C")
     }
 
     private fun locationToLatLng(location: SimpleLocation): LatLng {

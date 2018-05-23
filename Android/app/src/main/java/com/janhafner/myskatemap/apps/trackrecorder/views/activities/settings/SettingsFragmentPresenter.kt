@@ -6,12 +6,12 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.Servic
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import io.reactivex.disposables.Disposable
 
-internal final class SettingsFragmentPresenter(private val settingsFragment: SettingsFragment,
+internal final class SettingsFragmentPresenter(private val view: SettingsFragment,
                                                private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>) {
     private lateinit var trackRecorderServiceControllerSubscription: Disposable
 
     init {
-        this.settingsFragment.addPreferencesFromResource(R.xml.settings)
+        this.view.addPreferencesFromResource(R.xml.settings)
     }
 
     public fun onViewCreated() {
@@ -19,7 +19,7 @@ internal final class SettingsFragmentPresenter(private val settingsFragment: Set
             if(it) {
                 val binder = this.trackRecorderServiceController.currentBinder!!
 
-                val locationProviderPreference = this.settingsFragment.findPreference("preference_tracking_location_provider") as ListPreference
+                val locationProviderPreference = this.view.findPreference("preference_tracking_location_provider") as ListPreference
                 locationProviderPreference.isEnabled = binder.currentSession == null
 
                 if(!locationProviderPreference.isEnabled) {

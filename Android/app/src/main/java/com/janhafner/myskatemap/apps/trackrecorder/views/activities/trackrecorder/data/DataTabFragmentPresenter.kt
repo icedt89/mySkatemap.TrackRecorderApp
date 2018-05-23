@@ -21,11 +21,13 @@ import kotlinx.android.synthetic.main.fragment_data_tab.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-internal final class DataTabFragmentPresenter(private val dataTabFragment: DataTabFragment,
+internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
                                               private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>,
                                               private val appSettings: IAppSettings,
                                               private val trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory) {
     private val trackRecorderServiceControllerSubscription: Disposable
+
+    private var sessionAvailabilityChangedSubscription: Disposable? = null
 
     private var trackRecorderSession: ITrackRecordingSession? = null
 
@@ -40,19 +42,25 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
 
         this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe{
             if(it) {
-                val binder = this.trackRecorderServiceController.currentBinder!!
-
-                this.trackRecorderSession = this.getInitializedSession(binder.currentSession!!)
+                this.sessionAvailabilityChangedSubscription = this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged.subscribe{
+                    if(it) {
+                        this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
+                    } else {
+                        this.uninitializeSession()
+                    }
+                }
             } else {
                 this.uninitializeSession()
+
+                this.sessionAvailabilityChangedSubscription?.dispose()
             }
         }
     }
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
-        this.dataTabFragment.trackrecorderactivity_tab_data_startedat.text().accept(trackRecorderSession.trackingStartedAt.formatDefault())
-        this.dataTabFragment.trackrecorderactivity_tab_data_trackname.text().accept(trackRecorderSession.name)
-        this.dataTabFragment.trackrecorderactivity_tab_data_comments.text().accept(trackRecorderSession.comment)
+        this.view.trackrecorderactivity_tab_data_startedat.text().accept(trackRecorderSession.trackingStartedAt.formatDefault())
+        this.view.trackrecorderactivity_tab_data_trackname.text().accept(trackRecorderSession.name)
+        this.view.trackrecorderactivity_tab_data_comments.text().accept(trackRecorderSession.comment)
 
         this.sessionSubscriptions.addAll(
             Observable.switchOnNext(Observable.fromArray(trackRecorderSession.stateChanged
@@ -70,7 +78,7 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
                         it.toString()
                     }
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this.dataTabFragment.trackrecorderactivity_fragment_data_tab_locationscount.text()),
+                    .subscribe(this.view.trackrecorderactivity_fragment_data_tab_locationscount.text()),
 
             this.appSettings.appSettingsChanged.subscribe{
                 if(it.propertyName == "trackDistanceUnitFormatterTypeName" && it.hasChanged) {
@@ -78,11 +86,11 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
                 }
             },
 
-            this.dataTabFragment.trackrecorderactivity_tab_data_trackname.textChanges().subscribe{
+            this.view.trackrecorderactivity_tab_data_trackname.textChanges().subscribe{
                 trackRecorderSession.name = it.toString()
             },
 
-            this.dataTabFragment.trackrecorderactivity_tab_data_comments.textChanges().subscribe{
+            this.view.trackrecorderactivity_tab_data_comments.textChanges().subscribe{
                 trackRecorderSession.comment = it.toString()
             },
 
@@ -90,30 +98,30 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
                 this.trackDistanceUnitFormatter.format(it)
             }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this.dataTabFragment.trackrecorderactivity_tab_data_trackdistance.text()),
+            .subscribe(this.view.trackrecorderactivity_tab_data_trackdistance.text()),
 
             trackRecorderSession.recordingTimeChanged.map {
                 it.formatRecordingTime()
             }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this.dataTabFragment.trackrecorderactivity_tab_data_recordingtime.text())
+            .subscribe(this.view.trackrecorderactivity_tab_data_recordingtime.text())
         )
 
         return trackRecorderSession
     }
 
     public fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        if(this.dataTabFragment.activity is INeedFragmentVisibilityInfo) {
-            (this.dataTabFragment.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.dataTabFragment, isVisibleToUser)
+        if(this.view.activity is INeedFragmentVisibilityInfo) {
+            (this.view.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.view, isVisibleToUser)
         }
     }
 
     private fun uninitializeSession() {
         this.sessionSubscriptions.clear()
 
-        this.dataTabFragment.trackrecorderactivity_tab_data_startedat.text().accept(this.dataTabFragment.getText(R.string.trackrecorderactivity_fragment_data_tab_trackingstartedat_none))
-        this.dataTabFragment.trackrecorderactivity_tab_data_trackname.text().accept("")
-        this.dataTabFragment.trackrecorderactivity_tab_data_comments.text().accept("")
+        this.view.trackrecorderactivity_tab_data_startedat.text().accept(this.view.getText(R.string.trackrecorderactivity_fragment_data_tab_trackingstartedat_none))
+        this.view.trackrecorderactivity_tab_data_trackname.text().accept("")
+        this.view.trackrecorderactivity_tab_data_comments.text().accept("")
 
         this.trackRecorderSession = null
     }
@@ -122,6 +130,7 @@ internal final class DataTabFragmentPresenter(private val dataTabFragment: DataT
         this.trackRecorderServiceController.unbindService()
 
         this.trackRecorderServiceControllerSubscription.dispose()
+        this.sessionAvailabilityChangedSubscription?.dispose()
 
         this.uninitializeSession()
     }

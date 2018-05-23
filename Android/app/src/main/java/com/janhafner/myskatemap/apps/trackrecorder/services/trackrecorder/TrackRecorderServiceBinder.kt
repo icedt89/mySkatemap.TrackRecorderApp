@@ -2,8 +2,12 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import android.os.Binder
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
+import io.reactivex.Observable
 
 internal final class TrackRecorderServiceBinder(private val trackRecorderService: ITrackRecorderService): Binder(), ITrackRecorderService {
+    public override val hasCurrentSessionChanged: Observable<Boolean>
+        get() = this.trackRecorderService.hasCurrentSessionChanged
+
     public override val currentSession: ITrackRecordingSession?
         get() = this.trackRecorderService.currentSession
 

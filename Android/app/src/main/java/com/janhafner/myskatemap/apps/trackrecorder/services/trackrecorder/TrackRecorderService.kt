@@ -62,6 +62,9 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
 
     private val stateChangedSubject: BehaviorSubject<TrackRecorderServiceState> = BehaviorSubject.createDefault<TrackRecorderServiceState>(TrackRecorderServiceState.Idle)
 
+    private val hasCurrentSessionChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
+    public override val hasCurrentSessionChanged: Observable<Boolean> = this.hasCurrentSessionChangedSubject
+
     private val recordingSavedSubject: Subject<ITrackRecorderService> = PublishSubject.create<ITrackRecorderService>()
 
     public var currentTrackRecording: TrackRecording? = null
@@ -196,7 +199,9 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
         this.sessionSubscriptions.clear()
         this.deactiveLiveTracking()
 
+        // TODO
         this.currentSession = null
+        this.hasCurrentSessionChangedSubject.onNext(false)
 
         this.appSettings.currentTrackRecordingId = null
     }
@@ -261,6 +266,8 @@ internal final class TrackRecorderService: Service(), ITrackRecorderService {
                 this)
 
         this.subscribeToSession()
+
+        this.hasCurrentSessionChangedSubject.onNext(true)
     }
 
     private fun subscribeToSession() {

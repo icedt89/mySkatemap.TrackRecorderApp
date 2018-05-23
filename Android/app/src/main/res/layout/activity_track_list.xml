@@ -4,12 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/tracklistactivity_navigationdrawer">
-
     <android.support.design.widget.CoordinatorLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -17,15 +15,27 @@
                 android:id="@+id/tracklistactivity_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize" />
-            <ListView android:id="@+id/tracklistactivity_trackrecordings_grid"
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/tracklistactivity_trackrecordings_recyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="10dp"
                 android:dividerHeight="10dp"
-                android:divider="@color/transparent"/>
+                android:scrollbars="vertical"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:fadeScrollbars="true"
+                android:clipToPadding="false"
+                android:divider="@color/transparent" />
         </android.support.design.widget.AppBarLayout>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/tracklistactivity_main_floatingactionbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="15dp"
+            android:layout_margin="15dp"
+            android:src="@drawable/ic_action_track_recorder_recording_pause" />
     </android.support.design.widget.CoordinatorLayout>
-
     <android.support.design.widget.NavigationView
         android:id="@+id/tracklistactivity_navigation"
         android:layout_width="wrap_content"
@@ -33,5 +43,4 @@
         android:layout_gravity="start"
         app:menu="@menu/app_navigation_drawer_menu"
         app:headerLayout="@layout/navigation_drawer_header"/>
-
 </android.support.v4.widget.DrawerLayout>
