@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.calories
 
 import android.util.Log
-import com.janhafner.myskatemap.apps.trackrecorder.Sex
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
@@ -9,11 +8,11 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
                                             heightInCentimeters: Float,
                                             ageInYears: Int,
                                             sex: Sex,
-                                            metValue: Float) {
+                                            metValue: Float) : IBurnedEnergyCalculator {
     private val partiallyCompleteFormula: Float
 
     private val calculatedValueSubject: BehaviorSubject<BurnedEnergy> = BehaviorSubject.create<BurnedEnergy>()
-    public val calculatedValueChanged: Observable<BurnedEnergy> = this.calculatedValueSubject
+    public override val calculatedValueChanged: Observable<BurnedEnergy> = this.calculatedValueSubject
 
     public val calculatedValue: BurnedEnergy?
         get() = this.calculatedValueSubject.value
@@ -32,7 +31,11 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
         this.partiallyCompleteFormula = (basalMetabolicRate / 24.0f) * metValue
     }
 
-    public fun calculate(activityDurationInSeconds: Int) {
+    public override fun calculate(activityDurationInSeconds: Int) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         val kiloCalories = this.partiallyCompleteFormula * ((activityDurationInSeconds / 60.0f) / 60.0f)
 
         val burnedEnergy = BurnedEnergy(kiloCalories)
@@ -40,6 +43,17 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
         Log.v("BurnedEnergyCalculator", burnedEnergy.toString())
 
         this.calculatedValueSubject.onNext(burnedEnergy)
+    }
+
+    private var isDestroyed: Boolean = false
+    public override fun destroy() {
+        if(this.isDestroyed) {
+            return
+        }
+
+        this.calculatedValueSubject.onComplete()
+
+        this.isDestroyed = true
     }
 
     private final class BasalMetabolicFactorSet(public val factor1: Float,

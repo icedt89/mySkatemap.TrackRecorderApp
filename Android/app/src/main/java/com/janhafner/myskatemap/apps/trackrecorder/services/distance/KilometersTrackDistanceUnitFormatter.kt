@@ -6,14 +6,14 @@ import com.janhafner.myskatemap.apps.trackrecorder.roundTrackDistanceForDisplay
 
 internal final class KilometersTrackDistanceUnitFormatter(private val context: Context) : ITrackDistanceUnitFormatter {
     public override fun format(distanceInMeters: Float): String {
-        if (distanceInMeters > KilometersTrackDistanceUnitFormatter.MetersToKilometersFactor) {
-            return this.context.getString(R.string.app_trackdistance_template_kilometers, (distanceInMeters / KilometersTrackDistanceUnitFormatter.MetersToKilometersFactor).roundTrackDistanceForDisplay(this.context))
+        if (distanceInMeters > KilometersTrackDistanceUnitFormatter.METERS_TO_KILOMETERS_CONVERSION_FACTOR) {
+            return this.context.getString(R.string.app_trackdistance_template_kilometers, (distanceInMeters / KilometersTrackDistanceUnitFormatter.METERS_TO_KILOMETERS_CONVERSION_FACTOR).roundTrackDistanceForDisplay(this.context))
         }
 
         return this.context.getString(R.string.app_trackdistance_template_meters, distanceInMeters.roundTrackDistanceForDisplay(this.context))
     }
 
     companion object {
-        private const val MetersToKilometersFactor: Float = 1000.0f
+        private const val METERS_TO_KILOMETERS_CONVERSION_FACTOR: Float = 1000.0f
     }
 }

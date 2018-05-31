@@ -18,13 +18,11 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/tracklistactivity_trackrecordings_recyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:padding="10dp"
                 android:dividerHeight="10dp"
-                android:scrollbars="vertical"
-                android:scrollbarAlwaysDrawVerticalTrack="true"
-                android:fadeScrollbars="true"
                 android:clipToPadding="false"
+                android:scrollbars="vertical"
                 android:divider="@color/transparent" />
         </android.support.design.widget.AppBarLayout>
         <android.support.design.widget.FloatingActionButton

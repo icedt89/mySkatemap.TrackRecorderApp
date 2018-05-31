@@ -16,6 +16,7 @@ import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getContentInfo
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.FitnessActivity
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
@@ -23,6 +24,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrack
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings.SettingsActivity
@@ -43,7 +45,7 @@ import org.joda.time.format.DateTimeFormatter
 
 internal final class TrackRecorderActivityPresenter(private val view: TrackRecorderActivity,
                                                     private val trackService: ITrackService,
-                                                    private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>,
+                                                    private val trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>,
                                                     private val appSettings: IAppSettings) : INeedFragmentVisibilityInfo {
     private val mainFloatingActionButtonSubscriptions: CompositeDisposable = CompositeDisposable()
 
@@ -169,7 +171,16 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
         val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
-        return TrackRecording.start(trackRecordingName, this.appSettings.locationProviderTypeName)
+        val result = TrackRecording.start(trackRecordingName, this.appSettings.locationProviderTypeName)
+        if (this.appSettings.enableFitnessActivityTracking) {
+            result.fitnessActivity = FitnessActivity(this.appSettings.userAge,
+                    this.appSettings.defaultMetActivityCode,
+                    this.appSettings.userWeightInKilograms,
+                    this.appSettings.userHeightInCentimeters,
+                    this.appSettings.userSex)
+        }
+
+        return result
     }
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {

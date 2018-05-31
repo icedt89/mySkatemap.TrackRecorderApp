@@ -3,6 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.location.LocationManager
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
@@ -13,17 +14,13 @@ internal final class LocationAvailabilityChangedBroadcastReceiver(context: Conte
     public val locationAvailabilityChanged: Observable<Boolean> = this.locationAvailabilityChangedSubject
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent!!.action != PROVIDERS_CHANGED) {
+        if(intent == null || intent.action != LocationManager.PROVIDERS_CHANGED_ACTION) {
             return
         }
 
         val isLocationModeEnabled = context!!.isLocationServicesEnabled()
 
         this.locationAvailabilityChangedSubject.onNext(isLocationModeEnabled)
-    }
-
-    companion object {
-        public const val PROVIDERS_CHANGED: String = "android.location.PROVIDERS_CHANGED"
     }
 }
 

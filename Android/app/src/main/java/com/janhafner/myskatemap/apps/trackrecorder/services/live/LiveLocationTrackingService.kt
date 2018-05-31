@@ -7,7 +7,7 @@ internal final class LiveLocationTrackingService(private val jsonRestApiClient: 
     : ILiveLocationTrackingService {
     private val baseUrl: String = "https://api.myskatemap.io"
 
-    public override fun createSession(): ILiveTrackingSession {
+    public override fun createSession(): ILiveLocationTrackingSession {
         // POST /api/live
         // Server side: Store live session only in memory as long as endSession(...) is not called
         val fullUrl = this.jsonRestApiClient.buildFullUrl(this.baseUrl, "/live")
@@ -17,7 +17,7 @@ internal final class LiveLocationTrackingService(private val jsonRestApiClient: 
 
         val sessionId = UUID.randomUUID().toString()
 
-        return LiveTrackingSession(this, sessionId)
+        return LiveLocationTrackingSession(this, sessionId)
     }
 
     public fun sendLocations(sessionId: String, locations: List<SimpleLocation>) {

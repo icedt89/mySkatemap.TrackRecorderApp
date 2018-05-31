@@ -7,6 +7,16 @@ import okio.ByteString
 import java.nio.ByteBuffer
 
 internal final class AppConfig : IAppConfig {
+    public override val updateBurnedEnergySeconds: Int = 1
+
+    public override val updateStatisticsSeconds: Int = 1
+
+    public override val updateTrackRecordingLocationsSeconds: Int = 1
+
+    public override val updateTrackDistanceSeconds: Int = 5
+
+    public override val updateLiveLocationSession: Int = 5
+
     public override val forceUsingOpenStreetMap: Boolean = false
 
     public override val trackColor: String = "#FFFF3A3C"

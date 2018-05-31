@@ -4,9 +4,9 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.calories
 internal final class MetActivityDefinition(public val compendiumCode: String,
                                            public val metValue: Float) {
     companion object {
-        public val generalBikingMetActivityCode = "01015"
+        public const val GENERAL_BIKING_MET_ACTIVITY_CODE = "01015"
 
-        public val normalInlineSkatingMetActivityCode = "15591"
+        public const val NORMAL_INLINE_SKATING_MET_ACTIVITY_CODE = "15591"
     }
 }
 

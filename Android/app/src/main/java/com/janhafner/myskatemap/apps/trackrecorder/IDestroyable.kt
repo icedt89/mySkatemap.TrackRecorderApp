@@ -1,7 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
-enum class Sex {
-    Male ,
-
-    Female
+internal interface IDestroyable {
+    fun destroy()
 }

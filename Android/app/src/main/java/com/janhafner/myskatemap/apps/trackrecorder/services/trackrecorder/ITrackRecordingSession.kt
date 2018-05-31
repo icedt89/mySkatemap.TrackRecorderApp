@@ -1,13 +1,14 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
+import com.janhafner.myskatemap.apps.trackrecorder.IDestroyable
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.statistics.TrackRecordingStatistic
+import com.janhafner.myskatemap.apps.trackrecorder.statistics.ITrackRecordingStatistic
 import io.reactivex.Observable
 import org.joda.time.DateTime
 import org.joda.time.Period
 
-internal interface ITrackRecordingSession {
+internal interface ITrackRecordingSession :  IDestroyable {
     val trackDistanceChanged: Observable<Float>
 
     val recordingTimeChanged: Observable<Period>
@@ -16,11 +17,13 @@ internal interface ITrackRecordingSession {
 
     val stateChanged: Observable<TrackRecorderServiceState>
 
-    val recordingSaved: Observable<ITrackRecorderService>
+    val recordingSaved: Observable<com.janhafner.myskatemap.apps.trackrecorder.Nothing>
+
+    val sessionClosed: Observable<ITrackRecordingSession>
 
     val trackingStartedAt: DateTime
 
-    val statistic: TrackRecordingStatistic
+    val statistic: ITrackRecordingStatistic
 
     var name: String
 

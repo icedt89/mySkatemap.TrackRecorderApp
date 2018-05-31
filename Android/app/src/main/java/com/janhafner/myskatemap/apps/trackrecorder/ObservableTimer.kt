@@ -10,24 +10,27 @@ import org.joda.time.Period
 import org.joda.time.PeriodType
 import java.util.*
 
-internal final class ObservableTimer {
+internal final class ObservableTimer : IObservableTimer {
     private val timer: Timer = Timer()
 
     private var timerTask: TimerTask? = this.createTimerTask()
 
-    public var isRunning: Boolean = false
-        private set
+    private val elapsedSeconds: MutablePeriod = MutablePeriod(PeriodType.time())
 
     private val secondElapsedSubject: BehaviorSubject<Period> = BehaviorSubject.createDefault<Period>(Period.ZERO)
-    public val secondElapsed: Observable<Period> = this.secondElapsedSubject
+    public override val secondElapsed: Observable<Period> = this.secondElapsedSubject
 
-    private val isRunningSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public val isRunningChanged: Observable<Boolean> = this.isRunningSubject
+    public override val secondsElapsed: Period
+        get() = this.secondElapsedSubject.value
+
+    private val isRunningChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
+    public override val isRunningChanged: Observable<Boolean> = this.isRunningChangedSubject
+
+    public override val isRunning: Boolean
+        get() = this.isRunningChangedSubject.value
 
     private val timerResetSubject: Subject<Long> = PublishSubject.create<Long>()
-    public val timerReset: Observable<Long> = this.timerResetSubject
-
-    private val elapsedSeconds: MutablePeriod = MutablePeriod(PeriodType.time())
+    public override val timerReset: Observable<Long> = this.timerResetSubject
 
     private fun createTimerTask(): TimerTask {
         return object: TimerTask() {
@@ -41,7 +44,11 @@ internal final class ObservableTimer {
         }
     }
 
-    public fun reset(elapsedSecondsSinceStart: Int) {
+    public override fun set(elapsedSecondsSinceStart: Int) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if (elapsedSecondsSinceStart < 0) {
             throw IllegalArgumentException("elapsedSecondsSinceStart")
         }
@@ -56,11 +63,15 @@ internal final class ObservableTimer {
         this.timerResetSubject.onNext(SystemClock.elapsedRealtime())
     }
 
-    public fun reset() {
-        this.reset(0)
+    public override fun reset() {
+        this.set(0)
     }
 
-    public fun start() {
+    public override fun start() {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if (this.isRunning) {
             throw IllegalStateException("Timer is already started!")
         }
@@ -69,12 +80,16 @@ internal final class ObservableTimer {
             this.timerTask = this.createTimerTask()
         }
 
-        this.changeState(true)
+        this.isRunningChangedSubject.onNext(true)
 
         this.timer.scheduleAtFixedRate(this.timerTask, 0, 1000)
     }
 
-    public fun stop() {
+    public override fun stop() {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if (!this.isRunning) {
             throw IllegalStateException("Timer is already stopped!")
         }
@@ -82,12 +97,27 @@ internal final class ObservableTimer {
         this.timerTask!!.cancel()
         this.timerTask = null
 
-        this.changeState(false)
+        this.isRunningChangedSubject.onNext(false)
     }
 
-    private fun changeState(isRunning: Boolean) {
-        this.isRunning = isRunning
+    private var isDestroyed: Boolean = false
+    public override fun destroy() {
+        if(this.isDestroyed) {
+            return
+        }
 
-        this.isRunningSubject.onNext(isRunning)
+        if(this.isRunning) {
+            this.stop()
+        }
+
+        this.reset()
+        this.timerTask?.cancel()
+        this.timer.cancel()
+
+        this.isRunningChangedSubject.onComplete()
+        this.secondElapsedSubject.onComplete()
+        this.timerResetSubject.onComplete()
+
+        this.isDestroyed = true
     }
 }

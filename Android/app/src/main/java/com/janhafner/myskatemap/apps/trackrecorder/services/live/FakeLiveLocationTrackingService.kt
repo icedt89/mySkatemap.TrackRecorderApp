@@ -5,12 +5,12 @@ import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
 import java.util.*
 
 internal final class FakeLiveLocationTrackingService() : ILiveLocationTrackingService {
-    public override fun createSession(): ILiveTrackingSession {
+    public override fun createSession(): ILiveLocationTrackingSession {
         val sessionId = UUID.randomUUID().toString()
 
         Log.i("FakeLiveTracking", "Session ${sessionId} was created")
 
-        return FakeLiveTrackingSession(this, sessionId)
+        return FakeLiveLocationTrackingSession(this, sessionId)
     }
 
     public fun sendLocations(sessionId: String, locations: List<SimpleLocation>) {

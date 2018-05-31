@@ -2,12 +2,16 @@ package com.janhafner.myskatemap.apps.trackrecorder.statistics
 
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 
-internal final class TrackRecordingStatistic {
-    public val speed: Statistic = Statistic()
+internal final class TrackRecordingStatistic : ITrackRecordingStatistic {
+    public override val speed: Statistic = Statistic()
 
-    public val altitude: Statistic = Statistic()
+    public override val altitude: Statistic = Statistic()
 
-    public fun addAll(location: List<Location>) {
+    public override fun addAll(location: List<Location>) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         this.speed.addAll(location.map {
             if(it.speed == null) {
                 0.0f
@@ -25,7 +29,11 @@ internal final class TrackRecordingStatistic {
         })
     }
 
-    public fun add(location: Location) {
+    public override fun add(location: Location) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if(location.speed == null) {
             this.speed.add(0.0f)
         } else {
@@ -37,5 +45,17 @@ internal final class TrackRecordingStatistic {
         } else {
             this.altitude.add(location.altitude!!.toFloat())
         }
+    }
+
+    private var isDestroyed: Boolean = false
+    public override fun destroy() {
+        if(this.isDestroyed) {
+            return
+        }
+
+        this.altitude.destroy()
+        this.speed.destroy()
+
+        this.isDestroyed = true
     }
 }

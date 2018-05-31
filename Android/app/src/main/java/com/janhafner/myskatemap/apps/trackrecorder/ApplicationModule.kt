@@ -3,15 +3,15 @@ package com.janhafner.myskatemap.apps.trackrecorder
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.LocationManager
-import android.nfc.NfcAdapter
 import android.preference.PreferenceManager
 import com.couchbase.lite.Database
 import com.couchbase.lite.DatabaseConfiguration
+import com.google.android.gms.location.ActivityRecognition
+import com.google.android.gms.location.ActivityRecognitionClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.janhafner.myskatemap.apps.trackrecorder.io.FileSystemDirectoryNavigator
 import com.janhafner.myskatemap.apps.trackrecorder.io.IDirectoryNavigator
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.GpxFileWriter
 import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.GpxTrackWriter
 import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.IGpxFileWriter
@@ -21,17 +21,19 @@ import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimePeriodMoshiA
 import com.janhafner.myskatemap.apps.trackrecorder.jodatime.UuidMoshiAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.services.CouchDbTrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IMetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.MetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.live.FakeLiveLocationTrackingService
-import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingService
-import com.janhafner.myskatemap.apps.trackrecorder.services.live.LiveLocationTrackingService
+import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingServiceFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.live.LiveLocationTrackingServiceFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.StillDetectorBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.*
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProviderFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LocationProviderFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.AppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
@@ -54,7 +56,13 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
-    public fun provideMetActivityDefinitionFactory(moshi: Moshi) : MetActivityDefinitionFactory {
+    public fun provideActivityRecognitionClient(): ActivityRecognitionClient {
+        return ActivityRecognition.getClient(this.applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    public fun provideMetActivityDefinitionFactory(moshi: Moshi) : IMetActivityDefinitionFactory {
         return MetActivityDefinitionFactory(this.applicationContext, moshi)
     }
 
@@ -64,42 +72,22 @@ internal final class ApplicationModule(private val applicationContext: Context) 
         return LocationServices.getFusedLocationProviderClient(this.applicationContext)
     }
 
+    @Singleton
+    @Provides
+    public fun provideStillDetector(activityRecognitionClient: ActivityRecognitionClient) : StillDetectorBroadcastReceiver {
+        return StillDetectorBroadcastReceiver(this.applicationContext, activityRecognitionClient)
+    }
+
     @Provides
     @Singleton
-    public fun provideLocationProviderFactory(fusedLocationProviderClient: FusedLocationProviderClient, locationManager: LocationManager, appSettings: IAppSettings) : LocationProviderFactory {
+    public fun provideLocationProviderFactory(fusedLocationProviderClient: FusedLocationProviderClient, locationManager: LocationManager, appSettings: IAppSettings) : ILocationProviderFactory {
         return LocationProviderFactory(this.applicationContext, appSettings, fusedLocationProviderClient, locationManager)
     }
 
-    @Deprecated("Use method above instead!")
-    @Provides
-    public fun provideLocationProvider(fusedLocationProviderClient: FusedLocationProviderClient, locationManager: LocationManager, appSettings: IAppSettings): ILocationProvider {
-        val locationProviderTypeName = appSettings.locationProviderTypeName
-
-        if (locationProviderTypeName == TestLocationProvider::class.java.name) {
-            val initialLocation = Location(-1)
-
-            initialLocation.bearing = 1.0f
-            initialLocation.latitude = 50.8333
-            initialLocation.longitude = 12.9167
-
-            return TestLocationProvider(this.applicationContext, initialLocation, interval = 500)
-        }
-
-        if (locationProviderTypeName == LegacyLocationProvider::class.java.name) {
-            return LegacyLocationProvider(locationManager)
-        }
-
-        return FusedLocationProvider(fusedLocationProviderClient)
-    }
-
     @Provides
     @Singleton
-    public fun provideLiveLocationTrackingService(jsonRestApiClient: JsonRestApiClient, appConfig: IAppConfig) : ILiveLocationTrackingService {
-        if(appConfig.useFakeLiveLocationTrackingService) {
-            return FakeLiveLocationTrackingService()
-        }
-
-        return LiveLocationTrackingService(jsonRestApiClient)
+    public fun provideLiveLocationTrackingServiceFactory(jsonRestApiClient: JsonRestApiClient, appConfig: IAppConfig, appSettings: IAppSettings) : ILiveLocationTrackingServiceFactory {
+        return LiveLocationTrackingServiceFactory(appConfig, appSettings, jsonRestApiClient)
     }
 
     @Provides
@@ -125,12 +113,6 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
-    public fun provideNfcAdapter(): NfcAdapter? {
-        return NfcAdapter.getDefaultAdapter(this.applicationContext)
-    }
-
-    @Singleton
-    @Provides
     public fun provideAppConfig(moshi: Moshi): IAppConfig {
         return AppConfig.fromAppConfigJson(this.applicationContext, moshi)
     }
@@ -149,9 +131,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
-    public fun provideTrackService(appBaseDirectoryNavigator: IDirectoryNavigator, moshi: Moshi, couchDb: Database, appSettings: IAppSettings): ITrackService {
+    public fun provideTrackService(appBaseDirectoryNavigator: IDirectoryNavigator, couchDb: Database, appSettings: IAppSettings): ITrackService {
         return CouchDbTrackService(couchDb, appBaseDirectoryNavigator, appSettings)
-        //return TrackService(appBaseDirectoryNavigator, moshi)
     }
 
     @Provides
@@ -169,8 +150,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     }
 
     @Provides
-    public fun provideTrackRecorderServiceController(): ServiceController<TrackRecorderServiceBinder>  {
-        return ServiceController(this.applicationContext)
+    public fun provideTrackRecorderServiceController(): ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>  {
+        return ServiceController(this.applicationContext, RefactoredTrackRecorderService::class.java)
     }
 
     @Provides
@@ -194,11 +175,6 @@ internal final class ApplicationModule(private val applicationContext: Context) 
                 .add(UuidMoshiAdapter())
                 // .add(KotlinJsonAdapterFactory())
                 .build()
-    }
-
-    @Provides
-    public fun provideTrackDistanceCalculator(): TrackDistanceCalculator {
-        return TrackDistanceCalculator()
     }
 
     @Provides

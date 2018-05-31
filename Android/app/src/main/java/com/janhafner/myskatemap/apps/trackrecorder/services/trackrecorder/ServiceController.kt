@@ -10,8 +10,8 @@ import android.support.v7.app.AppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
-internal final class ServiceController<TBinder: IBinder>(private val context: Context, completeOnDisconnect: Boolean = false) {
-    private val trackRecorderServiceConnection = object : ServiceConnection {
+internal final class ServiceController<TService, TBinder: IBinder>(private val context: Context, private val serviceClass: Class<TService>, completeOnDisconnect: Boolean = false) {
+    private val serviceConnection = object : ServiceConnection {
         public override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             @Suppress("UNCHECKED_CAST")
             this@ServiceController.currentBinder = service!! as TBinder
@@ -47,17 +47,17 @@ internal final class ServiceController<TBinder: IBinder>(private val context: Co
 
     public fun startAndBindService() : Observable<Boolean> {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.context.startForegroundService(Intent(this.context, TrackRecorderService::class.java))
+            this.context.startForegroundService(Intent(this.context, this.serviceClass))
         } else {
-            this.context.startService(Intent(this.context, TrackRecorderService::class.java))
+            this.context.startService(Intent(this.context, this.serviceClass))
         }
 
-        this.context.bindService(Intent(this.context, TrackRecorderService::class.java), this.trackRecorderServiceConnection, AppCompatActivity.BIND_AUTO_CREATE)
+        this.context.bindService(Intent(this.context, this.serviceClass), this.serviceConnection, AppCompatActivity.BIND_AUTO_CREATE)
 
         return this.isBoundChanged
     }
 
     public fun unbindService() {
-        this.context.unbindService(this.trackRecorderServiceConnection)
+        this.context.unbindService(this.serviceConnection)
     }
 }

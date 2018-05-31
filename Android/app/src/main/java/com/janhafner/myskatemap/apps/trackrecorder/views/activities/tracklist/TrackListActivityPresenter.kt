@@ -11,7 +11,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.formatDefault
 import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.MetActivityDefinitionFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IMetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
@@ -28,7 +28,7 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
                                                 private val trackService: ITrackService,
                                                 private val appSettings: IAppSettings,
                                                 private val distanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory,
-                                                private val metActivityDefinitionFactory: MetActivityDefinitionFactory) {
+                                                private val metActivityDefinitionFactory: IMetActivityDefinitionFactory) {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     private var trackDistanceUnitFormatter: ITrackDistanceUnitFormatter = distanceUnitFormatterFactory.createTrackDistanceUnitFormatter()

@@ -6,8 +6,8 @@ internal final class BurnedEnergy(public val kiloCalories: Float) {
     public val wattHour: Float
 
     init {
-        this.kiloJoule = this.kiloCalories * BurnedEnergy.KiloCaloriesToKiloJouleFactor
-        this.wattHour = this.kiloCalories * BurnedEnergy.KiloCaloriesToWattHourFactor
+        this.kiloJoule = this.kiloCalories * BurnedEnergy.KILO_CALORIES_TO_JOULE_CONVERSION_FACTOR
+        this.wattHour = this.kiloCalories * BurnedEnergy.KILO_CALORIES_TO_WATTHOUR_CONVERSION_FACTOR
     }
 
     public override fun toString(): String {
@@ -15,8 +15,8 @@ internal final class BurnedEnergy(public val kiloCalories: Float) {
     }
 
     companion object {
-        private const val KiloCaloriesToKiloJouleFactor: Float = 4.1868f
+        private const val KILO_CALORIES_TO_JOULE_CONVERSION_FACTOR: Float = 4.1868f
 
-        private const val KiloCaloriesToWattHourFactor: Float = 1.163f
+        private const val KILO_CALORIES_TO_WATTHOUR_CONVERSION_FACTOR: Float = 1.163f
     }
 }

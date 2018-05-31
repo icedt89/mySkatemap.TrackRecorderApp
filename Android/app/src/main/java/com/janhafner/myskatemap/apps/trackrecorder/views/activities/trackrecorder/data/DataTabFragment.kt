@@ -10,6 +10,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import javax.inject.Inject
 
@@ -23,7 +24,7 @@ internal final class DataTabFragment : Fragment() {
     public lateinit var trackRecorderUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
 
     @Inject
-    public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>
+    public lateinit var trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_data_tab, container, false)

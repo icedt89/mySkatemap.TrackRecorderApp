@@ -7,12 +7,12 @@ import com.squareup.moshi.Moshi
 import okio.ByteString
 import java.nio.ByteBuffer
 
-internal final class MetActivityDefinitionFactory(private val context: Context, private val moshi: Moshi) {
+internal final class MetActivityDefinitionFactory(private val context: Context, private val moshi: Moshi) : IMetActivityDefinitionFactory {
     private val metDefinitions = lazy {
         this.readMetDefinitions()
     }
 
-    public fun preload() {
+    public override fun preload() {
         this.metDefinitions.value
     }
 
@@ -32,7 +32,7 @@ internal final class MetActivityDefinitionFactory(private val context: Context, 
         return metDefinitionFile.definitions
     }
 
-    public fun getMetActivityDefinitionByCode(code: String) : MetActivityDefinition? {
+    public override fun getMetActivityDefinitionByCode(code: String) : MetActivityDefinition? {
         val fixedCode = code.padStart(5, '0')
 
         if(!this.metDefinitions.value.containsKey(fixedCode)) {

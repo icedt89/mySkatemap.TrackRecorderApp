@@ -1,9 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
+import com.janhafner.myskatemap.apps.trackrecorder.Nothing
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.statistics.TrackRecordingStatistic
+import com.janhafner.myskatemap.apps.trackrecorder.statistics.ITrackRecordingStatistic
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import org.joda.time.DateTime
 import org.joda.time.Period
 
@@ -11,12 +14,12 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
                                            public override val recordingTimeChanged: Observable<Period>,
                                            public override val locationsChanged: Observable<Location>,
                                            public override val stateChanged: Observable<TrackRecorderServiceState>,
-                                           public override val recordingSaved: Observable<ITrackRecorderService>,
+                                           public override val recordingSaved: Observable<Nothing>,
                                            private val trackRecorderService: TrackRecorderService): ITrackRecordingSession {
     public override val trackingStartedAt: DateTime
         get() = this.trackRecorderService.currentTrackRecording!!.trackingStartedAt
 
-    public override val statistic: TrackRecordingStatistic
+    public override val statistic: ITrackRecordingStatistic
         get() = this.trackRecorderService.currentTrackRecordingStatistic!!
 
     public override var name: String
@@ -30,6 +33,10 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
         set(value) {
             this.trackRecorderService.currentTrackRecording!!.comment = value
         }
+
+    private val sessionClosedSubject: Subject<ITrackRecordingSession> = PublishSubject.create()
+    public override val sessionClosed: Observable<ITrackRecordingSession>
+        get() = this.sessionClosedSubject
 
     public override fun resumeTracking() {
         this.trackRecorderService.resumeTracking()
@@ -49,5 +56,9 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
 
     public override fun finishTracking(): TrackRecording {
         return this.trackRecorderService.finishTracking()
+    }
+
+    public override fun destroy() {
+        throw NotImplementedError()
     }
 }

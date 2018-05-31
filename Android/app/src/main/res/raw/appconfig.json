@@ -1,5 +1,10 @@
 {
   "forceUsingOpenStreetMap": false,
   "trackColor": "#FFFF3A3C",
-  "useFakeLiveLocationTrackingService": true
+  "useFakeLiveLocationTrackingService": true,
+  "updateBurnedEnergySeconds": 1,
+  "updateStatisticsSeconds": 1,
+  "updateTrackRecordingLocationsSeconds": 1,
+  "updateTrackDistanceSeconds": 5,
+  "updateLiveLocationSession": 5
 }

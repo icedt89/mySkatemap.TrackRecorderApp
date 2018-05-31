@@ -12,7 +12,7 @@ internal final class CouchDbTrackService(private val couchDb: Database,
     private val trackRecordingsDirectoryNavigator: IDirectoryNavigator
 
     init {
-        this.trackRecordingsDirectoryNavigator = this.appBaseDirectoryNavigator.getDirectory(CouchDbTrackService.RecordingBasedirectoryName)
+        this.trackRecordingsDirectoryNavigator = this.appBaseDirectoryNavigator.getDirectory(CouchDbTrackService.RECORDING_BASE_DIRECTORY_NAME)
     }
 
     public override fun getAllTrackRecordings(): List<TrackRecording> {
@@ -65,14 +65,14 @@ internal final class CouchDbTrackService(private val couchDb: Database,
     public override fun getAttachmentHandler(trackRecording: TrackRecording): IAttachmentHandler {
         val directoryNavigator = this.trackRecordingsDirectoryNavigator
                 .getDirectory(trackRecording.id.toString())
-                .getDirectory(CouchDbTrackService.RecordingAttachmentsDirectoryName)
+                .getDirectory(CouchDbTrackService.RECORDING_ATTACHMENTS_DIRECTORY_NAME)
 
         return FileSystemAttachmentHandler(trackRecording, directoryNavigator)
     }
 
     companion object {
-        private const val RecordingAttachmentsDirectoryName: String = "attachments"
+        private const val RECORDING_ATTACHMENTS_DIRECTORY_NAME: String = "attachments"
 
-        private const val RecordingBasedirectoryName: String = "recordings"
+        private const val RECORDING_BASE_DIRECTORY_NAME: String = "recordings"
     }
 }

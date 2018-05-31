@@ -2,7 +2,8 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.live
 
 import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
 
-internal final class FakeLiveTrackingSession(private val fakeLiveLocationTrackingService: FakeLiveLocationTrackingService, private val sessionId: String) : ILiveTrackingSession {
+internal final class FakeLiveLocationTrackingSession(private val fakeLiveLocationTrackingService: FakeLiveLocationTrackingService,
+                                                     private val sessionId: String) : ILiveLocationTrackingSession {
     public override fun sendLocations(locations: List<SimpleLocation>) {
         this.fakeLiveLocationTrackingService.sendLocations(this.sessionId, locations)
     }

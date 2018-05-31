@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.settings
 
 import android.content.SharedPreferences
-import com.janhafner.myskatemap.apps.trackrecorder.Sex
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.Sex
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.KilometersTrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider
 import io.reactivex.Observable
@@ -23,7 +23,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("currentTrackRecordingId", oldValue, value))
         }
 
-    public override var defaultMetActivityCode: String = AppSettings.DefaultMetActivityCode
+    public override var defaultMetActivityCode: String = AppSettings.DEFAULT_MET_ACTIVITY_CODE
         set(value) {
             val oldValue = field
 
@@ -32,7 +32,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("defaultMetActivityCode", oldValue, value))
         }
 
-    public override var enableFitnessActivityTracking: Boolean = DefaultEnableFitnessActivityTracking
+    public override var enableFitnessActivityTracking: Boolean = DEFAULT_ENABLE_FITNESS_ACTIVITY_TRACKING
         set(value) {
             val oldValue = field
 
@@ -40,7 +40,7 @@ internal final class AppSettings: IAppSettings {
 
             this.appSettingsChangedSubject.onNext(PropertyChangedData("enableFitnessActivityTracking", oldValue, value))
         }
-    public override var userAge: Int = DefaultUserAge
+    public override var userAge: Int = DEFAULT_USER_AGE
         set(value) {
             val oldValue = field
 
@@ -48,7 +48,7 @@ internal final class AppSettings: IAppSettings {
 
             this.appSettingsChangedSubject.onNext(PropertyChangedData("userAge", oldValue, value))
         }
-    public override var userWeightInKilograms: Float = DefaultUserWeightInKilograms
+    public override var userWeightInKilograms: Float = DEFAULT_USER_WEIGHT_IN_KILOGRAMS
         set(value) {
             val oldValue = field
 
@@ -56,7 +56,7 @@ internal final class AppSettings: IAppSettings {
 
             this.appSettingsChangedSubject.onNext(PropertyChangedData("userWeightInKilograms", oldValue, value))
         }
-    public override var userHeightInCentimeters: Float = DefaultUserHeightInCentimeters
+    public override var userHeightInCentimeters: Float = DEFAULT_USER_HEIGHT_IN_CENTIMETERS
         set(value) {
             val oldValue = field
 
@@ -64,7 +64,7 @@ internal final class AppSettings: IAppSettings {
 
             this.appSettingsChangedSubject.onNext(PropertyChangedData("userHeightInCentimeters", oldValue, value))
         }
-    public override var userSex: Sex = DefaultUserSex
+    public override var userSex: Sex = DEFAULT_USER_SEX
         set(value) {
             val oldValue = field
 
@@ -73,7 +73,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("userSex", oldValue, value))
         }
 
-    public override var allowLiveTracking: Boolean = DefaultAllowLiveTracking
+    public override var allowLiveTracking: Boolean = DEFAULT_ALLOW_LIVE_TRACKING
         set(value) {
             val oldValue = field
 
@@ -82,7 +82,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("allowLiveTracking", oldValue, value))
         }
 
-    public override var appUiLocale: String = DefaultAppUiLocale
+    public override var appUiLocale: String = DEFAULT_APP_UI_LOCALE
         set(value) {
             val oldValue = field
 
@@ -91,7 +91,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("appUiLocale", oldValue, value))
         }
 
-    public override var trackDistanceUnitFormatterTypeName: String = DefaultTrackDistanceUnitFormatterTypeName
+    public override var trackDistanceUnitFormatterTypeName: String = DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPENAME
         set(value) {
             val oldValue = field
 
@@ -100,16 +100,7 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("trackDistanceUnitFormatterTypeName", oldValue, value))
         }
 
-    public override var vibrateOnBackgroundStop: Boolean = DefaultVibrateOnBackgroundStop
-        set(value) {
-            val oldValue = field
-
-            field = value
-
-            this.appSettingsChangedSubject.onNext(PropertyChangedData("vibrateOnBackgroundStop", oldValue, value))
-        }
-
-    public override var locationProviderTypeName: String = DefaultLocationProviderTypeName
+    public override var locationProviderTypeName: String = DEFAULT_LOCATION_PROVIDER_TYPENAME
         set(value) {
             val oldValue = field
 
@@ -169,12 +160,6 @@ internal final class AppSettings: IAppSettings {
                 this.appSettings.trackDistanceUnitFormatterTypeName = value
             }
 
-        public override var vibrateOnBackgroundStop: Boolean
-            get() = this.appSettings.vibrateOnBackgroundStop
-            set(value) {
-                this.appSettings.vibrateOnBackgroundStop = value
-            }
-
         public override var locationProviderTypeName: String
             get() = this.appSettings.locationProviderTypeName
             set(value) {
@@ -226,31 +211,27 @@ internal final class AppSettings: IAppSettings {
             this.sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
                 when(key) {
                     "preference_units_distance" -> {
-                        val currentValue = sharedPreferences.getString(key, AppSettings.DefaultTrackDistanceUnitFormatterTypeName)
+                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPENAME)
                         this.appSettings.trackDistanceUnitFormatterTypeName = currentValue
                     }
                     "preference_tracking_location_provider" -> {
-                        val currentValue = sharedPreferences.getString(key, AppSettings.DefaultLocationProviderTypeName)
+                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_LOCATION_PROVIDER_TYPENAME)
                         this.appSettings.locationProviderTypeName = currentValue
                     }
-                    "preference_notifications_vibrate_on_background_stop" -> {
-                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DefaultVibrateOnBackgroundStop)
-                        this.appSettings.vibrateOnBackgroundStop = currentValue
-                    }
                     "preference_app_ui_locale" -> {
-                        val currentValue = sharedPreferences.getString(key, AppSettings.DefaultAppUiLocale)
+                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_APP_UI_LOCALE)
                         this.appSettings.appUiLocale = currentValue
                     }
                     "preference_tracking_allow_live_tracking" -> {
-                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DefaultAllowLiveTracking)
+                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
                         this.appSettings.allowLiveTracking = currentValue
                     }
                     "preference_fitness_enable_fitness_activity_tracking" -> {
-                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DefaultEnableFitnessActivityTracking)
+                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DEFAULT_ENABLE_FITNESS_ACTIVITY_TRACKING)
                         this.appSettings.enableFitnessActivityTracking = currentValue
                     }
                     "preference_fitness_user_sex" -> {
-                        val currentValue = sharedPreferences.getString(key, AppSettings.DefaultUserSex.toString())
+                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_USER_SEX.toString())
                         this.appSettings.userSex = Sex.valueOf(currentValue)
                     }
                 }
@@ -258,41 +239,38 @@ internal final class AppSettings: IAppSettings {
 
             boundSharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
 
-            this.appSettings.trackDistanceUnitFormatterTypeName = boundSharedPreferences.getString("preference_units_distance", AppSettings.DefaultTrackDistanceUnitFormatterTypeName)
-            this.appSettings.locationProviderTypeName = boundSharedPreferences.getString("preference_tracking_location_provider", AppSettings.DefaultLocationProviderTypeName)
-            this.appSettings.vibrateOnBackgroundStop = boundSharedPreferences.getBoolean("preference_notifications_vibrate_on_background_stop", AppSettings.DefaultVibrateOnBackgroundStop)
-            this.appSettings.appUiLocale = boundSharedPreferences.getString("preference_app_ui_locale", AppSettings.DefaultAppUiLocale)
-            this.appSettings.allowLiveTracking = boundSharedPreferences.getBoolean("preference_tracking_allow_live_tracking", AppSettings.DefaultAllowLiveTracking)
-            this.appSettings.enableFitnessActivityTracking = boundSharedPreferences.getBoolean("preference_fitness_enable_fitness_activity_tracking", AppSettings.DefaultEnableFitnessActivityTracking)
-            this.appSettings.userSex = Sex.valueOf(boundSharedPreferences.getString("preference_fitness_user_sex", AppSettings.DefaultUserSex.toString()))
-            this.appSettings.userAge = boundSharedPreferences.getString("preference_fitness_user_age", AppSettings.DefaultUserAge.toString()).toInt()
-            this.appSettings.userHeightInCentimeters = boundSharedPreferences.getString("preference_fitness_user_height_in_centimeters", AppSettings.DefaultUserHeightInCentimeters.toString()).toFloat()
-            this.appSettings.userWeightInKilograms = boundSharedPreferences.getString("preference_fitness_user_weight_in_kilograms", AppSettings.DefaultUserWeightInKilograms.toString()).toFloat()
-            this.appSettings.defaultMetActivityCode = boundSharedPreferences.getString("preference_fitness_default_met_activity_code", AppSettings.DefaultMetActivityCode)
+            this.appSettings.trackDistanceUnitFormatterTypeName = boundSharedPreferences.getString("preference_units_distance", AppSettings.DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPENAME)
+            this.appSettings.locationProviderTypeName = boundSharedPreferences.getString("preference_tracking_location_provider", AppSettings.DEFAULT_LOCATION_PROVIDER_TYPENAME)
+            this.appSettings.appUiLocale = boundSharedPreferences.getString("preference_app_ui_locale", AppSettings.DEFAULT_APP_UI_LOCALE)
+            this.appSettings.allowLiveTracking = boundSharedPreferences.getBoolean("preference_tracking_allow_live_tracking", AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
+            this.appSettings.enableFitnessActivityTracking = boundSharedPreferences.getBoolean("preference_fitness_enable_fitness_activity_tracking", AppSettings.DEFAULT_ENABLE_FITNESS_ACTIVITY_TRACKING)
+            this.appSettings.userSex = Sex.valueOf(boundSharedPreferences.getString("preference_fitness_user_sex", AppSettings.DEFAULT_USER_SEX.toString()))
+            this.appSettings.userAge = boundSharedPreferences.getString("preference_fitness_user_age", AppSettings.DEFAULT_USER_AGE.toString()).toInt()
+            this.appSettings.userHeightInCentimeters = boundSharedPreferences.getString("preference_fitness_user_height_in_centimeters", AppSettings.DEFAULT_USER_HEIGHT_IN_CENTIMETERS.toString()).toFloat()
+            this.appSettings.userWeightInKilograms = boundSharedPreferences.getString("preference_fitness_user_weight_in_kilograms", AppSettings.DEFAULT_USER_WEIGHT_IN_KILOGRAMS.toString()).toFloat()
+            this.appSettings.defaultMetActivityCode = boundSharedPreferences.getString("preference_fitness_default_met_activity_code", AppSettings.DEFAULT_MET_ACTIVITY_CODE)
         }
     }
 
     companion object {
-        public val DefaultLocationProviderTypeName: String = FusedLocationProvider::class.java.name
+        public val DEFAULT_LOCATION_PROVIDER_TYPENAME: String = FusedLocationProvider::class.java.name
 
-        public const val DefaultAllowLiveTracking: Boolean = false
+        public const val DEFAULT_ALLOW_LIVE_TRACKING: Boolean = false
 
-        public val DefaultAppUiLocale: String = Locale.getDefault().language
+        public val DEFAULT_APP_UI_LOCALE: String = Locale.getDefault().language
 
-        public const val DefaultVibrateOnBackgroundStop: Boolean = true
+        public val DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPENAME: String = KilometersTrackDistanceUnitFormatter::class.java.name
 
-        public val DefaultTrackDistanceUnitFormatterTypeName: String = KilometersTrackDistanceUnitFormatter::class.java.name
+        public const val DEFAULT_ENABLE_FITNESS_ACTIVITY_TRACKING: Boolean = false
 
-        public const val DefaultEnableFitnessActivityTracking: Boolean = false
+        public const val DEFAULT_MET_ACTIVITY_CODE: String = "01015"
 
-        public const val DefaultMetActivityCode: String = "01015"
+        public const val DEFAULT_USER_AGE: Int = 18
 
-        public const val DefaultUserAge: Int = 18
+        public const val DEFAULT_USER_WEIGHT_IN_KILOGRAMS: Float = 0.0f
 
-        public const val DefaultUserWeightInKilograms: Float = 0.0f
+        public const val DEFAULT_USER_HEIGHT_IN_CENTIMETERS: Float = 0.0f
 
-        public const val DefaultUserHeightInCentimeters: Float = 0.0f
-
-        public val DefaultUserSex: Sex = Sex.Male
+        public val DEFAULT_USER_SEX: Sex = Sex.Male
     }
 }

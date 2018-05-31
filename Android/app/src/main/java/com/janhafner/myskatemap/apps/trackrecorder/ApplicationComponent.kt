@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings.SettingsFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist.TrackListActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
@@ -26,4 +27,6 @@ internal interface ApplicationComponent {
     fun inject(attachmentsTabFragment: AttachmentsTabFragment)
 
     fun inject(settingsFragment: SettingsFragment)
+
+    fun inject(refactoredTrackRecorderService: RefactoredTrackRecorderService)
 }

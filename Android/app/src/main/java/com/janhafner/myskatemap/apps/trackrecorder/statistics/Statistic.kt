@@ -4,40 +4,44 @@ import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
-internal final class Statistic {
+internal final class Statistic : IStatistic {
     private val minimumValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public val minimumValueChanged: Observable<Float> = this.minimumValueChangedSubject
+    public override val minimumValueChanged: Observable<Float> = this.minimumValueChangedSubject
 
-    public val minimumValue: Float?
+    public override val minimumValue: Float?
         get() = this.minimumValueChangedSubject.value
 
     private val maximumValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public val maximumValueChanged: Observable<Float> = this.maximumValueChangedSubject
+    public override val maximumValueChanged: Observable<Float> = this.maximumValueChangedSubject
 
-    public val maximumValue: Float?
+    public override val maximumValue: Float?
         get() = this.maximumValueChangedSubject.value
 
     private val averageValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public val averageValueChanged: Observable<Float> = this.averageValueChangedSubject
+    public override val averageValueChanged: Observable<Float> = this.averageValueChangedSubject
 
-    public val averageValue: Float?
+    public override val averageValue: Float?
         get() = this.averageValueChangedSubject.value
 
     private val firstValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public val firstValueChanged: Observable<Float> = this.firstValueChangedSubject
+    public override val firstValueChanged: Observable<Float> = this.firstValueChangedSubject
 
-    public val firstValue: Float?
+    public override val firstValue: Float?
         get() = this.firstValueChangedSubject.value
 
     private val lastValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public val lastValueChanged: Observable<Float> = this.lastValueChangedSubject
+    public override val lastValueChanged: Observable<Float> = this.lastValueChangedSubject
 
-    public val lastValue: Float?
+    public override val lastValue: Float?
         get() = this.lastValueChangedSubject.value
 
     private var totalCountOfSamples: Int = 0
 
-    public fun addAll(values: List<Float>) {
+    public override fun addAll(values: List<Float>) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if(!values.any()) {
             return
         }
@@ -97,7 +101,11 @@ internal final class Statistic {
         Log.v("Statistic", this.toString())
     }
 
-    public fun add(value: Float) {
+    public override fun add(value: Float) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         this.totalCountOfSamples++
 
         if(this.minimumValueChangedSubject.value == null) {
@@ -126,11 +134,27 @@ internal final class Statistic {
         if(currentAverage == null) {
             currentAverage = 0.0f
         }
+
         currentAverage = (currentAverage + value) / this.totalCountOfSamples
 
         this.averageValueChangedSubject.onNext(currentAverage)
 
         Log.v("Statistic", this.toString())
+    }
+
+    private var isDestroyed: Boolean = false
+    public override fun destroy() {
+        if(this.isDestroyed) {
+            return
+        }
+
+        this.averageValueChangedSubject.onComplete()
+        this.firstValueChangedSubject.onComplete()
+        this.lastValueChangedSubject.onComplete()
+        this.maximumValueChangedSubject.onComplete()
+        this.minimumValueChangedSubject.onComplete()
+
+        this.isDestroyed = true
     }
 
     public override fun toString(): String {

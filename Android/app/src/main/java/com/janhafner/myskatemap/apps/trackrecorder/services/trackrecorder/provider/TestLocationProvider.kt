@@ -3,8 +3,8 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 import android.content.Context
 import android.os.SystemClock
 import com.google.android.gms.maps.model.LatLng
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.clone
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import org.joda.time.DateTime
 import java.util.*
@@ -44,6 +44,10 @@ internal final class TestLocationProvider(private val context: Context,
     }
 
     public override fun overrideSequenceNumber(sequenceNumber: Int) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         super.overrideSequenceNumber(-1)
         this.lastComputedLocation = null
 
@@ -111,6 +115,10 @@ internal final class TestLocationProvider(private val context: Context,
     }
 
     public override fun getCurrentLocation(): Location {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         val result = Location(-1)
 
         result.latitude = ThreadLocalRandom.current().nextDouble() * 50
@@ -126,7 +134,11 @@ internal final class TestLocationProvider(private val context: Context,
         return result
     }
 
-    override fun stopLocationUpdates() {
+    public override fun stopLocationUpdates() {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if (!this.isActive) {
             throw IllegalStateException("LocationProvider must be started first!")
         }
@@ -137,7 +149,11 @@ internal final class TestLocationProvider(private val context: Context,
         this.isActive = false
     }
 
-    override fun startLocationUpdates() {
+    public override fun startLocationUpdates() {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if (this.isActive) {
             throw IllegalStateException("LocationProvider must be stopped first!")
         }
@@ -153,6 +169,15 @@ internal final class TestLocationProvider(private val context: Context,
         this.timer.schedule(this.postLocationTimerTask, this.delay, this.interval)
 
         this.isActive = true
+    }
+
+    protected final override fun destroyCore() {
+        if(this.isDestroyed) {
+            return
+        }
+
+        this.postLocationTimerTask?.cancel()
+        this.timer.cancel()
     }
 
     private final class PointD(public val x: Double, public val y: Double) {

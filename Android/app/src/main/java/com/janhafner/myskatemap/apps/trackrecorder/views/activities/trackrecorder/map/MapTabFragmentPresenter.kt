@@ -5,6 +5,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnMapSnapshotReadyCallback
@@ -16,7 +17,7 @@ import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
 internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
-                                             private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>,
+                                             private val trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>,
                                              private val trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory)
     : OnTrackRecorderMapReadyCallback, OnMapSnapshotReadyCallback {
     private val trackRecorderServiceControllerSubscription: Disposable

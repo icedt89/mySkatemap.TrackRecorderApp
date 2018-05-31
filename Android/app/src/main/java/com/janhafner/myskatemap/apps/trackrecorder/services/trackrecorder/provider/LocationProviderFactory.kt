@@ -6,20 +6,19 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 
-// TODO: Interface
 internal final class LocationProviderFactory(private val context: Context,
                                              private val appSettings: IAppSettings,
                                              private val fusedLocationProviderClient: FusedLocationProviderClient,
-                                             private val locationManager: LocationManager) {
-    public fun getLocationProvider(locationProviderTypeName: String? = null) : ILocationProvider {
+                                             private val locationManager: LocationManager) : ILocationProviderFactory {
+    public override fun createLocationProvider(locationProviderTypeName: String?) : ILocationProvider {
         val realLocationProviderTypeName: String
         if(locationProviderTypeName == null) {
             realLocationProviderTypeName = this.appSettings.locationProviderTypeName
         } else {
-            realLocationProviderTypeName = locationProviderTypeName!!
+            realLocationProviderTypeName = locationProviderTypeName
         }
 
-        if (locationProviderTypeName == TestLocationProvider::class.java.name) {
+        if (realLocationProviderTypeName == TestLocationProvider::class.java.name) {
             val initialLocation = Location(-1)
 
             initialLocation.bearing = 1.0f
@@ -29,10 +28,10 @@ internal final class LocationProviderFactory(private val context: Context,
             return TestLocationProvider(this.context, initialLocation, interval = 500)
         }
 
-        if (locationProviderTypeName == LegacyLocationProvider::class.java.name) {
-            return LegacyLocationProvider(this.locationManager)
+        if (realLocationProviderTypeName == LegacyLocationProvider::class.java.name) {
+            return LegacyLocationProvider(this.context, this.locationManager)
         }
 
-        return FusedLocationProvider(this.fusedLocationProviderClient)
+        return FusedLocationProvider(this.context, this.fusedLocationProviderClient)
     }
 }

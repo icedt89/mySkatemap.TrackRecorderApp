@@ -1,25 +1,33 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.distance
 
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.distanceTo
+import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
-internal final class TrackDistanceCalculator {
+internal final class TrackDistanceCalculator : ITrackDistanceCalculator {
     private var lastAccessLocationForComputation: Location? = null
 
-    private val distanceSubject: BehaviorSubject<Float> = BehaviorSubject.createDefault<Float>(0f)
-    public val distanceCalculated: Observable<Float> = this.distanceSubject
+    private val distanceCalculatedSubject: BehaviorSubject<Float> = BehaviorSubject.createDefault<Float>(0f)
+    public override val distanceCalculated: Observable<Float> = this.distanceCalculatedSubject
 
-    public val distance: Float
-        get() = this.distanceSubject.value
+    public override val distance: Float
+        get() = this.distanceCalculatedSubject.value
 
-    public fun clear() {
+    public override fun clear() {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         this.lastAccessLocationForComputation = null
-        this.distanceSubject.onNext(0f)
+        this.distanceCalculatedSubject.onNext(0f)
     }
 
-    public fun addAll(locations: List<Location>) {
+    public override fun addAll(locations: List<Location>) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         var newDistance: Float = this.distance
         for(location in locations) {
             val actualDistance = this.computeDistance(newDistance, location)
@@ -28,7 +36,7 @@ internal final class TrackDistanceCalculator {
             }
         }
 
-        this.distanceSubject.onNext(newDistance)
+        this.distanceCalculatedSubject.onNext(newDistance)
     }
 
     private fun computeDistance(seed: Float, location: Location): Float? {
@@ -43,11 +51,26 @@ internal final class TrackDistanceCalculator {
         return result
     }
 
-    public fun add(location: Location) {
+    public override fun add(location: Location) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         val newDistance = this.computeDistance(this.distance, location)
 
         if(newDistance != null){
-            this.distanceSubject.onNext(newDistance)
+            this.distanceCalculatedSubject.onNext(newDistance)
         }
+    }
+
+    private var isDestroyed: Boolean = false
+    public override fun destroy() {
+        if(this.isDestroyed) {
+            return
+        }
+
+        this.distanceCalculatedSubject.onComplete()
+
+        this.isDestroyed = true
     }
 }

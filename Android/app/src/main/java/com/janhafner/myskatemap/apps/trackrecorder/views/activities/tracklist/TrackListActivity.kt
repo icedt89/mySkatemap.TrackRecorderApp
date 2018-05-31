@@ -4,9 +4,8 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.MetActivityDefinitionFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IMetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import javax.inject.Inject
 
@@ -21,7 +20,7 @@ internal final class TrackListActivity : AppCompatActivity() {
     public lateinit var trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
 
     @Inject
-    public lateinit var metActivityDefinitionFactory: MetActivityDefinitionFactory
+    public lateinit var metActivityDefinitionFactory: IMetActivityDefinitionFactory
 
     private lateinit var presenter: TrackListActivityPresenter
 

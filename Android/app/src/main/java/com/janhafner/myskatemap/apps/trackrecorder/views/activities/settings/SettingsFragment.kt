@@ -6,11 +6,12 @@ import android.view.View
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import javax.inject.Inject
 
 internal final class SettingsFragment : PreferenceFragment() {
     @Inject
-    public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>
+    public lateinit var trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>
 
     private lateinit var presenter: SettingsFragmentPresenter
 

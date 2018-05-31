@@ -10,6 +10,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
 import javax.inject.Inject
@@ -19,7 +20,7 @@ internal final class MapTabFragment: Fragment() {
     private var presenter: MapTabFragmentPresenter? = null
 
     @Inject
-    public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>
+    public lateinit var trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>
 
     @Inject
     public lateinit var trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory

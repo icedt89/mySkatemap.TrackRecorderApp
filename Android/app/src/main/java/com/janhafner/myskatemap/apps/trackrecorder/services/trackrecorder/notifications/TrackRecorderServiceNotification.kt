@@ -8,7 +8,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
-import com.janhafner.myskatemap.apps.trackrecorder.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ActivityStartMode
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
@@ -20,8 +19,6 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
     public var durationOfRecording: Period? = null
 
     public var trackDistance: Float? = null
-
-    public var vibrateOnLocationUnavailableState: Boolean = AppSettings.DefaultVibrateOnBackgroundStop
 
     public var isBound: Boolean = false
 
@@ -51,11 +48,6 @@ internal final class TrackRecorderServiceNotification(private val trackRecorderS
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_running))
             TrackRecorderServiceState.LocationServicesUnavailable -> {
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
-                if(this.vibrateOnLocationUnavailableState) {
-                    this.notificationCompatBuilder.setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000))
-                } else {
-                    this.notificationCompatBuilder.setVibrate(LongArray(0))
-                }
             }
             TrackRecorderServiceState.Paused ->
                 this.notificationCompatBuilder.setContentTitle(trackRecorderService.getString(R.string.trackrecorderservice_notification_status_paused))

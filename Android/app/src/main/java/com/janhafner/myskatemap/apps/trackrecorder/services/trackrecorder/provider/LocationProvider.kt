@@ -32,10 +32,18 @@ internal abstract class LocationProvider: ILocationProvider {
     }
 
     public override fun resetSequenceNumber() {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         this.overrideSequenceNumber(-1)
     }
 
     public override fun overrideSequenceNumber(sequenceNumber: Int) {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if (this.isActive) {
             throw IllegalStateException("LocationProvider must be stopped first!")
         }
@@ -47,4 +55,21 @@ internal abstract class LocationProvider: ILocationProvider {
         this.currentSequenceNumber = sequenceNumber
         this.sequenceNumberOverriddenSubject.onNext(sequenceNumber)
     }
+
+    protected var isDestroyed: Boolean = false
+    public override fun destroy() {
+        if(this.isDestroyed) {
+            return
+        }
+
+        this.destroyCore()
+
+        this.sequenceNumberOverriddenSubject.onComplete()
+        this.activityChangedSubject.onComplete()
+        this.locationReceivedSubject.onComplete()
+
+        this.isDestroyed = true
+    }
+
+    protected abstract fun destroyCore()
 }

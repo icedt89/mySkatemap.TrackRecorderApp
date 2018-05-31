@@ -1,13 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
-import android.annotation.SuppressLint
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
 
-internal final class LegacyLocationProvider(private val locationManager: LocationManager): LocationProvider() {
+internal final class LegacyLocationProvider(private val context: Context,
+                                            private val locationManager: LocationManager): LocationProvider() {
     private val locationListener = object: LocationListener {
         override fun onLocationChanged(receivedLocation: Location?) {
             if (receivedLocation == null) {
@@ -33,10 +36,17 @@ internal final class LegacyLocationProvider(private val locationManager: Locatio
         }
     }
 
-    @SuppressLint("MissingPermission")
     public override fun startLocationUpdates() {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if (this.isActive) {
             throw IllegalStateException("LocationProvider must be stopped first!")
+        }
+
+        if(this.context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            throw IllegalStateException("ACCESS_FINE_LOCATION must be granted!")
         }
 
         this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2500, 5f, this.locationListener, null)
@@ -45,6 +55,10 @@ internal final class LegacyLocationProvider(private val locationManager: Locatio
     }
 
     public override fun stopLocationUpdates() {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
         if (!this.isActive) {
             throw IllegalStateException("LocationProvider must be started first!")
         }
@@ -54,8 +68,25 @@ internal final class LegacyLocationProvider(private val locationManager: Locatio
         this.isActive = false
     }
 
-    @SuppressLint("MissingPermission")
     public override fun getCurrentLocation(): com.janhafner.myskatemap.apps.trackrecorder.io.data.Location {
+        if(this.isDestroyed) {
+            throw IllegalStateException("Object is destroyed!")
+        }
+
+        if(this.context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            throw IllegalStateException("ACCESS_FINE_LOCATION must be granted!")
+        }
+
         return this.locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toLocation(-1)
+    }
+
+    protected final override fun destroyCore() {
+        if(this.isDestroyed) {
+            return
+        }
+
+        if(this.isActive) {
+            this.stopLocationUpdates()
+        }
     }
 }

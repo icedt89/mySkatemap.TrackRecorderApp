@@ -11,6 +11,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrack
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import io.reactivex.Observable
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
-                                              private val trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>,
+                                              private val trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>,
                                               private val appSettings: IAppSettings,
                                               private val trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory) {
     private val trackRecorderServiceControllerSubscription: Disposable

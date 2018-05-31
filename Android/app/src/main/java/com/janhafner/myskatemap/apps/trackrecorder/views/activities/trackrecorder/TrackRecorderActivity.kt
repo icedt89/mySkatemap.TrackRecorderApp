@@ -9,6 +9,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import javax.inject.Inject
@@ -16,7 +17,7 @@ import javax.inject.Inject
 
 internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVisibilityInfo {
     @Inject
-    public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderServiceBinder>
+    public lateinit var trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>
 
     @Inject
     public lateinit var trackService: ITrackService

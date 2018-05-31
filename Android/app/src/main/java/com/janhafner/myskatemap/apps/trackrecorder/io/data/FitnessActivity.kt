@@ -2,7 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.io.data
 
 import com.couchbase.lite.Dictionary
 import com.couchbase.lite.MutableDictionary
-import com.janhafner.myskatemap.apps.trackrecorder.Sex
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.Sex
 
 internal final class FitnessActivity(public val age: Int,
                                      public val metActivityCode: String,

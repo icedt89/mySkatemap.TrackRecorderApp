@@ -1,12 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.settings
 
-import com.janhafner.myskatemap.apps.trackrecorder.Sex
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.Sex
 import java.util.*
 
 internal interface IAppSettings: IAppSettingsChanged {
     var trackDistanceUnitFormatterTypeName: String
-
-    var vibrateOnBackgroundStop: Boolean
 
     var locationProviderTypeName: String
 
