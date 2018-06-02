@@ -3,7 +3,6 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 import com.janhafner.myskatemap.apps.trackrecorder.Nothing
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.statistics.ITrackRecordingStatistic
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
@@ -18,9 +17,6 @@ internal final class TrackRecordingSession(public override val trackDistanceChan
                                            private val trackRecorderService: TrackRecorderService): ITrackRecordingSession {
     public override val trackingStartedAt: DateTime
         get() = this.trackRecorderService.currentTrackRecording!!.trackingStartedAt
-
-    public override val statistic: ITrackRecordingStatistic
-        get() = this.trackRecorderService.currentTrackRecordingStatistic!!
 
     public override var name: String
         get() = this.trackRecorderService.currentTrackRecording!!.name

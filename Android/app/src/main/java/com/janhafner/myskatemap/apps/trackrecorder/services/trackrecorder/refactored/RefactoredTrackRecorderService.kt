@@ -3,6 +3,9 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refac
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
+import com.google.android.gms.location.ActivityRecognitionResult
+import com.google.android.gms.location.DetectedActivity
 import com.janhafner.myskatemap.apps.trackrecorder.ObservableTimer
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
@@ -15,9 +18,12 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDista
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingServiceFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingSession
+import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.StillDetectorBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProviderFactory
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -50,6 +56,12 @@ internal final class RefactoredTrackRecorderService : Service(), ITrackRecorderS
     @Inject
     public lateinit var liveLocationTrackingServiceFactory: ILiveLocationTrackingServiceFactory
 
+    @Inject
+    public lateinit var locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver
+
+    @Inject
+    public lateinit var stillDetectorBroadcastReceiver: StillDetectorBroadcastReceiver
+
     private var sessionSubscription: Disposable? = null
 
     public override fun onCreate() {
@@ -72,6 +84,8 @@ internal final class RefactoredTrackRecorderService : Service(), ITrackRecorderS
                 this.sessionSubscription?.dispose()
                 this.sessionSubscription = null
             }
+
+            field = value
 
             this.hasCurrentSessionChangedSubject.onNext(value != null)
         }
@@ -126,7 +140,9 @@ internal final class RefactoredTrackRecorderService : Service(), ITrackRecorderS
                 locationProvider,
                 observableTimer,
                 liveLocationTrackingSession,
-                this)
+                this,
+                this.stillDetectorBroadcastReceiver,
+                this.locationAvailabilityChangedBroadcastReceiver)
 
         this.appSettings.currentTrackRecordingId = trackRecording.id
 
@@ -166,6 +182,35 @@ internal final class RefactoredTrackRecorderService : Service(), ITrackRecorderS
         if(notification != null) {
             this.startForeground(RefactoredTrackRecorderServiceNotification.ID, notification)
         }
+    }
+
+    public override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if(intent != null) {
+            when(intent.action) {
+                TrackRecorderServiceNotification.ACTION_RESUME ->
+                    this.currentSession!!.resumeTracking()
+                TrackRecorderServiceNotification.ACTION_PAUSE ->
+                    this.currentSession!!.pauseTracking()
+                TrackRecorderServiceNotification.ACTION_TERMINATE -> {
+                    this.stopForeground(true)
+
+                    this.stopSelf()
+                }
+                else -> {
+                    if(ActivityRecognitionResult.hasResult(intent)) {
+                        val result = ActivityRecognitionResult.extractResult(intent)
+                        val recognizedActivity = result.mostProbableActivity
+                        if(recognizedActivity.type == DetectedActivity.STILL) {
+                            Log.i("TRS", "STILLSTANDING DETECTED!")
+                        } else if(recognizedActivity.type != DetectedActivity.UNKNOWN) {
+                            Log.i("TRS", "STILLSTANDING ENDED!")
+                        }
+                    }
+                }
+            }
+        }
+
+        return START_NOT_STICKY
     }
 
     private var isDestroyed: Boolean = false

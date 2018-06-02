@@ -1,7 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map
 
 import android.graphics.Bitmap
-import com.janhafner.myskatemap.apps.trackrecorder.*
+import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.consumeLocations
+import com.janhafner.myskatemap.apps.trackrecorder.consumeReset
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
@@ -69,7 +72,6 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                     .subscribe(trackRecorderMapFragment.consumeReset()),
 
             trackRecorderSession.locationsChanged
-                    .dropLocationsNotInDistance(500.0)
                     .buffer(1, TimeUnit.SECONDS)
                     .filter{
                         it.any()

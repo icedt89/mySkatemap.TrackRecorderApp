@@ -154,6 +154,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                     } else {
                         ShowLocationServicesSnackbar.make(this.view, this.view.currentFocus).show()
                     }
+                } else {
+                    this.trackRecorderSession!!.pauseTracking()
                 }
 
                 if(this.fragment != null) {
@@ -192,8 +194,11 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                             Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_running, Toast.LENGTH_LONG).show()
                         }
                         TrackRecorderServiceState.Paused,
-                        TrackRecorderServiceState.LocationServicesUnavailable ->
+                        TrackRecorderServiceState.LocationServicesUnavailable -> {
                             Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
+
+                            this.trackRecorderSession!!.saveTracking()
+                        }
                         else -> {
                             // Nothing happens here. Else branch exist only to prevent warning on compile Oo
                         }
@@ -273,15 +278,6 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.trackRecorderServiceControllerSubscription.dispose()
 
         this.uninitializeSession()
-    }
-
-    fun save() {
-        this.trackRecorderSession?.stateChanged?.last(TrackRecorderServiceState.Idle)!!.subscribe{
-            it ->
-            if(it != TrackRecorderServiceState.Idle) {
-                this.trackRecorderSession!!.saveTracking()
-            }
-        }
     }
 
     private fun setupMainFloatingActionButton(fragment: Fragment, isVisibleToUser: Boolean){

@@ -33,7 +33,7 @@
     <string name="trackrecorderservice_notification_action_resume">Fortfahren</string>
     <string name="trackrecorderservice_notification_action_pause">Pausieren</string>
     <string name="trackrecorderservice_notification_action_terminate">Beenden</string>
-    <string name="trackrecorderservice_notification_contenttext_template">%s in %s, klasse</string>
+    <string name="trackrecorderservice_notification_contenttext_template">%s in %s, klasse 👍</string>
     <string name="trackrecorderactivity_discard_confirmation_message">Alle Daten der derzeitigen Aufnahme gehen unwiderruflich verloren! Möchtest du fortfahren?</string>
     <string name="trackrecorderactivity_snackbar_locationservices_action_enable">aktivieren</string>
     <string name="trackrecorderactivity_snackbar_locationservices_message">Standort nicht aktiviert</string>

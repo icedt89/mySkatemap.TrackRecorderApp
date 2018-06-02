@@ -23,8 +23,6 @@ internal interface ITrackRecordingSession :  IDestroyable {
 
     val trackingStartedAt: DateTime
 
-    val statistic: ITrackRecordingStatistic
-
     var name: String
 
     var comment: String?

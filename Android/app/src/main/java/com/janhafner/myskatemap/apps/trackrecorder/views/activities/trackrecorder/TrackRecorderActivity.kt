@@ -47,12 +47,6 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
         this.presenter!!.onActivityResult(requestCode, resultCode, data)
     }
 
-    public override fun onSaveInstanceState(outState: Bundle?) {
-        super.onSaveInstanceState(outState)
-
-        this.presenter!!.save()
-    }
-
     public override fun onDestroy() {
         super.onDestroy()
 
