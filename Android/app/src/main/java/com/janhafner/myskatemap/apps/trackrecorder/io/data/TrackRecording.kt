@@ -10,7 +10,13 @@ import org.joda.time.Period
 import java.util.*
 
 internal final class TrackRecording private constructor(public var name: String) {
-    public val id: UUID = UUID.randomUUID()
+    private constructor(name: String, id: UUID)
+        : this(name) {
+        this.id = id
+    }
+
+    public var id: UUID = UUID.randomUUID()
+        private set
 
     public var comment: String? = null
 
@@ -133,7 +139,9 @@ internal final class TrackRecording private constructor(public var name: String)
         }
 
         public fun fromCouchDbDocument(document: Document) : TrackRecording {
-            val result = TrackRecording(document.getString("name"))
+            val id = UUID.fromString(document.id)
+
+            val result = TrackRecording(document.getString("name"), id)
 
             result.locationProviderTypeName = document.getString("locationProviderTypeName")
             result.comment = document.getString("comment")
@@ -170,8 +178,8 @@ internal final class TrackRecording private constructor(public var name: String)
             return result
         }
 
-        public fun fromCouchDbDictionary(dictionary: Dictionary) : TrackRecording {
-            val result = TrackRecording(dictionary.getString("name"))
+        public fun fromCouchDbDictionary(dictionary: Dictionary, id: UUID) : TrackRecording {
+            val result = TrackRecording(dictionary.getString("name"), id)
 
             result.locationProviderTypeName = dictionary.getString("locationProviderTypeName")
             result.comment = dictionary.getString("comment")

@@ -3,7 +3,10 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist
 import android.content.Intent
 import android.support.design.widget.NavigationView
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.PopupMenu
 import android.view.MenuItem
+import com.couchbase.lite.internal.support.Log
+import com.jakewharton.rxbinding2.support.v7.widget.itemClicks
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.checkAllAppPermissions
@@ -41,7 +44,7 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
         this.view.checkAllAppPermissions().subscribe { areAllGranted ->
             if(areAllGranted) {
                 this.forwardToTrackRecorderIfNecessary()
-            }else {
+            } else {
                 this.view.finishAndRemoveTask()
             }
         }
@@ -109,6 +112,35 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
                     if(it.item.isFinished) {
                         it.view.activity_track_list_item_tracking_finishedat.text = it.item.trackingFinishedAt!!.formatDefault()
                     }
+
+                    val trackRecording = it.item
+
+                    val popupMenuAnchor = it.view.activity_track_list_item_tracking_menu
+                    this.subscriptions.add(
+                        popupMenuAnchor.clicks().subscribe {
+                            val popupMenu = PopupMenu(this.view, popupMenuAnchor)
+                            popupMenu.inflate(R.menu.track_list_activity_item_popupmenu)
+
+                            this.subscriptions.add(
+                                popupMenu.itemClicks().subscribe {
+                                    if(it.itemId == R.id.track_list_activity_item_popupmenu_recording_show) {
+                                        Log.i("TRACKLIST", "Needs to be implemented!")
+
+                                    } else if(it.itemId == R.id.track_list_activity_item_popupmenu_recording_delete) {
+                                        try {
+                                            this.trackService.deleteTrackRecording(trackRecording.id.toString())
+
+                                            Log.i("TRACKLIST", "Refresh bound array list after deletion went successful!")
+                                        } catch(exception: Exception) {
+                                            Log.i("TRACKLIST", "Exception handling!")
+                                        }
+                                    }
+                                }
+                            )
+
+                            popupMenu.show()
+                        }
+                    )
                 },
 
                 appSettings.appSettingsChanged.subscribe{

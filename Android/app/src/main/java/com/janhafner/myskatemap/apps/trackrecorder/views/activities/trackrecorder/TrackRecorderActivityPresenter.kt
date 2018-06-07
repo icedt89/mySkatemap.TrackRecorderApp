@@ -2,6 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
@@ -20,12 +21,9 @@ import com.janhafner.myskatemap.apps.trackrecorder.io.data.FitnessActivity
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.startLocationSourceSettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings.SettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist.TrackListActivity
@@ -33,6 +31,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.DiscardRecordingAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.FinishRecordingAlertDialogBuilder
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.ShowLocationServicesAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -45,7 +44,7 @@ import org.joda.time.format.DateTimeFormatter
 
 internal final class TrackRecorderActivityPresenter(private val view: TrackRecorderActivity,
                                                     private val trackService: ITrackService,
-                                                    private val trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>,
+                                                    private val trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>,
                                                     private val appSettings: IAppSettings) : INeedFragmentVisibilityInfo {
     private val mainFloatingActionButtonSubscriptions: CompositeDisposable = CompositeDisposable()
 
@@ -123,7 +122,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                 if (this.appSettings.currentTrackRecordingId != null) {
                     try {
                         currentTrackRecording = this.trackService.getTrackRecording(this.appSettings.currentTrackRecordingId!!.toString())
-                    } catch(exception: Throwable) {
+                    } catch(exception: Exception) {
                         // TODO
                         Log.e("RecorderPresenter", "Could not load track recording (Id=\"${this.appSettings.currentTrackRecordingId!!}\")!${exception}")
                     }
@@ -148,14 +147,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
                 this.trackRecorderSession = this.getInitializedSession(uninitializedSession)
 
-                if(createNewTrackRecording){
-                    if (this.view.isLocationServicesEnabled()) {
-                        this.trackRecorderSession!!.resumeTracking()
-                    } else {
-                        ShowLocationServicesSnackbar.make(this.view, this.view.currentFocus).show()
-                    }
-                } else {
-                    this.trackRecorderSession!!.pauseTracking()
+                if(createNewTrackRecording && this.view.isLocationServicesEnabled()){
+                    this.trackRecorderSession!!.resumeTracking()
                 }
 
                 if(this.fragment != null) {
@@ -190,26 +183,28 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
             trackRecorderSession.stateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{
                     currentState ->
                     when (currentState) {
-                        TrackRecorderServiceState.Running -> {
+                        TrackRecordingSessionState.Running -> {
                             Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_running, Toast.LENGTH_LONG).show()
                         }
-                        TrackRecorderServiceState.Paused,
-                        TrackRecorderServiceState.LocationServicesUnavailable -> {
+                        TrackRecordingSessionState.Paused -> {
+                            Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
+                        }
+                        TrackRecordingSessionState.LocationServicesUnavailable -> {
                             Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
 
-                            this.trackRecorderSession!!.saveTracking()
+                            this.buildAndShowLocationServicesDialog()
                         }
                         else -> {
-                            // Nothing happens here. Else branch exist only to prevent warning on compile Oo
+                            // Nothing happens here, else branch exist only to prevent warning on compile Oo
                         }
                     }
 
                     if(this.discardTrackRecordingMenuItem != null) {
-                        this.discardTrackRecordingMenuItem!!.isEnabled = currentState != TrackRecorderServiceState.Running
+                        this.discardTrackRecordingMenuItem!!.isEnabled = currentState != TrackRecordingSessionState.Running
                     }
 
                     if(this.finishTrackRecordingMenuItem != null) {
-                        this.finishTrackRecordingMenuItem!!.isEnabled = currentState != TrackRecorderServiceState.Running
+                        this.finishTrackRecordingMenuItem!!.isEnabled = currentState != TrackRecordingSessionState.Running
                     }
                 }
         )
@@ -256,13 +251,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                         val discardRecordingAlertDialogBuilder = DiscardRecordingAlertDialogBuilder(this.view)
                         discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
                             _, _ ->
-                            this.trackRecorderSession!!.discardTracking()
-
-                            this.uninitializeSession()
-
-                            this.view.startActivity(Intent(this.view, TrackListActivity::class.java))
-
-                            this.view.finish()
+                            this.discardTrackRecordingAndFinishActivity()
                         })
 
                         discardRecordingAlertDialogBuilder.show()
@@ -280,6 +269,25 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.uninitializeSession()
     }
 
+    private fun discardTrackRecordingAndFinishActivity() {
+        this.trackRecorderSession!!.discardTracking()
+
+        this.uninitializeSession()
+
+        this.view.startActivity(Intent(this.view, TrackListActivity::class.java))
+
+        this.view.finish()
+    }
+
+    private fun buildAndShowLocationServicesDialog() {
+        ShowLocationServicesAlertDialogBuilder(this.view)
+                .setPositiveButton(R.string.trackrecorderactivity_show_location_services_confirmation_open_label,  object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, which: Int) {
+                        this@TrackRecorderActivityPresenter.view.startLocationSourceSettingsActivity()
+                    }
+                }).create().show()
+    }
+
     private fun setupMainFloatingActionButton(fragment: Fragment, isVisibleToUser: Boolean){
         this.mainFloatingActionButtonSubscriptions.clear()
         this.fragment = fragment
@@ -290,11 +298,11 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                         this.trackRecorderSession!!.stateChanged
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe {
-                                    this.view.trackrecorderactivity_main_floatingactionbutton.isEnabled = it == TrackRecorderServiceState.Running || it == TrackRecorderServiceState.Paused
-
-                                    var iconId = R.drawable.ic_action_track_recorder_recording_startresume
-                                    if (it == TrackRecorderServiceState.Running) {
-                                        iconId = R.drawable.ic_action_track_recorder_recording_pause
+                                    var iconId = R.drawable.ic_action_track_recorder_recording_pause
+                                    if (it == TrackRecordingSessionState.Paused) {
+                                        iconId = R.drawable.ic_action_track_recorder_recording_startresume
+                                    } else if (it == TrackRecordingSessionState.LocationServicesUnavailable) {
+                                        iconId = R.drawable.ic_location
                                     }
 
                                     this.view.trackrecorderactivity_main_floatingactionbutton.setImageResource(iconId)
@@ -302,16 +310,18 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
                         this.view.trackrecorderactivity_main_floatingactionbutton.clicks()
                                 .subscribe {
-                                    this.trackRecorderSession!!.stateChanged.first(TrackRecorderServiceState.Idle).subscribe {
+                                    this.trackRecorderSession!!.stateChanged.first(TrackRecordingSessionState.Paused).subscribe {
                                         state ->
-                                        if(state == TrackRecorderServiceState.Paused) {
-                                            if (this.view.isLocationServicesEnabled()) {
-                                                this.trackRecorderSession!!.resumeTracking()
-                                            } else {
-                                                ShowLocationServicesSnackbar.make(this.view, this.view.currentFocus).show()
+                                        when(state) {
+                                            TrackRecordingSessionState.Running -> {
+                                                this.trackRecorderSession!!.pauseTracking()
                                             }
-                                        } else {
-                                            this.trackRecorderSession!!.pauseTracking()
+                                            TrackRecordingSessionState.Paused -> {
+                                                this.trackRecorderSession!!.resumeTracking()
+                                            }
+                                            TrackRecordingSessionState.LocationServicesUnavailable -> {
+                                                this.buildAndShowLocationServicesDialog()
+                                            }
                                         }
                                     }
                                 }

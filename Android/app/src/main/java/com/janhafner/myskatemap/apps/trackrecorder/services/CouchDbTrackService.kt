@@ -5,6 +5,7 @@ import com.couchbase.lite.*
 import com.janhafner.myskatemap.apps.trackrecorder.io.IDirectoryNavigator
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import java.util.*
 
 internal final class CouchDbTrackService(private val couchDb: Database,
                                          private val appBaseDirectoryNavigator: IDirectoryNavigator,
@@ -16,7 +17,7 @@ internal final class CouchDbTrackService(private val couchDb: Database,
     }
 
     public override fun getAllTrackRecordings(): List<TrackRecording> {
-        val queryBuilder = QueryBuilder.select(SelectResult.all())
+        val queryBuilder = QueryBuilder.select(SelectResult.all(), SelectResult.expression(Meta.id))
                 .from(DataSource.database(couchDb))
                 .where(Expression.property("_id").isNot(Expression.value(this.appSettings.currentTrackRecordingId?.toString())))
 
@@ -25,15 +26,16 @@ internal final class CouchDbTrackService(private val couchDb: Database,
         val trackRecordings = ArrayList<TrackRecording>()
 
         for (result in results) {
-            val document = result.getDictionary(couchDb.name)
+            val id = UUID.fromString(result.getString("id"))
+            val dictionary = result.getDictionary(couchDb.name)
 
             try {
-                val trackRecording = TrackRecording.fromCouchDbDictionary(document)
+                val trackRecording = TrackRecording.fromCouchDbDictionary(dictionary, id)
 
                 trackRecordings.add(trackRecording)
             } catch (exception: Exception) {
                 // TODO
-                Log.w("CouchDbTrackService", "Could not construct track recording (Id=\"${document.getString("id")}\")!")
+                Log.w("CouchDbTrackService", "Could not construct track recording (Id=\"${dictionary.getString("_id")}\")!")
             }
         }
 

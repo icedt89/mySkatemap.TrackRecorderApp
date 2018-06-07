@@ -4,11 +4,11 @@ import android.preference.ListPreference
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import io.reactivex.disposables.Disposable
 
 internal final class SettingsFragmentPresenter(private val view: SettingsFragment,
-                                               private val trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>) {
+                                               private val trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>) {
     private lateinit var trackRecorderServiceControllerSubscription: Disposable
 
     init {

@@ -24,6 +24,9 @@
     <string name="trackrecorderactivity_tab_data_numberofpositions">Number of locations</string>
     <string name="trackrecorderactivity_tab_data_startedat">Started at</string>
     <string name="trackrecorderactivity_tab_data_comments">Notices</string>
+    <string name="trackrecorderactivity_show_location_services_confirmation_message">Please activate location services to proceed with tracking.</string>
+    <string name="trackrecorderactivity_show_location_services_confirmation_title">Location services unavailable</string>
+    <string name="trackrecorderactivity_show_location_services_confirmation_open_label">Open location</string>
 
     <string name="app_trackdistance_template_meters">%s m</string>
     <string name="app_trackdistance_template_kilometers">%s km</string>

@@ -10,7 +10,6 @@ import android.provider.OpenableColumns
 import android.provider.Settings
 import com.janhafner.myskatemap.apps.trackrecorder.io.ContentInfo
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceState
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -129,15 +128,6 @@ internal fun ITrackRecorderMap.consumeLocations(): Consumer<List<Location>> {
     return Consumer({
         val locations = it.map { it.toSimpleLocation() }
         this.addLocations(locations)
-    })
-}
-
-internal fun ITrackRecorderMap.consumeReset(): Consumer<TrackRecorderServiceState> {
-    return Consumer({
-        currentState ->
-            if (currentState == TrackRecorderServiceState.Idle) {
-                this.clearTrack()
-            }
     })
 }
 

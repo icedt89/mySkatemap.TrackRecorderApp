@@ -1,8 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
-internal enum class TrackRecorderServiceState{
-    Idle,
-
+internal enum class TrackRecordingSessionState {
     Running,
 
     Paused,

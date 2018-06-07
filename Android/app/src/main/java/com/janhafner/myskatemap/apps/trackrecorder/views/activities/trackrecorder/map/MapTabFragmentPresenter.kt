@@ -4,11 +4,10 @@ import android.graphics.Bitmap
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.consumeLocations
-import com.janhafner.myskatemap.apps.trackrecorder.consumeReset
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnMapSnapshotReadyCallback
@@ -20,7 +19,7 @@ import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
 internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
-                                             private val trackRecorderServiceController: ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>,
+                                             private val trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>,
                                              private val trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory)
     : OnTrackRecorderMapReadyCallback, OnMapSnapshotReadyCallback {
     private val trackRecorderServiceControllerSubscription: Disposable
@@ -67,10 +66,6 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
         this.sessionSubscriptions.addAll(
-            trackRecorderSession.stateChanged
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(trackRecorderMapFragment.consumeReset()),
-
             trackRecorderSession.locationsChanged
                     .buffer(1, TimeUnit.SECONDS)
                     .filter{

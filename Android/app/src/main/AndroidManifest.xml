@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.janhafner.myskatemap.apps.trackrecorder">
-
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -42,8 +41,7 @@
         <activity
             android:name=".views.activities.tracklist.TrackListActivity"
             android:label="@string/tracklistactivity_title"
-            android:launchMode="singleTask"/>
-
+            android:launchMode="singleTask" />
         <activity
             android:name=".views.activities.settings.SettingsActivity" />
 
@@ -57,14 +55,8 @@
         <service
             android:name=".services.trackrecorder.TrackRecorderService"
             android:exported="false" />
-
-        <service
-            android:name=".services.trackrecorder.refactored.RefactoredTrackRecorderService"
-            android:exported="false" />
-
         <service
             android:name=".services.stilldetection.ActivityRecognizerIntentService"
             android:exported="false" />
     </application>
-
 </manifest>

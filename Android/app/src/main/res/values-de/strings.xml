@@ -39,6 +39,9 @@
     <string name="trackrecorderactivity_snackbar_locationservices_message">Standort nicht aktiviert</string>
     <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Löschen</string>
     <string name="trackrecorderactivity_finish_confirmation_message">Alle Daten der derzeitigen Aufnahme werden zur späteren Verarbeitung gespeichert! Möchtest du fortfahren?</string>
+    <string name="trackrecorderactivity_show_location_services_confirmation_message">Bitte aktiviere die Standortdienste um mit der Aufzeichnung fortzufahren.</string>
+    <string name="trackrecorderactivity_show_location_services_confirmation_title">Standort nicht verfügbar</string>
+    <string name="trackrecorderactivity_show_location_services_confirmation_open_label">Standort öffnen</string>
 
     <string name="startactivity_start_new_recording_button_label">neue Aufnahme beginnen</string>
 

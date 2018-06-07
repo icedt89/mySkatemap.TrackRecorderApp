@@ -30,10 +30,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.live.LiveLocationTra
 import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.StillDetectorBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProviderFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LocationProviderFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.refactored.RefactoredTrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.AppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.settings.AppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
@@ -150,8 +150,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     }
 
     @Provides
-    public fun provideTrackRecorderServiceController(): ServiceController<RefactoredTrackRecorderService, TrackRecorderServiceBinder>  {
-        return ServiceController(this.applicationContext, RefactoredTrackRecorderService::class.java)
+    public fun provideTrackRecorderServiceController(): ServiceController<TrackRecorderService, TrackRecorderServiceBinder>  {
+        return ServiceController(this.applicationContext, TrackRecorderService::class.java)
     }
 
     @Provides
