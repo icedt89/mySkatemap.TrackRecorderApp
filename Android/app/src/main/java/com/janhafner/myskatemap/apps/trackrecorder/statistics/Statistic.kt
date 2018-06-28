@@ -97,8 +97,6 @@ internal final class Statistic : IStatistic {
 
         this.averageValueChangedSubject.onNext(newAverageValue)
         this.lastValueChangedSubject.onNext(lastValue!!)
-
-        Log.v("Statistic", this.toString())
     }
 
     public override fun add(value: Float) {
@@ -138,8 +136,6 @@ internal final class Statistic : IStatistic {
         currentAverage = (currentAverage + value) / this.totalCountOfSamples
 
         this.averageValueChangedSubject.onNext(currentAverage)
-
-        Log.v("Statistic", this.toString())
     }
 
     private var isDestroyed: Boolean = false

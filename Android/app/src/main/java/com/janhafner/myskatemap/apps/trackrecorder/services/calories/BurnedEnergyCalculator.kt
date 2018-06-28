@@ -14,7 +14,7 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
     private val calculatedValueSubject: BehaviorSubject<BurnedEnergy> = BehaviorSubject.create<BurnedEnergy>()
     public override val calculatedValueChanged: Observable<BurnedEnergy> = this.calculatedValueSubject
 
-    public val calculatedValue: BurnedEnergy?
+    public override val calculatedValue: BurnedEnergy
         get() = this.calculatedValueSubject.value
 
     init {
@@ -31,7 +31,7 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
         this.partiallyCompleteFormula = (basalMetabolicRate / 24.0f) * metValue
     }
 
-    public override fun calculate(activityDurationInSeconds: Int) {
+    public override fun calculate(activityDurationInSeconds: Int) : BurnedEnergy {
         if(this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
@@ -40,9 +40,9 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
 
         val burnedEnergy = BurnedEnergy(kiloCalories)
 
-        Log.v("BurnedEnergyCalculator", burnedEnergy.toString())
-
         this.calculatedValueSubject.onNext(burnedEnergy)
+
+        return burnedEnergy
     }
 
     private var isDestroyed: Boolean = false

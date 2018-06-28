@@ -23,6 +23,15 @@ internal final class AppSettings: IAppSettings {
             this.appSettingsChangedSubject.onNext(PropertyChangedData("currentTrackRecordingId", oldValue, value))
         }
 
+    public override var currentDashboardId: UUID? = null
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.appSettingsChangedSubject.onNext(PropertyChangedData("currentDashboardId", oldValue, value))
+        }
+
     public override var defaultMetActivityCode: String = AppSettings.DEFAULT_MET_ACTIVITY_CODE
         set(value) {
             val oldValue = field
@@ -30,47 +39,6 @@ internal final class AppSettings: IAppSettings {
             field = value
 
             this.appSettingsChangedSubject.onNext(PropertyChangedData("defaultMetActivityCode", oldValue, value))
-        }
-
-    public override var enableFitnessActivityTracking: Boolean = DEFAULT_ENABLE_FITNESS_ACTIVITY_TRACKING
-        set(value) {
-            val oldValue = field
-
-            field = value
-
-            this.appSettingsChangedSubject.onNext(PropertyChangedData("enableFitnessActivityTracking", oldValue, value))
-        }
-    public override var userAge: Int = DEFAULT_USER_AGE
-        set(value) {
-            val oldValue = field
-
-            field = value
-
-            this.appSettingsChangedSubject.onNext(PropertyChangedData("userAge", oldValue, value))
-        }
-    public override var userWeightInKilograms: Float = DEFAULT_USER_WEIGHT_IN_KILOGRAMS
-        set(value) {
-            val oldValue = field
-
-            field = value
-
-            this.appSettingsChangedSubject.onNext(PropertyChangedData("userWeightInKilograms", oldValue, value))
-        }
-    public override var userHeightInCentimeters: Float = DEFAULT_USER_HEIGHT_IN_CENTIMETERS
-        set(value) {
-            val oldValue = field
-
-            field = value
-
-            this.appSettingsChangedSubject.onNext(PropertyChangedData("userHeightInCentimeters", oldValue, value))
-        }
-    public override var userSex: Sex = DEFAULT_USER_SEX
-        set(value) {
-            val oldValue = field
-
-            field = value
-
-            this.appSettingsChangedSubject.onNext(PropertyChangedData("userSex", oldValue, value))
         }
 
     public override var allowLiveTracking: Boolean = DEFAULT_ALLOW_LIVE_TRACKING
@@ -124,36 +92,6 @@ internal final class AppSettings: IAppSettings {
                 this.appSettings.defaultMetActivityCode = value
             }
 
-        public override var enableFitnessActivityTracking: Boolean
-            get() = this.appSettings.enableFitnessActivityTracking
-            set(value) {
-                this.appSettings.enableFitnessActivityTracking = value
-            }
-
-        public override var userAge: Int
-            get() = this.appSettings.userAge
-            set(value) {
-                this.appSettings.userAge = value
-            }
-
-        public override var userWeightInKilograms: Float
-            get() = this.appSettings.userWeightInKilograms
-            set(value) {
-                this.appSettings.userWeightInKilograms = value
-            }
-
-        public override var userHeightInCentimeters: Float
-            get() = this.appSettings.userHeightInCentimeters
-            set(value) {
-                this.appSettings.userHeightInCentimeters = value
-            }
-
-        public override var userSex: Sex
-            get() = this.appSettings.userSex
-            set(value) {
-                this.appSettings.userSex = value
-            }
-
         public override var trackDistanceUnitFormatterTypeName: String
             get() = this.appSettings.trackDistanceUnitFormatterTypeName
             set(value) {
@@ -184,6 +122,12 @@ internal final class AppSettings: IAppSettings {
                 this.appSettings.currentTrackRecordingId = value
             }
 
+        public override var currentDashboardId: UUID?
+            get() = this.appSettings.currentDashboardId
+            set(value) {
+                this.appSettings.currentDashboardId = value
+            }
+
         public override val appSettingsChanged: Observable<PropertyChangedData>
             get() = this.appSettings.appSettingsChanged
 
@@ -192,6 +136,12 @@ internal final class AppSettings: IAppSettings {
             val currentTrackRecordingId = boundSharedPreferences.getString(currentTrackRecordingIdKey, null)
             if(currentTrackRecordingId != null) {
                 this.appSettings.currentTrackRecordingId = UUID.fromString(currentTrackRecordingId)
+            }
+
+            val currentDashboardIdKey = "currentDashboardId"
+            val currentDashboardId = boundSharedPreferences.getString(currentDashboardIdKey, null)
+            if(currentDashboardId != null) {
+                this.appSettings.currentDashboardId = UUID.fromString(currentDashboardId)
             }
 
             this.appSettingsChangedSubscription = this.appSettings.appSettingsChanged.subscribe {
@@ -226,14 +176,6 @@ internal final class AppSettings: IAppSettings {
                         val currentValue = sharedPreferences.getBoolean(key, AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
                         this.appSettings.allowLiveTracking = currentValue
                     }
-                    "preference_fitness_enable_fitness_activity_tracking" -> {
-                        val currentValue = sharedPreferences.getBoolean(key, AppSettings.DEFAULT_ENABLE_FITNESS_ACTIVITY_TRACKING)
-                        this.appSettings.enableFitnessActivityTracking = currentValue
-                    }
-                    "preference_fitness_user_sex" -> {
-                        val currentValue = sharedPreferences.getString(key, AppSettings.DEFAULT_USER_SEX.toString())
-                        this.appSettings.userSex = Sex.valueOf(currentValue)
-                    }
                 }
             }
 
@@ -243,11 +185,6 @@ internal final class AppSettings: IAppSettings {
             this.appSettings.locationProviderTypeName = boundSharedPreferences.getString("preference_tracking_location_provider", AppSettings.DEFAULT_LOCATION_PROVIDER_TYPENAME)
             this.appSettings.appUiLocale = boundSharedPreferences.getString("preference_app_ui_locale", AppSettings.DEFAULT_APP_UI_LOCALE)
             this.appSettings.allowLiveTracking = boundSharedPreferences.getBoolean("preference_tracking_allow_live_tracking", AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
-            this.appSettings.enableFitnessActivityTracking = boundSharedPreferences.getBoolean("preference_fitness_enable_fitness_activity_tracking", AppSettings.DEFAULT_ENABLE_FITNESS_ACTIVITY_TRACKING)
-            this.appSettings.userSex = Sex.valueOf(boundSharedPreferences.getString("preference_fitness_user_sex", AppSettings.DEFAULT_USER_SEX.toString()))
-            this.appSettings.userAge = boundSharedPreferences.getString("preference_fitness_user_age", AppSettings.DEFAULT_USER_AGE.toString()).toInt()
-            this.appSettings.userHeightInCentimeters = boundSharedPreferences.getString("preference_fitness_user_height_in_centimeters", AppSettings.DEFAULT_USER_HEIGHT_IN_CENTIMETERS.toString()).toFloat()
-            this.appSettings.userWeightInKilograms = boundSharedPreferences.getString("preference_fitness_user_weight_in_kilograms", AppSettings.DEFAULT_USER_WEIGHT_IN_KILOGRAMS.toString()).toFloat()
             this.appSettings.defaultMetActivityCode = boundSharedPreferences.getString("preference_fitness_default_met_activity_code", AppSettings.DEFAULT_MET_ACTIVITY_CODE)
         }
     }
@@ -261,16 +198,6 @@ internal final class AppSettings: IAppSettings {
 
         public val DEFAULT_TRACK_DISTANCE_UNIT_FORMATTER_TYPENAME: String = KilometersTrackDistanceUnitFormatter::class.java.name
 
-        public const val DEFAULT_ENABLE_FITNESS_ACTIVITY_TRACKING: Boolean = false
-
         public const val DEFAULT_MET_ACTIVITY_CODE: String = "01015"
-
-        public const val DEFAULT_USER_AGE: Int = 18
-
-        public const val DEFAULT_USER_WEIGHT_IN_KILOGRAMS: Float = 0.0f
-
-        public const val DEFAULT_USER_HEIGHT_IN_CENTIMETERS: Float = 0.0f
-
-        public val DEFAULT_USER_SEX: Sex = Sex.Male
     }
 }

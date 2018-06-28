@@ -2,6 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 
 import android.content.Context
 import android.os.SystemClock
+import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
@@ -10,6 +11,7 @@ import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.collections.ArrayList
+import kotlin.math.max
 
 internal final class TestLocationProvider(private val context: Context,
                                           private val initialLocation: Location,
@@ -109,9 +111,26 @@ internal final class TestLocationProvider(private val context: Context,
 
             this.lastComputedLocation?.latitude = nextComputedLocation.latitude
             this.lastComputedLocation?.longitude = nextComputedLocation.longitude
+
+            this.lastComputedLocation?.speed = this.computeSpeed(sequenceNumber).toFloat()
+            this.lastComputedLocation?.altitude = this.computeAltitude(sequenceNumber)
         }
 
         return this.lastComputedLocation!!
+    }
+
+    private fun computeSpeed(sequenceNumber: Int): Double {
+        val period = 24
+        val maximum = 50
+
+        return ((1 - Math.sin(sequenceNumber * 2 * Math.PI / period)) * (maximum / 2) + (maximum / 2)) * maximum
+    }
+
+    private fun computeAltitude(sequenceNumber: Int): Double {
+        val period = 24
+        val maximum = 100
+
+        return (Math.sin(sequenceNumber * 2 * Math.PI / period) * (maximum / 2) + (maximum / 2)) * maximum
     }
 
     public override fun getCurrentLocation(): Location {
@@ -182,7 +201,7 @@ internal final class TestLocationProvider(private val context: Context,
 
     private final class PointD(public val x: Double, public val y: Double) {
         public override fun toString(): String {
-            return "PointD(X: ${this.x}; Y: ${this.y})"
+            return "PointD(X:${this.x};Y:${this.y})"
         }
     }
 }

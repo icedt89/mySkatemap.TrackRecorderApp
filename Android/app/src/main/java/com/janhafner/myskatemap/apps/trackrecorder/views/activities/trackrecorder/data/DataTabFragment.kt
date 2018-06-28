@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
@@ -24,7 +25,7 @@ internal final class DataTabFragment : Fragment() {
     public lateinit var trackRecorderUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
 
     @Inject
-    public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>
+    public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_data_tab, container, false)

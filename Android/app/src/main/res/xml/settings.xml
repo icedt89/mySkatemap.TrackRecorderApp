@@ -23,8 +23,8 @@
             android:summary="@string/settingsfragment_preference_tracking_location_provider_summary"
             android:entries="@array/settingsactivity_tracking_location_provider_names"
             android:entryValues="@array/settingsactivity_tracking_location_provider_values"
-            android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider" />
-        <CheckBoxPreference
+            android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider" />
+        <SwitchPreference
             android:key="preference_tracking_allow_live_tracking"
             android:title="@string/settingsfragment_preference_tracking_allow_live_tracking_label"
             android:summary="@string/settingsfragment_preference_tracking_allow_live_tracking_summary"
@@ -44,7 +44,7 @@
     <PreferenceCategory
         android:title="@string/settingsfragment_preference_fitness"
         android:key="preference_fitness">
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="preference_fitness_enable_fitness_activity_tracking"
             android:title="@string/settingsfragment_preference_fitness_enable_fitness_activity_tracking_label"
             android:summary="@string/settingsfragment_preference_tracking_allow_live_tracking_summary"

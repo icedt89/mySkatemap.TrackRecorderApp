@@ -5,6 +5,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
 internal interface ITrackRecorderMap {
     val track: List<SimpleLocation>
 
+    val isReady: Boolean
+
     fun addLocations(locations: List<SimpleLocation>)
 
     fun clearTrack()

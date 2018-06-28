@@ -25,6 +25,9 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
     public override val track: List<SimpleLocation>
         get() = this.locations
 
+    public override var isReady: Boolean = false
+        private set
+
     public override fun getSnapshotAsync(callback: OnMapSnapshotReadyCallback) {
         val cached = this.map.drawingCache
 
@@ -37,6 +40,8 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
         }
 
         callback.onMapReady(this)
+
+        this.isReady = true
     }
 
     public override fun addLocations(locations: List<SimpleLocation>) {

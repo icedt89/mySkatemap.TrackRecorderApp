@@ -18,5 +18,7 @@ internal final class BurnedEnergy(public val kiloCalories: Float) {
         private const val KILO_CALORIES_TO_JOULE_CONVERSION_FACTOR: Float = 4.1868f
 
         private const val KILO_CALORIES_TO_WATTHOUR_CONVERSION_FACTOR: Float = 1.163f
+
+        public val empty: BurnedEnergy = BurnedEnergy(0.0f)
     }
 }

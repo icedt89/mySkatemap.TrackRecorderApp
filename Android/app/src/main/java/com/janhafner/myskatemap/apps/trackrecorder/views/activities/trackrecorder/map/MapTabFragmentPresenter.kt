@@ -5,8 +5,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.consumeLocations
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
@@ -19,10 +18,10 @@ import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
 internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
-                                             private val trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>,
+                                             private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                              private val trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory)
     : OnTrackRecorderMapReadyCallback, OnMapSnapshotReadyCallback {
-    private val trackRecorderServiceControllerSubscription: Disposable
+    private lateinit var trackRecorderServiceControllerSubscription: Disposable
 
     private var sessionAvailabilityChangedSubscription: Disposable? = null
 
@@ -35,27 +34,28 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     init {
         this.view.childFragmentManager.beginTransaction()
                 .replace(R.id.fragment_track_recorder_map_map_placeholder, this.trackRecorderMapFragment)
-                .commit()
+                .runOnCommit({
+                    this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.isClientBoundChanged.subscribe{
+                        if(it) {
+                            this.sessionAvailabilityChangedSubscription = this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged.subscribe{
+                                if(it) {
+                                    val binder = this.trackRecorderServiceController.currentBinder!!
 
-        this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe{
-            if(it) {
-                this.sessionAvailabilityChangedSubscription = this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged.subscribe{
-                    if(it) {
-                        val binder = this.trackRecorderServiceController.currentBinder!!
+                                    this.trackRecorderMapFragment.getMapAsync(this)
 
-                        this.trackRecorderMapFragment.getMapAsync(this)
+                                    this.trackRecorderSession = this.getInitializedSession(binder.currentSession!!)
+                                } else {
+                                    this.uninitializeSession()
+                                }
+                            }
+                        } else {
+                            this.uninitializeSession()
 
-                        this.trackRecorderSession = this.getInitializedSession(binder.currentSession!!)
-                    } else {
-                        this.uninitializeSession()
+                            this.sessionAvailabilityChangedSubscription?.dispose()
+                        }
                     }
-                }
-            } else {
-                this.uninitializeSession()
-
-                this.sessionAvailabilityChangedSubscription?.dispose()
-            }
-        }
+                })
+                .commit()
     }
 
     public fun setUserVisibleHint(isVisibleToUser: Boolean) {
@@ -88,6 +88,10 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     private fun uninitializeSession() {
         this.sessionSubscriptions.clear()
 
+        if(this.trackRecorderMapFragment.isReady) {
+            this.trackRecorderMapFragment.clearTrack()
+        }
+
         this.trackRecorderSession = null
     }
 
@@ -96,18 +100,17 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     }
 
     public override fun onSnapshotReady(bitmap: Bitmap) {
-        val ooo = bitmap
-        val ppp = ooo
-
         bitmap.recycle()
     }
 
     public fun destroy() {
         this.trackRecorderServiceController.unbindService()
-
         this.trackRecorderServiceControllerSubscription.dispose()
+
         this.sessionAvailabilityChangedSubscription?.dispose()
 
         this.uninitializeSession()
+
+        this.sessionSubscriptions.dispose()
     }
 }

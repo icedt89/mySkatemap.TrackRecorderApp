@@ -4,14 +4,15 @@ import android.os.Bundle
 import android.preference.PreferenceFragment
 import android.view.View
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.views.userprofile.settings.UserProfileSettingsFragmentPresenter
 import javax.inject.Inject
+
 
 internal final class SettingsFragment : PreferenceFragment() {
     @Inject
-    public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>
+    public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
     private lateinit var presenter: SettingsFragmentPresenter
 

@@ -9,7 +9,6 @@ import com.couchbase.lite.internal.support.Log
 import com.jakewharton.rxbinding2.support.v7.widget.itemClicks
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.checkAllAppPermissions
 import com.janhafner.myskatemap.apps.trackrecorder.formatDefault
 import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
@@ -19,10 +18,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDista
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings.SettingsActivity
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.ActivityStartMode
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivityPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.userprofile.settings.UserProfileSettingsActivity
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_track_list.*
 import kotlinx.android.synthetic.main.activity_track_list_item.view.*
@@ -40,37 +36,6 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
         this.view.setContentView(R.layout.activity_track_list)
 
         this.view.setSupportActionBar(this.view.tracklistactivity_toolbar)
-
-        this.view.checkAllAppPermissions().subscribe { areAllGranted ->
-            if(areAllGranted) {
-                this.forwardToTrackRecorderIfNecessary()
-            } else {
-                this.view.finishAndRemoveTask()
-            }
-        }
-    }
-
-    private fun forwardToTrackRecorderIfNecessary() {
-        val hasCurrentTrackRecording: Boolean
-        if(this.appSettings.currentTrackRecordingId != null) {
-            hasCurrentTrackRecording = this.trackService.hasTrackRecording(this.appSettings.currentTrackRecordingId!!.toString())
-            if(!hasCurrentTrackRecording) {
-                this.appSettings.currentTrackRecordingId = null
-            }
-        } else {
-            hasCurrentTrackRecording = false
-        }
-
-        if(hasCurrentTrackRecording) {
-            val intent = Intent(this.view, TrackRecorderActivity::class.java)
-            intent.putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.TryResume.toString())
-
-            this.view.startActivity(intent)
-
-            this.view.finish()
-        } else {
-            this.setupActivity()
-        }
     }
 
     private fun setupActivity() {
@@ -128,7 +93,7 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
 
                                     } else if(it.itemId == R.id.track_list_activity_item_popupmenu_recording_delete) {
                                         try {
-                                            this.trackService.deleteTrackRecording(trackRecording.id.toString())
+                                            this.trackService.delete(trackRecording.id.toString())
 
                                             Log.i("TRACKLIST", "Refresh bound array list after deletion went successful!")
                                         } catch(exception: Exception) {
@@ -150,18 +115,9 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
                 }
         )
 
-        val items = this.trackService.getAllTrackRecordings()
+        val items = this.trackService.getAll()
 
         itemsAdapter.addAll(items)
-
-        this.view.tracklistactivity_main_floatingactionbutton.clicks().subscribe{
-            val intent = Intent(this.view, TrackRecorderActivity::class.java)
-            intent.putExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY, ActivityStartMode.StartNew.toString())
-
-            this.view.startActivity(intent)
-
-            this.view.finish()
-        }
 
         // TODO:
         val navigationView = this.view.findViewById<NavigationView>(R.id.tracklistactivity_navigation)
@@ -169,7 +125,7 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
                 object : NavigationView.OnNavigationItemSelectedListener {
                     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
                         if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_settings) {
-                            this@TrackListActivityPresenter.view.startActivity(Intent(this@TrackListActivityPresenter.view, SettingsActivity::class.java))
+                            this@TrackListActivityPresenter.view.startActivity(Intent(this@TrackListActivityPresenter.view, UserProfileSettingsActivity::class.java))
                         } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_trackrecordings) {
                             val intent = Intent(this@TrackListActivityPresenter.view, TrackListActivity::class.java)
 
@@ -184,6 +140,6 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
     }
 
     public fun destroy() {
-        this.subscriptions.clear()
+        this.subscriptions.dispose()
     }
 }

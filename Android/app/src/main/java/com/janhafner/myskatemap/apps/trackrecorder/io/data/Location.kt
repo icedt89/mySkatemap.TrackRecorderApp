@@ -2,6 +2,8 @@ package com.janhafner.myskatemap.apps.trackrecorder.io.data
 
 import com.couchbase.lite.Dictionary
 import com.couchbase.lite.MutableDictionary
+import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.AmbientTemperatureService
+import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.Temperature
 import org.joda.time.DateTime
 
 internal final class Location(public val sequenceNumber: Int) {
@@ -28,6 +30,8 @@ internal final class Location(public val sequenceNumber: Int) {
 
     public var verticalAccuracyMeters: Float? = null
 
+    public var correlatingAmbientTemperature: Temperature? = null
+
     public fun toCouchDbDictionary() : Dictionary {
         val result = MutableDictionary()
 
@@ -39,6 +43,10 @@ internal final class Location(public val sequenceNumber: Int) {
 
         if(this.accuracy != null) {
             result.setFloat("accuracy", this.accuracy!!)
+        }
+
+        if(this.correlatingAmbientTemperature != null) {
+            result.setDictionary("correlatingAmbientTemperature", this.correlatingAmbientTemperature!!.toCouchDbDictionary())
         }
 
         if(this.altitude != null) {
@@ -69,7 +77,7 @@ internal final class Location(public val sequenceNumber: Int) {
     }
 
     public override fun toString(): String {
-        return "Location(#${this.sequenceNumber}; lat: ${this.latitude}; lon: ${this.longitude})"
+        return "Location(#${this.sequenceNumber};lat:${this.latitude};lon:${this.longitude})"
     }
 
     companion object {
@@ -88,6 +96,11 @@ internal final class Location(public val sequenceNumber: Int) {
             result.speed = dictionary.getFloat("speed")
             result.speedAccuracyMetersPerSecond = dictionary.getFloat("speedAccuracyMetersPerSecond")
             result.verticalAccuracyMeters = dictionary.getFloat("verticalAccuracyMeters")
+
+            val correlatingAmbientTemperature = dictionary.getDictionary("correlatingAmbientTemperature")
+            if(correlatingAmbientTemperature != null) {
+                result.correlatingAmbientTemperature = Temperature.fromCouchDbDictionary(correlatingAmbientTemperature)
+            }
 
             return result
         }

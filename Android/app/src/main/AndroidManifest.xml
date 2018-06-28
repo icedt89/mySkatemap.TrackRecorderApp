@@ -7,13 +7,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.nfc" android:required="false" />
     <application
         android:supportsRtl="false"
         android:name=".TrackRecorderApplication"
@@ -43,7 +40,7 @@
             android:label="@string/tracklistactivity_title"
             android:launchMode="singleTask" />
         <activity
-            android:name=".views.activities.settings.SettingsActivity" />
+            android:name=".views.userprofile.settings.UserProfileSettingsActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

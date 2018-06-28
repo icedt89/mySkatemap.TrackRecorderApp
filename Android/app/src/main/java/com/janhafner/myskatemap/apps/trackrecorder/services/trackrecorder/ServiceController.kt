@@ -10,54 +10,66 @@ import android.support.v7.app.AppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
-internal final class ServiceController<TService, TBinder: IBinder>(private val context: Context, private val serviceClass: Class<TService>, completeOnDisconnect: Boolean = false) {
+internal final class ServiceController<TService, TBinder: IBinder>(private val context: Context,
+                                                                   private val serviceClass: Class<TService>,
+                                                                   completeOnDisconnect: Boolean = false)
+        : IServiceController<TBinder> {
     private val serviceConnection = object : ServiceConnection {
         public override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             @Suppress("UNCHECKED_CAST")
             this@ServiceController.currentBinder = service!! as TBinder
 
-            this@ServiceController.isBoundChangedSubject.onNext(true)
+            this@ServiceController.isClientBoundChangedSubject.onNext(true)
         }
 
         public override fun onServiceDisconnected(name: ComponentName?) {
             this@ServiceController.currentBinder = null
 
-            this@ServiceController.isBoundChangedSubject.onNext(false)
+            this@ServiceController.isClientBoundChangedSubject.onNext(false)
 
             if(completeOnDisconnect){
-                this@ServiceController.isBoundChangedSubject.onComplete()
+                this@ServiceController.isClientBoundChangedSubject.onComplete()
             }
         }
 
         public override fun onBindingDied(name: ComponentName?) {
             this@ServiceController.currentBinder = null
 
-            this@ServiceController.isBoundChangedSubject.onComplete()
+            this@ServiceController.isClientBoundChangedSubject.onComplete()
         }
     }
 
-    private val isBoundChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
-    public val isBoundChanged: Observable<Boolean> = this.isBoundChangedSubject
+    private val isClientBoundChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
+    public override val isClientBoundChanged: Observable<Boolean> = this.isClientBoundChangedSubject
 
-    public val isBound
-        get() = this.isBoundChangedSubject.value
+    public override val isClientBound
+        get() = this.isClientBoundChangedSubject.value
 
-    public var currentBinder: TBinder? = null
+    public override var currentBinder: TBinder? = null
         private set
 
-    public fun startAndBindService() : Observable<Boolean> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.context.startForegroundService(Intent(this.context, this.serviceClass))
+    public override fun startAndBindService() : Observable<Boolean> {
+        if (this.currentBinder == null) {
+            // Starting from api level 26 a background services must be marked as "foreground"-service in order to get not killed by the OS
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                this.context.startForegroundService(Intent(this.context, this.serviceClass))
+            } else {
+                this.context.startService(Intent(this.context, this.serviceClass))
+            }
+
+            this.context.bindService(Intent(this.context, this.serviceClass), this.serviceConnection, AppCompatActivity.BIND_AUTO_CREATE)
         } else {
-            this.context.startService(Intent(this.context, this.serviceClass))
+            this.isClientBoundChangedSubject.onNext(true)
         }
 
-        this.context.bindService(Intent(this.context, this.serviceClass), this.serviceConnection, AppCompatActivity.BIND_AUTO_CREATE)
-
-        return this.isBoundChanged
+        return this.isClientBoundChanged
     }
 
-    public fun unbindService() {
-        this.context.unbindService(this.serviceConnection)
+    public override fun unbindService() {
+        if (this.isClientBound) {
+            this.context.unbindService(this.serviceConnection)
+        }
+
+        this.isClientBoundChangedSubject.onNext(false)
     }
 }

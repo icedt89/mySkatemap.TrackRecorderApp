@@ -7,19 +7,20 @@ import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import java.util.*
 
-internal final class CouchDbTrackService(private val couchDb: Database,
-                                         private val appBaseDirectoryNavigator: IDirectoryNavigator,
-                                         private val appSettings: IAppSettings) : ITrackService {
+internal final class TrackService(private val couchDb: Database,
+                                  private val appBaseDirectoryNavigator: IDirectoryNavigator,
+                                  private val appSettings: IAppSettings) : ITrackService {
     private val trackRecordingsDirectoryNavigator: IDirectoryNavigator
 
     init {
-        this.trackRecordingsDirectoryNavigator = this.appBaseDirectoryNavigator.getDirectory(CouchDbTrackService.RECORDING_BASE_DIRECTORY_NAME)
+        this.trackRecordingsDirectoryNavigator = this.appBaseDirectoryNavigator.getDirectory(TrackService.RECORDING_BASE_DIRECTORY_NAME)
     }
 
-    public override fun getAllTrackRecordings(): List<TrackRecording> {
+    public override fun getAll(): List<TrackRecording> {
         val queryBuilder = QueryBuilder.select(SelectResult.all(), SelectResult.expression(Meta.id))
                 .from(DataSource.database(couchDb))
-                .where(Expression.property("_id").isNot(Expression.value(this.appSettings.currentTrackRecordingId?.toString())))
+                .where(Expression.property("_id").isNot(Expression.value(this.appSettings.currentTrackRecordingId?.toString()))
+                        .and(Expression.property("documentType").`is`(Expression.string(TrackRecording::javaClass.name))))
 
         val results = queryBuilder.execute()
 
@@ -35,39 +36,38 @@ internal final class CouchDbTrackService(private val couchDb: Database,
                 trackRecordings.add(trackRecording)
             } catch (exception: Exception) {
                 // TODO
-                Log.w("CouchDbTrackService", "Could not construct track recording (Id=\"${dictionary.getString("_id")}\")!")
+                Log.w("TrackService", "Could not construct track recording (Id=\"${dictionary.getString("_id")}\")!")
             }
         }
 
         return trackRecordings
     }
 
-    public override fun getTrackRecording(id: String): TrackRecording? {
+    public override fun getByIdOrNull(id: String): TrackRecording? {
         val result = this.couchDb.getDocument(id)
+        if (result == null) {
+            return null
+        }
 
         return TrackRecording.fromCouchDbDocument(result)
     }
 
-    public override fun saveTrackRecording(trackRecording: TrackRecording) {
-        val document = trackRecording.toCouchDbDocument()
+    public override fun save(item: TrackRecording) {
+        val document = item.toCouchDbDocument()
 
         this.couchDb.save(document)
     }
 
-    public override fun deleteTrackRecording(id: String) {
+    public override fun delete(id: String) {
         val result = this.couchDb.getDocument(id)
 
         this.couchDb.delete(result)
     }
 
-    public override fun hasTrackRecording(id: String): Boolean {
-        return this.couchDb.getDocument(id) != null
-    }
-
     public override fun getAttachmentHandler(trackRecording: TrackRecording): IAttachmentHandler {
         val directoryNavigator = this.trackRecordingsDirectoryNavigator
                 .getDirectory(trackRecording.id.toString())
-                .getDirectory(CouchDbTrackService.RECORDING_ATTACHMENTS_DIRECTORY_NAME)
+                .getDirectory(TrackService.RECORDING_ATTACHMENTS_DIRECTORY_NAME)
 
         return FileSystemAttachmentHandler(trackRecording, directoryNavigator)
     }

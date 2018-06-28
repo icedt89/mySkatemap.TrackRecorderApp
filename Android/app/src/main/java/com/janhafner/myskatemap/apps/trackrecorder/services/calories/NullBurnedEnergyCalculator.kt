@@ -7,7 +7,11 @@ internal final class NullBurnedEnergyCalculator : IBurnedEnergyCalculator {
     public override val calculatedValueChanged: Observable<BurnedEnergy>
         get() = this.calculatedValueChangedSubject
 
-    public override fun calculate(activityDurationInSeconds: Int) {
+    public override val calculatedValue: BurnedEnergy
+        get() = BurnedEnergy.empty
+
+    public override fun calculate(activityDurationInSeconds: Int) : BurnedEnergy {
+        return this.calculatedValue
     }
 
     public override fun destroy() {

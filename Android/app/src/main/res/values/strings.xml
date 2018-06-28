@@ -6,9 +6,9 @@
     <string name="trackrecorderactivity_presenter_default_new_trackrecording_name_template">Track %s</string>
     <string name="trackrecorderactivity_toast_recording_running">Recording active</string>
     <string name="trackrecorderactivity_toast_recording_paused">Recording paused</string>
+    <string name="trackrecorderactivity_tab_dashboard_title">Dashboard</string>
     <string name="trackrecorderactivity_tab_map_title">Map</string>
     <string name="trackrecorderactivity_tab_data_title">Data</string>
-    <string name="trackrecorderactivity_tab_attachments_title">Attachments</string>
     <string name="trackrecorderactivity_fragment_data_tab_trackingstartedat_none">No recording in progress</string>
     <string name="trackrecorderactivity_discard_confirmation_title">Discard</string>
     <string name="trackrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost!  Do you want to proceed?</string>
@@ -28,9 +28,6 @@
     <string name="trackrecorderactivity_show_location_services_confirmation_title">Location services unavailable</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_open_label">Open location</string>
 
-    <string name="app_trackdistance_template_meters">%s m</string>
-    <string name="app_trackdistance_template_kilometers">%s km</string>
-    <string name="app_trackdistance_template_miles">%s miles</string>
     <string name="app_trackdistance_decimalformat">#.##</string>
 
     <string name="trackrecorderservice_notification_status_paused">Recording paused</string>

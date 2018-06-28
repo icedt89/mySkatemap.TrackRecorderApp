@@ -47,8 +47,13 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
             }
 
             callback.onMapReady(this)
+
+            this.isReady = true
         })
     }
+
+    public override var isReady: Boolean = false
+        private set
 
     public override val track: List<SimpleLocation>
         get() = this.locations

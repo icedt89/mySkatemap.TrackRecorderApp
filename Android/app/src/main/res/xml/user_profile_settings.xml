@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+    <PreferenceCategory
+        android:title="@string/settingsfragment_preference_fitness"
+        android:key="preference_fitness">
+        <EditTextPreference
+            android:key="preference_fitness_user_age"
+            android:title="@string/settingsfragment_preference_fitness_user_age_label"
+            android:summary="@string/settingsfragment_preference_fitness_user_age_summary"
+            android:defaultValue="18"
+            android:numeric="integer" />
+        <EditTextPreference
+            android:key="preference_fitness_user_weight_in_kilograms"
+            android:title="@string/settingsfragment_preference_fitness_user_weight_in_kilograms_label"
+            android:summary="@string/settingsfragment_preference_fitness_user_weight_in_kilograms_summary"
+            android:defaultValue="0.0"
+            android:numeric="decimal" />
+        <EditTextPreference
+            android:key="preference_fitness_user_height_in_centimeters"
+            android:title="@string/settingsfragment_preference_fitness_user_height_in_centimeters_label"
+            android:summary="@string/settingsfragment_preference_fitness_user_height_in_centimeters_summary"
+            android:defaultValue="0.0"
+            android:numeric="decimal"/>
+        <ListPreference
+            android:key="preference_fitness_user_sex"
+            android:title="@string/settingsfragment_preference_fitness_user_sex_label"
+            android:summary="@string/settingsfragment_preference_fitness_user_sex_summary"
+            android:entries="@array/settingsactivity_fitness_user_sex_names"
+            android:entryValues="@array/settingsactivity_fitness_user_sex_values"
+            android:defaultValue="Male" />
+        <ListPreference
+            android:key="preference_fitness_default_met_activity_code"
+            android:title="@string/settingsfragment_preference_fitness_default_met_activity_code_label"
+            android:summary="@string/settingsfragment_preference_fitness_default_met_activity_code_summary"
+            android:entries="@array/settingsactivity_fitness_default_met_activity_code_names"
+            android:entryValues="@array/settingsactivity_fitness_default_met_activity_code_values"
+            android:defaultValue="01015" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -14,15 +14,7 @@ internal interface IAppSettings: IAppSettingsChanged {
 
     var currentTrackRecordingId: UUID?
 
-    var enableFitnessActivityTracking: Boolean
-
-    var userAge: Int
+    var currentDashboardId: UUID?
 
     var defaultMetActivityCode: String
-
-    var userWeightInKilograms: Float
-
-    var userHeightInCentimeters: Float
-
-    var userSex: Sex
 }

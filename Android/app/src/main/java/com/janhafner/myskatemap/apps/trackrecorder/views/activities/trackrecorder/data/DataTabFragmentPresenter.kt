@@ -5,12 +5,10 @@ import com.jakewharton.rxbinding2.widget.textChanges
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.formatDefault
 import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
+import com.janhafner.myskatemap.apps.trackrecorder.liveCount
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import io.reactivex.Observable
@@ -19,10 +17,9 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.fragment_data_tab.*
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
-                                              private val trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>,
+                                              private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                               private val appSettings: IAppSettings,
                                               private val trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory) {
     private val trackRecorderServiceControllerSubscription: Disposable
@@ -35,12 +32,10 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
 
     private var trackDistanceUnitFormatter: ITrackDistanceUnitFormatter
 
-    private var currentLocationsCount: AtomicInteger = AtomicInteger()
-
     init {
         this.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
 
-        this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe{
+        this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.isClientBoundChanged.subscribe{
             if(it) {
                 this.sessionAvailabilityChangedSubscription = this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged.subscribe{
                     if(it) {
@@ -68,9 +63,10 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
                         0
                     }, trackRecorderSession.locationsChanged
                     .buffer(1, TimeUnit.SECONDS)
-                    .map {
-                        this.currentLocationsCount.addAndGet(it.count())
-                    }))
+                    .filter {
+                        it.any()
+                    }
+                    .liveCount()))
                     .map {
                         it.toString()
                     }
@@ -107,12 +103,6 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
         return trackRecorderSession
     }
 
-    public fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        if(this.view.activity is INeedFragmentVisibilityInfo) {
-            (this.view.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.view, isVisibleToUser)
-        }
-    }
-
     private fun uninitializeSession() {
         this.sessionSubscriptions.clear()
 
@@ -123,6 +113,12 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
         this.trackRecorderSession = null
     }
 
+    public fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        if(this.view.activity is INeedFragmentVisibilityInfo) {
+            (this.view.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.view, isVisibleToUser)
+        }
+    }
+
     public fun destroy() {
         this.trackRecorderServiceController.unbindService()
 
@@ -130,5 +126,7 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
         this.sessionAvailabilityChangedSubscription?.dispose()
 
         this.uninitializeSession()
+
+        this.sessionSubscriptions.dispose()
     }
 }

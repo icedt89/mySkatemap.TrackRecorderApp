@@ -82,6 +82,7 @@ internal final class TrackRecording private constructor(public var name: String)
 
     public fun toCouchDbDocument(): MutableDocument {
         val result = MutableDocument(this.id.toString())
+        result.setString("documentType", this.javaClass.name)
 
         result.setString("comment", this.comment)
         result.setString("name", this.name)

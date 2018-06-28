@@ -10,6 +10,9 @@ import android.provider.OpenableColumns
 import android.provider.Settings
 import com.janhafner.myskatemap.apps.trackrecorder.io.ContentInfo
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
+import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.Dashboard
+import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.UserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -21,6 +24,8 @@ import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 internal fun Context.startLocationSourceSettingsActivity() {
     this.startActivity(android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
@@ -125,10 +130,13 @@ internal fun Location.toSimpleLocation(): SimpleLocation {
 }
 
 internal fun ITrackRecorderMap.consumeLocations(): Consumer<List<Location>> {
-    return Consumer({
-        val locations = it.map { it.toSimpleLocation() }
+    return Consumer {
+        val locations = it.map {
+            it.toSimpleLocation()
+        }
+
         this.addLocations(locations)
-    })
+    }
 }
 
 internal fun Context.isLocationServicesEnabled(): Boolean {
@@ -176,6 +184,35 @@ internal fun Activity.checkAccessFineLocationPermission(): Observable<Boolean> {
                 })
                 .check()
     }
+}
+
+private fun <TDocument> ICrudRepository<TDocument>.getByIdOrDefault(id: UUID?, default: TDocument) : TDocument {
+    if(id == null) {
+        return default
+    }
+
+    val result = this.getByIdOrNull(id.toString())
+    if (result == null) {
+        return default
+    }
+
+    return result
+}
+
+internal fun ICrudRepository<Dashboard>.getByIdOrDefault(id: UUID?, default: Dashboard = Dashboard(UUID.randomUUID())) : Dashboard {
+    return this.getByIdOrDefault<Dashboard>(id, default)
+}
+
+internal fun <Upstream> Observable<List<Upstream>>.liveCount() : Observable<Int> {
+    val liveCounter: AtomicInteger = AtomicInteger()
+
+    return this.map {
+        liveCounter.addAndGet(it.count())
+    }
+}
+
+internal fun UserProfile.isValidForBurnedEnergyCalculation() : Boolean {
+    return this.age != null && this.height != null && this.weight != null && this.sex != null
 }
 
 internal fun Activity.checkWriteExternalStoragePermission(): Observable<Boolean> {

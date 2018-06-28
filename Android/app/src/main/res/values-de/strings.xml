@@ -7,9 +7,9 @@
     <string name="trackrecorderactivity_presenter_default_new_trackrecording_name_template">Strecke %s</string>
     <string name="trackrecorderactivity_toast_recording_running">Aufnahme aktiv</string>
     <string name="trackrecorderactivity_toast_recording_paused">Aufnahme pausiert</string>
+    <string name="trackrecorderactivity_tab_dashboard_title">Dashboard</string>
     <string name="trackrecorderactivity_tab_map_title">Karte</string>
     <string name="trackrecorderactivity_tab_data_title">Daten</string>
-    <string name="trackrecorderactivity_tab_attachments_title">Anhänge</string>
     <string name="trackrecorderactivity_fragment_data_tab_trackingstartedat_none">keine Aufnahme aktiv</string>
     <string name="trackrecorderactivity_discard_confirmation_title">Verwerfen</string>
     <string name="trackrecorderactivity_discard_confirmation_button_yes_label">Verwerfen</string>
@@ -23,9 +23,6 @@
     <string name="trackrecorderactivity_tab_data_numberofpositions">Anzahl ermittelter Positionen</string>
     <string name="trackrecorderactivity_tab_data_startedat">Begonnen um</string>
     <string name="trackrecorderactivity_tab_data_comments">Notizen</string>
-    <string name="app_trackdistance_template_meters">%s m</string>
-    <string name="app_trackdistance_template_kilometers">%s km</string>
-    <string name="app_trackdistance_template_miles">%s miles</string>
     <string name="app_trackdistance_decimalformat">#.##</string>
     <string name="trackrecorderservice_notification_status_paused">Aufnahme pausiert</string>
     <string name="trackrecorderservice_notification_status_locationservicesunavailable">Standort nicht verfügbar</string>

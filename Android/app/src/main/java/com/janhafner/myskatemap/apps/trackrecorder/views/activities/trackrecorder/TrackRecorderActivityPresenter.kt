@@ -15,19 +15,19 @@ import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
-import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.getContentInfo
+import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.FitnessActivity
 import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
+import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.*
+import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.IUserProfileService
+import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.UserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.startLocationSourceSettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings.SettingsActivity
+import com.janhafner.myskatemap.apps.trackrecorder.views.userprofile.settings.UserProfileSettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist.TrackListActivity
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.attachments.AttachmentsTabFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.DashboardTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.DiscardRecordingAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.FinishRecordingAlertDialogBuilder
@@ -44,17 +44,20 @@ import org.joda.time.format.DateTimeFormatter
 
 internal final class TrackRecorderActivityPresenter(private val view: TrackRecorderActivity,
                                                     private val trackService: ITrackService,
-                                                    private val trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>,
-                                                    private val appSettings: IAppSettings) : INeedFragmentVisibilityInfo {
+                                                    private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
+                                                    private val appSettings: IAppSettings,
+                                                    private val userProfileService: IUserProfileService) : INeedFragmentVisibilityInfo {
     private val mainFloatingActionButtonSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private var fragment: Fragment? = null
 
-    private val trackRecorderServiceControllerSubscription: Disposable
+    private var trackRecorderServiceControllerSubscription: Disposable? = null
 
     private var trackRecorderSession: ITrackRecordingSession? = null
 
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
+
+    private val sessionMenuSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private var finishTrackRecordingMenuItem: MenuItem? = null
 
@@ -101,7 +104,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                 object : NavigationView.OnNavigationItemSelectedListener {
                     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
                         if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_settings) {
-                            this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, SettingsActivity::class.java))
+                            this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, UserProfileSettingsActivity::class.java))
                         } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_trackrecordings) {
                             val intent = Intent(this@TrackRecorderActivityPresenter.view, TrackListActivity::class.java)
 
@@ -112,51 +115,32 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                     }
                 })
 
-        this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe{
-            if(it) {
-                val binder = this.trackRecorderServiceController.currentBinder!!
 
-                val uninitializedSession: ITrackRecordingSession
+        // Lifecycle unclear! Handling would be better in another place!
+        if (this.trackRecorderSession == null && this.trackRecorderServiceController.currentBinder != null) {
+            val currentBinder = this.trackRecorderServiceController.currentBinder!!
 
-                var currentTrackRecording: TrackRecording? = null
-                if (this.appSettings.currentTrackRecordingId != null) {
-                    try {
-                        currentTrackRecording = this.trackService.getTrackRecording(this.appSettings.currentTrackRecordingId!!.toString())
-                    } catch(exception: Exception) {
-                        // TODO
-                        Log.e("RecorderPresenter", "Could not load track recording (Id=\"${this.appSettings.currentTrackRecordingId!!}\")!${exception}")
-                    }
-                }
-
-                val createNewTrackRecording: Boolean
-                if(binder.currentSession == null) {
-                    val mode = ActivityStartMode.valueOf(this.view.intent.getStringExtra(TrackRecorderActivityPresenter.ACTIVITY_START_MODE_KEY))
-                    createNewTrackRecording = mode == ActivityStartMode.StartNew || (mode == ActivityStartMode.TryResume && currentTrackRecording == null)
-                    if (createNewTrackRecording) {
-                        val newTrackRecording = this.createNewTrackRecording()
-
-                        uninitializedSession = binder.useTrackRecording(newTrackRecording)
+            if(currentBinder.currentSession != null) {
+                // In case the service is already running (indicated by the currentBinder state),
+                // the isClientBoundChanged observable will populate "true" by calling this method.
+                this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe {
+                    if(it) {
+                        this.trackRecorderSession = this.getInitializedSession(currentBinder.currentSession!!)
                     } else {
-                        uninitializedSession = binder.useTrackRecording(currentTrackRecording!!)
+                        this.uninitializeSession()
                     }
-                } else {
-                    uninitializedSession = binder.currentSession!!
-
-                    createNewTrackRecording = false
                 }
-
-                this.trackRecorderSession = this.getInitializedSession(uninitializedSession)
-
-                if(createNewTrackRecording && this.view.isLocationServicesEnabled()){
-                    this.trackRecorderSession!!.resumeTracking()
-                }
-
-                if(this.fragment != null) {
-                    this.setupMainFloatingActionButton(this.fragment!!, true)
-                }
-            } else {
-                this.uninitializeSession()
             }
+        }
+    }
+
+    private fun showMenuItems(isVisible: Boolean) {
+        if (this.finishTrackRecordingMenuItem != null) {
+            this.finishTrackRecordingMenuItem!!.isVisible = isVisible
+        }
+
+        if (this.discardTrackRecordingMenuItem != null) {
+            this.discardTrackRecordingMenuItem!!.isVisible = isVisible
         }
     }
 
@@ -166,19 +150,22 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
         val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
+        val userProfile = this.userProfileService.getUserProfileOrDefault()
         val result = TrackRecording.start(trackRecordingName, this.appSettings.locationProviderTypeName)
-        if (this.appSettings.enableFitnessActivityTracking) {
-            result.fitnessActivity = FitnessActivity(this.appSettings.userAge,
+        if (userProfile.isValidForBurnedEnergyCalculation()) {
+            result.fitnessActivity = FitnessActivity(userProfile.age!!,
                     this.appSettings.defaultMetActivityCode,
-                    this.appSettings.userWeightInKilograms,
-                    this.appSettings.userHeightInCentimeters,
-                    this.appSettings.userSex)
+                    userProfile.weight!!,
+                    userProfile.height!!,
+                    userProfile.sex!!)
         }
 
         return result
     }
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
+        this.showMenuItems(true)
+
         this.sessionSubscriptions.addAll(
             trackRecorderSession.stateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{
                     currentState ->
@@ -193,17 +180,16 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                             Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
 
                             this.buildAndShowLocationServicesDialog()
-                        }
-                        else -> {
+                        } else -> {
                             // Nothing happens here, else branch exist only to prevent warning on compile Oo
                         }
                     }
 
-                    if(this.discardTrackRecordingMenuItem != null) {
+                    if (this.discardTrackRecordingMenuItem != null) {
                         this.discardTrackRecordingMenuItem!!.isEnabled = currentState != TrackRecordingSessionState.Running
                     }
 
-                    if(this.finishTrackRecordingMenuItem != null) {
+                    if (this.finishTrackRecordingMenuItem != null) {
                         this.finishTrackRecordingMenuItem!!.isEnabled = currentState != TrackRecordingSessionState.Running
                     }
                 }
@@ -214,9 +200,44 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
     private fun uninitializeSession() {
         this.sessionSubscriptions.clear()
+        this.sessionMenuSubscriptions.clear()
         this.mainFloatingActionButtonSubscriptions.clear()
 
         this.trackRecorderSession = null
+
+        this.showMenuItems(false)
+
+        this.setupMainFloatingActionButton(this.fragment!!, true)
+    }
+
+    public fun onMenuOpened(featureId: Int, menu: Menu?): Boolean {
+        if(this.sessionMenuSubscriptions.size() == 0) {
+            if(this.finishTrackRecordingMenuItem != null) {
+                this.sessionMenuSubscriptions.add(this.finishTrackRecordingMenuItem!!.clicks().subscribe{
+                    val finishRecordingAlertDialogBuilder = FinishRecordingAlertDialogBuilder(this.view)
+                    finishRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
+                        _, _ ->
+                        this.finishTrackRecording()
+                    })
+
+                    finishRecordingAlertDialogBuilder.show()
+                })
+            }
+
+            if(this.discardTrackRecordingMenuItem != null) {
+                this.sessionMenuSubscriptions.add(this.discardTrackRecordingMenuItem!!.clicks().subscribe{
+                    val discardRecordingAlertDialogBuilder = DiscardRecordingAlertDialogBuilder(this.view)
+                    discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
+                        _, _ ->
+                        this.discardTrackRecording()
+                    })
+
+                    discardRecordingAlertDialogBuilder.show()
+                })
+            }
+        }
+
+        return true
     }
 
     public fun onCreateOptionsMenu(menu: Menu) : Boolean {
@@ -224,38 +245,10 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
         if(this.finishTrackRecordingMenuItem == null) {
             this.finishTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_finish_currenttracking)
-
-            this.sessionSubscriptions.add(this.finishTrackRecordingMenuItem!!.clicks().subscribe{
-                val finishRecordingAlertDialogBuilder = FinishRecordingAlertDialogBuilder(this.view)
-                finishRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, {
-                    _,
-                    _ ->
-                    // TODO: Make something useful with it (history, upload etc...)
-                    val trackRecording = this.trackRecorderSession!!.finishTracking()
-
-                    this.uninitializeSession()
-
-                    this.view.startActivity(Intent(this.view, TrackListActivity::class.java))
-
-                    this.view.finish()
-                })
-
-                finishRecordingAlertDialogBuilder.show()
-            })
         }
 
         if(this.discardTrackRecordingMenuItem == null) {
             this.discardTrackRecordingMenuItem = menu.findItem(R.id.trackrecorderactivity_toolbar_discard_currenttracking)
-
-            this.sessionSubscriptions.add(this.discardTrackRecordingMenuItem!!.clicks().subscribe{
-                        val discardRecordingAlertDialogBuilder = DiscardRecordingAlertDialogBuilder(this.view)
-                        discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, {
-                            _, _ ->
-                            this.discardTrackRecordingAndFinishActivity()
-                        })
-
-                        discardRecordingAlertDialogBuilder.show()
-                    })
         }
 
         return true
@@ -264,19 +257,24 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
     public fun destroy() {
         this.trackRecorderServiceController.unbindService()
 
-        this.trackRecorderServiceControllerSubscription.dispose()
+        this.trackRecorderServiceControllerSubscription?.dispose()
+
+        this.uninitializeSession()
+
+        this.sessionSubscriptions.dispose()
+    }
+
+    private fun finishTrackRecording() {
+        // TODO: Make something useful with it (history, upload etc...)
+        val trackRecording = this.trackRecorderSession!!.finishTracking()
 
         this.uninitializeSession()
     }
 
-    private fun discardTrackRecordingAndFinishActivity() {
+    private fun discardTrackRecording() {
         this.trackRecorderSession!!.discardTracking()
 
         this.uninitializeSession()
-
-        this.view.startActivity(Intent(this.view, TrackListActivity::class.java))
-
-        this.view.finish()
     }
 
     private fun buildAndShowLocationServicesDialog() {
@@ -292,8 +290,58 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.mainFloatingActionButtonSubscriptions.clear()
         this.fragment = fragment
 
-        if(this.trackRecorderSession != null && isVisibleToUser) {
-            if(fragment is DataTabFragment || fragment is MapTabFragment) {
+        if(this.trackRecorderSession == null) {
+            this.mainFloatingActionButtonSubscriptions.add (
+                this.view.trackrecorderactivity_main_floatingactionbutton.clicks()
+                        .subscribe {
+                            this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.startAndBindService().subscribe {
+                                if(it) {
+                                    val binder = this.trackRecorderServiceController.currentBinder!!
+
+                                    val uninitializedSession: ITrackRecordingSession
+
+                                    var currentTrackRecording: TrackRecording? = null
+                                    if (this.appSettings.currentTrackRecordingId != null) {
+                                        try {
+                                            currentTrackRecording = this.trackService.getByIdOrNull(this.appSettings.currentTrackRecordingId!!.toString())
+                                        } catch(exception: Exception) {
+                                            // TODO
+                                            Log.e("RecorderPresenter", "Could not load track recording (Id=\"${this.appSettings.currentTrackRecordingId!!}\")!${exception}")
+                                        }
+                                    }
+
+                                    var createNewTrackRecording: Boolean = false
+                                    if (binder.currentSession == null) {
+                                        if (currentTrackRecording == null) {
+                                            val newTrackRecording = this.createNewTrackRecording()
+
+                                            uninitializedSession = binder.useTrackRecording(newTrackRecording)
+
+                                            createNewTrackRecording = true
+                                        } else {
+                                            uninitializedSession = binder.useTrackRecording(currentTrackRecording)
+                                        }
+                                    } else {
+                                        uninitializedSession = binder.currentSession!!
+                                    }
+
+                                    this.trackRecorderSession = this.getInitializedSession(uninitializedSession)
+
+                                    if(createNewTrackRecording && this.view.isLocationServicesEnabled()){
+                                        this.trackRecorderSession!!.resumeTracking()
+                                    }
+
+                                    if(this.fragment != null) {
+                                        this.setupMainFloatingActionButton(this.fragment!!, true)
+                                    }
+                                } else {
+                                    this.uninitializeSession()
+                                }
+                            }
+                        }
+            )
+        } else if(isVisibleToUser) {
+            if(fragment is DataTabFragment || fragment is MapTabFragment || fragment is DashboardTabFragment) {
                 this.mainFloatingActionButtonSubscriptions.addAll(
                         this.trackRecorderSession!!.stateChanged
                                 .observeOn(AndroidSchedulers.mainThread())
@@ -326,20 +374,6 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                     }
                                 }
                 )
-            } else if(fragment is AttachmentsTabFragment) {
-                this.view.trackrecorderactivity_main_floatingactionbutton.setImageResource(R.drawable.ic_action_track_recorder_attachments_addfromlibrary)
-
-                this.mainFloatingActionButtonSubscriptions.addAll(
-                        this.view.trackrecorderactivity_main_floatingactionbutton.clicks()
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe {
-                                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                                    intent.addCategory(Intent.CATEGORY_OPENABLE)
-                                    intent.type = "image/*"
-
-                                    this.view.startActivityForResult(intent, 42)
-                                }
-                )
             }
         }
     }
@@ -354,9 +388,5 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
     public override fun onFragmentVisibilityChange(fragment: Fragment, isVisibleToUser: Boolean) {
         this.setupMainFloatingActionButton(fragment, isVisibleToUser)
-    }
-
-    companion object {
-        public const val ACTIVITY_START_MODE_KEY: String = "ActivityStartMode"
     }
 }

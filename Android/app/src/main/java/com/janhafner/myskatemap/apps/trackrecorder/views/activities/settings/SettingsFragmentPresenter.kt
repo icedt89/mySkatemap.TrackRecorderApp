@@ -1,17 +1,20 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.settings
 
+import android.content.Context
 import android.preference.ListPreference
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import io.reactivex.disposables.Disposable
 
 internal final class SettingsFragmentPresenter(private val view: SettingsFragment,
-                                               private val trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>) {
+                                               private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>) {
     private lateinit var trackRecorderServiceControllerSubscription: Disposable
 
     init {
+        this.view.preferenceManager.setSharedPreferencesName("user_profile_settings");
+        this.view.preferenceManager.setSharedPreferencesMode(Context.MODE_WORLD_READABLE);
+
         this.view.addPreferencesFromResource(R.xml.settings)
     }
 

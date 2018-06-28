@@ -30,10 +30,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:id="@+id/trackrecorderactivity_toolbar_tab_data" />
-                        <android.support.design.widget.TabItem
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/trackrecorderactivity_toolbar_tab_attachments" />
                     </android.support.design.widget.TabLayout>
                 </android.support.v4.view.ViewPager>
                 <android.support.design.widget.FloatingActionButton
@@ -43,7 +39,7 @@
                     android:layout_gravity="bottom|end"
                     android:layout_marginBottom="15dp"
                     android:layout_margin="15dp"
-                    android:src="@drawable/ic_action_track_recorder_recording_pause" />
+                    android:src="@drawable/ic_action_track_recorder_recording_startresume" />
             </android.support.design.widget.CoordinatorLayout>
         </android.support.design.widget.AppBarLayout>
     <android.support.design.widget.NavigationView

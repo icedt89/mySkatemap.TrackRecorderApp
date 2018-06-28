@@ -6,5 +6,7 @@ import io.reactivex.Observable
 internal interface IBurnedEnergyCalculator : IDestroyable {
     val calculatedValueChanged: Observable<BurnedEnergy>
 
-    fun calculate(activityDurationInSeconds: Int)
+    val calculatedValue: BurnedEnergy
+
+    fun calculate(activityDurationInSeconds: Int) : BurnedEnergy
 }

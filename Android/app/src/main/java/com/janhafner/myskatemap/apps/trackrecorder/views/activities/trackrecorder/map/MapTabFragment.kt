@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
@@ -20,7 +21,7 @@ internal final class MapTabFragment: Fragment() {
     private var presenter: MapTabFragmentPresenter? = null
 
     @Inject
-    public lateinit var trackRecorderServiceController: ServiceController<TrackRecorderService, TrackRecorderServiceBinder>
+    public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
     @Inject
     public lateinit var trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory

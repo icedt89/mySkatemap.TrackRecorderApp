@@ -1,6 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.content.Context
+import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergy
+import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.Temperature
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
@@ -36,4 +38,32 @@ internal fun Float.roundTrackDistanceForDisplay(context: Context): String {
     decimalFormat.roundingMode = RoundingMode.CEILING
 
     return decimalFormat.format(this)
+}
+
+internal fun Float.formatSpeed() : String {
+    return "${this} km/h"
+}
+
+internal fun BurnedEnergy.formatKilocalorie() : String {
+    return "${this.kiloCalories} kcal"
+}
+
+internal fun BurnedEnergy.formatKilojoule() : String {
+    return "${this.kiloJoule} kJ"
+}
+
+internal fun BurnedEnergy.formatWattHour() : String {
+    return "${this.wattHour} wH"
+}
+
+internal fun Temperature.formatKelvin() : String {
+    return "${this.kelvin} K"
+}
+
+internal fun Temperature.formatCelsius() : String {
+    return "${this.celsius} °C"
+}
+
+internal fun Temperature.formatFahrenheit() : String {
+    return "${this.fahrenheit} °F"
 }

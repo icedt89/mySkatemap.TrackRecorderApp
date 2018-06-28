@@ -14,6 +14,8 @@ internal abstract class TrackRecorderMapFragment : Fragment(), ITrackRecorderMap
 
     public abstract override val track: List<SimpleLocation>
 
+    public abstract override val isReady: Boolean
+
     public abstract override fun addLocations(locations: List<SimpleLocation>)
 
     public abstract override fun clearTrack()

@@ -16,4 +16,31 @@
         <item name="contentPaddingLeft">14dp</item>
         <item name="contentPaddingRight">14dp</item>
     </style>
+
+    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Fragment" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:layout_rowWeight">1</item>
+        <item name="android:layout_columnWeight">1</item>
+    </style>
+
+    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Title" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textSize">22sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Value" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Title">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">30sp</item>
+    </style>
+
+    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Title" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textSize">30sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Value" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Title">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">50sp</item>
+    </style>
 </resources>

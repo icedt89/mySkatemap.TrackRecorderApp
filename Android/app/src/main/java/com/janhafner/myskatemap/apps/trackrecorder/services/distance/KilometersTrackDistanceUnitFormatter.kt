@@ -7,10 +7,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.roundTrackDistanceForDisplay
 internal final class KilometersTrackDistanceUnitFormatter(private val context: Context) : ITrackDistanceUnitFormatter {
     public override fun format(distanceInMeters: Float): String {
         if (distanceInMeters > KilometersTrackDistanceUnitFormatter.METERS_TO_KILOMETERS_CONVERSION_FACTOR) {
-            return this.context.getString(R.string.app_trackdistance_template_kilometers, (distanceInMeters / KilometersTrackDistanceUnitFormatter.METERS_TO_KILOMETERS_CONVERSION_FACTOR).roundTrackDistanceForDisplay(this.context))
+            return "${(distanceInMeters / KilometersTrackDistanceUnitFormatter.METERS_TO_KILOMETERS_CONVERSION_FACTOR).roundTrackDistanceForDisplay(this.context)} km"
         }
 
-        return this.context.getString(R.string.app_trackdistance_template_meters, distanceInMeters.roundTrackDistanceForDisplay(this.context))
+        return "${distanceInMeters.roundTrackDistanceForDisplay(this.context)} m"
     }
 
     companion object {

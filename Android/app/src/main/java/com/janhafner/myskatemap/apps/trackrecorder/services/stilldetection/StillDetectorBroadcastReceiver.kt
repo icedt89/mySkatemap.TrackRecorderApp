@@ -60,7 +60,7 @@ internal final class StillDetectorBroadcastReceiver(context: Context, private va
 
         this.activityRecognitionClient.requestActivityUpdates(interval, this.pendingIntent)
 
-        this.isDetectingChangedSubject.onNext(this.isDetecting)
+        this.isDetectingChangedSubject.onNext(!this.isDetecting)
 
         return this.stillDetectedChanged
     }
@@ -76,7 +76,7 @@ internal final class StillDetectorBroadcastReceiver(context: Context, private va
 
         this.activityRecognitionClient.removeActivityUpdates(this.pendingIntent)
 
-        this.isDetectingChangedSubject.onNext(this.isDetecting)
+        this.isDetectingChangedSubject.onNext(!this.isDetecting)
     }
 
     private var isDestroyed: Boolean = false
