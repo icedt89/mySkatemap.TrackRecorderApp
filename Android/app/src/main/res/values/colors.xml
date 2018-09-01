@@ -3,4 +3,6 @@
     <color name="transparent">#00ffffff</color>
     <color name="colorAppIconForeground">#ffffff</color>
     <color name="colorAppIconBackground">#2979ff</color>
+    <color name="colorPrimaryBright">#FFFFFF</color>
+    <color name="colorPrimaryDark">#293133</color>
 </resources>

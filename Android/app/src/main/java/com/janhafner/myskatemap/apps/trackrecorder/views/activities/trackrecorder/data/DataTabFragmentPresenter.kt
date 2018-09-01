@@ -6,8 +6,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.formatDefault
 import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.liveCount
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatter
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatter
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
                                               private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                               private val appSettings: IAppSettings,
-                                              private val trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory) {
+                                              private val distanceUnitFormatterFactory: IDistanceUnitFormatterFactory) {
     private val trackRecorderServiceControllerSubscription: Disposable
 
     private var sessionAvailabilityChangedSubscription: Disposable? = null
@@ -30,10 +30,10 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
 
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
-    private var trackDistanceUnitFormatter: ITrackDistanceUnitFormatter
+    private var distanceUnitFormatter: IDistanceUnitFormatter
 
     init {
-        this.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
+        this.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
 
         this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.isClientBoundChanged.subscribe{
             if(it) {
@@ -73,9 +73,9 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this.view.trackrecorderactivity_fragment_data_tab_locationscount.text()),
 
-            this.appSettings.appSettingsChanged.subscribe{
-                if(it.propertyName == "trackDistanceUnitFormatterTypeName" && it.hasChanged) {
-                    this.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
+            this.appSettings.propertyChanged.subscribe{
+                if(it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name) {
+                    this.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
                 }
             },
 
@@ -87,8 +87,8 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
                 trackRecorderSession.comment = it.toString()
             },
 
-            trackRecorderSession.trackDistanceChanged.map {
-                this.trackDistanceUnitFormatter.format(it)
+            trackRecorderSession.distanceChanged.map {
+                this.distanceUnitFormatter.format(it)
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(this.view.trackrecorderactivity_tab_data_trackdistance.text()),
@@ -109,6 +109,9 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
         this.view.trackrecorderactivity_tab_data_startedat.text().accept(this.view.getText(R.string.trackrecorderactivity_fragment_data_tab_trackingstartedat_none))
         this.view.trackrecorderactivity_tab_data_trackname.text().accept("")
         this.view.trackrecorderactivity_tab_data_comments.text().accept("")
+        this.view.trackrecorderactivity_tab_data_recordingtime.text().accept("")
+        this.view.trackrecorderactivity_tab_data_trackdistance.text().accept("")
+        this.view.trackrecorderactivity_fragment_data_tab_locationscount.text().accept("")
 
         this.trackRecorderSession = null
     }

@@ -6,18 +6,16 @@ import android.os.Handler
 import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.IObservableTimer
 import com.janhafner.myskatemap.apps.trackrecorder.Nothing
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergy
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IBurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.IDistanceCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.ActivityRecognizerIntentService
 import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.StillDetectorBroadcastReceiver
-import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.IAmbientTemperatureService
-import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.Temperature
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
@@ -38,8 +36,8 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                            private val appConfig: IAppConfig,
                                            private val trackService: ITrackService,
                                            private val trackRecorderServiceNotification: TrackRecorderServiceNotification,
-                                           private val trackDistanceCalculator: ITrackDistanceCalculator,
-                                           private val trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory,
+                                           private val distanceCalculator: IDistanceCalculator,
+                                           private val distanceUnitFormatterFactory: IDistanceUnitFormatterFactory,
                                            private val trackRecording: TrackRecording,
                                            public override val statistic: ITrackRecordingStatistic,
                                            private val burnedEnergyCalculator: IBurnedEnergyCalculator,
@@ -48,8 +46,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                            private val liveLocationTrackingSession: ILiveLocationTrackingSession,
                                            private val service: Service,
                                            private val stillDetectorBroadcastReceiver: StillDetectorBroadcastReceiver,
-                                           private val locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver,
-                                           private val ambientTemperatureService: IAmbientTemperatureService) : ITrackRecordingSession {
+                                           private val locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver) : ITrackRecordingSession {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     public override lateinit var recordingTimeChanged: Observable<Period>
@@ -60,8 +57,8 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
     public override val burnedEnergyChanged: Observable<BurnedEnergy> = this.burnedEnergyCalculator.calculatedValueChanged
 
-    public override val trackDistanceChanged: Observable<Float>
-        get() = this.trackDistanceCalculator.distanceCalculated
+    public override val distanceChanged: Observable<Float>
+        get() = this.distanceCalculator.distanceCalculated
 
     private val sessionClosedSubject: Subject<ITrackRecordingSession> = PublishSubject.create()
     public override val sessionClosed: Observable<ITrackRecordingSession>
@@ -91,9 +88,9 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
     private fun initializeSession() {
         this.subscriptions.addAll(
-                this.appSettings.appSettingsChanged.subscribe {
-                    if (it.hasChanged && it.propertyName == "trackDistanceUnitFormatterTypeName") {
-                        this.trackRecorderServiceNotification.trackDistanceUnitFormatter = this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
+                this.appSettings.propertyChanged.subscribe {
+                    if (it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name) {
+                        this.trackRecorderServiceNotification.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
 
                         this.tryUpdateNotification()
                     }
@@ -123,7 +120,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                 Pair(it.sequenceNumber, it)
                             })
 
-                            this.trackDistanceCalculator.addAll(it)
+                            this.distanceCalculator.addAll(it)
 
                             this.liveLocationTrackingSession.sendLocations(it.map {
                                 it.toSimpleLocation()
@@ -137,7 +134,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
                             this.trackRecording.locations.put(it.sequenceNumber, it)
 
-                            this.trackDistanceCalculator.add(it)
+                            this.distanceCalculator.add(it)
 
                             this.liveLocationTrackingSession.sendLocations(listOf(it.toSimpleLocation()))
                         },*/
@@ -167,7 +164,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                             it.any()
                         }
                         .subscribe {
-                            this.trackDistanceCalculator.addAll(it)
+                            this.distanceCalculator.addAll(it)
                         },
                 this.locationsChanged
                         .buffer(this.appConfig.updateLiveLocationSession.toLong(), TimeUnit.SECONDS)
@@ -189,15 +186,14 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                     this.tryUpdateNotification()
                 },
 
-                this.trackDistanceChanged.subscribe {
-                    this.trackRecorderServiceNotification.trackDistance = it
+                this.distanceChanged.subscribe {
+                    this.trackRecorderServiceNotification.distance = it
 
                     this.tryUpdateNotification()
                 })
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
         this.initializeStillDetectorBroadcastReceiver()
-        this.initializeAmbientTemperatureService()
     }
 
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
@@ -220,27 +216,17 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
     private fun initializeStillDetectorBroadcastReceiver() {
         this.service.registerReceiver(this.stillDetectorBroadcastReceiver, android.content.IntentFilter(ActivityRecognizerIntentService.INTENT_ACTION_NAME))
 
-        this.subscriptions.add(this.stillDetectorBroadcastReceiver.startDetection(1500).subscribe{
+        this.subscriptions.add(this.stillDetectorBroadcastReceiver.startDetection(this.appConfig.stillDetectorDetectionIntervalInMilliseconds.toLong()).subscribe{
             if(it) {
                 if(this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
-                    // this.pauseTrackingAndSetState(TrackRecordingSessionState.Paused)
-                    Log.i("TRS", "StillDetector: tracking would be resumed!")
+                    this.pauseTrackingAndSetState(TrackRecordingSessionState.Paused)
                 }
             } else {
                 if(this.stateChangedSubject.value == TrackRecordingSessionState.Paused) {
-                    //this.resumeTracking()
-                    Log.i("TRS", "StillDetector: tracking would be paused!")
+                    this.resumeTracking()
                 }
             }
         })
-    }
-
-    private fun initializeAmbientTemperatureService() {
-        this.subscriptions.add(
-                this.ambientTemperatureService.startListening().subscribe {
-                    this.statistic.addAmbientTemperature(it)
-                }
-        )
     }
 
     private fun tryUpdateNotification() {
@@ -314,7 +300,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         }
 
         if(this.stateChangedSubject.value != TrackRecordingSessionState.Running) {
-            throw IllegalStateException("Only possible in state \"Running\"!")
+            throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Running}\"!")
         }
 
         this.pauseTrackingAndSetState(TrackRecordingSessionState.Paused)
@@ -326,7 +312,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         }
 
         if(this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
-            throw IllegalStateException("Only possible in state \"Paused\" or \"LocationServicesUnavailable\"!")
+            throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Paused}\" or \"${TrackRecordingSessionState.LocationServicesUnavailable}\"!")
         }
 
         this.trackService.save(this.trackRecording)
@@ -341,13 +327,13 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
         if(this.stateChangedSubject.value != TrackRecordingSessionState.Paused
             && this.stateChangedSubject.value != TrackRecordingSessionState.LocationServicesUnavailable) {
-            throw IllegalStateException("Only possible in state \"Paused\" or \"LocationServicesUnavailable\"!")
+            throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Paused}\" or \"${TrackRecordingSessionState.LocationServicesUnavailable}\"!")
         }
 
         this.recordingTimeTimer.reset()
         this.locationProvider.resetSequenceNumber()
 
-        this.trackDistanceCalculator.clear()
+        this.distanceCalculator.clear()
 
         this.trackService.delete(this.trackRecording.id.toString())
 
@@ -360,7 +346,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         }
 
         if(this.stateChangedSubject.value != TrackRecordingSessionState.Paused) {
-            throw IllegalStateException("Only possible in state \"Paused\"!")
+            throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Paused}\"!")
         }
 
         val finishedTrackRecording = this.trackRecording
@@ -371,7 +357,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         this.recordingTimeTimer.reset()
         this.locationProvider.resetSequenceNumber()
 
-        this.trackDistanceCalculator.clear()
+        this.distanceCalculator.clear()
 
         this.destroy()
 
@@ -388,11 +374,11 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
         this.service.unregisterReceiver(this.stillDetectorBroadcastReceiver)
         this.service.unregisterReceiver(this.locationAvailabilityChangedBroadcastReceiver)
-        this.ambientTemperatureService.stopListening()
 
-        this.burnedEnergyCalculator.destroy()
+        this.statistic.destroy()
         this.recordingTimeTimer.destroy()
-        this.trackDistanceCalculator.destroy()
+        this.burnedEnergyCalculator.destroy()
+        this.distanceCalculator.destroy()
         this.locationProvider.destroy()
         this.liveLocationTrackingSession.endSession()
 

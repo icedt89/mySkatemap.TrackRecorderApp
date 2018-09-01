@@ -1,10 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.statistics
 
 import com.janhafner.myskatemap.apps.trackrecorder.IObservableTimer
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergy
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IBurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.IDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.statistics.IStatistic
 import com.janhafner.myskatemap.apps.trackrecorder.statistics.Statistic
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 
 internal final class StatisticalAggregation(private val burnedEnergyCalculator: IBurnedEnergyCalculator,
                                             private val recordingTimeTimer: IObservableTimer,
-                                            private val trackDistanceCalculator: ITrackDistanceCalculator,
+                                            private val distanceCalculator: IDistanceCalculator,
                                             private val appConfig: IAppConfig) : IStatisticalAggregation {
     public override val burnedEnergyChanged: Observable<BurnedEnergy> = this.burnedEnergyCalculator.calculatedValueChanged
 
@@ -27,10 +27,10 @@ internal final class StatisticalAggregation(private val burnedEnergyCalculator: 
     public override val recordingTime: Period
         get() = this.recordingTimeTimer.secondsElapsed
 
-    public override val trackDistanceChanged: Observable<Float> = this.trackDistanceCalculator.distanceCalculated
+    public override val distanceChanged: Observable<Float> = this.distanceCalculator.distanceCalculated
 
-    public override val trackDistance: Float
-        get() = this.trackDistanceCalculator.distance
+    public override val distance: Float
+        get() = this.distanceCalculator.distance
 
     public override val speed: IStatistic = Statistic()
 
@@ -41,7 +41,7 @@ internal final class StatisticalAggregation(private val burnedEnergyCalculator: 
     init {
         this.subscriptions.addAll(
                 this.recordingTimeChanged
-                        .sample(this.appConfig.updateBurnedEnergySeconds.toLong(), TimeUnit.SECONDS)
+                        .sample(1, TimeUnit.SECONDS)
                         .subscribe {
                             this.burnedEnergyCalculator.calculate(it.seconds)
                         }
@@ -69,7 +69,7 @@ internal final class StatisticalAggregation(private val burnedEnergyCalculator: 
             }
         })
 
-        this.trackDistanceCalculator.addAll(location)
+        this.distanceCalculator.addAll(location)
     }
 
     public override fun add(location: Location) {
@@ -89,7 +89,7 @@ internal final class StatisticalAggregation(private val burnedEnergyCalculator: 
             this.altitude.add(location.altitude!!.toFloat())
         }
 
-        this.trackDistanceCalculator.add(location)
+        this.distanceCalculator.add(location)
     }
 
     private var isDestroyed: Boolean = false
@@ -103,7 +103,7 @@ internal final class StatisticalAggregation(private val burnedEnergyCalculator: 
 
         this.burnedEnergyCalculator.destroy()
         this.recordingTimeTimer.destroy()
-        this.trackDistanceCalculator.destroy()
+        this.distanceCalculator.destroy()
 
         this.subscriptions.dispose()
 

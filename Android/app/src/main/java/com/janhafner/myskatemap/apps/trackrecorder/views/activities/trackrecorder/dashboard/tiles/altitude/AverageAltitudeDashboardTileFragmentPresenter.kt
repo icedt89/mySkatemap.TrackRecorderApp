@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude
 
 import com.jakewharton.rxbinding2.widget.text
+import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
@@ -16,8 +17,7 @@ internal final class AverageAltitudeDashboardTileFragmentPresenter(view: Dashboa
                                                                    trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>)
     : DashboardTileFragmentPresenter(view, appSettings, trackRecorderServiceController) {
     public override fun initialize() {
-        // TODO
-        this.view.fragment_dashboard_tile_title.text = "⌀ Höhe"
+        this.view.fragment_dashboard_tile_title.text = view.context!!.getString(R.string.dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title)
     }
 
     protected override fun createSubscriptions(trackRecorderSession: ITrackRecordingSession): List<Disposable> {

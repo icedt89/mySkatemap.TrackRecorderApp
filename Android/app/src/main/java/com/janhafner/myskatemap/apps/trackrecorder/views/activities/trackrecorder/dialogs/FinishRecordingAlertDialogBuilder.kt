@@ -9,7 +9,7 @@ internal final class FinishRecordingAlertDialogBuilder(context: Context): AlertD
         this.setTitle(R.string.trackrecorderactivity_finish_confirmation_title)
         this.setCancelable(true)
         this.setMessage(R.string.trackrecorderactivity_finish_confirmation_message)
-        this.setIcon(R.drawable.ic_dialog_question)
+        this.setIcon(R.drawable.ic_help_dark_24dp)
         this.setNegativeButton(R.string.trackrecorderactivity_finish_confirmation_button_no_label, null)
     }
 }

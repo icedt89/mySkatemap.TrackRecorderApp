@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:columnCount="2"
     android:orientation="vertical"
-    android:rowCount="3">
+    android:rowCount="3"
+    android:padding="10dp">
 
     <FrameLayout style="@style/MySkatemap.TrackRecorder.Dashboard.Tile.Fragment"
         android:layout_column="0"

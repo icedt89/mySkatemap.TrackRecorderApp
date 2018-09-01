@@ -12,14 +12,14 @@ internal final class LiveLocationTrackingServiceFactory(private val appConfig: I
                                                         private val appSettings: IAppSettings,
                                                         private val jsonRestApiClient: JsonRestApiClient) : ILiveLocationTrackingServiceFactory {
     public override fun createService(): ILiveLocationTrackingService {
-        if(this.appConfig.useFakeLiveLocationTrackingService) {
-            return FakeLiveLocationTrackingService()
+        if(!this.appSettings.allowLiveTracking) {
+            if(this.appConfig.useFakeLiveLocationTrackingService) {
+                return FakeLiveLocationTrackingService()
+            }
+
+            return NullLiveLocationTrackingService()
         }
 
-        if(this.appSettings.allowLiveTracking) {
-            return LiveLocationTrackingService(this.jsonRestApiClient)
-        }
-
-        return NullLiveLocationTrackingService()
+        return LiveLocationTrackingService(jsonRestApiClient)
     }
 }

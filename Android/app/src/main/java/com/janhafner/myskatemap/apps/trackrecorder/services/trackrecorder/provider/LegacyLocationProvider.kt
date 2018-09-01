@@ -68,7 +68,7 @@ internal final class LegacyLocationProvider(private val context: Context,
         this.isActive = false
     }
 
-    public override fun getCurrentLocation(): com.janhafner.myskatemap.apps.trackrecorder.io.data.Location {
+    public override fun getlastKnownLocation(): com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location? {
         if(this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
@@ -77,7 +77,12 @@ internal final class LegacyLocationProvider(private val context: Context,
             throw IllegalStateException("ACCESS_FINE_LOCATION must be granted!")
         }
 
-        return this.locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).toLocation(-1)
+        val lastKnownLocation = this.locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        if(lastKnownLocation != null) {
+            return lastKnownLocation.toLocation(-1)
+        }
+
+        return null
     }
 
     protected final override fun destroyCore() {

@@ -2,16 +2,14 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 
 import android.content.Context
 import android.os.SystemClock
-import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.clone
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.collections.ArrayList
-import kotlin.math.max
 
 internal final class TestLocationProvider(private val context: Context,
                                           private val initialLocation: Location,
@@ -133,7 +131,7 @@ internal final class TestLocationProvider(private val context: Context,
         return (Math.sin(sequenceNumber * 2 * Math.PI / period) * (maximum / 2) + (maximum / 2)) * maximum
     }
 
-    public override fun getCurrentLocation(): Location {
+    public override fun getlastKnownLocation(): Location? {
         if(this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }

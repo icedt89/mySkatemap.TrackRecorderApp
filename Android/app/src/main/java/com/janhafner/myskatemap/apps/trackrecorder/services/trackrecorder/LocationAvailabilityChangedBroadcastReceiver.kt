@@ -8,12 +8,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
-
-internal final class LocationAvailabilityChangedBroadcastReceiver(context: Context): BroadcastReceiver() {
+internal final class LocationAvailabilityChangedBroadcastReceiver(context: Context): BroadcastReceiver(), ILocationAvailabilityChangedDetector {
     private val locationAvailabilityChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(context.isLocationServicesEnabled())
-    public val locationAvailabilityChanged: Observable<Boolean> = this.locationAvailabilityChangedSubject
+    public override val locationAvailabilityChanged: Observable<Boolean> = this.locationAvailabilityChangedSubject
 
-    override fun onReceive(context: Context?, intent: Intent?) {
+    public override fun onReceive(context: Context?, intent: Intent?) {
         if(intent == null || intent.action != LocationManager.PROVIDERS_CHANGED_ACTION) {
             return
         }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp">
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/trackrecorderactivity_tab_debug_log_output_filter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/trackrecorderactivity_tab_debug_log_output_filter_hint"
+            android:drawableStart="@drawable/ic_search_dark_24dp"/>
+        <android.support.v7.widget.AppCompatButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text=" "
+            android:background="@drawable/ic_search_dark_24dp"/>
+    </android.support.v7.widget.LinearLayoutCompat>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/trackrecorderactivity_tab_debug_log_output_items"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:dividerHeight="10dp"
+        android:clipToPadding="false"
+        android:visibility="gone"
+        android:divider="@color/transparent" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/trackrecorderactivity_tab_debug_log_output_empty"
+        android:textSize="22sp"
+        android:gravity="center"
+        android:text="@string/trackrecorderactivity_tab_debug_log_output_empty"/>
+</android.support.v7.widget.LinearLayoutCompat>

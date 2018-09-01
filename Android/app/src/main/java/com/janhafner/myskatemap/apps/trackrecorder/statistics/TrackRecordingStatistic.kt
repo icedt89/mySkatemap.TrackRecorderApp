@@ -1,16 +1,11 @@
 package com.janhafner.myskatemap.apps.trackrecorder.statistics
 
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
-import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.Temperature
-import io.reactivex.Observable
-import java.time.temporal.TemporalAccessor
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 
 internal final class TrackRecordingStatistic : ITrackRecordingStatistic {
     public override val speed: Statistic = Statistic()
 
     public override val altitude: Statistic = Statistic()
-
-    public override val ambientTemperature: Statistic = Statistic()
 
     public override fun addAll(location: List<Location>) {
         if(this.isDestroyed) {
@@ -50,22 +45,6 @@ internal final class TrackRecordingStatistic : ITrackRecordingStatistic {
         } else {
             this.altitude.add(location.altitude!!.toFloat())
         }
-    }
-
-    public override fun addAmbientTemperature(temperature: Temperature) {
-        if(this.isDestroyed) {
-            return
-        }
-
-        this.ambientTemperature.add(temperature.celsius)
-    }
-
-    public override fun addAllAmbientTemperatures(temperatures: List<Temperature>) {
-        if(this.isDestroyed) {
-            return
-        }
-
-        this.ambientTemperature.addAll(temperatures.map { it.celsius })
     }
 
     private var isDestroyed: Boolean = false

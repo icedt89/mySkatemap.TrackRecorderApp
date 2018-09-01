@@ -8,11 +8,15 @@ import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
 import android.provider.Settings
+import com.couchbase.lite.Database
 import com.janhafner.myskatemap.apps.trackrecorder.io.ContentInfo
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.ICouchDbFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.Dashboard
-import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.UserProfile
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfile
+import com.janhafner.myskatemap.apps.trackrecorder.views.ArrayRecyclerViewAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.views.ObservableArrayAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -22,6 +26,7 @@ import com.karumi.dexter.listener.multi.BaseMultiplePermissionsListener
 import com.karumi.dexter.listener.single.BasePermissionListener
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
 import java.util.*
@@ -186,6 +191,17 @@ internal fun Activity.checkAccessFineLocationPermission(): Observable<Boolean> {
     }
 }
 
+internal fun ICouchDbFactory.executeUnitOfWork(action: (database: Database) -> Unit) {
+    var database: Database? = null
+    try {
+        database = this.createDatabase()
+
+        action(database)
+    } finally {
+        database?.close()
+    }
+}
+
 private fun <TDocument> ICrudRepository<TDocument>.getByIdOrDefault(id: UUID?, default: TDocument) : TDocument {
     if(id == null) {
         return default
@@ -211,8 +227,8 @@ internal fun <Upstream> Observable<List<Upstream>>.liveCount() : Observable<Int>
     }
 }
 
-internal fun UserProfile.isValidForBurnedEnergyCalculation() : Boolean {
-    return this.age != null && this.height != null && this.weight != null && this.sex != null
+internal fun IUserProfile.isValidForBurnedEnergyCalculation() : Boolean {
+    return this.enableCalculationOfBurnedEnergy && this.age != null && this.weight != null && this.height != null && this.sex != null
 }
 
 internal fun Activity.checkWriteExternalStoragePermission(): Observable<Boolean> {
@@ -251,4 +267,46 @@ internal fun ContentResolver.getContentInfo(uri: Uri): ContentInfo {
     cursor.close()
 
     return ContentInfo(displayName, size, uri, mimeType)
+}
+
+internal fun <T> ArrayRecyclerViewAdapter<T>.subscribeTo(items: Observable<T>, clearOnComplete: Boolean = false): Disposable {
+    var result = items
+
+    if(clearOnComplete) {
+        result = result.doOnComplete{
+            this.clear()
+        }
+    }
+
+    return result.subscribe{
+        this.add(it)
+    }
+}
+
+internal fun <T> ArrayRecyclerViewAdapter<T>.subscribeToList(items: Observable<List<T>>, clearOnComplete: Boolean = false): Disposable {
+    var result = items
+
+    if(clearOnComplete) {
+        result = result.doOnComplete{
+            this.clear()
+        }
+    }
+
+    return result.subscribe{
+        this.addAll(it)
+    }
+}
+
+internal fun <T> ObservableArrayAdapter<T>.subscribeTo(items: Observable<T>, clearOnComplete: Boolean = false): Disposable {
+    var result = items
+
+    if(clearOnComplete) {
+        result = result.doOnComplete{
+            this.clear()
+        }
+    }
+
+    return result.subscribe{
+        this.add(it)
+    }
 }

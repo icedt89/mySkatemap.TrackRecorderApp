@@ -3,7 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 import android.content.Context
 import android.location.LocationManager
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 
 internal final class LocationProviderFactory(private val context: Context,

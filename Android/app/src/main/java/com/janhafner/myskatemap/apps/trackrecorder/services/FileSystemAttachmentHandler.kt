@@ -3,8 +3,8 @@ package com.janhafner.myskatemap.apps.trackrecorder.services
 import com.janhafner.myskatemap.apps.trackrecorder.io.ContentInfo
 import com.janhafner.myskatemap.apps.trackrecorder.io.FileSystemFileAccessor
 import com.janhafner.myskatemap.apps.trackrecorder.io.IDirectoryNavigator
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Attachment
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Attachment
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
 import org.joda.time.DateTime
 import java.io.File
 

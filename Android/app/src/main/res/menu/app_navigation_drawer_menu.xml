@@ -6,4 +6,6 @@
         android:title="Meine Aufnahmen"  />
     <item android:id="@+id/trackrecorderactivity_navigation_drawer_action_settings"
         android:title="Settings"  />
+    <item android:id="@+id/trackrecorderactivity_navigation_drawer_action_user_profile"
+        android:title="Your Profile"  />
 </menu>

@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import com.janhafner.myskatemap.apps.trackrecorder.IDestroyable
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import io.reactivex.Observable
 
 internal interface ILocationProvider : IDestroyable {
@@ -11,7 +11,7 @@ internal interface ILocationProvider : IDestroyable {
 
     fun resetSequenceNumber()
 
-    fun getCurrentLocation(): Location?
+    fun getlastKnownLocation(): Location?
 
     fun overrideSequenceNumber(sequenceNumber: Int)
 

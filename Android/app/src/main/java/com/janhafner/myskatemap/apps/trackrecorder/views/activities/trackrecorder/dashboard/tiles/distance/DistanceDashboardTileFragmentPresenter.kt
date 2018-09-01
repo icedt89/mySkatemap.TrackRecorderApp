@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.distance
 
 import com.jakewharton.rxbinding2.widget.text
+import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
@@ -16,15 +17,14 @@ internal final class DistanceDashboardTileFragmentPresenter(view: DashboardTileF
                                                             trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>)
     : DashboardTileFragmentPresenter(view, appSettings, trackRecorderServiceController) {
     public override fun initialize() {
-        // TODO
-        this.view.fragment_dashboard_tile_title.text = "Entfernung"
+        this.view.fragment_dashboard_tile_title.text = view.context!!.getString(R.string.dashboard_tile_distancedashboardtilefragmentpresenter_tile)
     }
 
     protected override fun createSubscriptions(trackRecorderSession: ITrackRecordingSession): List<Disposable> {
         val result = ArrayList<Disposable>()
 
         result.add(
-                trackRecorderSession.trackDistanceChanged
+                trackRecorderSession.distanceChanged
                         .map {
                             it.toString()
                         }

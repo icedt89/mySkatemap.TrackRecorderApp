@@ -38,8 +38,6 @@ internal final class StillDetectorBroadcastReceiver(context: Context, private va
         }
 
         if(ActivityRecognitionResult.hasResult(intent)) {
-            Log.v("StillDetector", "Activity recognized!")
-
             val activityRecognitionResult = ActivityRecognitionResult.extractResult(intent)
             if(activityRecognitionResult.mostProbableActivity.type == DetectedActivity.STILL) {
                 this@StillDetectorBroadcastReceiver.stillDetectedChangedSubject.onNext(true)

@@ -1,6 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.statistics
 
-import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+    <SwitchPreference
+        android:key="@string/userprofilesettings_preference_enablecalculationofburnedenergy_key"
+        android:title="@string/userprofilesettings_preference_enablecalculationofburnedenergy_label"
+        android:summary="@string/userprofilesettings_preference_enablecalculationofburnedenergy_summary"
+        android:defaultValue="false" />
+    <com.janhafner.myskatemap.apps.trackrecorder.views.FixedEditTextPreference
+        android:key="@string/userprofilesettings_preference_name_key"
+        android:title="@string/userprofilesettings_preference_name_label"
+        android:summary="@string/userprofilesettings_preference_name_summary"
+        android:inputType="textPersonName"
+        android:defaultValue="Anonymous"
+        app:emptySummary="@string/userprofilesettings_preference_name_summary_empty"/>
+    <com.janhafner.myskatemap.apps.trackrecorder.views.FixedEditTextPreference
+        android:key="@string/userprofilesettings_preference_age_key"
+        android:title="@string/userprofilesettings_preference_age_label"
+        android:summary="@string/userprofilesettings_preference_age_summary"
+        android:inputType="number"
+        android:numeric="integer"
+        app:emptySummary="@string/userprofilesettings_preference_age_summary_empty"/>
+    <com.janhafner.myskatemap.apps.trackrecorder.views.FixedEditTextPreference
+        android:key="@string/userprofilesettings_preference_weight_key"
+        android:title="@string/userprofilesettings_preference_weight_label"
+        android:summary="@string/userprofilesettings_preference_weight_summary"
+        android:inputType="numberDecimal"
+        android:numeric="decimal"
+        app:emptySummary="@string/userprofilesettings_preference_weight_summary_empty"/>
+    <com.janhafner.myskatemap.apps.trackrecorder.views.FixedEditTextPreference
+        android:key="@string/userprofilesettings_preference_height_key"
+        android:title="@string/userprofilesettings_preference_height_label"
+        android:summary="@string/userprofilesettings_preference_height_summary"
+        android:inputType="number"
+        android:numeric="integer"
+        app:emptySummary="@string/userprofilesettings_preference_height_summary_empty"/>
+    <ListPreference
+        android:key="@string/userprofilesettings_preference_sex_key"
+        android:title="@string/userprofilesettings_preference_sex_label"
+        android:summary="@string/userprofilesettings_preference_sex_summary"
+        android:entries="@array/userprofilesettings_preference_sex_names"
+        android:entryValues="@array/userprofilesettings_preference_sex_values"
+        android:defaultValue="Male" />
+</PreferenceScreen>

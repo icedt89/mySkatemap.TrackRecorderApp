@@ -5,14 +5,13 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
+import android.view.MenuItem
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.IUserProfileService
-import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.UserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import javax.inject.Inject
 
@@ -25,10 +24,10 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
     public lateinit var trackService: ITrackService
 
     @Inject
-    public lateinit var userProfileService: IUserProfileService
+    public lateinit var appSettings: IAppSettings
 
     @Inject
-    public lateinit var appSettings: IAppSettings
+    public lateinit var userProfile: IUserProfile
 
     private var presenter: TrackRecorderActivityPresenter? = null
 
@@ -41,7 +40,7 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
 
         super.onCreate(savedInstanceState)
 
-        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController, this.appSettings, this.userProfileService)
+        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController, this.appSettings, this.userProfile)
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -49,11 +48,15 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
     }
 
     public override fun onMenuOpened(featureId: Int, menu: Menu?): Boolean {
-        return this.presenter!!.onMenuOpened(featureId, menu)
+        return this.presenter!!.onMenuOpened()
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         this.presenter!!.onActivityResult(requestCode, resultCode, data)
+    }
+
+    public override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return this.presenter!!.onOptionsItemSelected(item)
     }
 
     public override fun onDestroy() {

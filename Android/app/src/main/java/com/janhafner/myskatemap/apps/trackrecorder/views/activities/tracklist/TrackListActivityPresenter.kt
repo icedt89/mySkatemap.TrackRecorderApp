@@ -14,11 +14,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IMetActivityDefinitionFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatter
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatter
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.DistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.userprofile.settings.UserProfileSettingsActivity
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings.UserProfileSettingsActivity
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_track_list.*
 import kotlinx.android.synthetic.main.activity_track_list_item.view.*
@@ -26,11 +26,11 @@ import kotlinx.android.synthetic.main.activity_track_list_item.view.*
 internal final class TrackListActivityPresenter(private val view: TrackListActivity,
                                                 private val trackService: ITrackService,
                                                 private val appSettings: IAppSettings,
-                                                private val distanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory,
+                                                private val distanceUnitFormatterFactory: IDistanceUnitFormatterFactory,
                                                 private val metActivityDefinitionFactory: IMetActivityDefinitionFactory) {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    private var trackDistanceUnitFormatter: ITrackDistanceUnitFormatter = distanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
+    private var distanceUnitFormatter: IDistanceUnitFormatter = distanceUnitFormatterFactory.createFormatter()
 
     init {
         this.view.setContentView(R.layout.activity_track_list)
@@ -45,14 +45,14 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
         this.view.tracklistactivity_trackrecordings_recyclerview.layoutManager = LinearLayoutManager(this.view)
 
         this.subscriptions.addAll(
-                itemsAdapter.viewHolderBound.subscribe{
+                itemsAdapter.itemViewCreated.subscribe{
                     val locations = it.item.locations.values.toList()
 
                     // TODO
-                    val trackDistanceCalculator = TrackDistanceCalculator()
-                    trackDistanceCalculator.addAll(locations)
-                    it.view.activity_track_list_item_tracking_distance.text = this.trackDistanceUnitFormatter.format(trackDistanceCalculator.distance)
-                    trackDistanceCalculator.clear()
+                    val distanceCalculator = DistanceCalculator()
+                    distanceCalculator.addAll(locations)
+                    it.view.activity_track_list_item_tracking_distance.text = this.distanceUnitFormatter.format(distanceCalculator.distance)
+                    distanceCalculator.clear()
 
                     it.view.activity_track_list_item_tracking_name.text = it.item.name
                     it.view.activity_track_list_item_tracking_duration.text = it.item.recordingTime.formatRecordingTime()
@@ -61,7 +61,7 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
                     if(it.item.fitnessActivity != null) {
                         val metActivityDefinition = this.metActivityDefinitionFactory.getMetActivityDefinitionByCode(it.item.fitnessActivity!!.metActivityCode)
 
-                        // TODO
+                        // TODO: Persist each individual track list item in the couchdb to prevent calculations like this
                         val burnedEnergyCalculator = BurnedEnergyCalculator(it.item.fitnessActivity!!.weightInKilograms,
                                 it.item.fitnessActivity!!.heightInCentimeters,
                                 it.item.fitnessActivity!!.age,
@@ -69,7 +69,7 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
                                 metActivityDefinition!!.metValue)
                         burnedEnergyCalculator.calculate(it.item.recordingTime.seconds)
 
-                        it.view.activity_track_list_item_tracking_fitness_calories.text = burnedEnergyCalculator.calculatedValue!!.toString()
+                        it.view.activity_track_list_item_tracking_fitness_calories.text = burnedEnergyCalculator.calculatedValue.toString()
                     } else {
                         it.view.activity_track_list_item_tracking_fitness_calories.text = ""
                     }
@@ -108,9 +108,9 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
                     )
                 },
 
-                appSettings.appSettingsChanged.subscribe{
-                    if (it.hasChanged && it.propertyName == "trackDistanceUnitFormatterTypeName") {
-                        this.trackDistanceUnitFormatter = this.distanceUnitFormatterFactory.createTrackDistanceUnitFormatter()
+                appSettings.propertyChanged.subscribe{
+                    if (it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name) {
+                        this.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
                     }
                 }
         )

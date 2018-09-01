@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.statistics
 
 import com.janhafner.myskatemap.apps.trackrecorder.IDestroyable
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergy
 import com.janhafner.myskatemap.apps.trackrecorder.statistics.IStatistic
 import io.reactivex.Observable
@@ -16,9 +16,9 @@ internal interface IStatisticalAggregation : IDestroyable {
 
     val recordingTime: Period
 
-    val trackDistanceChanged: Observable<Float>
+    val distanceChanged: Observable<Float>
 
-    val trackDistance: Float
+    val distance: Float
 
     val speed: IStatistic
 

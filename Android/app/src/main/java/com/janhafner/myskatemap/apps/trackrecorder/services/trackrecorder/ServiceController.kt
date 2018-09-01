@@ -58,7 +58,7 @@ internal final class ServiceController<TService, TBinder: IBinder>(private val c
             }
 
             this.context.bindService(Intent(this.context, this.serviceClass), this.serviceConnection, AppCompatActivity.BIND_AUTO_CREATE)
-        } else {
+        } else if(!this.isClientBoundChangedSubject.value) {
             this.isClientBoundChangedSubject.onNext(true)
         }
 

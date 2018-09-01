@@ -1,7 +1,0 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/trackrecorderactivity_tab_attachments_actionbar_delete"
-        android:title="@string/trackrecorderactivity_tab_attachments_actionbar_delete"
-        android:icon="@drawable/ic_actionbar_delete"
-        app:showAsAction="ifRoom"/>
-</menu>

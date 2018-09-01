@@ -6,10 +6,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.CurrentAltitudeDashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.MaximumAltitudeDashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.MinimumAltitudeDashboardTileFragment
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.ambienttemperature.AverageAmbientTemperatureDashboardTileFragment
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.ambienttemperature.CurrentAmbientTemperatureDashboardTileFragment
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.ambienttemperature.MaximumAmbientTemperatureDashboardTileFragment
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.ambienttemperature.MinimumAmbientTemperatureDashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.burnedenergy.BurnedEnergyDashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.distance.DistanceDashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.AverageSpeedDashboardTileFragment
@@ -32,10 +28,6 @@ internal final class DashboardTileDescriptor(public val tileSelectorTitle: Strin
             result.add(DashboardTileDescriptor("CurrentAltitudeDashboardTileFragment", CurrentAltitudeDashboardTileFragment::javaClass.name))
             result.add(DashboardTileDescriptor("MaximumAltitudeDashboardTileFragment", MaximumAltitudeDashboardTileFragment::javaClass.name))
             result.add(DashboardTileDescriptor("MinimumAltitudeDashboardTileFragment", MinimumAltitudeDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("AverageAmbientTemperatureDashboardTileFragment", AverageAmbientTemperatureDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("CurrentAmbientTemperatureDashboardTileFragment", CurrentAmbientTemperatureDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("MaximumAmbientTemperatureDashboardTileFragment", MaximumAmbientTemperatureDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("MinimumAmbientTemperatureDashboardTileFragment", MinimumAmbientTemperatureDashboardTileFragment::javaClass.name))
             result.add(DashboardTileDescriptor("BurnedEnergyDashboardTileFragment", BurnedEnergyDashboardTileFragment::javaClass.name))
             result.add(DashboardTileDescriptor("DistanceDashboardTileFragment", DistanceDashboardTileFragment::javaClass.name))
             result.add(DashboardTileDescriptor("AverageSpeedDashboardTileFragment", AverageSpeedDashboardTileFragment::javaClass.name))

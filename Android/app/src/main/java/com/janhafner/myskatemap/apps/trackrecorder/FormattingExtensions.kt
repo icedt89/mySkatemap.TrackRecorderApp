@@ -1,15 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
-import android.content.Context
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergy
-import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.Temperature
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
-import org.joda.time.format.PeriodFormatter
-import org.joda.time.format.PeriodFormatterBuilder
+import org.joda.time.format.*
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
@@ -23,47 +17,79 @@ private val trackRecordingTimeFormatter: PeriodFormatter = PeriodFormatterBuilde
         .appendSeconds()
         .toFormatter()
 
-private val dateTimeFormatter: DateTimeFormatter = DateTimeFormat.shortDateTime()
+private val defaultTimeFormatter: DateTimeFormatter = DateTimeFormatterBuilder()
+        .appendHourOfDay(2)
+        .appendLiteral(":")
+        .appendMinuteOfHour(2)
+        .appendLiteral(":")
+        .appendSecondOfMinute(2)
+        .toFormatter()
+
+private val defaultDateTimeFormatter: DateTimeFormatter = DateTimeFormatterBuilder()
+        .appendDayOfMonth(2)
+        .appendLiteral(".")
+        .appendMonthOfYear(2)
+        .appendLiteral(".")
+        .appendYear(4, 4)
+        .appendLiteral(" ")
+        .appendHourOfDay(2)
+        .appendLiteral(":")
+        .appendMinuteOfHour(2)
+        .appendLiteral(":")
+        .appendSecondOfMinute(2)
+        .toFormatter()
 
 internal fun DateTime.formatDefault(): String {
-    return dateTimeFormatter.print(this)
+    return defaultDateTimeFormatter.print(this)
+}
+
+internal fun DateTime.formatTimeOnlyDefault(): String {
+    return defaultTimeFormatter.print(this)
 }
 
 internal fun Period.formatRecordingTime(): String {
     return trackRecordingTimeFormatter.print(this.normalizedStandard(PeriodType.time()))
 }
 
-internal fun Float.roundTrackDistanceForDisplay(context: Context): String {
-    val decimalFormat = DecimalFormat(context.getString(R.string.app_trackdistance_decimalformat))
+internal fun Float.roundWithTwoDecimals(): String {
+    val decimalFormat = DecimalFormat("#.##")
     decimalFormat.roundingMode = RoundingMode.CEILING
 
     return decimalFormat.format(this)
 }
 
-internal fun Float.formatSpeed() : String {
-    return "${this} km/h"
+internal fun Float.formatDistanceKilometers() : String {
+    return "${this.roundWithTwoDecimals()} km"
 }
 
-internal fun BurnedEnergy.formatKilocalorie() : String {
-    return "${this.kiloCalories} kcal"
+internal fun Float.formatDistanceMiles() : String {
+    return "${this.roundWithTwoDecimals()} mi"
 }
 
-internal fun BurnedEnergy.formatKilojoule() : String {
-    return "${this.kiloJoule} kJ"
+internal fun Float.formatDistanceMeters() : String {
+    return "${this.roundWithTwoDecimals()} m"
 }
 
-internal fun BurnedEnergy.formatWattHour() : String {
-    return "${this.wattHour} wH"
+internal fun Float.formatSpeedMetersPerSecond() : String {
+    return "${this} m/s"
 }
 
-internal fun Temperature.formatKelvin() : String {
-    return "${this.kelvin} K"
+internal fun Float.formatSpeedKilometersPerHour() : String {
+    return "${this.roundWithTwoDecimals()} km/h"
 }
 
-internal fun Temperature.formatCelsius() : String {
-    return "${this.celsius} °C"
+internal fun Float.formatSpeedMilesPerHour() : String {
+    return "${this.roundWithTwoDecimals()} mi/h"
 }
 
-internal fun Temperature.formatFahrenheit() : String {
-    return "${this.fahrenheit} °F"
+internal fun Float.formatBurnedEnergyKilocalorie() : String {
+    return "${this} kcal"
+}
+
+internal fun Float.formatBurnedEnergyKilojoule() : String {
+    return "${this} kJ"
+}
+
+internal fun Float.formatBurnedEnergyWattHour() : String {
+    return "${this} wH"
 }

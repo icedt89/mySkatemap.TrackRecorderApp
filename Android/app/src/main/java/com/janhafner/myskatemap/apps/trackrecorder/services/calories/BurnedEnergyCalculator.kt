@@ -1,11 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.calories
 
-import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
 internal final class BurnedEnergyCalculator(weightInKilograms: Float,
-                                            heightInCentimeters: Float,
+                                            heightInCentimeters: Int,
                                             ageInYears: Int,
                                             sex: Sex,
                                             metValue: Float) : IBurnedEnergyCalculator {
@@ -26,6 +25,18 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
         }
 
         // https://www.blitzresults.com/en/calories-burned/
+        /*
+            Formula MET (Metabolic Rate)
+            The MET is the metabolic rate, i. e. the calorie consumption per hour per kilogram or pound of body weight.
+
+            MET = 1\frac{kcal}{kg*h}
+            However, it is also possible to calculate the kilocalorie consumption more precisely with the basal metabolic rate (BMR). This is made up of weight, size and age and a suitable formula was first used by Harris Benedict in 1919.
+
+            \text{BMR for Women} = (9,56 * \text{Weight in kg}) + (1,85 * \text{Height in cm}) - (4,68 * \text{Age}) + 655 \text{BMR for Men} = (13,75 * \text{Weight in kg}) + (5 * \text{Height in cm}) - 6,67 * \text{Age}) + 66
+            Combining the BMR (basic metabolic rate) with the MET (metabolic rate) and taking into account the time, one obtains the consumed calories for a certain activity.
+
+            Kilocalories = \frac{BMR}{24}*MET*\text{Time in h}
+         */
         val basalMetabolicRate = (basalMetabolicFactorSet.factor1 * weightInKilograms) + (basalMetabolicFactorSet.factor2 * heightInCentimeters) - (basalMetabolicFactorSet.factor3 * ageInYears) + basalMetabolicFactorSet.factor4
 
         this.partiallyCompleteFormula = (basalMetabolicRate / 24.0f) * metValue

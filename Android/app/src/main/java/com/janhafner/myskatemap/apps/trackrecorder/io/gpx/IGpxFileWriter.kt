@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.io.gpx
 
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
 import java.io.OutputStream
 
 internal interface IGpxFileWriter {

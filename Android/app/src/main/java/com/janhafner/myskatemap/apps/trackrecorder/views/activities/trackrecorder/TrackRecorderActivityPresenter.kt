@@ -7,8 +7,8 @@ import android.content.Intent
 import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
+import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
-import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -16,27 +16,31 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.*
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.FitnessActivity
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.*
-import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.IUserProfileService
-import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.UserProfile
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecordingSessionState
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.FitnessActivity
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
-import com.janhafner.myskatemap.apps.trackrecorder.views.userprofile.settings.UserProfileSettingsActivity
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.appsettings.AppSettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist.TrackListActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.DashboardTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.debug.DebugTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.DiscardRecordingAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.FinishRecordingAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.ShowLocationServicesAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings.UserProfileSettingsActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_track_recorder.*
+import kotlinx.android.synthetic.main.app_toolbar.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -46,7 +50,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                                     private val trackService: ITrackService,
                                                     private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                     private val appSettings: IAppSettings,
-                                                    private val userProfileService: IUserProfileService) : INeedFragmentVisibilityInfo {
+                                                    private val userProfile: IUserProfile) : INeedFragmentVisibilityInfo {
     private val mainFloatingActionButtonSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private var fragment: Fragment? = null
@@ -66,12 +70,11 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
     init {
         this.view.setContentView(R.layout.activity_track_recorder)
 
-        val trackRecorderToolbar = this.view.findViewById<Toolbar>(R.id.trackrecorderactivity_toolbar)
-        this.view.setSupportActionBar(trackRecorderToolbar)
+        this.view.setSupportActionBar(this.view.app_toolbar)
 
         val actionBar = this.view.supportActionBar
         actionBar!!.setDisplayHomeAsUpEnabled(true)
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu)
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_bright_24dp)
 
         val viewPager = this.view.findViewById<ViewPager>(R.id.trackrecorderactivity_toolbar_viewpager)
         viewPager.adapter = TrackRecorderTabsAdapter(this.view, this.view.supportFragmentManager)
@@ -103,13 +106,17 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         navigationView.setNavigationItemSelectedListener(
                 object : NavigationView.OnNavigationItemSelectedListener {
                     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
-                        if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_settings) {
+                        if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_user_profile) {
                             this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, UserProfileSettingsActivity::class.java))
+                        } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_settings) {
+                            this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, AppSettingsActivity::class.java))
                         } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_trackrecordings) {
                             val intent = Intent(this@TrackRecorderActivityPresenter.view, TrackListActivity::class.java)
 
                             this@TrackRecorderActivityPresenter.view.startActivity(intent)
                         }
+
+                        this@TrackRecorderActivityPresenter.view.trackrecorderactivity_navigationdrawer.closeDrawers()
 
                         return true
                     }
@@ -150,9 +157,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
         val trackRecordingName: String = String.format(nameTemplate, dateTimeFormatter.print(DateTime.now()))
 
-        val userProfile = this.userProfileService.getUserProfileOrDefault()
         val result = TrackRecording.start(trackRecordingName, this.appSettings.locationProviderTypeName)
-        if (userProfile.isValidForBurnedEnergyCalculation()) {
+        if (this.userProfile.isValidForBurnedEnergyCalculation()) {
             result.fitnessActivity = FitnessActivity(userProfile.age!!,
                     this.appSettings.defaultMetActivityCode,
                     userProfile.weight!!,
@@ -167,21 +173,25 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.showMenuItems(true)
 
         this.sessionSubscriptions.addAll(
-            trackRecorderSession.stateChanged.observeOn(AndroidSchedulers.mainThread()).subscribe{
-                    currentState ->
-                    when (currentState) {
-                        TrackRecordingSessionState.Running -> {
-                            Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_running, Toast.LENGTH_LONG).show()
-                        }
-                        TrackRecordingSessionState.Paused -> {
-                            Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
-                        }
-                        TrackRecordingSessionState.LocationServicesUnavailable -> {
-                            Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
+            trackRecorderSession.stateChanged.pairWithPrevious().observeOn(AndroidSchedulers.mainThread()).subscribe{
+                    pair ->
+                    val previousState = pair.first
+                    val currentState = pair.second
+                    if(previousState != null) {
+                        when (currentState) {
+                            TrackRecordingSessionState.Running -> {
+                                Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_running, Toast.LENGTH_LONG).show()
+                            }
+                            TrackRecordingSessionState.Paused -> {
+                                Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
+                            }
+                            TrackRecordingSessionState.LocationServicesUnavailable -> {
+                                Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_LONG).show()
 
-                            this.buildAndShowLocationServicesDialog()
-                        } else -> {
-                            // Nothing happens here, else branch exist only to prevent warning on compile Oo
+                                this.buildAndShowLocationServicesDialog()
+                            } else -> {
+                                // Nothing happens here, else branch exist only to prevent warning on compile Oo
+                            }
                         }
                     }
 
@@ -210,7 +220,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.setupMainFloatingActionButton(this.fragment!!, true)
     }
 
-    public fun onMenuOpened(featureId: Int, menu: Menu?): Boolean {
+    public fun onMenuOpened(): Boolean {
         if(this.sessionMenuSubscriptions.size() == 0) {
             if(this.finishTrackRecordingMenuItem != null) {
                 this.sessionMenuSubscriptions.add(this.finishTrackRecordingMenuItem!!.clicks().subscribe{
@@ -254,6 +264,14 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         return true
     }
 
+    public fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == android.R.id.home) {
+            this.view.trackrecorderactivity_navigationdrawer.openDrawer(GravityCompat.START)
+        }
+
+        return true
+    }
+
     public fun destroy() {
         this.trackRecorderServiceController.unbindService()
 
@@ -290,6 +308,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.mainFloatingActionButtonSubscriptions.clear()
         this.fragment = fragment
 
+        // TODO: Reimplement as two FAB with are shown/hide
         if(this.trackRecorderSession == null) {
             this.mainFloatingActionButtonSubscriptions.add (
                 this.view.trackrecorderactivity_main_floatingactionbutton.clicks()
@@ -341,16 +360,16 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                         }
             )
         } else if(isVisibleToUser) {
-            if(fragment is DataTabFragment || fragment is MapTabFragment || fragment is DashboardTabFragment) {
+            if(fragment is DataTabFragment || fragment is MapTabFragment || fragment is DashboardTabFragment || fragment is DebugTabFragment) {
                 this.mainFloatingActionButtonSubscriptions.addAll(
                         this.trackRecorderSession!!.stateChanged
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe {
-                                    var iconId = R.drawable.ic_action_track_recorder_recording_pause
+                                    var iconId = R.drawable.ic_pause_bright_24dp
                                     if (it == TrackRecordingSessionState.Paused) {
-                                        iconId = R.drawable.ic_action_track_recorder_recording_startresume
+                                        iconId = R.drawable.ic_play_arrow_bright_24dp
                                     } else if (it == TrackRecordingSessionState.LocationServicesUnavailable) {
-                                        iconId = R.drawable.ic_location
+                                        iconId = R.drawable.ic_location_on_bright_24dp
                                     }
 
                                     this.view.trackrecorderactivity_main_floatingactionbutton.setImageResource(iconId)
@@ -360,17 +379,17 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                 .subscribe {
                                     this.trackRecorderSession!!.stateChanged.first(TrackRecordingSessionState.Paused).subscribe {
                                         state ->
-                                        when(state) {
-                                            TrackRecordingSessionState.Running -> {
-                                                this.trackRecorderSession!!.pauseTracking()
+                                            when(state) {
+                                                TrackRecordingSessionState.Running -> {
+                                                    this.trackRecorderSession!!.pauseTracking()
+                                                }
+                                                TrackRecordingSessionState.Paused -> {
+                                                    this.trackRecorderSession!!.resumeTracking()
+                                                }
+                                                TrackRecordingSessionState.LocationServicesUnavailable -> {
+                                                    this.buildAndShowLocationServicesDialog()
+                                                }
                                             }
-                                            TrackRecordingSessionState.Paused -> {
-                                                this.trackRecorderSession!!.resumeTracking()
-                                            }
-                                            TrackRecordingSessionState.LocationServicesUnavailable -> {
-                                                this.buildAndShowLocationServicesDialog()
-                                            }
-                                        }
                                     }
                                 }
                 )

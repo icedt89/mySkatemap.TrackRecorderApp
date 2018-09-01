@@ -8,7 +8,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.IDashboardTileFragmentFactory
 import io.reactivex.disposables.CompositeDisposable
-import java.util.*
 
 internal final class DashboardTabFragmentPresenter(private val view: DashboardTabFragment,
                                                    private val appSettings: IAppSettings,
@@ -17,8 +16,11 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     init {
-        // The dashboard is either the one from the app settings or a default one.
+        // The dashboard is either the one from the app app_settings or a default one.
         // Because it does'nt matter we save it always!
+        val allDashboards = this.dashboardService.getAll()
+        val ooo = allDashboards
+
         val dashboard = this.dashboardService.getByIdOrDefault(this.appSettings.currentDashboardId)
         this.dashboardService.save(dashboard)
         this.appSettings.currentDashboardId = dashboard.id

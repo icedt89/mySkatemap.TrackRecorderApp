@@ -20,7 +20,7 @@
         android:configChanges="locale|orientation"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
-        android:theme="@style/MySkatemap.TrackRecorder.AppTheme">
+        android:theme="@style/MySkatemap.TrackRecorder.AppTheme.AppCompat">
         <activity
             android:name=".views.activities.SplashscreenActivity"
             android:theme="@style/MySkatemap.TrackRecorder.SplashscreenActivityTheme">
@@ -40,7 +40,11 @@
             android:label="@string/tracklistactivity_title"
             android:launchMode="singleTask" />
         <activity
-            android:name=".views.userprofile.settings.UserProfileSettingsActivity" />
+            android:name=".views.activities.userprofilesettings.UserProfileSettingsActivity"
+            android:label="@string/userprofilesettingsactivity_title" />
+        <activity
+            android:name=".views.activities.appsettings.AppSettingsActivity"
+            android:label="@string/settingsactivity_title" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

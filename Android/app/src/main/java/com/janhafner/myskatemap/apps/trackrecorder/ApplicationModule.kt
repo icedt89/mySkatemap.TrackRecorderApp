@@ -3,16 +3,23 @@ package com.janhafner.myskatemap.apps.trackrecorder
 import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
-import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.LocationManager
 import android.preference.PreferenceManager
+import android.util.EventLog
 import com.couchbase.lite.Database
 import com.couchbase.lite.DatabaseConfiguration
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.FixedTypeConversionSharedPreferencesAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.BurnedEnergyUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.IBurnedEnergyUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.DistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.ISpeedUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.SpeedUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.io.FileSystemDirectoryNavigator
 import com.janhafner.myskatemap.apps.trackrecorder.io.IDirectoryNavigator
 import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.GpxFileWriter
@@ -22,30 +29,19 @@ import com.janhafner.myskatemap.apps.trackrecorder.io.gpx.IGpxTrackWriter
 import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimeDateTimeMoshiAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimePeriodMoshiAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.jodatime.UuidMoshiAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
-import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.services.TrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.*
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IMetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.MetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.DashboardService
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingServiceFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.LiveLocationTrackingServiceFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.IStillDetector
 import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.StillDetectorBroadcastReceiver
-import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.AmbientTemperatureService
-import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.FakeAmbientTemperatureService
-import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.IAmbientTemperatureService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProviderFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LocationProviderFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.IUserProfileService
-import com.janhafner.myskatemap.apps.trackrecorder.services.userprofile.UserProfileService
-import com.janhafner.myskatemap.apps.trackrecorder.settings.AppConfig
-import com.janhafner.myskatemap.apps.trackrecorder.settings.AppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
-import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.settings.*
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.IDashboardTileFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
@@ -53,7 +49,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFra
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
+import okhttp3.Call
+import okhttp3.EventListener
 import okhttp3.OkHttpClient
+import java.io.IOException
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -96,25 +96,20 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
-    public fun provideAmbientTemperatureService(sensorManager: SensorManager) : IAmbientTemperatureService {
-        val ambientTemperatureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
-        if(ambientTemperatureSensor == null) {
-            return FakeAmbientTemperatureService()
-        }
-
-        return AmbientTemperatureService(sensorManager, ambientTemperatureSensor)
-    }
-
-    @Singleton
-    @Provides
     public fun provideFusedLocationProviderClient() : FusedLocationProviderClient {
         return LocationServices.getFusedLocationProviderClient(this.applicationContext)
     }
 
     @Singleton
     @Provides
-    public fun provideStillDetector(activityRecognitionClient: ActivityRecognitionClient) : StillDetectorBroadcastReceiver {
+    public fun provideStillDetectorBroadcastReceiver(activityRecognitionClient: ActivityRecognitionClient) : StillDetectorBroadcastReceiver {
         return StillDetectorBroadcastReceiver(this.applicationContext, activityRecognitionClient)
+    }
+
+    @Singleton
+    @Provides
+    public fun provideStillDetector(stillDetectorBroadcastReceiver: StillDetectorBroadcastReceiver) : IStillDetector {
+        return stillDetectorBroadcastReceiver
     }
 
     @Provides
@@ -133,6 +128,20 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     @Singleton
     public fun provideJsonRestApiClient(moshi: Moshi) : JsonRestApiClient {
         val okHttpClient = OkHttpClient.Builder()
+                // TODO: Working?
+                .eventListener(object : EventListener() {
+                    override fun callFailed(call: Call, ioe: IOException) {
+                        super.callFailed(call, ioe)
+                    }
+
+                    override fun callStart(call: Call) {
+                        super.callStart(call)
+                    }
+
+                    override fun callEnd(call: Call) {
+                        super.callEnd(call)
+                    }
+                })
                 .build()
 
         return JsonRestApiClient(okHttpClient, moshi)
@@ -140,8 +149,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
-    public fun provideGpxFileWriter(gpxTrackWriter: IGpxTrackWriter): IGpxFileWriter {
-        return GpxFileWriter(gpxTrackWriter)
+    public fun provideGpxFileWriter(gpxTrackWriter: IGpxTrackWriter, userProfile: IUserProfile): IGpxFileWriter {
+        return GpxFileWriter(gpxTrackWriter, this.applicationContext, userProfile)
     }
 
     @Singleton
@@ -162,28 +171,16 @@ internal final class ApplicationModule(private val applicationContext: Context) 
         return TrackRecorderMapFragmentFactory(this.applicationContext, appConfig)
     }
 
+    @Provides
+    @Singleton
+    public fun provideLocationAvailabilityChangedDetector(locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver) : ILocationAvailabilityChangedDetector {
+        return locationAvailabilityChangedBroadcastReceiver
+    }
+
     @Singleton
     @Provides
     public fun provideLocationAvailabilityChangedBroadcastReceiver(): LocationAvailabilityChangedBroadcastReceiver {
         return LocationAvailabilityChangedBroadcastReceiver(this.applicationContext)
-    }
-
-    @Provides
-    @Singleton
-    public fun provideTrackService(appBaseDirectoryNavigator: IDirectoryNavigator, couchDb: Database, appSettings: IAppSettings): ITrackService {
-        return TrackService(couchDb, appBaseDirectoryNavigator, appSettings)
-    }
-
-    @Provides
-    @Singleton
-    public fun provideUserProfileService(couchDb: Database) : IUserProfileService {
-        return UserProfileService(couchDb)
-    }
-
-    @Provides
-    @Singleton
-    public fun provideDashboardService(couchDb: Database) : ICrudRepository<Dashboard> {
-        return DashboardService(couchDb)
     }
 
     @Provides
@@ -208,14 +205,22 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
-    public fun provideAppSettings(sharedPreferences: SharedPreferences): IAppSettings {
-        return AppSettings().bindToSharedPreferences(sharedPreferences)
+    public fun provideAppSettings(): IAppSettings {
+        var sharedPreferences = this.applicationContext.getSharedPreferences("appsettings", Context.MODE_PRIVATE)
+
+        sharedPreferences = FixedTypeConversionSharedPreferencesAdapter(sharedPreferences)
+
+        return AppSettings().bindToSharedPreferences(sharedPreferences, this.applicationContext)
     }
 
     @Provides
     @Singleton
-    public fun provideSharedPreferences() : SharedPreferences {
-        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+    public fun provideUserProfile(): IUserProfile {
+        var sharedPreferences = this.applicationContext.getSharedPreferences("userprofilesettings", Context.MODE_PRIVATE)
+
+        sharedPreferences = FixedTypeConversionSharedPreferencesAdapter(sharedPreferences)
+
+        return UserProfile().bindToSharedPreferences(sharedPreferences, this.applicationContext)
     }
 
     @Singleton
@@ -231,15 +236,49 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
-    public fun provideTrackDistanceUnitFormatterFactory(appSettings: IAppSettings): ITrackDistanceUnitFormatterFactory {
-        return TrackDistanceUnitFormatterFactory(appSettings, this.applicationContext)
+    public fun provideDistanceUnitFormatterFactory(appSettings: IAppSettings): IDistanceUnitFormatterFactory {
+        return DistanceUnitFormatterFactory(appSettings)
     }
 
     @Provides
     @Singleton
-    public fun provideCouchDb() : Database {
+    public fun provideSpeedUnitFormatterFactory(appSettings: IAppSettings): ISpeedUnitFormatterFactory {
+        return SpeedUnitFormatterFactory(appSettings)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideBurnedEnergyUnitFormatterFactory(appSettings: IAppSettings): IBurnedEnergyUnitFormatterFactory {
+        return BurnedEnergyUnitFormatterFactory(appSettings)
+    }
+
+    @Named("track-recordings-couchdb-factory")
+    @Singleton
+    @Provides
+    public fun provideTrackRecordingsCouchDbFactory(): ICouchDbFactory {
         val databaseConfiguration = DatabaseConfiguration(this.applicationContext)
 
-        return Database("track-recordings", databaseConfiguration)
+        return CouchDbFactory("track-recordings", databaseConfiguration)
+    }
+
+    @Named("dashboards-couchdb-factory")
+    @Singleton
+    @Provides
+    public fun provideDashboardsCouchDbFactory(): ICouchDbFactory {
+        val databaseConfiguration = DatabaseConfiguration(this.applicationContext)
+
+        return CouchDbFactory("dashboards", databaseConfiguration)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideTrackService(appBaseDirectoryNavigator: IDirectoryNavigator, appSettings: IAppSettings, @Named("track-recordings-couchdb-factory") trackRecordingsCouchDbFactory: ICouchDbFactory): ITrackService {
+        return TrackService(trackRecordingsCouchDbFactory, appBaseDirectoryNavigator, appSettings)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideDashboardService(@Named("dashboards-couchdb-factory") dashboardsCouchDbFactory: ICouchDbFactory) : ICrudRepository<Dashboard> {
+        return DashboardService(dashboardsCouchDbFactory)
     }
 }

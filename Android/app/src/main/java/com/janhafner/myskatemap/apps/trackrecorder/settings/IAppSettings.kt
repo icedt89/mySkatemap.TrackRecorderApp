@@ -1,10 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.settings
 
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.Sex
+import io.reactivex.Observable
 import java.util.*
 
-internal interface IAppSettings: IAppSettingsChanged {
-    var trackDistanceUnitFormatterTypeName: String
+internal interface IAppSettings {
+    val propertyChanged: Observable<PropertyChangedData>
+
+    var distanceUnitFormatterTypeName: String
+
+    var speedUnitFormatterTypeName: String
+
+    var burnedEnergyUnitFormatterTypeName: String
 
     var locationProviderTypeName: String
 

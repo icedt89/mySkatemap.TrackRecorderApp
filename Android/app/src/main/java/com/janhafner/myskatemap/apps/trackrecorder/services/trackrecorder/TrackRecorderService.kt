@@ -5,29 +5,28 @@ import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import android.support.v4.app.NotificationManagerCompat
 import android.util.Log
 import com.google.android.gms.location.ActivityRecognitionResult
 import com.google.android.gms.location.DetectedActivity
 import com.janhafner.myskatemap.apps.trackrecorder.ObservableTimer
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IBurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IMetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.calories.NullBurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.TrackDistanceCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.distance.DistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingServiceFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.StillDetectorBroadcastReceiver
-import com.janhafner.myskatemap.apps.trackrecorder.services.temperature.IAmbientTemperatureService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotificationChannel
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProviderFactory
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.statistics.TrackRecordingStatistic
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -46,16 +45,13 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public lateinit var trackService: ITrackService
 
     @Inject
-    public lateinit var trackDistanceUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
+    public lateinit var distanceUnitFormatterFactory: IDistanceUnitFormatterFactory
 
     @Inject
     public lateinit var locationProviderFactory: ILocationProviderFactory
 
     @Inject
     public lateinit var metActivityDefinitionFactory: IMetActivityDefinitionFactory
-
-    @Inject
-    public lateinit var ambientTemperatureService: IAmbientTemperatureService
 
     @Inject
     public lateinit var liveLocationTrackingServiceFactory: ILiveLocationTrackingServiceFactory
@@ -83,7 +79,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
             this.trackRecorderServiceNotificationChannel = TrackRecorderServiceNotificationChannel(notificationManager)
         }
 
-        this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this, this.trackDistanceUnitFormatterFactory.createTrackDistanceUnitFormatter())
+        this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this, this.distanceUnitFormatterFactory.createFormatter())
 
         super.onCreate()
     }
@@ -120,7 +116,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         val locationProvider = this.locationProviderFactory.createLocationProvider(trackRecording.locationProviderTypeName)
         val observableTimer = ObservableTimer()
         val trackRecordingStatistic = TrackRecordingStatistic()
-        val trackDistanceCalculator = TrackDistanceCalculator()
+        val distanceCalculator = DistanceCalculator()
         val burnedEnergyCalculator: IBurnedEnergyCalculator
         val liveLocationTrackingSession: ILiveLocationTrackingSession
 
@@ -147,8 +143,8 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                 this.appConfig,
                 this.trackService,
                 this.trackRecorderServiceNotification,
-                trackDistanceCalculator,
-                this.trackDistanceUnitFormatterFactory,
+                distanceCalculator,
+                this.distanceUnitFormatterFactory,
                 trackRecording,
                 trackRecordingStatistic,
                 burnedEnergyCalculator,
@@ -157,8 +153,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                 liveLocationTrackingSession,
                 this,
                 this.stillDetectorBroadcastReceiver,
-                this.locationAvailabilityChangedBroadcastReceiver,
-                this.ambientTemperatureService)
+                this.locationAvailabilityChangedBroadcastReceiver)
 
         this.appSettings.currentTrackRecordingId = trackRecording.id
 
@@ -209,17 +204,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                     this.currentSession!!.pauseTracking()
                 TrackRecorderServiceNotification.ACTION_TERMINATE -> {
                     this.terminateService()
-                }
-                else -> {
-                    if(ActivityRecognitionResult.hasResult(intent)) {
-                        val result = ActivityRecognitionResult.extractResult(intent)
-                        val recognizedActivity = result.mostProbableActivity
-                        if(recognizedActivity.type == DetectedActivity.STILL) {
-                            Log.i("TRS", "STILLSTANDING DETECTED!")
-                        } else if(recognizedActivity.type != DetectedActivity.UNKNOWN) {
-                            Log.i("TRS", "STILLSTANDING ENDED!")
-                        }
-                    }
                 }
             }
         }

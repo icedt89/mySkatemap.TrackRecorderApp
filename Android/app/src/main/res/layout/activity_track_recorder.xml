@@ -5,12 +5,12 @@
     android:layout_height="match_parent"
     android:id="@+id/trackrecorderactivity_navigationdrawer">
         <android.support.design.widget.AppBarLayout
+            android:fitsSystemWindows="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/trackrecorderactivity_toolbar"
+            <include layout="@layout/app_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize" />
+                android:layout_height="wrap_content" />
             <android.support.design.widget.CoordinatorLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -34,12 +34,11 @@
                 </android.support.v4.view.ViewPager>
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/trackrecorderactivity_main_floatingactionbutton"
+                    android:layout_gravity="bottom|end"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|end"
-                    android:layout_marginBottom="15dp"
                     android:layout_margin="15dp"
-                    android:src="@drawable/ic_action_track_recorder_recording_startresume" />
+                    android:src="@drawable/ic_play_arrow_bright_24dp" />
             </android.support.design.widget.CoordinatorLayout>
         </android.support.design.widget.AppBarLayout>
     <android.support.design.widget.NavigationView

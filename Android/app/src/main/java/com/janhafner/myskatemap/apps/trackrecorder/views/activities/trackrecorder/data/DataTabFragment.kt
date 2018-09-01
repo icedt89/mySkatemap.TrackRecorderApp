@@ -7,11 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.ITrackDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import javax.inject.Inject
 
@@ -22,7 +20,7 @@ internal final class DataTabFragment : Fragment() {
     public lateinit var appSettings: IAppSettings
 
     @Inject
-    public lateinit var trackRecorderUnitFormatterFactory: ITrackDistanceUnitFormatterFactory
+    public lateinit var trackRecorderUnitFormatterFactory: IDistanceUnitFormatterFactory
 
     @Inject
     public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>

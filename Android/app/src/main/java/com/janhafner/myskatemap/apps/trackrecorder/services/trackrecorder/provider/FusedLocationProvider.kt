@@ -7,8 +7,10 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.Location
+import com.google.android.gms.tasks.Tasks
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.toLocation
+import java.util.concurrent.ExecutionException
 
 internal final class FusedLocationProvider(private val context: Context,
                                            private val fusedLocationProviderClient: FusedLocationProviderClient): LocationProvider() {
@@ -66,7 +68,7 @@ internal final class FusedLocationProvider(private val context: Context,
         this.isActive = false
     }
 
-    public override fun getCurrentLocation(): Location? {
+    public override fun getlastKnownLocation(): Location? {
         if(this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
@@ -75,7 +77,13 @@ internal final class FusedLocationProvider(private val context: Context,
             throw IllegalStateException("ACCESS_FINE_LOCATION must be granted!")
         }
 
-        return this.fusedLocationProviderClient.lastLocation.result.toLocation(-1)
+        try {
+            val result = Tasks.await(this.fusedLocationProviderClient.lastLocation)
+
+            return result.toLocation(-1)
+        } catch(exception: ExecutionException) {
+            return null
+        }
     }
 
     protected final override fun destroyCore() {

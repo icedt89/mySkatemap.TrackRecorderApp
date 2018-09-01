@@ -2,12 +2,13 @@ package com.janhafner.myskatemap.apps.trackrecorder.services
 
 import android.util.Log
 import com.couchbase.lite.*
+import com.janhafner.myskatemap.apps.trackrecorder.executeUnitOfWork
 import com.janhafner.myskatemap.apps.trackrecorder.io.IDirectoryNavigator
-import com.janhafner.myskatemap.apps.trackrecorder.io.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import java.util.*
 
-internal final class TrackService(private val couchDb: Database,
+internal final class TrackService(private val trackRecordingsCouchDbFactory: ICouchDbFactory,
                                   private val appBaseDirectoryNavigator: IDirectoryNavigator,
                                   private val appSettings: IAppSettings) : ITrackService {
     private val trackRecordingsDirectoryNavigator: IDirectoryNavigator
@@ -17,26 +18,27 @@ internal final class TrackService(private val couchDb: Database,
     }
 
     public override fun getAll(): List<TrackRecording> {
-        val queryBuilder = QueryBuilder.select(SelectResult.all(), SelectResult.expression(Meta.id))
-                .from(DataSource.database(couchDb))
-                .where(Expression.property("_id").isNot(Expression.value(this.appSettings.currentTrackRecordingId?.toString()))
-                        .and(Expression.property("documentType").`is`(Expression.string(TrackRecording::javaClass.name))))
-
-        val results = queryBuilder.execute()
-
         val trackRecordings = ArrayList<TrackRecording>()
 
-        for (result in results) {
-            val id = UUID.fromString(result.getString("id"))
-            val dictionary = result.getDictionary(couchDb.name)
+        this.trackRecordingsCouchDbFactory.executeUnitOfWork {
+            val queryBuilder = QueryBuilder.select(SelectResult.all(), SelectResult.expression(Meta.id))
+                    .from(DataSource.database(it))
+                    .where(Expression.property("_id").isNot(Expression.value(this.appSettings.currentTrackRecordingId?.toString()))
+                            .and(Expression.property("documentType").`is`(Expression.string(TrackRecording::javaClass.name))))
 
-            try {
-                val trackRecording = TrackRecording.fromCouchDbDictionary(dictionary, id)
+            val results = queryBuilder.execute()
 
-                trackRecordings.add(trackRecording)
-            } catch (exception: Exception) {
-                // TODO
-                Log.w("TrackService", "Could not construct track recording (Id=\"${dictionary.getString("_id")}\")!")
+            for (result in results) {
+                val id = UUID.fromString(result.getString("id"))
+                val dictionary = result.getDictionary(it.name)
+
+                try {
+                    val trackRecording = TrackRecording.fromCouchDbDictionary(dictionary, id)
+
+                    trackRecordings.add(trackRecording)
+                } catch (exception: Exception) {
+                    Log.w("TrackService", "Could not construct track recording (Id=\"${dictionary.getString("_id")}\")!")
+                }
             }
         }
 
@@ -44,24 +46,33 @@ internal final class TrackService(private val couchDb: Database,
     }
 
     public override fun getByIdOrNull(id: String): TrackRecording? {
-        val result = this.couchDb.getDocument(id)
+        var result: Document? = null
+
+        this.trackRecordingsCouchDbFactory.executeUnitOfWork {
+            result = it.getDocument(id)
+        }
+
         if (result == null) {
             return null
         }
 
-        return TrackRecording.fromCouchDbDocument(result)
+        return TrackRecording.fromCouchDbDocument(result!!)
     }
 
     public override fun save(item: TrackRecording) {
-        val document = item.toCouchDbDocument()
+        this.trackRecordingsCouchDbFactory.executeUnitOfWork {
+            val document = item.toCouchDbDocument()
 
-        this.couchDb.save(document)
+            it.save(document)
+        }
     }
 
     public override fun delete(id: String) {
-        val result = this.couchDb.getDocument(id)
+        this.trackRecordingsCouchDbFactory.executeUnitOfWork {
+            val result = it.getDocument(id)
 
-        this.couchDb.delete(result)
+            it.delete(result)
+        }
     }
 
     public override fun getAttachmentHandler(trackRecording: TrackRecording): IAttachmentHandler {

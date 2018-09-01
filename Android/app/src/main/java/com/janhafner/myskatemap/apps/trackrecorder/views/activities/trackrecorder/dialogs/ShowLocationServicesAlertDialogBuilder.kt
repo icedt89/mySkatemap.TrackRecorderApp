@@ -8,6 +8,6 @@ internal final class ShowLocationServicesAlertDialogBuilder(context: Context): A
     init {
         this.setTitle(R.string.trackrecorderactivity_show_location_services_confirmation_title)
         this.setMessage(R.string.trackrecorderactivity_show_location_services_confirmation_message)
-        this.setIcon(R.drawable.ic_dialog_warning)
+        this.setIcon(R.drawable.ic_warning_dark_24dp)
     }
 }
