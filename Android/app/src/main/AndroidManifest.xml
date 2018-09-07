@@ -36,10 +36,6 @@
             android:label="@string/trackrecorderactivity_title"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
-            android:name=".views.activities.tracklist.TrackListActivity"
-            android:label="@string/tracklistactivity_title"
-            android:launchMode="singleTask" />
-        <activity
             android:name=".views.activities.userprofilesettings.UserProfileSettingsActivity"
             android:label="@string/userprofilesettingsactivity_title" />
         <activity

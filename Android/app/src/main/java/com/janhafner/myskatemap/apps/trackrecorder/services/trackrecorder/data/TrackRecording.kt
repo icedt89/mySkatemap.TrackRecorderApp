@@ -24,13 +24,11 @@ internal final class TrackRecording private constructor(public var name: String)
 
     public val locations: MutableMap<Int, Location> = ArrayMap<Int, Location>()
 
-    public val attachments: MutableList<Attachment> = ArrayList()
-
     private val stateChangeEntries: MutableList<StateChangeEntry> = ArrayList()
     public val stateChanges: List<StateChangeEntry>
         get() = this.stateChangeEntries
 
-    public var fitnessActivity: FitnessActivity? = null
+    public var userProfile: UserProfile? = null
 
     public val isFinished: Boolean
         get() = this.trackingFinishedAt != null
@@ -82,7 +80,7 @@ internal final class TrackRecording private constructor(public var name: String)
 
     public fun toCouchDbDocument(): MutableDocument {
         val result = MutableDocument(this.id.toString())
-        result.setString("documentType", this.javaClass.name)
+        result.setString("documentType", this.javaClass.simpleName)
 
         result.setString("comment", this.comment)
         result.setString("name", this.name)
@@ -91,10 +89,10 @@ internal final class TrackRecording private constructor(public var name: String)
         result.setDate("trackingStartedAt", this.trackingStartedAt.toDate())
         result.setDate("trackingFinishedAt", this.trackingFinishedAt?.toDate())
 
-        if(this.fitnessActivity != null) {
-            val fitnessActivityDictionary = this.fitnessActivity!!.toCouchDbDictionary()
+        if(this.userProfile != null) {
+            val fitnessActivityDictionary = this.userProfile!!.toCouchDbDictionary()
 
-            result.setDictionary("fitnessActivity", fitnessActivityDictionary)
+            result.setDictionary("userProfile", fitnessActivityDictionary)
         }
 
         val stateChangeEntriesArray = MutableArray()
@@ -114,15 +112,6 @@ internal final class TrackRecording private constructor(public var name: String)
         }
 
         result.setArray("locations", locationsArray)
-
-        val attachmentsArray = MutableArray()
-        for (attachment in this.attachments) {
-            val attachmentDictionary = attachment.toCouchDbDictionary()
-
-            attachmentsArray.addDictionary(attachmentDictionary)
-        }
-
-        result.setArray("attachments", attachmentsArray)
 
         return result
     }
@@ -150,9 +139,9 @@ internal final class TrackRecording private constructor(public var name: String)
             result.trackingStartedAt = DateTime(document.getDate("trackingStartedAt"))
             result.recordingTime = Period.seconds(document.getInt("recordingTime"))
 
-            val fitnessActivityDictionary = document.getDictionary("fitnessActivity")
+            val fitnessActivityDictionary = document.getDictionary("userProfile")
             if(fitnessActivityDictionary != null) {
-                result.fitnessActivity = FitnessActivity.fromCouchDbDictionary(fitnessActivityDictionary)
+                result.userProfile = UserProfile.fromCouchDbDictionary(fitnessActivityDictionary)
             }
 
             val stateChangeEntriesArray = document.getArray("stateChangeEntries")
@@ -169,13 +158,6 @@ internal final class TrackRecording private constructor(public var name: String)
                 result.locations.put(location.sequenceNumber, location)
             }
 
-            val attachmentsArray = document.getArray("attachments")
-            for (attachmentDictionary in attachmentsArray.map { it as Dictionary}) {
-                val attachment = Attachment.fromCouchDbDictionary(attachmentDictionary)
-
-                result.attachments.add(attachment)
-            }
-
             return result
         }
 
@@ -188,9 +170,9 @@ internal final class TrackRecording private constructor(public var name: String)
             result.trackingStartedAt = DateTime(dictionary.getDate("trackingStartedAt"))
             result.recordingTime = Period.seconds(dictionary.getInt("recordingTime"))
 
-            val fitnessActivityDictionary = dictionary.getDictionary("fitnessActivity")
+            val fitnessActivityDictionary = dictionary.getDictionary("userProfile")
             if(fitnessActivityDictionary != null) {
-                result.fitnessActivity = FitnessActivity.fromCouchDbDictionary(fitnessActivityDictionary)
+                result.userProfile = UserProfile.fromCouchDbDictionary(fitnessActivityDictionary)
             }
 
             val stateChangeEntriesArray = dictionary.getArray("stateChangeEntries")
@@ -205,13 +187,6 @@ internal final class TrackRecording private constructor(public var name: String)
                 val location = Location.fromCouchDbDictionary(locationDictionary)
 
                 result.locations.put(location.sequenceNumber, location)
-            }
-
-            val attachmentsArray = dictionary.getArray("attachments")
-            for (attachmentDictionary in attachmentsArray.map { it as Dictionary}) {
-                val attachment = Attachment.fromCouchDbDictionary(attachmentDictionary)
-
-                result.attachments.add(attachment)
             }
 
             return result

@@ -6,15 +6,16 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.KilometersDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.KilometersPerHourSpeedUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.GoogleTrackRecorderMapFragment
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.*
 
 internal final class AppSettings: IAppSettings {
     private val propertyChangedSubject: PublishSubject<PropertyChangedData> = PublishSubject.create()
-
-    public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject
+    public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject.subscribeOn(Schedulers.computation())
 
     public override var currentTrackRecordingId: UUID? = null
         set(value) {
@@ -22,7 +23,16 @@ internal final class AppSettings: IAppSettings {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::currentTrackRecordingId.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::currentTrackRecordingId.name, oldValue, value))
+        }
+
+    public override var mapControlTypeName: String = AppSettings.DEFAULT_MAP_CONTROL_TYPENAME
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::mapControlTypeName.name, oldValue, value))
         }
 
     public override var currentDashboardId: UUID? = null
@@ -31,7 +41,7 @@ internal final class AppSettings: IAppSettings {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::currentDashboardId.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::currentDashboardId.name, oldValue, value))
         }
 
     public override var defaultMetActivityCode: String = AppSettings.DEFAULT_MET_ACTIVITY_CODE
@@ -40,7 +50,7 @@ internal final class AppSettings: IAppSettings {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::defaultMetActivityCode.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::defaultMetActivityCode.name, oldValue, value))
         }
 
     public override var allowLiveTracking: Boolean = DEFAULT_ALLOW_LIVE_TRACKING
@@ -49,7 +59,7 @@ internal final class AppSettings: IAppSettings {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::allowLiveTracking.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::allowLiveTracking.name, oldValue, value))
         }
 
     public override var appUiLocale: String = DEFAULT_APP_UI_LOCALE
@@ -58,7 +68,7 @@ internal final class AppSettings: IAppSettings {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::appUiLocale.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::appUiLocale.name, oldValue, value))
         }
 
     public override var distanceUnitFormatterTypeName: String = DEFAULT_DISTANCE_UNIT_FORMATTER_TYPENAME
@@ -67,7 +77,7 @@ internal final class AppSettings: IAppSettings {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::distanceUnitFormatterTypeName.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::distanceUnitFormatterTypeName.name, oldValue, value))
         }
 
     public override var speedUnitFormatterTypeName: String = DEFAULT_SPEED_UNIT_FORMATTER_TYPENAME
@@ -76,16 +86,16 @@ internal final class AppSettings: IAppSettings {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::speedUnitFormatterTypeName.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::speedUnitFormatterTypeName.name, oldValue, value))
         }
 
-    public override var burnedEnergyUnitFormatterTypeName: String = DEFAULT_BURNED_ENERGY_UNIT_FORMATTER_TYPENAME
+    public override var energyUnitFormatterTypeName: String = DEFAULT_ENERGY_UNIT_FORMATTER_TYPENAME
         set(value) {
             val oldValue = field
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::burnedEnergyUnitFormatterTypeName.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::energyUnitFormatterTypeName.name, oldValue, value))
         }
 
     public override var locationProviderTypeName: String = DEFAULT_LOCATION_PROVIDER_TYPENAME
@@ -94,10 +104,10 @@ internal final class AppSettings: IAppSettings {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::locationProviderTypeName.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::locationProviderTypeName.name, oldValue, value))
         }
 
-    public fun bindToSharedPreferences(sharedPreferences: SharedPreferences, context: Context) : IAppSettings {
+    public fun bindToSharedPreferences(sharedPreferences: SharedPreferences, context: Context): IAppSettings {
         return SharedPreferencesAppSettingsBinding(this, sharedPreferences, context)
     }
 
@@ -105,6 +115,12 @@ internal final class AppSettings: IAppSettings {
         private val sharedPreferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
 
         private val propertyChangedSubscription: Disposable
+
+        public override var mapControlTypeName: String
+            get() = this.appSettings.mapControlTypeName
+            set(value) {
+                this.appSettings.mapControlTypeName = value
+            }
 
         public override var defaultMetActivityCode: String
             get() = this.appSettings.defaultMetActivityCode
@@ -124,10 +140,10 @@ internal final class AppSettings: IAppSettings {
                 this.appSettings.speedUnitFormatterTypeName = value
             }
 
-        public override var burnedEnergyUnitFormatterTypeName: String
-            get() = this.appSettings.burnedEnergyUnitFormatterTypeName
+        public override var energyUnitFormatterTypeName: String
+            get() = this.appSettings.energyUnitFormatterTypeName
             set(value) {
-                this.appSettings.burnedEnergyUnitFormatterTypeName = value
+                this.appSettings.energyUnitFormatterTypeName = value
             }
 
         public override var locationProviderTypeName: String
@@ -160,42 +176,45 @@ internal final class AppSettings: IAppSettings {
                 this.appSettings.currentDashboardId = value
             }
 
-        public override val propertyChanged: Observable<PropertyChangedData>
-            get() = this.appSettings.propertyChanged
+        public override val propertyChanged: Observable<PropertyChangedData> = this.appSettings.propertyChanged
 
         init {
             val distanceUnitFormatterTypeNameKey = context.getString(R.string.appsettings_preference_units_distance_key)
-            val burnedEnergyUnitFormatterTypeNameKey = context.getString(R.string.appsettings_preference_units_burnedenergy_key)
+            val energyUnitFormatterTypeNameKey = context.getString(R.string.appsettings_preference_units_energy_key)
             val speedUnitFormatterTypeNameKey = context.getString(R.string.appsettings_preference_units_speed_key)
             val locationProviderTypeNameKey = context.getString(R.string.appsettings_preference_tracking_location_provider_key)
-            val appUiLocaleKey = "appsettings_preference_app_ui_locale_key" // TODO: Make configurable
+            val appUiLocaleKey = context.getString(R.string.appsettings_preference_app_ui_locale_key)
             val allowLiveTrackingKey = context.getString(R.string.appsettings_preference_tracking_allow_live_tracking_key)
             val defaultMetActivityCodeKey = context.getString(R.string.appsettings_preference_default_met_activity_code_key)
-            val currentTrackRecordingIdKey = context.getString(R.string.appsettings_preference_current_dashboard_id_key)
-            val currentDashboardIdKey = context.getString(R.string.appsettings_preference_current_dashboard_id_key)
+            val currentTrackRecordingIdKey = IAppSettings::currentTrackRecordingId.name
+            val currentDashboardIdKey = IAppSettings::currentDashboardId.name
+            val mapControlTypeNameKey = context.getString(R.string.appsettings_preference_map_control_key)
 
             val currentTrackRecordingId = boundSharedPreferences.getString(currentTrackRecordingIdKey, null)
-            if(currentTrackRecordingId != null) {
+            if (currentTrackRecordingId != null) {
                 this.appSettings.currentTrackRecordingId = UUID.fromString(currentTrackRecordingId)
             }
 
             val currentDashboardId = boundSharedPreferences.getString(currentDashboardIdKey, null)
-            if(currentDashboardId != null) {
+            if (currentDashboardId != null) {
                 this.appSettings.currentDashboardId = UUID.fromString(currentDashboardId)
             }
 
-            this.propertyChangedSubscription = this.appSettings.propertyChanged.subscribe {
-                if(it.hasChanged && it.propertyName == IAppSettings::currentTrackRecordingId.name) {
-                    val sharedPreferenceEditor = boundSharedPreferences.edit()
-                    if(it.newValue != null) {
-                        sharedPreferenceEditor.putString(it.propertyName, it.newValue.toString())
-                    } else {
-                        sharedPreferenceEditor.remove(it.propertyName)
-                    }
+            this.propertyChangedSubscription = this.appSettings.propertyChanged
+                    .subscribe {
+                        if (it.hasChanged) {
+                            if (it.propertyName == IAppSettings::currentTrackRecordingId.name || it.propertyName == IAppSettings::currentDashboardId.name) {
+                                val sharedPreferenceEditor = boundSharedPreferences.edit()
+                                if (it.newValue != null) {
+                                    sharedPreferenceEditor.putString(it.propertyName, it.newValue.toString())
+                                } else {
+                                    sharedPreferenceEditor.remove(it.propertyName)
+                                }
 
-                    sharedPreferenceEditor.apply()
-                }
-            }
+                                sharedPreferenceEditor.apply()
+                            }
+                        }
+                    }
 
             this.sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                 when (key) {
@@ -207,9 +226,13 @@ internal final class AppSettings: IAppSettings {
                         val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_SPEED_UNIT_FORMATTER_TYPENAME)
                         this.appSettings.speedUnitFormatterTypeName = currentValue
                     }
-                    burnedEnergyUnitFormatterTypeNameKey -> {
-                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_BURNED_ENERGY_UNIT_FORMATTER_TYPENAME)
-                        this.appSettings.burnedEnergyUnitFormatterTypeName = currentValue
+                    energyUnitFormatterTypeNameKey -> {
+                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_ENERGY_UNIT_FORMATTER_TYPENAME)
+                        this.appSettings.energyUnitFormatterTypeName = currentValue
+                    }
+                    mapControlTypeNameKey -> {
+                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_MAP_CONTROL_TYPENAME)
+                        this.appSettings.mapControlTypeName = currentValue
                     }
                     locationProviderTypeNameKey -> {
                         val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_LOCATION_PROVIDER_TYPENAME)
@@ -229,27 +252,30 @@ internal final class AppSettings: IAppSettings {
             boundSharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
 
             this.appSettings.distanceUnitFormatterTypeName = boundSharedPreferences.getString(distanceUnitFormatterTypeNameKey, AppSettings.DEFAULT_DISTANCE_UNIT_FORMATTER_TYPENAME)
-            this.appSettings.burnedEnergyUnitFormatterTypeName = boundSharedPreferences.getString(burnedEnergyUnitFormatterTypeNameKey, AppSettings.DEFAULT_BURNED_ENERGY_UNIT_FORMATTER_TYPENAME)
+            this.appSettings.energyUnitFormatterTypeName = boundSharedPreferences.getString(energyUnitFormatterTypeNameKey, AppSettings.DEFAULT_ENERGY_UNIT_FORMATTER_TYPENAME)
             this.appSettings.speedUnitFormatterTypeName = boundSharedPreferences.getString(speedUnitFormatterTypeNameKey, AppSettings.DEFAULT_SPEED_UNIT_FORMATTER_TYPENAME)
             this.appSettings.locationProviderTypeName = boundSharedPreferences.getString(locationProviderTypeNameKey, AppSettings.DEFAULT_LOCATION_PROVIDER_TYPENAME)
             this.appSettings.appUiLocale = boundSharedPreferences.getString(appUiLocaleKey, AppSettings.DEFAULT_APP_UI_LOCALE)
             this.appSettings.allowLiveTracking = boundSharedPreferences.getBoolean(allowLiveTrackingKey, AppSettings.DEFAULT_ALLOW_LIVE_TRACKING)
             this.appSettings.defaultMetActivityCode = boundSharedPreferences.getString(defaultMetActivityCodeKey, AppSettings.DEFAULT_MET_ACTIVITY_CODE)
+            this.appSettings.mapControlTypeName = boundSharedPreferences.getString(mapControlTypeNameKey, AppSettings.DEFAULT_MAP_CONTROL_TYPENAME)
         }
     }
 
     companion object {
-        public val DEFAULT_LOCATION_PROVIDER_TYPENAME: String = FusedLocationProvider::class.java.name
+        public val DEFAULT_MAP_CONTROL_TYPENAME: String = GoogleTrackRecorderMapFragment::class.java.simpleName
+
+        public val DEFAULT_LOCATION_PROVIDER_TYPENAME: String = FusedLocationProvider::class.java.simpleName
 
         public const val DEFAULT_ALLOW_LIVE_TRACKING: Boolean = false
 
         public val DEFAULT_APP_UI_LOCALE: String = Locale.getDefault().language
 
-        public val DEFAULT_DISTANCE_UNIT_FORMATTER_TYPENAME: String = KilometersDistanceUnitFormatter::class.java.name
+        public val DEFAULT_DISTANCE_UNIT_FORMATTER_TYPENAME: String = KilometersDistanceUnitFormatter::class.java.simpleName
 
-        public val DEFAULT_BURNED_ENERGY_UNIT_FORMATTER_TYPENAME: String = KilometersDistanceUnitFormatter::class.java.name
+        public val DEFAULT_ENERGY_UNIT_FORMATTER_TYPENAME: String = KilometersDistanceUnitFormatter::class.java.simpleName
 
-        public val DEFAULT_SPEED_UNIT_FORMATTER_TYPENAME: String = KilometersPerHourSpeedUnitFormatter::class.java.name
+        public val DEFAULT_SPEED_UNIT_FORMATTER_TYPENAME: String = KilometersPerHourSpeedUnitFormatter::class.java.simpleName
 
         public const val DEFAULT_MET_ACTIVITY_CODE: String = "01015"
     }

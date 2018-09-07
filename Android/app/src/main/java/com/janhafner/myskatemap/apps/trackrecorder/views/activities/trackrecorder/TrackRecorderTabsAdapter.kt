@@ -32,7 +32,7 @@ internal final class TrackRecorderTabsAdapter(context: Context, fragmentManager:
                 }, 2),
                 TabDefinition(context.getString(R.string.trackrecorderactivity_tab_debug_title), {
                     DebugTabFragment()
-                }, 3, BuildConfig.ENABLE_DEBUG_ACTIVITY)
+                }, 3, BuildConfig.DEBUG_ENABLE_DEBUGACTIVITY)
         )
 
         this.availableTabDefinitions = tabDefinitions.filter {

@@ -1,6 +1,7 @@
-package com.janhafner.myskatemap.apps.trackrecorder.services.calories
+package com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy
 
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 
 internal final class BurnedEnergyCalculator(weightInKilograms: Float,
@@ -11,7 +12,7 @@ internal final class BurnedEnergyCalculator(weightInKilograms: Float,
     private val partiallyCompleteFormula: Float
 
     private val calculatedValueSubject: BehaviorSubject<BurnedEnergy> = BehaviorSubject.create<BurnedEnergy>()
-    public override val calculatedValueChanged: Observable<BurnedEnergy> = this.calculatedValueSubject
+    public override val calculatedValueChanged: Observable<BurnedEnergy> = this.calculatedValueSubject.subscribeOn(Schedulers.computation())
 
     public override val calculatedValue: BurnedEnergy
         get() = this.calculatedValueSubject.value

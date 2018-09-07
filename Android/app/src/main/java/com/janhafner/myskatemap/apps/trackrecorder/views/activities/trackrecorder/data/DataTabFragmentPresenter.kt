@@ -2,10 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import com.jakewharton.rxbinding2.widget.text
 import com.jakewharton.rxbinding2.widget.textChanges
-import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.formatDefault
-import com.janhafner.myskatemap.apps.trackrecorder.formatRecordingTime
-import com.janhafner.myskatemap.apps.trackrecorder.liveCount
+import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatter
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.*
@@ -22,34 +19,40 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
                                               private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                               private val appSettings: IAppSettings,
                                               private val distanceUnitFormatterFactory: IDistanceUnitFormatterFactory) {
-    private val trackRecorderServiceControllerSubscription: Disposable
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    private var sessionAvailabilityChangedSubscription: Disposable? = null
-
-    private var trackRecorderSession: ITrackRecordingSession? = null
+    private val clientSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
+
+    private var trackRecorderSession: ITrackRecordingSession? = null
 
     private var distanceUnitFormatter: IDistanceUnitFormatter
 
     init {
         this.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
 
-        this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.isClientBoundChanged.subscribe{
-            if(it) {
-                this.sessionAvailabilityChangedSubscription = this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged.subscribe{
-                    if(it) {
-                        this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
-                    } else {
-                        this.uninitializeSession()
-                    }
-                }
-            } else {
-                this.uninitializeSession()
+        this.subscriptions.add(
+                this.trackRecorderServiceController.isClientBoundChanged
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            if (it) {
+                                this.clientSubscriptions.add(
+                                        this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe {
+                                                    if (it) {
+                                                        this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
+                                                    } else {
+                                                        this.uninitializeSession()
+                                                    }
+                                                })
+                            } else {
+                                this.uninitializeSession()
 
-                this.sessionAvailabilityChangedSubscription?.dispose()
-            }
-        }
+                                this.clientSubscriptions.clear()
+                            }
+                        })
     }
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
@@ -58,46 +61,42 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
         this.view.trackrecorderactivity_tab_data_comments.text().accept(trackRecorderSession.comment)
 
         this.sessionSubscriptions.addAll(
-            Observable.switchOnNext(Observable.fromArray(trackRecorderSession.stateChanged
-                    .map {
-                        0
-                    }, trackRecorderSession.locationsChanged
-                    .buffer(1, TimeUnit.SECONDS)
-                    .filter {
-                        it.any()
-                    }
-                    .liveCount()))
-                    .map {
-                        it.toString()
-                    }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this.view.trackrecorderactivity_fragment_data_tab_locationscount.text()),
+                Observable.just(0)
+                        .mergeWith(trackRecorderSession.locationsChanged
+                                .buffer(1, TimeUnit.SECONDS)
+                                .filterNotEmpty()
+                                .liveCount())
+                                .map {
+                                    it.toString()
+                                }
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(this.view.trackrecorderactivity_fragment_data_tab_locationscount.text()),
+                this.appSettings.propertyChanged
+                        .subscribe {
+                            if (it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name) {
+                                this.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
+                            }
+                        },
+                this.view.trackrecorderactivity_tab_data_trackname.textChanges()
+                        .subscribe {
+                            trackRecorderSession.name = it.toString()
+                        },
+                this.view.trackrecorderactivity_tab_data_comments.textChanges()
+                        .subscribe {
+                            trackRecorderSession.comment = it.toString()
+                        },
+                trackRecorderSession.distanceChanged.map {
+                            this.distanceUnitFormatter.format(it)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this.view.trackrecorderactivity_tab_data_trackdistance.text()),
 
-            this.appSettings.propertyChanged.subscribe{
-                if(it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name) {
-                    this.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
-                }
-            },
-
-            this.view.trackrecorderactivity_tab_data_trackname.textChanges().subscribe{
-                trackRecorderSession.name = it.toString()
-            },
-
-            this.view.trackrecorderactivity_tab_data_comments.textChanges().subscribe{
-                trackRecorderSession.comment = it.toString()
-            },
-
-            trackRecorderSession.distanceChanged.map {
-                this.distanceUnitFormatter.format(it)
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this.view.trackrecorderactivity_tab_data_trackdistance.text()),
-
-            trackRecorderSession.recordingTimeChanged.map {
-                it.formatRecordingTime()
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this.view.trackrecorderactivity_tab_data_recordingtime.text())
+                trackRecorderSession.recordingTimeChanged
+                        .map {
+                            it.formatRecordingTime()
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this.view.trackrecorderactivity_tab_data_recordingtime.text())
         )
 
         return trackRecorderSession
@@ -117,19 +116,16 @@ internal final class DataTabFragmentPresenter(private val view: DataTabFragment,
     }
 
     public fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        if(this.view.activity is INeedFragmentVisibilityInfo) {
+        if (this.view.activity is INeedFragmentVisibilityInfo) {
             (this.view.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.view, isVisibleToUser)
         }
     }
 
     public fun destroy() {
-        this.trackRecorderServiceController.unbindService()
-
-        this.trackRecorderServiceControllerSubscription.dispose()
-        this.sessionAvailabilityChangedSubscription?.dispose()
-
         this.uninitializeSession()
 
         this.sessionSubscriptions.dispose()
+        this.clientSubscriptions.dispose()
+        this.subscriptions.dispose()
     }
 }

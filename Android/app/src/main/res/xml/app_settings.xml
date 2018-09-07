@@ -11,21 +11,21 @@
             android:summary="@string/appsettings_preference_units_distance_summary"
             android:entries="@array/appsettings_preference_units_distance_names"
             android:entryValues="@array/appsettings_preference_units_distance_values"
-            android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.KilometersDistanceUnitFormatter" />
+            android:defaultValue="KilometersDistanceUnitFormatter" />
         <ListPreference
             android:key="@string/appsettings_preference_units_speed_key"
             android:title="@string/appsettings_preference_units_speed_label"
             android:summary="@string/appsettings_preference_units_speed_summary"
             android:entries="@array/appsettings_preference_units_speed_names"
             android:entryValues="@array/appsettings_preference_units_speed_values"
-            android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.KilometersPerHourSpeedUnitFormatter" />
+            android:defaultValue="KilometersPerHourSpeedUnitFormatter" />
         <ListPreference
-            android:key="@string/appsettings_preference_units_burnedenergy_key"
-            android:title="@string/appsettings_preference_units_burnedenergy_label"
-            android:summary="@string/appsettings_preference_units_burnedenergy_summary"
-            android:entries="@array/appsettings_preference_units_burnedenergy_names"
-            android:entryValues="@array/appsettings_preference_units_burnedenergy_values"
-            android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.KilocalorieBurnedEnergyUnitFormatter" />
+            android:key="@string/appsettings_preference_units_energy_key"
+            android:title="@string/appsettings_preference_units_energy_label"
+            android:summary="@string/appsettings_preference_units_energy_summary"
+            android:entries="@array/appsettings_preference_units_energy_names"
+            android:entryValues="@array/appsettings_preference_units_energy_values"
+            android:defaultValue="KilocalorieBurnedEnergyUnitFormatter" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -37,7 +37,14 @@
             android:summary="@string/appsettings_preference_tracking_location_provider_summary"
             android:entries="@array/appsettings_preference_tracking_location_provider_names"
             android:entryValues="@array/appsettings_preference_tracking_location_provider_values"
-            android:defaultValue="com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider" />
+            android:defaultValue="FusedLocationProvider" />
+        <ListPreference
+            android:key="@string/appsettings_preference_map_control_key"
+            android:title="@string/appsettings_preference_tracking_map_control_label"
+            android:summary="@string/appsettings_preference_tracking_map_control_summary"
+            android:entries="@array/appsettings_preference_tracking_map_control_names"
+            android:entryValues="@array/appsettings_preference_tracking_map_control_values"
+            android:defaultValue="GoogleTrackRecorderMapFragment" />
         <SwitchPreference
             android:key="@string/appsettings_preference_tracking_allow_live_tracking_key"
             android:title="@string/appsettings_preference_tracking_allow_live_tracking_label"

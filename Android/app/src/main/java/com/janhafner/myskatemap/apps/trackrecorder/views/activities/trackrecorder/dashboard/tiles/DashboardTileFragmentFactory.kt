@@ -1,5 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
+import android.os.Bundle
 import android.support.annotation.LayoutRes
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.AverageAltitudeDashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.CurrentAltitudeDashboardTileFragment
@@ -13,37 +14,45 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 
 internal final class DashboardTileFragmentFactory : IDashboardTileFragmentFactory {
     public override fun createInstance(className: String, @LayoutRes layoutId: Int) : DashboardTileFragment {
+        val result: DashboardTileFragment
         when(className) {
-            AverageAltitudeDashboardTileFragment::class.java.name -> {
-                return AverageAltitudeDashboardTileFragment(layoutId)
+            AverageAltitudeDashboardTileFragment::class.java.simpleName -> {
+                result = AverageAltitudeDashboardTileFragment()
             }
-            CurrentAltitudeDashboardTileFragment::class.java.name -> {
-                return CurrentAltitudeDashboardTileFragment(layoutId)
+            CurrentAltitudeDashboardTileFragment::class.java.simpleName -> {
+                result = CurrentAltitudeDashboardTileFragment()
             }
-            MaximumAltitudeDashboardTileFragment::class.java.name -> {
-                return MaximumAltitudeDashboardTileFragment(layoutId)
+            MaximumAltitudeDashboardTileFragment::class.java.simpleName -> {
+                result = MaximumAltitudeDashboardTileFragment()
             }
-            MinimumAltitudeDashboardTileFragment::class.java.name -> {
-                return MinimumAltitudeDashboardTileFragment(layoutId)
+            MinimumAltitudeDashboardTileFragment::class.java.simpleName -> {
+                result = MinimumAltitudeDashboardTileFragment()
             }
-            BurnedEnergyDashboardTileFragment::class.java.name -> {
-                return BurnedEnergyDashboardTileFragment(layoutId)
+            BurnedEnergyDashboardTileFragment::class.java.simpleName -> {
+                result = BurnedEnergyDashboardTileFragment()
             }
-            DistanceDashboardTileFragment::class.java.name -> {
-                return DistanceDashboardTileFragment(layoutId)
+            DistanceDashboardTileFragment::class.java.simpleName -> {
+                result = DistanceDashboardTileFragment()
             }
-            AverageSpeedDashboardTileFragment::class.java.name -> {
-                return AverageSpeedDashboardTileFragment(layoutId)
+            AverageSpeedDashboardTileFragment::class.java.simpleName -> {
+                result = AverageSpeedDashboardTileFragment()
             }
-            CurrentSpeedDashboardTileFragment::class.java.name -> {
-                return CurrentSpeedDashboardTileFragment(layoutId)
+            CurrentSpeedDashboardTileFragment::class.java.simpleName -> {
+                result = CurrentSpeedDashboardTileFragment()
             }
-            MaximumSpeedDashboardTileFragment::class.java.name -> {
-                return MaximumSpeedDashboardTileFragment(layoutId)
+            MaximumSpeedDashboardTileFragment::class.java.simpleName -> {
+                result = MaximumSpeedDashboardTileFragment()
             }
             else -> {
                 throw NotImplementedError("Implementation for \"${className}\" not found!")
             }
         }
+
+        val fragmentArguments = Bundle()
+        fragmentArguments.putInt(DashboardTileFragment.EXTRAS_LAYOUT_ARGUMENT_KEY, layoutId)
+
+        result.arguments = fragmentArguments
+
+        return result
     }
 }

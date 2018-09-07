@@ -6,8 +6,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import kotlinx.android.synthetic.main.app_toolbar.*
 
 internal final class AppSettingsActivity : AppCompatActivity() {
-
-
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

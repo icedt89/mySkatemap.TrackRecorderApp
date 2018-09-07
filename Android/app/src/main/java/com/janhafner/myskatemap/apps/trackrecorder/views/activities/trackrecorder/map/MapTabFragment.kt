@@ -10,6 +10,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
 import javax.inject.Inject
@@ -23,6 +24,9 @@ internal final class MapTabFragment: Fragment() {
 
     @Inject
     public lateinit var trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory
+
+    @Inject
+    public lateinit var appSettings: IAppSettings
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_map_tab, container, false)
@@ -41,7 +45,7 @@ internal final class MapTabFragment: Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragmentFactory)
+        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragmentFactory, this.appSettings)
     }
 
     public override fun onAttach(context: Context?) {
@@ -53,8 +57,8 @@ internal final class MapTabFragment: Fragment() {
     }
 
     public override fun onDestroyView() {
-        super.onDestroyView()
-
         this.presenter!!.destroy()
+
+        super.onDestroyView()
     }
 }

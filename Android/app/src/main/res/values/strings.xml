@@ -46,13 +46,15 @@
     <string name="appsettings_preference_units_distance_summary">Distances will be display and formatted as %s</string>
     <string name="appsettings_preference_units_speed_label">Speed</string>
     <string name="appsettings_preference_units_speed_summary">Speed will be display and formatted as %s</string>
-    <string name="appsettings_preference_units_burnedenergy_label">Burned energy</string>
-    <string name="appsettings_preference_units_burnedenergy_summary">Burned energy will be display and formatted as %s</string>
+    <string name="appsettings_preference_units_energy_label">Energy</string>
+    <string name="appsettings_preference_units_energy_summary">Energy will be display and formatted as %s</string>
     <string name="appsettings_preference_tracking_title">Recording</string>
     <string name="appsettings_preference_tracking_location_provider_label">Location Provider implementation</string>
     <string name="appsettings_preference_tracking_location_provider_summary">Locations will be received using the %s provider</string>
     <string name="appsettings_preference_tracking_allow_live_tracking_label">Live tracking</string>
     <string name="appsettings_preference_tracking_allow_live_tracking_summary">Sends the currently recorded track anonymously to MySkatemap</string>
+    <string name="appsettings_preference_tracking_map_control_label">Map</string>
+    <string name="appsettings_preference_tracking_map_control_summary">Uses %s to display the map</string>
     <string name="appsettings_preference_notifications_title">Notifications</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_label">Vibrate on background stop</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_summary">Let your phone vibrate if receiving locations was disabled e.g. due to connectivity issues</string>
@@ -74,7 +76,6 @@
     <string name="userprofilesettings_preference_enablecalculationofburnedenergy_summary">If enabled, calculates your burned energy based on your profile</string>
     <string name="appsettings_preference_tracking_default_met_activity_code_label">Default activity type</string>
     <string name="appsettings_preference_tracking_default_met_activity_code_summary">You prefer %s as default activity type for new recordings</string>
-    <string name="tracklistactivity_title">Recorded tracks</string>
 
     <string name="userprofilesettings_preference_enablecalculationofburnedenergy_key">userprofilesettings_preference_enablecalculationofburnedenergy</string>
     <string name="userprofilesettings_preference_name_key">userprofilesettings_preference_name</string>
@@ -85,17 +86,19 @@
 
     <string name="appsettings_preference_units_distance_key">appsettings_preference_units_distance</string>
     <string name="appsettings_preference_units_speed_key">appsettings_preference_units_speed</string>
-    <string name="appsettings_preference_units_burnedenergy_key">appsettings_preference_units_burnedenergy</string>
+    <string name="appsettings_preference_units_energy_key">appsettings_preference_units_energy</string>
     <string name="appsettings_preference_tracking_location_provider_key">appsettings_preference_tracking_location_provider</string>
     <string name="appsettings_preference_tracking_allow_live_tracking_key">appsettings_preference_tracking_allow_live_tracking</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_key">appsettings_preference_notifications_vibrate_on_background_stop</string>
-    <string name="appsettings_preference_current_track_recording_id_key">appsettings_preference_current_track_recording_id</string>
-    <string name="appsettings_preference_current_dashboard_id_key">appsettings_preference_current_dashboard_id</string>
     <string name="appsettings_preference_default_met_activity_code_key">appsettings_preference_default_met_activity_code</string>
+    <string name="appsettings_preference_map_control_key">appsettings_preference_map_control</string>
+    <string name="appsettings_preference_app_ui_locale_key">appsettings_preference_app_ui_locale</string>
+
     <string name="userprofilesettingsactivity_title">Your Profile</string>
     <string name="settingsactivity_title">Settings</string>
     <string name="trackrecorderactivity_tab_debug_title">Debug Log</string>
     <string name="trackrecorderactivity_tab_debug_log_output_empty">Start a session first to collect debug data</string>
+    <string name="trackrecorderactivity_tab_debug_log_output_filter_hint">Enter comma separated filter here</string>
 
     <string name="gpx_metadata_name">Recording export from %s</string>
     <string name="gpx_metadata_description">This was generated on %s and contains %s recordings.</string>
@@ -109,7 +112,8 @@
     <string name="dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title">avg. alt.</string>
     <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">min. alt.</string>
     <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">altitude</string>
-    <string name="trackrecorderactivity_tab_debug_log_output_filter_hint">Enter comma separated filter here</string>
+    <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Settings</string>
+    <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">Your Profile</string>
 
     <string-array name="appsettings_preference_tracking_location_provider_names">
         <item>Default</item>
@@ -117,9 +121,9 @@
         <item>Simulated</item>
     </string-array>
     <string-array name="appsettings_preference_tracking_location_provider_values">
-        <item>com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider</item>
-        <item>com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.LegacyLocationProvider</item>
-        <item>com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.TestLocationProvider</item>
+        <item>FusedLocationProvider</item>
+        <item>LegacyLocationProvider</item>
+        <item>SimulatedLocationProvider</item>
     </string-array>
 
     <string-array name="appsettings_preference_units_distance_names">
@@ -127,8 +131,8 @@
         <item>Miles</item>
     </string-array>
     <string-array name="appsettings_preference_units_distance_values">
-        <item>com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.KilometersDistanceUnitFormatter</item>
-        <item>com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.MilesDistanceUnitFormatter</item>
+        <item>KilometersDistanceUnitFormatter</item>
+        <item>MilesDistanceUnitFormatter</item>
     </string-array>
 
     <string-array name="appsettings_preference_units_speed_names">
@@ -137,20 +141,20 @@
         <item>Meters per second</item>
     </string-array>
     <string-array name="appsettings_preference_units_speed_values">
-        <item>com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.KilometersPerHourSpeedUnitFormatter</item>
-        <item>com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.MilesPerHourSpeedUnitFormatter</item>
-        <item>com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.MetersPerSecondSpeedUnitFormatter</item>
+        <item>KilometersPerHourSpeedUnitFormatter</item>
+        <item>MilesPerHourSpeedUnitFormatter</item>
+        <item>MetersPerSecondSpeedUnitFormatter</item>
     </string-array>
 
-    <string-array name="appsettings_preference_units_burnedenergy_names">
+    <string-array name="appsettings_preference_units_energy_names">
         <item>Kilocalorie</item>
         <item>Kilojoule</item>
         <item>Watt Hour</item>
     </string-array>
-    <string-array name="appsettings_preference_units_burnedenergy_values">
-        <item>com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.KilocalorieBurnedEnergyUnitFormatter</item>
-        <item>com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.KilojouleBurnedEnergyUnitFormatter</item>
-        <item>com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.WattHourBurnedEnergyUnitFormatter</item>
+    <string-array name="appsettings_preference_units_energy_values">
+        <item>KilocalorieBurnedEnergyUnitFormatter</item>
+        <item>KilojouleBurnedEnergyUnitFormatter</item>
+        <item>WattHourBurnedEnergyUnitFormatter</item>
     </string-array>
 
     <string-array name="userprofilesettings_preference_sex_names">
@@ -171,5 +175,14 @@
         <item>01015</item>
         <item>15591</item>
         <item>17160</item>
+    </string-array>
+
+    <string-array name="appsettings_preference_tracking_map_control_names">
+        <item>Google Maps</item>
+        <item>OpenStreetMap</item>
+    </string-array>
+    <string-array name="appsettings_preference_tracking_map_control_values">
+        <item>GoogleTrackRecorderMapFragment</item>
+        <item>OpenStreetMapTrackRecorderMapFragment</item>
     </string-array>
 </resources>

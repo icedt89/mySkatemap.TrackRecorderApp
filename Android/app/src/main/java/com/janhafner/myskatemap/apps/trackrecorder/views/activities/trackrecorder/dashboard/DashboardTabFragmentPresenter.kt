@@ -1,13 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard
 
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.getByIdOrDefault
+import com.janhafner.myskatemap.apps.trackrecorder.getByIdOrDefaultAsync
 import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.IDashboardTileFragmentFactory
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 
 internal final class DashboardTabFragmentPresenter(private val view: DashboardTabFragment,
                                                    private val appSettings: IAppSettings,
@@ -16,76 +19,48 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     init {
-        // The dashboard is either the one from the app app_settings or a default one.
-        // Because it does'nt matter we save it always!
-        val allDashboards = this.dashboardService.getAll()
-        val ooo = allDashboards
+        this.dashboardService.getByIdOrDefaultAsync(this.appSettings.currentDashboardId)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    // No need to .saveAsync(...), we are already async!
+                    this.dashboardService.save(it)
+                    this.appSettings.currentDashboardId = it.id
 
-        val dashboard = this.dashboardService.getByIdOrDefault(this.appSettings.currentDashboardId)
-        this.dashboardService.save(dashboard)
-        this.appSettings.currentDashboardId = dashboard.id
-
-        val topLeftFragment = this.dashboardTileFragmentFactory.createInstance(dashboard.topLeftTileImplementationTypeName, R.layout.fragment_dashboard_tile_default)
-        val topRightFragment = this.dashboardTileFragmentFactory.createInstance(dashboard.topRightTileImplementationTypeName, R.layout.fragment_dashboard_tile_default)
-        val middleCenterFragment = this.dashboardTileFragmentFactory.createInstance(dashboard.middleCenterTileImplementationTypeName, R.layout.fragment_dashboard_tile_main)
-        val bottomLeftFragment = this.dashboardTileFragmentFactory.createInstance(dashboard.bottomLeftTileImplementationTypeName, R.layout.fragment_dashboard_tile_default)
-        val bottomRightFragment = this.dashboardTileFragmentFactory.createInstance(dashboard.bottomRightTileImplementationTypeName, R.layout.fragment_dashboard_tile_default)
-
-        /*
-        this.subscriptions.addAll(
-                this.view.trackrecorderactivity_tab_dashboard_tile_top_left.longClicks().subscribe {
-                    val tiles = DashboardTileDescriptor.getDescriptors()
-
-                    val gl = GridLayout(this.view.context!!)
-                    gl.columnCount = 1
-                    gl.rowCount = tiles.count()
-
-                    for ((index, tile) in tiles.withIndex()) {
-                        val v = Button(this.view.context!!)
-                        v.text = tile.tileSelectorTitle
-
-
-                        val params = GridLayout.LayoutParams()
-                        params.rowSpec = GridLayout.spec(index, 1)
-                        params.columnSpec = GridLayout.spec(0, 1)
-
-                        v.layoutParams = params
-
-
-                        gl.addView(v)
-                    }
-
-                    val b =AlertDialog.Builder(this.view.context!!).setView(gl)
-b.show()
-//                    val popupMenu = this.createPopupMenu(this.view.trackrecorderactivity_tab_dashboard_tile_top_left)
-  //                  popupMenu.show()
-                },
-
-                this.view.trackrecorderactivity_tab_dashboard_tile_top_right.longClicks().subscribe {
-
-                },
-
-                this.view.trackrecorderactivity_tab_dashboard_tile_middle_center.longClicks().subscribe {
-
-                },
-
-                this.view.trackrecorderactivity_tab_dashboard_tile_bottom_left.longClicks().subscribe {
-
-                },
-
-                this.view.trackrecorderactivity_tab_dashboard_tile_bottom_right.longClicks().subscribe {
-
+                    it
                 }
-        )
-        */
+                .observeOn(Schedulers.computation())
+                .map {
+                    val topLeftFragment = this.dashboardTileFragmentFactory.createInstance(it.topLeftTileImplementationTypeName, R.layout.fragment_dashboard_tile_default)
+                    val topRightFragment = this.dashboardTileFragmentFactory.createInstance(it.topRightTileImplementationTypeName, R.layout.fragment_dashboard_tile_default)
+                    val middleCenterFragment = this.dashboardTileFragmentFactory.createInstance(it.middleCenterTileImplementationTypeName, R.layout.fragment_dashboard_tile_main)
+                    val bottomLeftFragment = this.dashboardTileFragmentFactory.createInstance(it.bottomLeftTileImplementationTypeName, R.layout.fragment_dashboard_tile_default)
+                    val bottomRightFragment = this.dashboardTileFragmentFactory.createInstance(it.bottomRightTileImplementationTypeName, R.layout.fragment_dashboard_tile_default)
 
-        this.view.activity!!.supportFragmentManager.beginTransaction()
-                .replace(R.id.trackrecorderactivity_tab_dashboard_tile_top_left, topLeftFragment)
-                .replace(R.id.trackrecorderactivity_tab_dashboard_tile_top_right, topRightFragment)
-                .replace(R.id.trackrecorderactivity_tab_dashboard_tile_middle_center, middleCenterFragment)
-                .replace(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_left, bottomLeftFragment)
-                .replace(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_right, bottomRightFragment)
-                .commit()
+                    object : Any() {
+                        public val topLeftFragment: DashboardTileFragment = topLeftFragment
+
+                        public val topRightFragment: DashboardTileFragment = topRightFragment
+
+                        public val middleCenterFragment: DashboardTileFragment = middleCenterFragment
+
+                        public val bottomLeftFragment: DashboardTileFragment = bottomLeftFragment
+
+                        public val bottomRightFragment: DashboardTileFragment = bottomRightFragment
+
+                        public val dashboard: Dashboard = it
+                    }
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    dashboardResult, exception ->
+                    this.view.activity!!.supportFragmentManager.beginTransaction()
+                            .replace(R.id.trackrecorderactivity_tab_dashboard_tile_top_left, dashboardResult.topLeftFragment)
+                            .replace(R.id.trackrecorderactivity_tab_dashboard_tile_top_right, dashboardResult.topRightFragment)
+                            .replace(R.id.trackrecorderactivity_tab_dashboard_tile_middle_center, dashboardResult.middleCenterFragment)
+                            .replace(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_left, dashboardResult.bottomLeftFragment)
+                            .replace(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_right, dashboardResult.bottomRightFragment)
+                            .commit()
+                }
     }
 
     public fun setUserVisibleHint(isVisibleToUser: Boolean) {

@@ -6,13 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.*
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.IBurnedEnergyUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.energy.IEnergyUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.ISpeedUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.IStillDetector
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ILocationAvailabilityChangedDetector
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import javax.inject.Inject
@@ -27,7 +26,7 @@ internal final class DebugTabFragment : Fragment() {
     public lateinit var trackRecorderUnitFormatterFactory: IDistanceUnitFormatterFactory
 
     @Inject
-    public lateinit var burnedEnergyUnitFormatterFactory: IBurnedEnergyUnitFormatterFactory
+    public lateinit var energyUnitFormatterFactory: IEnergyUnitFormatterFactory
 
     @Inject
     public lateinit var speedUnitFormatterFactory: ISpeedUnitFormatterFactory
@@ -51,7 +50,7 @@ internal final class DebugTabFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         this.presenter = DebugTabFragmentPresenter(this, this.trackRecorderServiceController, this.appSettings, this.trackRecorderUnitFormatterFactory,
-                this.burnedEnergyUnitFormatterFactory,
+                this.energyUnitFormatterFactory,
                 this.speedUnitFormatterFactory, this.stillDetector, this.locationAvailabilityChangedDetector)
     }
 
@@ -64,9 +63,9 @@ internal final class DebugTabFragment : Fragment() {
     }
 
     public override fun onDestroyView() {
-        super.onDestroyView()
-
         this.presenter!!.destroy()
+
+        super.onDestroyView()
     }
 }
 

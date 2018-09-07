@@ -1,6 +1,0 @@
-{
-  "forceUsingOpenStreetMap": false,
-  "trackColor": "#FFFF3A3C",
-  "useFakeLiveLocationTrackingService": true,
-  "stillDetectorDetectionIntervalInMilliseconds": 2000
-}

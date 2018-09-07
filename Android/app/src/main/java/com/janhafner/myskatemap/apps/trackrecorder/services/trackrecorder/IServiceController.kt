@@ -2,6 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import android.os.IBinder
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 
 internal interface IServiceController<TBinder: IBinder> {
     val isClientBoundChanged: Observable<Boolean>
@@ -10,7 +11,5 @@ internal interface IServiceController<TBinder: IBinder> {
 
     val currentBinder: TBinder?
 
-    fun startAndBindService() : Observable<Boolean>
-
-    fun unbindService()
+    fun startAndBindService() : Disposable
 }

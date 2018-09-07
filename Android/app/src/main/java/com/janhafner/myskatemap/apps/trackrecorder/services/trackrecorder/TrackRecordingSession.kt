@@ -2,15 +2,12 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import android.app.Service
 import android.location.LocationManager
-import android.os.Handler
-import android.util.Log
-import com.janhafner.myskatemap.apps.trackrecorder.IObservableTimer
-import com.janhafner.myskatemap.apps.trackrecorder.Nothing
+import com.janhafner.myskatemap.apps.trackrecorder.*
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergy
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IBurnedEnergyCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.BurnedEnergy
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IBurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.IDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingSession
@@ -18,12 +15,12 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.Activ
 import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.StillDetectorBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.statistics.ITrackRecordingStatistic
-import com.janhafner.myskatemap.apps.trackrecorder.toSimpleLocation
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
@@ -33,8 +30,6 @@ import java.util.concurrent.TimeUnit
 
 // Thats a shitload of dependencies...
 internal final class TrackRecordingSession(private val appSettings: IAppSettings,
-                                           private val appConfig: IAppConfig,
-                                           private val trackService: ITrackService,
                                            private val trackRecorderServiceNotification: TrackRecorderServiceNotification,
                                            private val distanceCalculator: IDistanceCalculator,
                                            private val distanceUnitFormatterFactory: IDistanceUnitFormatterFactory,
@@ -57,16 +52,13 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
     public override val burnedEnergyChanged: Observable<BurnedEnergy> = this.burnedEnergyCalculator.calculatedValueChanged
 
-    public override val distanceChanged: Observable<Float>
-        get() = this.distanceCalculator.distanceCalculated
+    public override val distanceChanged: Observable<Float> = this.distanceCalculator.distanceCalculated
 
     private val sessionClosedSubject: Subject<ITrackRecordingSession> = PublishSubject.create()
-    public override val sessionClosed: Observable<ITrackRecordingSession>
-        get() = this.sessionClosedSubject
+    public override val sessionClosed: Observable<ITrackRecordingSession> = this.sessionClosedSubject.subscribeOn(Schedulers.computation())
 
     private val stateChangedSubject: BehaviorSubject<TrackRecordingSessionState> = BehaviorSubject.createDefault(TrackRecordingSessionState.Paused)
-    public override val stateChanged: Observable<TrackRecordingSessionState>
-        get() = this.stateChangedSubject
+    public override val stateChanged: Observable<TrackRecordingSessionState> = this.stateChangedSubject.subscribeOn(Schedulers.computation())
 
     init {
         this.locationsChanged = this.locationProvider.locationsReceived.replay().autoConnect()
@@ -88,31 +80,28 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
     private fun initializeSession() {
         this.subscriptions.addAll(
-                this.appSettings.propertyChanged.subscribe {
-                    if (it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name) {
-                        this.trackRecorderServiceNotification.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
+                this.appSettings.propertyChanged
+                        .subscribe {
+                            if (it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name) {
+                                this.trackRecorderServiceNotification.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
 
-                        this.tryUpdateNotification()
-                    }
-                },
-
+                                this.tryUpdateNotification()
+                            }
+                        },
                 this.recordingTimeChanged
                         .subscribe {
                             this.burnedEnergyCalculator.calculate(it.seconds)
                         },
+                this.recordingTimeChanged
+                        .subscribe {
+                            currentRecordingTime ->
+                                this.trackRecording.recordingTime = currentRecordingTime
 
-                this.recordingTimeChanged.subscribe { currentRecordingTime ->
-                    this.trackRecording.recordingTime = currentRecordingTime
-
-                    this.trackRecorderServiceNotification.recordingTime = currentRecordingTime
-                },
-
-                // TODO: Buffered; Less threads?
+                                this.trackRecorderServiceNotification.recordingTime = currentRecordingTime
+                        },
                 this.locationsChanged
                         .buffer(1, TimeUnit.SECONDS)
-                        .filter {
-                            it.any()
-                        }
+                        .filterNotEmpty()
                         .subscribe {
                             this.statistic.addAll(it)
 
@@ -121,76 +110,33 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                             })
 
                             this.distanceCalculator.addAll(it)
-
-                            this.liveLocationTrackingSession.sendLocations(it.map {
-                                it.toSimpleLocation()
-                            })
-                        },
-
-                // TODO: Unbuffered; Less threads?
-                /*this.locationsChanged
-                        .subscribe {
-                            this.statistic.add(it)
-
-                            this.trackRecording.locations.put(it.sequenceNumber, it)
-
-                            this.distanceCalculator.add(it)
-
-                            this.liveLocationTrackingSession.sendLocations(listOf(it.toSimpleLocation()))
-                        },*/
-
-                // TODO: More threads?
-                /*this.locationsChanged
-                        .buffer(this.appConfig.updateStatisticsSeconds.toLong(), TimeUnit.SECONDS)
-                        .filter {
-                            it.any()
-                        }
-                        .subscribe {
-                            this.statistic.addAll(it)
                         },
                 this.locationsChanged
-                        .buffer(this.appConfig.updateTrackRecordingLocationsSeconds.toLong(), TimeUnit.SECONDS)
-                        .filter {
-                            it.any()
-                        }
-                        .subscribe {
-                            this.trackRecording.locations.putAll(it.map {
-                                Pair(it.sequenceNumber, it)
-                            })
-                        },
-                this.locationsChanged
-                        .buffer(this.appConfig.updateTrackDistanceSeconds.toLong(), TimeUnit.SECONDS)
-                        .filter {
-                            it.any()
-                        }
-                        .subscribe {
-                            this.distanceCalculator.addAll(it)
-                        },
-                this.locationsChanged
-                        .buffer(this.appConfig.updateLiveLocationSession.toLong(), TimeUnit.SECONDS)
-                        .filter{
-                            it.any()
-                        }
                         .map {
-                            it.map {
-                                it.toSimpleLocation()
-                            }
+                            it.toSimpleLocation()
                         }
+                        .buffer(5, TimeUnit.SECONDS)
+                        .filter {
+                            it.any()
+                        }
+                        // This could also without any problems be executed on the computation-scheduler.
+                        // But there will be network IO involved so we switch to the io-scheduler!
+                        .observeOn(Schedulers.io())
                         .subscribe {
                             this.liveLocationTrackingSession.sendLocations(it)
-                        },*/
+                        },
+                this.stateChanged
+                        .subscribe {
+                            this.trackRecorderServiceNotification.state = it
 
-                this.stateChanged.subscribe {
-                    this.trackRecorderServiceNotification.state = it
+                            this.tryUpdateNotification()
+                        },
+                this.distanceChanged
+                        .subscribe {
+                            this.trackRecorderServiceNotification.distance = it
 
-                    this.tryUpdateNotification()
-                },
-
-                this.distanceChanged.subscribe {
-                    this.trackRecorderServiceNotification.distance = it
-
-                    this.tryUpdateNotification()
-                })
+                            this.tryUpdateNotification()
+                        })
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
         this.initializeStillDetectorBroadcastReceiver()
@@ -199,46 +145,44 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
         this.service.registerReceiver(this.locationAvailabilityChangedBroadcastReceiver, android.content.IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
 
-        this.subscriptions.add(this.locationAvailabilityChangedBroadcastReceiver.locationAvailabilityChanged.subscribe{
-            if (!it) {
-                if (this.stateChangedSubject.value == TrackRecordingSessionState.Running
-                        || this.stateChangedSubject.value == TrackRecordingSessionState.Paused) {
-                    this.pauseTrackingAndSetState(TrackRecordingSessionState.LocationServicesUnavailable)
-                }
-            } else {
-                if (this.stateChangedSubject.value == TrackRecordingSessionState.LocationServicesUnavailable) {
-                    this.resumeTracking()
-                }
-            }
-        })
+        this.subscriptions.add(this.locationAvailabilityChangedBroadcastReceiver.locationAvailabilityChanged
+                .subscribe {
+                    if (!it) {
+                        if (this.stateChangedSubject.value == TrackRecordingSessionState.Running
+                                || this.stateChangedSubject.value == TrackRecordingSessionState.Paused) {
+                            this.pauseTrackingAndSetState(TrackRecordingSessionState.LocationServicesUnavailable)
+                        }
+                    } else {
+                        if (this.stateChangedSubject.value == TrackRecordingSessionState.LocationServicesUnavailable) {
+                            this.resumeTracking()
+                        }
+                    }
+                })
     }
 
     private fun initializeStillDetectorBroadcastReceiver() {
         this.service.registerReceiver(this.stillDetectorBroadcastReceiver, android.content.IntentFilter(ActivityRecognizerIntentService.INTENT_ACTION_NAME))
 
-        this.subscriptions.add(this.stillDetectorBroadcastReceiver.startDetection(this.appConfig.stillDetectorDetectionIntervalInMilliseconds.toLong()).subscribe{
-            if(it) {
-                if(this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
-                    this.pauseTrackingAndSetState(TrackRecordingSessionState.Paused)
-                }
-            } else {
-                if(this.stateChangedSubject.value == TrackRecordingSessionState.Paused) {
-                    this.resumeTracking()
-                }
-            }
-        })
+        this.subscriptions.add(this.stillDetectorBroadcastReceiver.startDetection(BuildConfig.TRACKING_STILLDETECTOR_DETECTION_INTERVAL_IN_MILLISECONDS.toLong())
+                .subscribe {
+                    if (it) {
+                        if (this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
+                            this.pauseTrackingAndSetState(TrackRecordingSessionState.Paused)
+                        }
+                    } else {
+                        if (this.stateChangedSubject.value == TrackRecordingSessionState.Paused) {
+                            this.resumeTracking()
+                        }
+                    }
+                })
     }
 
     private fun tryUpdateNotification() {
         val notification = this.trackRecorderServiceNotification.update()
-        if(notification != null) {
+        if (notification != null) {
             this.service.startForeground(TrackRecorderServiceNotification.ID, notification)
         }
     }
-
-    private val recordingSavedSubject: PublishSubject<Nothing> = PublishSubject.create()
-    public override val recordingSaved: Observable<Nothing>
-        get() = this.recordingSavedSubject
 
     public override val trackingStartedAt: DateTime
         get() = this.trackRecording.trackingStartedAt
@@ -255,30 +199,12 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
             this.trackRecording.comment = value
         }
 
-    private fun pauseTrackingAndSetState(state: TrackRecordingSessionState) {
-        if(this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
-            this.locationProvider.stopLocationUpdates()
-            this.recordingTimeTimer.stop()
-
-            this.trackRecording.pause()
-        }
-
-        Handler().postDelayed({
-            // Hack: Because processing of locationsReceived is buffered every second,
-            // it can happen that by the time the tracking is saved the list of locationsReceived is still being updated.
-            // To prevent exceptions, delay saving 1 second and hope updates are done; until I find a better solution!
-            this.saveTracking()
-        }, 1000)
-
-        this.changeState(state)
-    }
-
     public override fun resumeTracking() {
-        if(this.isDestroyed) {
+        if (this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
 
-        if(this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
+        if (this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
             throw IllegalStateException("Tracking must be paused first!")
         }
 
@@ -295,38 +221,35 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
     }
 
     public override fun pauseTracking() {
-        if(this.isDestroyed) {
+        if (this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
 
-        if(this.stateChangedSubject.value != TrackRecordingSessionState.Running) {
+        if (this.stateChangedSubject.value != TrackRecordingSessionState.Running) {
             throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Running}\"!")
         }
 
         this.pauseTrackingAndSetState(TrackRecordingSessionState.Paused)
     }
 
-    public override fun saveTracking() {
-        if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+    private fun pauseTrackingAndSetState(state: TrackRecordingSessionState) {
+        if (this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
+            this.locationProvider.stopLocationUpdates()
+            this.recordingTimeTimer.stop()
+
+            this.trackRecording.pause()
         }
 
-        if(this.stateChangedSubject.value == TrackRecordingSessionState.Running) {
-            throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Paused}\" or \"${TrackRecordingSessionState.LocationServicesUnavailable}\"!")
-        }
-
-        this.trackService.save(this.trackRecording)
-
-        this.recordingSavedSubject.onNext(Nothing.instance)
+        this.changeState(state)
     }
 
     public override fun discardTracking() {
-        if(this.isDestroyed) {
+        if (this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
 
-        if(this.stateChangedSubject.value != TrackRecordingSessionState.Paused
-            && this.stateChangedSubject.value != TrackRecordingSessionState.LocationServicesUnavailable) {
+        if (this.stateChangedSubject.value != TrackRecordingSessionState.Paused
+                && this.stateChangedSubject.value != TrackRecordingSessionState.LocationServicesUnavailable) {
             throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Paused}\" or \"${TrackRecordingSessionState.LocationServicesUnavailable}\"!")
         }
 
@@ -335,24 +258,21 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
         this.distanceCalculator.clear()
 
-        this.trackService.delete(this.trackRecording.id.toString())
-
         this.destroy()
     }
 
     public override fun finishTracking(): TrackRecording {
-        if(this.isDestroyed) {
+        if (this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
 
-        if(this.stateChangedSubject.value != TrackRecordingSessionState.Paused) {
+        if (this.stateChangedSubject.value != TrackRecordingSessionState.Paused) {
             throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Paused}\"!")
         }
 
         val finishedTrackRecording = this.trackRecording
 
         finishedTrackRecording.finish()
-        this.saveTracking()
 
         this.recordingTimeTimer.reset()
         this.locationProvider.resetSequenceNumber()
@@ -366,7 +286,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
     private var isDestroyed: Boolean = false
     public override fun destroy() {
-        if(this.isDestroyed) {
+        if (this.isDestroyed) {
             return
         }
 
@@ -384,7 +304,6 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
         this.subscriptions.dispose()
 
-        this.recordingSavedSubject.onComplete()
         this.stateChangedSubject.onComplete()
 
         this.isDestroyed = true

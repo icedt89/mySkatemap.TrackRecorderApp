@@ -1,35 +1,36 @@
 package com.janhafner.myskatemap.apps.trackrecorder.statistics
 
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 
 internal final class Statistic : IStatistic {
     private val minimumValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public override val minimumValueChanged: Observable<Float> = this.minimumValueChangedSubject
+    public override val minimumValueChanged: Observable<Float> = this.minimumValueChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val minimumValue: Float?
         get() = this.minimumValueChangedSubject.value
 
     private val maximumValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public override val maximumValueChanged: Observable<Float> = this.maximumValueChangedSubject
+    public override val maximumValueChanged: Observable<Float> = this.maximumValueChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val maximumValue: Float?
         get() = this.maximumValueChangedSubject.value
 
     private val averageValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public override val averageValueChanged: Observable<Float> = this.averageValueChangedSubject
+    public override val averageValueChanged: Observable<Float> = this.averageValueChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val averageValue: Float?
         get() = this.averageValueChangedSubject.value
 
     private val firstValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public override val firstValueChanged: Observable<Float> = this.firstValueChangedSubject
+    public override val firstValueChanged: Observable<Float> = this.firstValueChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val firstValue: Float?
         get() = this.firstValueChangedSubject.value
 
     private val lastValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
-    public override val lastValueChanged: Observable<Float> = this.lastValueChangedSubject
+    public override val lastValueChanged: Observable<Float> = this.lastValueChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val lastValue: Float?
         get() = this.lastValueChangedSubject.value

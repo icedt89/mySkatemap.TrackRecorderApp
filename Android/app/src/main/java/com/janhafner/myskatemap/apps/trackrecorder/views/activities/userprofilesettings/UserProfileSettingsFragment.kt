@@ -9,9 +9,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackR
 import javax.inject.Inject
 
 internal final class UserProfileSettingsFragment : PreferenceFragment() {
-    @Inject
-    public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
-
     private lateinit var presenter: UserProfileSettingsFragmentPresenter
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,12 +16,6 @@ internal final class UserProfileSettingsFragment : PreferenceFragment() {
 
         super.onCreate(savedInstanceState)
 
-        this.presenter = UserProfileSettingsFragmentPresenter(this, this.trackRecorderServiceController)
-    }
-
-    public override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        this.presenter.onViewCreated()
+        this.presenter = UserProfileSettingsFragmentPresenter(this)
     }
 }

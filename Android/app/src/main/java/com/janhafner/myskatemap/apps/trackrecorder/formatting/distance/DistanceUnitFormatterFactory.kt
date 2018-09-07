@@ -8,7 +8,7 @@ internal final class DistanceUnitFormatterFactory(private val appSettings: IAppS
     private val kilometersDistanceUnitFormatter: IDistanceUnitFormatter = KilometersDistanceUnitFormatter()
 
     public override fun createFormatter(): IDistanceUnitFormatter {
-        if(this.appSettings.distanceUnitFormatterTypeName == MilesDistanceUnitFormatter::class.java.name) {
+        if(this.appSettings.distanceUnitFormatterTypeName == MilesDistanceUnitFormatter::class.java.simpleName) {
             return this.milesDistanceUnitFormatter
         }
 

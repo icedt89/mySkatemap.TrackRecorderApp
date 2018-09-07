@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.services.calories
+package com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy
 
 import android.content.Context
 import android.support.v4.util.ArrayMap

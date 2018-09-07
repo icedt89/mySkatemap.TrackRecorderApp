@@ -5,17 +5,14 @@ import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
-import com.google.android.gms.location.ActivityRecognitionResult
-import com.google.android.gms.location.DetectedActivity
 import com.janhafner.myskatemap.apps.trackrecorder.ObservableTimer
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.BurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IBurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IMetActivityDefinitionFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.NullBurnedEnergyCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.BurnedEnergyCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IBurnedEnergyCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IMetActivityDefinitionFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.NullBurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.DistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingServiceFactory
@@ -24,12 +21,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.Still
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotificationChannel
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProviderFactory
-import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppConfig
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.statistics.TrackRecordingStatistic
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import javax.inject.Inject
@@ -37,12 +33,6 @@ import javax.inject.Inject
 internal final class TrackRecorderService : Service(), ITrackRecorderService {
     @Inject
     public lateinit var appSettings: IAppSettings
-
-    @Inject
-    public lateinit var appConfig: IAppConfig
-
-    @Inject
-    public lateinit var trackService: ITrackService
 
     @Inject
     public lateinit var distanceUnitFormatterFactory: IDistanceUnitFormatterFactory
@@ -87,11 +77,10 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public override var currentSession: ITrackRecordingSession? = null
         private set(value) {
             if(value != null && value != field) {
-                this.sessionSubscription = value.sessionClosed.subscribe{
-                    this.currentSession = null
-
-                    this.terminateService()
-                }
+                this.sessionSubscription = value.sessionClosed
+                        .subscribe {
+                            this.currentSession = null
+                        }
             }
 
             if(field != null && value == null) {
@@ -105,8 +94,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         }
 
     private val hasCurrentSessionChangedSubject: Subject<Boolean> = BehaviorSubject.createDefault(false)
-    public override val hasCurrentSessionChanged: Observable<Boolean>
-        get() = this.hasCurrentSessionChangedSubject
+    public override val hasCurrentSessionChanged: Observable<Boolean> = this.hasCurrentSessionChangedSubject.subscribeOn(Schedulers.computation())
 
     public override fun useTrackRecording(trackRecording: TrackRecording): ITrackRecordingSession {
         if (this.currentSession != null) {
@@ -120,13 +108,13 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         val burnedEnergyCalculator: IBurnedEnergyCalculator
         val liveLocationTrackingSession: ILiveLocationTrackingSession
 
-        if(trackRecording.fitnessActivity != null) {
-            val metActivityDefinition = this.metActivityDefinitionFactory.getMetActivityDefinitionByCode(trackRecording.fitnessActivity!!.metActivityCode)
+        if(trackRecording.userProfile != null) {
+            val metActivityDefinition = this.metActivityDefinitionFactory.getMetActivityDefinitionByCode(trackRecording.userProfile!!.metActivityCode)
             if(metActivityDefinition != null) {
-                burnedEnergyCalculator  = BurnedEnergyCalculator(trackRecording.fitnessActivity!!.weightInKilograms,
-                        trackRecording.fitnessActivity!!.heightInCentimeters,
-                        trackRecording.fitnessActivity!!.age,
-                        trackRecording.fitnessActivity!!.sex,
+                burnedEnergyCalculator  = BurnedEnergyCalculator(trackRecording.userProfile!!.weightInKilograms,
+                        trackRecording.userProfile!!.heightInCentimeters,
+                        trackRecording.userProfile!!.age,
+                        trackRecording.userProfile!!.sex,
                         metActivityDefinition.metValue)
             } else {
                 burnedEnergyCalculator = NullBurnedEnergyCalculator()
@@ -140,8 +128,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
 
         this.currentSession = TrackRecordingSession(
                 this.appSettings,
-                this.appConfig,
-                this.trackService,
                 this.trackRecorderServiceNotification,
                 distanceCalculator,
                 this.distanceUnitFormatterFactory,
@@ -171,20 +157,18 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     }
 
     private fun serviceBound() {
-        this.trackRecorderServiceNotification.isBound = true
-
         this.tryUpdateNotification()
     }
 
     public override fun onUnbind(intent: Intent?): Boolean {
         this.serviceUnbind()
 
-        return true
+        this.terminateService()
+
+        return false
     }
 
     private fun serviceUnbind() {
-        this.trackRecorderServiceNotification.isBound = false
-
         this.tryUpdateNotification()
     }
 
@@ -202,9 +186,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                     this.currentSession!!.resumeTracking()
                 TrackRecorderServiceNotification.ACTION_PAUSE ->
                     this.currentSession!!.pauseTracking()
-                TrackRecorderServiceNotification.ACTION_TERMINATE -> {
-                    this.terminateService()
-                }
             }
         }
 

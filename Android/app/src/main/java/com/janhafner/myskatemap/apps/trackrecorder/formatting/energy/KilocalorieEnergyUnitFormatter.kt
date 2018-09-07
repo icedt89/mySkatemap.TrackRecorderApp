@@ -1,8 +1,8 @@
-package com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy
+package com.janhafner.myskatemap.apps.trackrecorder.formatting.energy
 
 import com.janhafner.myskatemap.apps.trackrecorder.formatBurnedEnergyKilocalorie
 
-internal final class KilocalorieBurnedEnergyUnitFormatter : IBurnedEnergyUnitFormatter {
+internal final class KilocalorieEnergyUnitFormatter : IEnergyUnitFormatter {
     public override fun format(burnedEnergyInKilocalories: Float): String {
         return burnedEnergyInKilocalories.formatBurnedEnergyKilocalorie()
     }

@@ -21,8 +21,6 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
 
     public var distance: Float? = null
 
-    public var isBound: Boolean = false
-
     private val notificationCompatBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this.context, TrackRecorderServiceNotificationChannel.ID)
 
     init {
@@ -62,10 +60,6 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
             this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_pause_bright_24dp, this.context.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.context, 0, Intent(ACTION_PAUSE, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
         }
 
-        if(!this.isBound && this.state != TrackRecordingSessionState.Running){
-            this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_clear_bright_24dp, this.context.getString(R.string.trackrecorderservice_notification_action_terminate), PendingIntent.getService(this.context, 0, Intent(ACTION_TERMINATE, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
-        }
-
         return this.notificationCompatBuilder.build()
     }
 
@@ -90,8 +84,6 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
         public const val ACTION_RESUME = "trackrecorderservice.action.resume"
 
         public const val ACTION_PAUSE = "trackrecorderservice.action.pause"
-
-        public const val ACTION_TERMINATE = "trackrecorderservice.action.terminate"
 
         public const val ID: Int = 1
     }

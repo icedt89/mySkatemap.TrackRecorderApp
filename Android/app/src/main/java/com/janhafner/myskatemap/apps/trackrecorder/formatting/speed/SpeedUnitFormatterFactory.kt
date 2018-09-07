@@ -10,11 +10,11 @@ internal final class SpeedUnitFormatterFactory(private val appSettings: IAppSett
     private val milesPerHourSpeedUnitFormatter: ISpeedUnitFormatter = MilesPerHourSpeedUnitFormatter()
 
     public override fun createFormatter(): ISpeedUnitFormatter {
-        if(this.appSettings.speedUnitFormatterTypeName == MetersPerSecondSpeedUnitFormatter::class.java.name) {
+        if(this.appSettings.speedUnitFormatterTypeName == MetersPerSecondSpeedUnitFormatter::class.java.simpleName) {
             return this.metersPerSecondSpeedUnitFormatter
         }
 
-        if(this.appSettings.speedUnitFormatterTypeName == MilesPerHourSpeedUnitFormatter::class.java.name) {
+        if(this.appSettings.speedUnitFormatterTypeName == MilesPerHourSpeedUnitFormatter::class.java.simpleName) {
             return this.milesPerHourSpeedUnitFormatter
         }
 

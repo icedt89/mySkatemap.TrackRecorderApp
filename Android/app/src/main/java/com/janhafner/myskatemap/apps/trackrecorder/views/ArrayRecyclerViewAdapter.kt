@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 
 internal open class ArrayRecyclerViewAdapter<T>(@LayoutRes private val itemLayoutId: Int)
@@ -16,7 +17,7 @@ internal open class ArrayRecyclerViewAdapter<T>(@LayoutRes private val itemLayou
     protected val items: ArrayList<T> = ArrayList()
 
     protected val itemViewCreatedSubject: PublishSubject<ItemViewCreatedArgs<View, T>> = PublishSubject.create<ItemViewCreatedArgs<View, T>>()
-    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject
+    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject.subscribeOn(Schedulers.computation())
 
     public override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if(this.layoutInflater == null) {
@@ -50,25 +51,6 @@ internal open class ArrayRecyclerViewAdapter<T>(@LayoutRes private val itemLayou
     }
 
     public open fun add(`object`: T) {
-        /*val mm = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return false
-            }
-
-            override fun getOldListSize(): Int {
-                return this@ArrayRecyclerViewAdapter.items.count()
-            }
-
-            override fun getNewListSize(): Int {
-                return this@ArrayRecyclerViewAdapter.items.count() + 1
-            }
-
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return false
-            }
-        })
-        mm.dispatchUpdatesTo(this)
-*/
         this.items.add(`object`)
 
         this.notifyItemInserted(this.items.count())

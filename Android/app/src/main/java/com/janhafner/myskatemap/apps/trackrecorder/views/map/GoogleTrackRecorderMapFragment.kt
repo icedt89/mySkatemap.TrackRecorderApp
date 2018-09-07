@@ -58,6 +58,15 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
     public override val track: List<SimpleLocation>
         get() = this.locations
 
+    public override var gesturesEnabled: Boolean = false
+        set(value) {
+            if (this.isReady) {
+                this.map.uiSettings.setAllGesturesEnabled(value)
+            }
+
+            field = value
+        }
+
     public override fun addLocations(locations: List<SimpleLocation>) {
         this.locations.addAll(locations)
 
@@ -86,8 +95,6 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
         val cameraUpdate = CameraUpdateFactory.newLatLngBounds(cameraBounds, 100)
 
         this.map.animateCamera(cameraUpdate)
-
-        Log.v("GoogleMap", "Moved view of Google map to new bounds")
     }
 
     public override fun zoomToLocation(location: SimpleLocation, zoom: Float) {
@@ -107,7 +114,7 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
 
         this.map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this.context!!, R.raw.mapstyle_fanticmotor))
 
-        this.polyline.color = Color.parseColor("#FFFF3A3C")
+        this.polyline.color = this.context!!.getColor(R.color.secondaryColor)
     }
 
     private fun locationToLatLng(location: SimpleLocation): LatLng {

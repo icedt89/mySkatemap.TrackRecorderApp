@@ -22,14 +22,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/trackrecorderactivity_toolbar_tablayout">
-                        <android.support.design.widget.TabItem
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/trackrecorderactivity_toolbar_tab_track" />
-                        <android.support.design.widget.TabItem
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/trackrecorderactivity_toolbar_tab_data" />
                     </android.support.design.widget.TabLayout>
                 </android.support.v4.view.ViewPager>
                 <android.support.design.widget.FloatingActionButton
@@ -48,4 +40,11 @@
         android:layout_gravity="start"
         app:menu="@menu/app_navigation_drawer_menu"
         app:headerLayout="@layout/navigation_drawer_header"/>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/trackrecorderactivity_info"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        app:menu="@menu/trackrecorder_info_menu"
+        app:headerLayout="@layout/navigation_drawer_header" />
 </android.support.v4.widget.DrawerLayout>

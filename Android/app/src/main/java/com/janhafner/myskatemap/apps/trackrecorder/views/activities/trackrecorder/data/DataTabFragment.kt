@@ -46,8 +46,8 @@ internal final class DataTabFragment : Fragment() {
     }
 
     public override fun onDestroyView() {
-        super.onDestroyView()
-
         this.presenter!!.destroy()
+
+        super.onDestroyView()
     }
 }

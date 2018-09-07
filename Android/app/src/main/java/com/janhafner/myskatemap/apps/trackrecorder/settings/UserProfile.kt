@@ -3,14 +3,14 @@ package com.janhafner.myskatemap.apps.trackrecorder.settings
 import android.content.Context
 import android.content.SharedPreferences
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.Sex
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.Sex
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 
 internal final class UserProfile : IUserProfile {
     private val propertyChangedSubject: PublishSubject<PropertyChangedData> = PublishSubject.create()
-
-    public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject
+    public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject.subscribeOn(Schedulers.computation())
 
     public override var enableCalculationOfBurnedEnergy: Boolean = false
         set(value) {
@@ -18,7 +18,7 @@ internal final class UserProfile : IUserProfile {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::enableCalculationOfBurnedEnergy.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IUserProfile::enableCalculationOfBurnedEnergy.name, oldValue, value))
         }
 
     public override var name: String? = null
@@ -27,7 +27,7 @@ internal final class UserProfile : IUserProfile {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::name.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IUserProfile::name.name, oldValue, value))
         }
 
     public override var age: Int? = null
@@ -36,7 +36,7 @@ internal final class UserProfile : IUserProfile {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::age.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IUserProfile::age.name, oldValue, value))
         }
 
     public override var height: Int? = null
@@ -62,7 +62,7 @@ internal final class UserProfile : IUserProfile {
 
             field = value
 
-            this.propertyChangedSubject.onNext(PropertyChangedData(::sex.name, oldValue, value))
+            this.propertyChangedSubject.onNext(PropertyChangedData(IUserProfile::sex.name, oldValue, value))
         }
 
     public fun bindToSharedPreferences(sharedPreferences: SharedPreferences, context: Context) : IUserProfile {
@@ -108,8 +108,7 @@ internal final class UserProfile : IUserProfile {
                 this.userProfile.sex = value
             }
 
-        public override val propertyChanged: Observable<PropertyChangedData>
-            get() = this.userProfile.propertyChanged
+        public override val propertyChanged: Observable<PropertyChangedData> = this.userProfile.propertyChanged
 
         init {
             val enableCalculationOfBurnedEnergyKey = context.getString(R.string.userprofilesettings_preference_enablecalculationofburnedenergy_key)

@@ -24,15 +24,15 @@ internal final class DashboardTileDescriptor(public val tileSelectorTitle: Strin
             val result = ArrayList<DashboardTileDescriptor>()
 
             // TODO
-            result.add(DashboardTileDescriptor("AverageAltitudeDashboardTileFragment", AverageAltitudeDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("CurrentAltitudeDashboardTileFragment", CurrentAltitudeDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("MaximumAltitudeDashboardTileFragment", MaximumAltitudeDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("MinimumAltitudeDashboardTileFragment", MinimumAltitudeDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("BurnedEnergyDashboardTileFragment", BurnedEnergyDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("DistanceDashboardTileFragment", DistanceDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("AverageSpeedDashboardTileFragment", AverageSpeedDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("CurrentSpeedDashboardTileFragment", CurrentSpeedDashboardTileFragment::javaClass.name))
-            result.add(DashboardTileDescriptor("MaximumSpeedDashboardTileFragment", MaximumSpeedDashboardTileFragment::javaClass.name))
+            result.add(DashboardTileDescriptor("AverageAltitudeDashboardTileFragment", AverageAltitudeDashboardTileFragment::class.java.simpleName))
+            result.add(DashboardTileDescriptor("CurrentAltitudeDashboardTileFragment", CurrentAltitudeDashboardTileFragment::class.java.simpleName))
+            result.add(DashboardTileDescriptor("MaximumAltitudeDashboardTileFragment", MaximumAltitudeDashboardTileFragment::class.java.simpleName))
+            result.add(DashboardTileDescriptor("MinimumAltitudeDashboardTileFragment", MinimumAltitudeDashboardTileFragment::class.java.simpleName))
+            result.add(DashboardTileDescriptor("BurnedEnergyDashboardTileFragment", BurnedEnergyDashboardTileFragment::class.java.simpleName))
+            result.add(DashboardTileDescriptor("DistanceDashboardTileFragment", DistanceDashboardTileFragment::class.java.simpleName))
+            result.add(DashboardTileDescriptor("AverageSpeedDashboardTileFragment", AverageSpeedDashboardTileFragment::class.java.simpleName))
+            result.add(DashboardTileDescriptor("CurrentSpeedDashboardTileFragment", CurrentSpeedDashboardTileFragment::class.java.simpleName))
+            result.add(DashboardTileDescriptor("MaximumSpeedDashboardTileFragment", MaximumSpeedDashboardTileFragment::class.java.simpleName))
 
             result
         }

@@ -4,14 +4,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 
-internal final class UserProfileSettingsFragmentPresenter(private val view: UserProfileSettingsFragment,
-                                                          private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>) {
+internal final class UserProfileSettingsFragmentPresenter(private val view: UserProfileSettingsFragment) {
     init {
         this.view.preferenceManager.setSharedPreferencesName("userprofilesettings");
 
         this.view.addPreferencesFromResource(R.xml.userprofile_settings)
-    }
-
-    public fun onViewCreated() {
     }
 }

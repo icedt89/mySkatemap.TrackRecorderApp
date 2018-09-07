@@ -7,6 +7,8 @@ internal interface ITrackRecorderMap {
 
     val isReady: Boolean
 
+    var gesturesEnabled: Boolean
+
     fun addLocations(locations: List<SimpleLocation>)
 
     fun clearTrack()

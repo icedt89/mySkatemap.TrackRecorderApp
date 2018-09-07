@@ -11,14 +11,14 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.collections.ArrayList
 
-internal final class TestLocationProvider(private val context: Context,
-                                          private val initialLocation: Location,
-                                          private val bearingStepping: Float = 0.0001f,
-                                          private val latitudeStepping: Double = 0.001,
-                                          private val longitudeStepping: Double = 0.001,
-                                          private val delay: Long = 0,
-                                          private val interval: Long = 5000,
-                                          private val simulateDependencyToAndroidLocationServices: Boolean = true): LocationProvider() {
+internal final class SimulatedLocationProvider(private val context: Context,
+                                               private val initialLocation: Location,
+                                               private val bearingStepping: Float = 0.0001f,
+                                               private val latitudeStepping: Double = 0.001,
+                                               private val longitudeStepping: Double = 0.001,
+                                               private val delay: Int = 0,
+                                               private val interval: Int = 5000,
+                                               private val simulateDependencyToAndroidLocationServices: Boolean = true): LocationProvider() {
     private val timer: Timer = Timer()
 
     private val genericCoordinates: MutableList<PointD> = ArrayList()
@@ -30,7 +30,7 @@ internal final class TestLocationProvider(private val context: Context,
     private fun createTimerTask(): TimerTask {
         return object: TimerTask() {
             override fun run() {
-                val self = this@TestLocationProvider
+                val self = this@SimulatedLocationProvider
 
                 if (self.simulateDependencyToAndroidLocationServices && !self.context.isLocationServicesEnabled()) {
                     return
@@ -183,7 +183,7 @@ internal final class TestLocationProvider(private val context: Context,
             this.postLocationTimerTask = this.createTimerTask()
         }
 
-        this.timer.schedule(this.postLocationTimerTask, this.delay, this.interval)
+        this.timer.schedule(this.postLocationTimerTask, this.delay.toLong(), this.interval.toLong())
 
         this.isActive = true
     }

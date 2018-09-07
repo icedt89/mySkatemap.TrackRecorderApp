@@ -2,7 +2,16 @@
 <resources>
     <color name="transparent">#00ffffff</color>
     <color name="colorAppIconForeground">#ffffff</color>
-    <color name="colorAppIconBackground">#2979ff</color>
+    <color name="colorAppIconBackground">#293133</color>
     <color name="colorPrimaryBright">#FFFFFF</color>
     <color name="colorPrimaryDark">#293133</color>
+
+    <color name="primaryColor">#293133</color>
+    <color name="primaryLightColor">#525a5c</color>
+    <color name="primaryDarkColor">#00090c</color>
+    <color name="secondaryColor">#cd0000</color>
+    <color name="secondaryLightColor">#ff4f30</color>
+    <color name="secondaryDarkColor">#940000</color>
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="secondaryTextColor">#ffffff</color>
 </resources>

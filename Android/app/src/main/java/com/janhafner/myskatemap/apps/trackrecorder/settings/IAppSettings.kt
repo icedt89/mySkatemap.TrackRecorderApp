@@ -10,9 +10,11 @@ internal interface IAppSettings {
 
     var speedUnitFormatterTypeName: String
 
-    var burnedEnergyUnitFormatterTypeName: String
+    var energyUnitFormatterTypeName: String
 
     var locationProviderTypeName: String
+
+    var mapControlTypeName: String
 
     var appUiLocale: String
 

@@ -9,6 +9,7 @@ import com.google.android.gms.location.ActivityRecognitionClient
 import com.google.android.gms.location.ActivityRecognitionResult
 import com.google.android.gms.location.DetectedActivity
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 
 internal final class StillDetectorBroadcastReceiver(context: Context, private val activityRecognitionClient: ActivityRecognitionClient)
@@ -16,13 +17,13 @@ internal final class StillDetectorBroadcastReceiver(context: Context, private va
     private val pendingIntent: PendingIntent
 
     private val stillDetectedChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.create<Boolean>()
-    public override val stillDetectedChanged: Observable<Boolean> = this.stillDetectedChangedSubject
+    public override val stillDetectedChanged: Observable<Boolean> = this.stillDetectedChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val isStill: Boolean
         get() = this.stillDetectedChangedSubject.value
 
     private val isDetectingChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public override val isDetectingChanged: Observable<Boolean> = this.isDetectingChangedSubject
+    public override val isDetectingChanged: Observable<Boolean> = this.isDetectingChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val isDetecting: Boolean
         get() = this.isDetectingChangedSubject.value

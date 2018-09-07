@@ -3,6 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 import android.content.Context
 import android.location.LocationManager
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 
@@ -18,17 +19,19 @@ internal final class LocationProviderFactory(private val context: Context,
             realLocationProviderTypeName = locationProviderTypeName
         }
 
-        if (realLocationProviderTypeName == TestLocationProvider::class.java.name) {
+        if (realLocationProviderTypeName == SimulatedLocationProvider::class.java.simpleName) {
             val initialLocation = Location(-1)
 
-            initialLocation.bearing = 1.0f
-            initialLocation.latitude = 50.8333
-            initialLocation.longitude = 12.9167
+            initialLocation.bearing = BuildConfig.SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING
+            initialLocation.latitude = BuildConfig.MAP_INITIAL_LATITUDE
+            initialLocation.longitude = BuildConfig.MAP_INITIAL_LONGITUDE
 
-            return TestLocationProvider(this.context, initialLocation, interval = 500)
+            return SimulatedLocationProvider(this.context, initialLocation,
+                    delay = BuildConfig.SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS,
+                    interval = BuildConfig.SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS)
         }
 
-        if (realLocationProviderTypeName == LegacyLocationProvider::class.java.name) {
+        if (realLocationProviderTypeName == LegacyLocationProvider::class.java.simpleName) {
             return LegacyLocationProvider(this.context, this.locationManager)
         }
 

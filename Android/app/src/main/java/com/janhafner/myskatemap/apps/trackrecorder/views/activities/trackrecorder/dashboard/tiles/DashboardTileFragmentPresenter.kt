@@ -4,38 +4,45 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 
 internal abstract class DashboardTileFragmentPresenter(protected val view: DashboardTileFragment,
                                                        protected val appSettings: IAppSettings,
                                                        protected val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>) {
-    private val trackRecorderServiceControllerSubscription: Disposable
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    private var sessionAvailabilityChangedSubscription: Disposable? = null
-
-    private var trackRecorderSession: ITrackRecordingSession? = null
+    private val clientSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
+
+    private var trackRecorderSession: ITrackRecordingSession? = null
 
     init {
         this.initialize()
 
-        this.trackRecorderServiceControllerSubscription = this.trackRecorderServiceController.isClientBoundChanged.subscribe{
-            if(it) {
-                this.sessionAvailabilityChangedSubscription = this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged.subscribe{
-                    if(it) {
-                        this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
-                    } else {
-                        this.uninitializeSession()
-                    }
-                }
-            } else {
-                this.uninitializeSession()
+        this.subscriptions.addAll(
+                this.trackRecorderServiceController.isClientBoundChanged
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            if (it) {
+                                this.clientSubscriptions.addAll(
+                                        this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe {
+                                                    if (it) {
+                                                        this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
+                                                    } else {
+                                                        this.uninitializeSession()
+                                                    }
+                                                })
+                            } else {
+                                this.uninitializeSession()
 
-                this.sessionAvailabilityChangedSubscription?.dispose()
-            }
-        }
+                                this.clientSubscriptions.clear()
+                            }
+                        })
     }
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
@@ -62,13 +69,10 @@ internal abstract class DashboardTileFragmentPresenter(protected val view: Dashb
     protected abstract fun resetView()
 
     public fun destroy() {
-        this.trackRecorderServiceController.unbindService()
-
-        this.trackRecorderServiceControllerSubscription.dispose()
-        this.sessionAvailabilityChangedSubscription?.dispose()
-
         this.uninitializeSession()
 
         this.sessionSubscriptions.dispose()
+        this.clientSubscriptions.dispose()
+        this.subscriptions.dispose()
     }
 }

@@ -3,43 +3,16 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-        <item name="colorPrimary">#ffffff</item>
-        <item name="colorAccent">#c1121c</item>
+        <!--
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorAccent">@color/secondaryColor</item>
         <item name="android:statusBarColor">@color/colorPrimaryDark</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
-    </style>
-
-    <style name="MySkatemap.TrackRecorder.AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-
-        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
-        <item name="android:colorBackground">@color/colorPrimaryBright</item>
-        <item name="colorPrimary">@color/colorPrimaryBright</item>
-    </style>
-
-    <style name="MySkatemap.TrackRecorder.AppBarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="colorPrimary">@color/colorPrimaryDark</item>
-        <item name="android:textColorPrimary">@color/colorPrimaryBright</item>
-    </style>
-
-    <style name="MySkatemap.FloatingActionButton.Main" parent="Widget.Design.FloatingActionButton">
-        <item name="android:backgroundTint">#c1121c</item>
-        <item name="android:foregroundTint">#ffffff</item>
+        -->
     </style>
 
     <style name="MySkatemap.TrackRecorder.SplashscreenActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@drawable/splashscreen</item>
-    </style>
-
-    <style name="MySkatemap.TrackList.ItemTheme" parent="Theme.AppCompat.Light">
-        <item name="cardCornerRadius">3dp</item>
-        <item name="cardElevation">2dp</item>
-        <item name="contentPaddingBottom">20dp</item>
-        <item name="contentPaddingTop">20dp</item>
-        <item name="contentPaddingLeft">14dp</item>
-        <item name="contentPaddingRight">14dp</item>
     </style>
 
     <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Fragment" parent="Theme.AppCompat.Light.NoActionBar">

@@ -46,8 +46,8 @@
     <string name="appsettings_preference_units_distance_summary">Entfernungen werden angezeigt und formatiert als %s</string>
     <string name="appsettings_preference_units_speed_label">Geschwindigkeit</string>
     <string name="appsettings_preference_units_speed_summary">Geschwindigkeiten werden angezeigt und formatiert als %s</string>
-    <string name="appsettings_preference_units_burnedenergy_label">Verbrannte Energie</string>
-    <string name="appsettings_preference_units_burnedenergy_summary">Verbrannte Energie wird angezeigt und formatiert als %s</string>
+    <string name="appsettings_preference_units_energy_label">Energie</string>
+    <string name="appsettings_preference_units_energy_summary">Energie wird angezeigt und formatiert als %s</string>
     <string name="appsettings_preference_tracking_title">Aufnahme</string>
     <string name="appsettings_preference_tracking_location_provider_label">Standortprovider Implementierung</string>
     <string name="appsettings_preference_tracking_location_provider_summary">Standorte werden mittels des %s providers bereitgestellt</string>
@@ -56,6 +56,8 @@
     <string name="appsettings_preference_notifications_title">Benachrichtigungen</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_label">Vibrieren bei Stopp</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_summary">Vibrieren wenn die Standortsermittlung/Tracking im Hintergrund deaktiviert wurde, beispielsweise durch verlust der Standortdienst</string>
+    <string name="appsettings_preference_tracking_map_control_label">Karte</string>
+    <string name="appsettings_preference_tracking_map_control_summary">Verwendet %s zum anzeigen der Karte</string>
     <string name="userprofilesettings_preference_age_label">Dein Alter</string>
     <string name="userprofilesettings_preference_age_summary">Du bist %s Jahr(e) alt</string>
     <string name="userprofilesettings_preference_age_summary_empty">In Jahren</string>
@@ -74,12 +76,12 @@
     <string name="userprofilesettings_preference_enablecalculationofburnedenergy_summary">Berechnet deine Kalorien basierend auf deinem Profil</string>
     <string name="appsettings_preference_tracking_default_met_activity_code_label">Standard Aktivitätstyp</string>
     <string name="appsettings_preference_tracking_default_met_activity_code_summary">Du bevorzugst %s als standard Aktivitätstyp für neue Aufnahmen</string>
-    <string name="tracklistactivity_title">Aufgenommene Strecken</string>
     <string name="userprofilesettingsactivity_title">Dein Profil</string>
     <string name="settingsactivity_title">Einstellungen</string>
     <string name="trackrecorderactivity_tab_debug_title">Debug Log</string>
     <string name="trackrecorderactivity_tab_debug_log_output_empty">Um Debug Ausgaben zu sehen musst du zu erst eine Session starten</string>
 
+    <string name="trackrecorderactivity_tab_debug_log_output_filter_hint">Filter mit Komma trennen</string>
     <string name="gpx_metadata_name">Export der Aufnahmen vom %s</string>
     <string name="gpx_metadata_description">Diese Datei wurde am %s gerzeugt und beinhaltet %s Aufnahmen.</string>
 
@@ -92,7 +94,8 @@
     <string name="dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title">durchs. Höhe</string>
     <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">min. Höhe</string>
     <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">Höhe</string>
-    <string name="trackrecorderactivity_tab_debug_log_output_filter_hint">Filter mit Komma trennen</string>
+    <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Einstellungen</string>
+    <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">Dein Profil</string>
 
     <string-array name="appsettings_preference_tracking_location_provider_names">
         <item>Standard</item>
@@ -111,7 +114,7 @@
         <item>Meter pro Sekunde</item>
     </string-array>
 
-    <string-array name="appsettings_preference_units_burnedenergy_names">
+    <string-array name="appsettings_preference_units_energy_names">
         <item>Kilokalorie</item>
         <item>Kilojoule</item>
         <item>Wattstunden</item>
@@ -126,5 +129,10 @@
         <item>Radfahren</item>
         <item>Inline Skaten</item>
         <item>Wandern</item>
+    </string-array>
+
+    <string-array name="appsettings_preference_tracking_map_control_names">
+        <item>Google Maps</item>
+        <item>OpenStreetMap</item>
     </string-array>
 </resources>

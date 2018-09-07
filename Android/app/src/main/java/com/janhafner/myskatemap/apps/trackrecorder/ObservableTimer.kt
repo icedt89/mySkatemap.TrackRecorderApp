@@ -2,6 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.os.SystemClock
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
@@ -18,19 +19,19 @@ internal final class ObservableTimer : IObservableTimer {
     private val elapsedSeconds: MutablePeriod = MutablePeriod(PeriodType.time())
 
     private val secondElapsedSubject: BehaviorSubject<Period> = BehaviorSubject.createDefault<Period>(Period.ZERO)
-    public override val secondElapsed: Observable<Period> = this.secondElapsedSubject
+    public override val secondElapsed: Observable<Period> = this.secondElapsedSubject.subscribeOn(Schedulers.computation())
 
     public override val secondsElapsed: Period
         get() = this.secondElapsedSubject.value
 
     private val isRunningChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public override val isRunningChanged: Observable<Boolean> = this.isRunningChangedSubject
+    public override val isRunningChanged: Observable<Boolean> = this.isRunningChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val isRunning: Boolean
         get() = this.isRunningChangedSubject.value
 
     private val timerResetSubject: Subject<Long> = PublishSubject.create<Long>()
-    public override val timerReset: Observable<Long> = this.timerResetSubject
+    public override val timerReset: Observable<Long> = this.timerResetSubject.subscribeOn(Schedulers.computation())
 
     private fun createTimerTask(): TimerTask {
         return object: TimerTask() {

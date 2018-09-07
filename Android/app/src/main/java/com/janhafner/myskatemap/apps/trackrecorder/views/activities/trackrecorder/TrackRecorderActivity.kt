@@ -44,6 +44,7 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Setup of FAB and existing session must be done after the options menu was created! (DIRTY!)
         return this.presenter!!.onCreateOptionsMenu(menu)
     }
 
@@ -51,17 +52,13 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
         return this.presenter!!.onMenuOpened()
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        this.presenter!!.onActivityResult(requestCode, resultCode, data)
-    }
-
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return this.presenter!!.onOptionsItemSelected(item)
     }
 
     public override fun onDestroy() {
-        super.onDestroy()
-
         this.presenter!!.destroy()
+
+        super.onDestroy()
     }
 }

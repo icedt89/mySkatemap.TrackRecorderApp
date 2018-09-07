@@ -24,7 +24,7 @@ internal final class TrackService(private val trackRecordingsCouchDbFactory: ICo
             val queryBuilder = QueryBuilder.select(SelectResult.all(), SelectResult.expression(Meta.id))
                     .from(DataSource.database(it))
                     .where(Expression.property("_id").isNot(Expression.value(this.appSettings.currentTrackRecordingId?.toString()))
-                            .and(Expression.property("documentType").`is`(Expression.string(TrackRecording::javaClass.name))))
+                            .and(Expression.property("documentType").`is`(Expression.string(TrackRecording::class.java.simpleName))))
 
             val results = queryBuilder.execute()
 
@@ -32,13 +32,9 @@ internal final class TrackService(private val trackRecordingsCouchDbFactory: ICo
                 val id = UUID.fromString(result.getString("id"))
                 val dictionary = result.getDictionary(it.name)
 
-                try {
-                    val trackRecording = TrackRecording.fromCouchDbDictionary(dictionary, id)
+                val trackRecording = TrackRecording.fromCouchDbDictionary(dictionary, id)
 
-                    trackRecordings.add(trackRecording)
-                } catch (exception: Exception) {
-                    Log.w("TrackService", "Could not construct track recording (Id=\"${dictionary.getString("_id")}\")!")
-                }
+                trackRecordings.add(trackRecording)
             }
         }
 
@@ -73,14 +69,6 @@ internal final class TrackService(private val trackRecordingsCouchDbFactory: ICo
 
             it.delete(result)
         }
-    }
-
-    public override fun getAttachmentHandler(trackRecording: TrackRecording): IAttachmentHandler {
-        val directoryNavigator = this.trackRecordingsDirectoryNavigator
-                .getDirectory(trackRecording.id.toString())
-                .getDirectory(TrackService.RECORDING_ATTACHMENTS_DIRECTORY_NAME)
-
-        return FileSystemAttachmentHandler(trackRecording, directoryNavigator)
     }
 
     companion object {

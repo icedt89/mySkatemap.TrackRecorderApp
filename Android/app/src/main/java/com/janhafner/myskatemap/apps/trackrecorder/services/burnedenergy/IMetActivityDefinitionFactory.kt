@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.services.calories
+package com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy
 
 internal interface IMetActivityDefinitionFactory {
     fun preload()

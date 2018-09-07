@@ -28,6 +28,8 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
     public override var isReady: Boolean = false
         private set
 
+    public override var gesturesEnabled: Boolean = false
+
     public override fun getSnapshotAsync(callback: OnMapSnapshotReadyCallback) {
         val cached = this.map.drawingCache
 
@@ -66,8 +68,6 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
         val boundingBox = BoundingBox.fromGeoPoints(this.polyline.points)
 
         this.map.zoomToBoundingBox(boundingBox.increaseByScale(1.1f), false,0)
-
-        Log.v("OpenStreetMap", "Moved view of OpenStreet map to new bounds")
     }
 
     public override fun zoomToLocation(location: SimpleLocation, zoom: Float) {
@@ -94,15 +94,15 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
     private fun applyDefaults() {
         this.map.setBuiltInZoomControls(false)
         this.map.setMultiTouchControls(false)
-        this.map.isVerticalMapRepetitionEnabled = false
-        this.map.isHorizontalMapRepetitionEnabled = false
+        this.map.isVerticalMapRepetitionEnabled = true
+        this.map.isHorizontalMapRepetitionEnabled = true
         // Inhibit touch gestures which could possibly move/drag the map view around
         this.map.setOnTouchListener {
             _, _ ->
-                true
+                !this.gesturesEnabled
         }
         this.map.setTileSource(TileSourceFactory.MAPNIK)
 
-        this.polyline.color = Color.parseColor("#FFFF3A3C")
+        this.polyline.color = this.context!!.getColor(R.color.secondaryColor)
     }
 }

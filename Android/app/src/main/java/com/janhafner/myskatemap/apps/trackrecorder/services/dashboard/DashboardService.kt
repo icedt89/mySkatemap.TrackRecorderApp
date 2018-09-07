@@ -15,7 +15,7 @@ internal final class DashboardService(private val dashboardsCouchDbFactory: ICou
 
             val queryBuilder = QueryBuilder.select(SelectResult.all())
                     .from(DataSource.database(it))
-                    .where(Expression.property("documentType").`is`(Expression.string(Dashboard::javaClass.name)))
+                    .where(Expression.property("documentType").`is`(Expression.string(Dashboard::class.java.simpleName)))
 
             val results = queryBuilder.execute()
 
@@ -23,14 +23,9 @@ internal final class DashboardService(private val dashboardsCouchDbFactory: ICou
                 val id = UUID.fromString(result.getString("id"))
                 val dictionary = result.getDictionary(it.name)
 
-                try {
-                    val dashboard = Dashboard.fromCouchDbDictionary(dictionary, id)
+                val dashboard = Dashboard.fromCouchDbDictionary(dictionary, id)
 
-                    dashboards.add(dashboard)
-                } catch (exception: Exception) {
-                    // TODO
-                    Log.w("DashboardService", "Could not construct dashboard configuration (Id=\"${dictionary.getString("_id")}\")!")
-                }
+                dashboards.add(dashboard)
             }
         }
 

@@ -16,8 +16,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.views.ArrayRecyclerViewAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.views.ObservableArrayAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap
+import com.janhafner.myskatemap.apps.trackrecorder.views.DynamicArrayAdapter
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -25,9 +24,9 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.multi.BaseMultiplePermissionsListener
 import com.karumi.dexter.listener.single.BasePermissionListener
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
+import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
 import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -72,7 +71,7 @@ internal fun <TSource> Observable<TSource>.pairWithPrevious() : Observable<Pair<
 
 internal fun Observable<Location>.dropLocationsNotInDistance(maximumDistance: Double, includeEdge: Boolean = true): Observable<Location> {
     return this.pairWithPrevious()
-            .filter{
+            .filter {
                 if (it.first == null) {
                     // Dont filter first real value [Pair(null, location)]
                     true
@@ -134,16 +133,6 @@ internal fun Location.toSimpleLocation(): SimpleLocation {
     return SimpleLocation(this.latitude, this.longitude)
 }
 
-internal fun ITrackRecorderMap.consumeLocations(): Consumer<List<Location>> {
-    return Consumer {
-        val locations = it.map {
-            it.toSimpleLocation()
-        }
-
-        this.addLocations(locations)
-    }
-}
-
 internal fun Context.isLocationServicesEnabled(): Boolean {
     return Settings.Secure.getInt(this.contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF) != Settings.Secure.LOCATION_MODE_OFF
 }
@@ -155,36 +144,46 @@ internal fun Location.distanceTo(location: Location): Float {
     return androidLocation.distanceTo(otherAndroidLocation)
 }
 
-internal fun Activity.checkAllAppPermissions(): Observable<Boolean> {
-    return Observable.create { emitter: ObservableEmitter<Boolean> ->
+internal fun Activity.checkAllAppPermissions() : Single<Boolean> {
+    return Single.create { emitter: SingleEmitter<Boolean> ->
         Dexter.withActivity(this)
                 .withPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .withListener(object : BaseMultiplePermissionsListener() {
                     public override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-                        emitter.onNext(report!!.areAllPermissionsGranted())
-
-                        emitter.onComplete()
+                        emitter.onSuccess(report!!.areAllPermissionsGranted())
                     }
                 })
                 .check()
     }
 }
 
-internal fun Activity.checkAccessFineLocationPermission(): Observable<Boolean> {
-    return Observable.create { emitter: ObservableEmitter<Boolean> ->
+internal fun Activity.checkWriteExternalStoragePermission(): Single<Boolean> {
+    return Single.create { emitter: SingleEmitter<Boolean> ->
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(object : BasePermissionListener() {
+                    public override fun onPermissionGranted(response: PermissionGrantedResponse?) {
+                        emitter.onSuccess(true)
+                    }
+
+                    public override fun onPermissionDenied(response: PermissionDeniedResponse?) {
+                        emitter.onSuccess(false)
+                    }
+                })
+                .check()
+    }
+}
+
+internal fun Activity.checkAccessFineLocationPermission(): Single<Boolean> {
+    return Single.create { emitter: SingleEmitter<Boolean> ->
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                 .withListener(object : BasePermissionListener() {
                     public override fun onPermissionGranted(response: PermissionGrantedResponse?) {
-                        emitter.onNext(true)
-
-                        emitter.onComplete()
-                    }
+                        emitter.onSuccess(true) }
 
                     public override fun onPermissionDenied(response: PermissionDeniedResponse?) {
-                        emitter.onNext(false)
-
-                        emitter.onComplete()
+                        emitter.onSuccess(false)
                     }
                 })
                 .check()
@@ -215,41 +214,76 @@ private fun <TDocument> ICrudRepository<TDocument>.getByIdOrDefault(id: UUID?, d
     return result
 }
 
-internal fun ICrudRepository<Dashboard>.getByIdOrDefault(id: UUID?, default: Dashboard = Dashboard(UUID.randomUUID())) : Dashboard {
-    return this.getByIdOrDefault<Dashboard>(id, default)
+private fun <TDocument> ICrudRepository<TDocument>.getByIdOrDefaultAsync(id: UUID?, default: TDocument) : Single<TDocument> {
+    return Single.create {
+        emitter: SingleEmitter<TDocument> ->
+        try {
+            val result = this.getByIdOrDefault(id, default)
+
+            emitter.onSuccess(result)
+        } catch(exception: Exception) {
+            emitter.onError(exception)
+        }
+    }
+}
+
+internal fun <TDocument> ICrudRepository<TDocument>.saveAsync(item: TDocument) : Single<Unit> {
+    return Single.create {
+        emitter: SingleEmitter<Unit> ->
+        try {
+            this.save(item)
+
+            emitter.onSuccess(Unit)
+        } catch(exception: Exception) {
+            emitter.onError(exception)
+        }
+    }
+}
+
+internal fun <Upstream> Observable<List<Upstream>>.filterNotEmpty() : Observable<List<Upstream>> {
+    return this
+            .filter {
+                it.any()
+            }
+}
+
+internal fun ICrudRepository<Dashboard>.getByIdOrDefaultAsync(id: UUID?, default: Dashboard = Dashboard(UUID.randomUUID())) : Single<Dashboard> {
+    return this.getByIdOrDefaultAsync<Dashboard>(id, default)
+}
+
+internal fun <TDocument> ICrudRepository<TDocument>.deleteAsync(id: String) : Single<Unit> {
+    return Single.create {
+        emitter: SingleEmitter<Unit> ->
+        try {
+            this.delete(id)
+
+            emitter.onSuccess(Unit)
+        } catch(exception: Exception) {
+            emitter.onError(exception)
+        }
+    }
 }
 
 internal fun <Upstream> Observable<List<Upstream>>.liveCount() : Observable<Int> {
-    val liveCounter: AtomicInteger = AtomicInteger()
+    val liveCounter = AtomicInteger()
 
     return this.map {
         liveCounter.addAndGet(it.count())
     }
 }
 
-internal fun IUserProfile.isValidForBurnedEnergyCalculation() : Boolean {
-    return this.enableCalculationOfBurnedEnergy && this.age != null && this.weight != null && this.height != null && this.sex != null
+internal fun <Upstream> Observable<Upstream>.withCount() : Observable<Counted<Upstream>> {
+    val liveCounter = AtomicInteger()
+
+    return this.map {
+        val currentCount = liveCounter.incrementAndGet()
+
+        Counted(currentCount, it)
+    }
 }
 
-internal fun Activity.checkWriteExternalStoragePermission(): Observable<Boolean> {
-    return Observable.create { emitter: ObservableEmitter<Boolean> ->
-        Dexter.withActivity(this)
-                .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .withListener(object : BasePermissionListener() {
-                    public override fun onPermissionGranted(response: PermissionGrantedResponse?) {
-                        emitter.onNext(true)
-
-                        emitter.onComplete()
-                    }
-
-                    public override fun onPermissionDenied(response: PermissionDeniedResponse?) {
-                        emitter.onNext(false)
-
-                        emitter.onComplete()
-                    }
-                })
-                .check()
-    }
+internal fun IUserProfile.isValidForBurnedEnergyCalculation() : Boolean {
+    return this.enableCalculationOfBurnedEnergy && this.age != null && this.weight != null && this.height != null && this.sex != null
 }
 
 internal fun ContentResolver.getContentInfo(uri: Uri): ContentInfo {
@@ -278,9 +312,10 @@ internal fun <T> ArrayRecyclerViewAdapter<T>.subscribeTo(items: Observable<T>, c
         }
     }
 
-    return result.subscribe{
-        this.add(it)
-    }
+    return result
+            .subscribe {
+                this.add(it)
+            }
 }
 
 internal fun <T> ArrayRecyclerViewAdapter<T>.subscribeToList(items: Observable<List<T>>, clearOnComplete: Boolean = false): Disposable {
@@ -292,12 +327,13 @@ internal fun <T> ArrayRecyclerViewAdapter<T>.subscribeToList(items: Observable<L
         }
     }
 
-    return result.subscribe{
-        this.addAll(it)
-    }
+    return result
+            .subscribe {
+                this.addAll(it)
+            }
 }
 
-internal fun <T> ObservableArrayAdapter<T>.subscribeTo(items: Observable<T>, clearOnComplete: Boolean = false): Disposable {
+internal fun <T> DynamicArrayAdapter<T>.subscribeTo(items: Observable<T>, clearOnComplete: Boolean = false): Disposable {
     var result = items
 
     if(clearOnComplete) {
@@ -306,7 +342,8 @@ internal fun <T> ObservableArrayAdapter<T>.subscribeTo(items: Observable<T>, cle
         }
     }
 
-    return result.subscribe{
-        this.add(it)
-    }
+    return result
+            .subscribe {
+                this.add(it)
+            }
 }

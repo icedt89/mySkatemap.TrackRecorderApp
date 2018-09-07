@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.services.calories
+package com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy
 
 internal final class BurnedEnergy(public val kiloCalories: Float) {
     public override fun toString(): String {

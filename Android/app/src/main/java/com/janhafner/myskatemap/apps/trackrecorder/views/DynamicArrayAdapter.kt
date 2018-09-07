@@ -10,17 +10,17 @@ import android.widget.ArrayAdapter
 import com.jakewharton.rxbinding2.widget.dataChanges
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 
-@Deprecated("Rename to something more generic")
-internal open class ObservableArrayAdapter<T>(context: Context, @LayoutRes private val itemLayoutId: Int)
+internal open class DynamicArrayAdapter<T>(context: Context, @LayoutRes private val itemLayoutId: Int)
     : ArrayAdapter<T>(context, itemLayoutId, ArrayList<T>()) {
     protected val itemLayoutInflater: LayoutInflater = LayoutInflater.from(context)
 
     protected val viewCache: MutableMap<Int, View> = ArrayMap<Int, View>()
 
     protected val itemViewCreatedSubject: PublishSubject<ItemViewCreatedArgs<View, T>> = PublishSubject.create<ItemViewCreatedArgs<View, T>>()
-    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject
+    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject.subscribeOn(Schedulers.computation())
 
     init {
         this.setNotifyOnChange(false)

@@ -2,20 +2,16 @@ package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.app.NotificationManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.hardware.SensorManager
 import android.location.LocationManager
-import android.preference.PreferenceManager
-import android.util.EventLog
-import com.couchbase.lite.Database
 import com.couchbase.lite.DatabaseConfiguration
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.FixedTypeConversionSharedPreferencesAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.BurnedEnergyUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.burnedenergy.IBurnedEnergyUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.energy.EnergyUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.formatting.energy.IEnergyUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.DistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.ISpeedUnitFormatterFactory
@@ -30,8 +26,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimeDateTimeMosh
 import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimePeriodMoshiAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.jodatime.UuidMoshiAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.services.*
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.IMetActivityDefinitionFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.MetActivityDefinitionFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IMetActivityDefinitionFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.MetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.DashboardService
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingServiceFactory
@@ -120,8 +116,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
-    public fun provideLiveLocationTrackingServiceFactory(jsonRestApiClient: JsonRestApiClient, appConfig: IAppConfig, appSettings: IAppSettings) : ILiveLocationTrackingServiceFactory {
-        return LiveLocationTrackingServiceFactory(appConfig, appSettings, jsonRestApiClient)
+    public fun provideLiveLocationTrackingServiceFactory(jsonRestApiClient: JsonRestApiClient, appSettings: IAppSettings) : ILiveLocationTrackingServiceFactory {
+        return LiveLocationTrackingServiceFactory(appSettings, jsonRestApiClient)
     }
 
     @Provides
@@ -161,14 +157,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
-    public fun provideAppConfig(moshi: Moshi): IAppConfig {
-        return AppConfig.fromAppConfigJson(this.applicationContext, moshi)
-    }
-
-    @Provides
-    @Singleton
-    public fun provideTrackRecorderMapFactory(appConfig: IAppConfig): ITrackRecorderMapFragmentFactory {
-        return TrackRecorderMapFragmentFactory(this.applicationContext, appConfig)
+    public fun provideTrackRecorderMapFactory(appSettings: IAppSettings): ITrackRecorderMapFragmentFactory {
+        return TrackRecorderMapFragmentFactory(this.applicationContext, appSettings)
     }
 
     @Provides
@@ -248,8 +238,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Provides
     @Singleton
-    public fun provideBurnedEnergyUnitFormatterFactory(appSettings: IAppSettings): IBurnedEnergyUnitFormatterFactory {
-        return BurnedEnergyUnitFormatterFactory(appSettings)
+    public fun provideEnergyUnitFormatterFactory(appSettings: IAppSettings): IEnergyUnitFormatterFactory {
+        return EnergyUnitFormatterFactory(appSettings)
     }
 
     @Named("track-recordings-couchdb-factory")

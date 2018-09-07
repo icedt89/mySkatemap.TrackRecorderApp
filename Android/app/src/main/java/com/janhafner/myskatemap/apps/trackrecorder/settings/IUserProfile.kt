@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.settings
 
-import com.janhafner.myskatemap.apps.trackrecorder.services.calories.Sex
+import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.Sex
 import io.reactivex.Observable
 
 internal interface IUserProfile {

@@ -18,19 +18,19 @@ internal final class Dashboard {
     public var id: UUID = UUID.randomUUID()
         private set
 
-    public var topLeftTileImplementationTypeName: String = DistanceDashboardTileFragment::class.java.name
+    public var topLeftTileImplementationTypeName: String = DistanceDashboardTileFragment::class.java.simpleName
 
-    public var topRightTileImplementationTypeName: String = BurnedEnergyDashboardTileFragment::class.java.name
+    public var topRightTileImplementationTypeName: String = BurnedEnergyDashboardTileFragment::class.java.simpleName
 
-    public var middleCenterTileImplementationTypeName: String = CurrentSpeedDashboardTileFragment::class.java.name
+    public var middleCenterTileImplementationTypeName: String = CurrentSpeedDashboardTileFragment::class.java.simpleName
 
-    public var bottomLeftTileImplementationTypeName: String = AverageSpeedDashboardTileFragment::class.java.name
+    public var bottomLeftTileImplementationTypeName: String = AverageSpeedDashboardTileFragment::class.java.simpleName
 
-    public var bottomRightTileImplementationTypeName: String = CurrentAltitudeDashboardTileFragment::class.java.name
+    public var bottomRightTileImplementationTypeName: String = CurrentAltitudeDashboardTileFragment::class.java.simpleName
 
     public fun toCouchDbDocument(): MutableDocument {
         val result = MutableDocument(this.id.toString())
-        result.setString("documentType", this.javaClass.name)
+        result.setString("documentType", this.javaClass.simpleName)
 
         result.setString("topLeftTileImplementationTypeName", this.topLeftTileImplementationTypeName)
         result.setString("topRightTileImplementationTypeName", this.topRightTileImplementationTypeName)
