@@ -3,27 +3,18 @@
     <string name="trackrecorderactivity_title">Track Recorder</string>
     <string name="trackrecorderactivity_toolbar_finish_currenttracking">Finish</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttracking">Discard</string>
-    <string name="trackrecorderactivity_presenter_default_new_trackrecording_name_template">Track %s</string>
     <string name="trackrecorderactivity_toast_recording_running">Recording active</string>
     <string name="trackrecorderactivity_toast_recording_paused">Recording paused</string>
     <string name="trackrecorderactivity_tab_dashboard_title">Dashboard</string>
     <string name="trackrecorderactivity_tab_map_title">Map</string>
-    <string name="trackrecorderactivity_tab_data_title">Data</string>
-    <string name="trackrecorderactivity_fragment_data_tab_trackingstartedat_none">No recording in progress</string>
     <string name="trackrecorderactivity_discard_confirmation_title">Discard</string>
-    <string name="trackrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost!  Do you want to proceed?</string>
+    <string name="trackrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost! Do you want to proceed?</string>
     <string name="trackrecorderactivity_discard_confirmation_button_yes_label">Discard</string>
     <string name="trackrecorderactivity_discard_confirmation_button_no_label">Cancel</string>
     <string name="trackrecorderactivity_finish_confirmation_title">Finish</string>
     <string name="trackrecorderactivity_finish_confirmation_message">All data of the current recording will be saved for later processing by you.\n\nDo you want to proceed?</string>
     <string name="trackrecorderactivity_finish_confirmation_button_yes_label">Finish</string>
     <string name="trackrecorderactivity_finish_confirmation_button_no_label">Cancel</string>
-    <string name="trackrecorderactivity_tab_data_trackname">Name of track</string>
-    <string name="trackrecorderactivity_tab_data_trackdistance">Length</string>
-    <string name="trackrecorderactivity_tab_data_recordingtime">Recording duration</string>
-    <string name="trackrecorderactivity_tab_data_numberofpositions">Number of locations</string>
-    <string name="trackrecorderactivity_tab_data_startedat">Started at</string>
-    <string name="trackrecorderactivity_tab_data_comments">Notices</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_message">Please activate location services to proceed with tracking.</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_title">Location services unavailable</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_open_label">Open location</string>
@@ -33,13 +24,7 @@
     <string name="trackrecorderservice_notification_status_running">Running</string>
     <string name="trackrecorderservice_notification_action_resume">Resume</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
-    <string name="trackrecorderservice_notification_action_terminate">Terminate</string>
-    <string name="trackrecorderservice_notification_contenttext_template">%s in %s, cool 👍</string>
-    <string name="trackrecorderactivity_tab_attachments_actionbar_delete">Delete</string>
-    <string name="trackrecorderactivity_snackbar_locationservices_message">Location services not enabled</string>
-    <string name="trackrecorderactivity_snackbar_locationservices_action_enable">enable</string>
-
-    <string name="startactivity_start_new_recording_button_label">Start new recording</string>
+    <string name="trackrecorderservice_notification_contenttext_template">%s in %s</string>
 
     <string name="appsettings_preference_units_title">Units</string>
     <string name="appsettings_preference_units_distance_label">Distance</string>
@@ -49,8 +34,8 @@
     <string name="appsettings_preference_units_energy_label">Energy</string>
     <string name="appsettings_preference_units_energy_summary">Energy will be display and formatted as %s</string>
     <string name="appsettings_preference_tracking_title">Recording</string>
-    <string name="appsettings_preference_tracking_location_provider_label">Location Provider implementation</string>
-    <string name="appsettings_preference_tracking_location_provider_summary">Locations will be received using the %s provider</string>
+    <string name="appsettings_preference_tracking_location_provider_label">Location Provider</string>
+    <string name="appsettings_preference_tracking_location_provider_summary">Locations will be received using the "%s" provider</string>
     <string name="appsettings_preference_tracking_allow_live_tracking_label">Live tracking</string>
     <string name="appsettings_preference_tracking_allow_live_tracking_summary">Sends the currently recorded track anonymously to MySkatemap</string>
     <string name="appsettings_preference_tracking_map_control_label">Map</string>
@@ -67,6 +52,8 @@
     <string name="userprofilesettings_preference_height_label">Your height</string>
     <string name="userprofilesettings_preference_height_summary_empty">In centimeters</string>
     <string name="userprofilesettings_preference_height_summary">You are %s centimeters tall</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_label">Auto pause</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_summary">Automatically pauses recording if still stand is detected</string>
     <string name="userprofilesettings_preference_sex_label">Your sex</string>
     <string name="userprofilesettings_preference_sex_summary">Your are %s</string>
     <string name="userprofilesettings_preference_name_label">Your name</string>
@@ -93,6 +80,7 @@
     <string name="appsettings_preference_default_met_activity_code_key">appsettings_preference_default_met_activity_code</string>
     <string name="appsettings_preference_map_control_key">appsettings_preference_map_control</string>
     <string name="appsettings_preference_app_ui_locale_key">appsettings_preference_app_ui_locale</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_key">appsettings_preference_enable_auto_pause_on_still</string>
 
     <string name="userprofilesettingsactivity_title">Your Profile</string>
     <string name="settingsactivity_title">Settings</string>

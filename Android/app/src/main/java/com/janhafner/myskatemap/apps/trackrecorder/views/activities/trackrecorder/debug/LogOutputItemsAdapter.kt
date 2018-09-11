@@ -1,10 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.debug
 
 import android.view.View
-import com.janhafner.myskatemap.apps.trackrecorder.Counted
+import com.janhafner.myskatemap.apps.trackrecorder.common.Counted
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.formatTimeOnlyDefault
-import com.janhafner.myskatemap.apps.trackrecorder.views.ArrayRecyclerViewAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.common.ArrayRecyclerViewAdapter
 import kotlinx.android.synthetic.main.activity_track_recorder_tab_debug_log_output_item.view.*
 
 internal final class LogOutputItemsAdapter : ArrayRecyclerViewAdapter<Counted<LogItem>>(R.layout.activity_track_recorder_tab_debug_log_output_item) {

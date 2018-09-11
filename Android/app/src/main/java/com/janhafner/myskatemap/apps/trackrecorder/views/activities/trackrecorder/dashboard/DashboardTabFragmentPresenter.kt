@@ -3,7 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getByIdOrDefaultAsync
 import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
-import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.Dashboard
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
@@ -52,7 +52,7 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    dashboardResult, exception ->
+                    dashboardResult, _ ->
                     this.view.activity!!.supportFragmentManager.beginTransaction()
                             .replace(R.id.trackrecorderactivity_tab_dashboard_tile_top_left, dashboardResult.topLeftFragment)
                             .replace(R.id.trackrecorderactivity_tab_dashboard_tile_top_right, dashboardResult.topRightFragment)

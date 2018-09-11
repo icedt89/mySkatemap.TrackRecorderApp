@@ -1,8 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.map
 
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +9,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
 
 internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
     private lateinit var polyline: Polyline

@@ -8,28 +8,28 @@
         android:title="@string/userprofilesettings_preference_enablecalculationofburnedenergy_label"
         android:summary="@string/userprofilesettings_preference_enablecalculationofburnedenergy_summary"
         android:defaultValue="false" />
-    <com.janhafner.myskatemap.apps.trackrecorder.views.FixedEditTextPreference
+    <com.janhafner.myskatemap.apps.trackrecorder.settings.FixedEditTextPreference
         android:key="@string/userprofilesettings_preference_name_key"
         android:title="@string/userprofilesettings_preference_name_label"
         android:summary="@string/userprofilesettings_preference_name_summary"
         android:inputType="textPersonName"
         android:defaultValue="Anonymous"
         app:emptySummary="@string/userprofilesettings_preference_name_summary_empty"/>
-    <com.janhafner.myskatemap.apps.trackrecorder.views.FixedEditTextPreference
+    <com.janhafner.myskatemap.apps.trackrecorder.settings.FixedEditTextPreference
         android:key="@string/userprofilesettings_preference_age_key"
         android:title="@string/userprofilesettings_preference_age_label"
         android:summary="@string/userprofilesettings_preference_age_summary"
         android:inputType="number"
         android:numeric="integer"
         app:emptySummary="@string/userprofilesettings_preference_age_summary_empty"/>
-    <com.janhafner.myskatemap.apps.trackrecorder.views.FixedEditTextPreference
+    <com.janhafner.myskatemap.apps.trackrecorder.settings.FixedEditTextPreference
         android:key="@string/userprofilesettings_preference_weight_key"
         android:title="@string/userprofilesettings_preference_weight_label"
         android:summary="@string/userprofilesettings_preference_weight_summary"
         android:inputType="numberDecimal"
         android:numeric="decimal"
         app:emptySummary="@string/userprofilesettings_preference_weight_summary_empty"/>
-    <com.janhafner.myskatemap.apps.trackrecorder.views.FixedEditTextPreference
+    <com.janhafner.myskatemap.apps.trackrecorder.settings.FixedEditTextPreference
         android:key="@string/userprofilesettings_preference_height_key"
         android:title="@string/userprofilesettings_preference_height_label"
         android:summary="@string/userprofilesettings_preference_height_summary"

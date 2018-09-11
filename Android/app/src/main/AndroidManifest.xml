@@ -53,7 +53,7 @@
             android:name=".services.trackrecorder.TrackRecorderService"
             android:exported="false" />
         <service
-            android:name=".services.stilldetection.ActivityRecognizerIntentService"
+            android:name=".services.activitydetection.ActivityRecognizerIntentService"
             android:exported="false" />
     </application>
 </manifest>

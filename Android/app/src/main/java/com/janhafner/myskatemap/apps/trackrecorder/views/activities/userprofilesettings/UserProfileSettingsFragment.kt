@@ -2,11 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofile
 
 import android.os.Bundle
 import android.preference.PreferenceFragment
-import android.view.View
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import javax.inject.Inject
 
 internal final class UserProfileSettingsFragment : PreferenceFragment() {
     private lateinit var presenter: UserProfileSettingsFragmentPresenter

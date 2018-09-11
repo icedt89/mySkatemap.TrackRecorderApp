@@ -5,24 +5,26 @@ import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import com.janhafner.myskatemap.apps.trackrecorder.ObservableTimer
+import com.janhafner.myskatemap.apps.trackrecorder.aggregations.LocationsAggregation
+import com.janhafner.myskatemap.apps.trackrecorder.common.ObservableTimer
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.services.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.activitydetection.IActivityDetectorBroadcastReceiverFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.BurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IBurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IMetActivityDefinitionFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.NullBurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.DistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingServiceFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingSession
-import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.StillDetectorBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.services.locationavailability.LocationAvailabilityChangedBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotificationChannel
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProviderFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.statistics.TrackRecordingStatistic
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -35,7 +37,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public lateinit var appSettings: IAppSettings
 
     @Inject
-    public lateinit var distanceUnitFormatterFactory: IDistanceUnitFormatterFactory
+    public lateinit var distanceConverterFactory: IDistanceConverterFactory
 
     @Inject
     public lateinit var locationProviderFactory: ILocationProviderFactory
@@ -53,7 +55,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public lateinit var notificationManager: NotificationManager
 
     @Inject
-    public lateinit var stillDetectorBroadcastReceiver: StillDetectorBroadcastReceiver
+    public lateinit var activityDetectorBroadcastReceiverFactory: IActivityDetectorBroadcastReceiverFactory
 
     private lateinit var trackRecorderServiceNotificationChannel: TrackRecorderServiceNotificationChannel
 
@@ -69,7 +71,8 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
             this.trackRecorderServiceNotificationChannel = TrackRecorderServiceNotificationChannel(notificationManager)
         }
 
-        this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this, this.distanceUnitFormatterFactory.createFormatter())
+        this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this, this.distanceConverterFactory.createConverter())
+        this.trackRecorderServiceNotification.vibrateOnLocationAvailabilityLoss = this.appSettings.vibrateOnLocationAvailabilityLoss
 
         super.onCreate()
     }
@@ -103,7 +106,8 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
 
         val locationProvider = this.locationProviderFactory.createLocationProvider(trackRecording.locationProviderTypeName)
         val observableTimer = ObservableTimer()
-        val trackRecordingStatistic = TrackRecordingStatistic()
+        val trackRecordingStatistic = LocationsAggregation()
+        val stillDetectorBroadcastReceiver = this.activityDetectorBroadcastReceiverFactory.createActivityDetector()
         val distanceCalculator = DistanceCalculator()
         val burnedEnergyCalculator: IBurnedEnergyCalculator
         val liveLocationTrackingSession: ILiveLocationTrackingSession
@@ -130,7 +134,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                 this.appSettings,
                 this.trackRecorderServiceNotification,
                 distanceCalculator,
-                this.distanceUnitFormatterFactory,
+                this.distanceConverterFactory,
                 trackRecording,
                 trackRecordingStatistic,
                 burnedEnergyCalculator,
@@ -138,7 +142,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                 observableTimer,
                 liveLocationTrackingSession,
                 this,
-                this.stillDetectorBroadcastReceiver,
+                stillDetectorBroadcastReceiver,
                 this.locationAvailabilityChangedBroadcastReceiver)
 
         this.appSettings.currentTrackRecordingId = trackRecording.id

@@ -1,7 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import android.os.Binder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import io.reactivex.Observable
 
 internal final class TrackRecorderServiceBinder(private val trackRecorderService: ITrackRecorderService): Binder(), ITrackRecorderService {

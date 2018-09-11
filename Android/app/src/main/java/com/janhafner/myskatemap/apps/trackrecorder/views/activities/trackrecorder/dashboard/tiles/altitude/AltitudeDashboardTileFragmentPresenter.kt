@@ -1,11 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude
 
 import com.jakewharton.rxbinding2.widget.text
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatter
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.format
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
@@ -17,17 +18,17 @@ import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.*
 internal abstract class AltitudeDashboardTileFragmentPresenter(view: DashboardTileFragment,
                                                             appSettings: IAppSettings,
                                                             trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
-                                                            private val distanceUnitFormatterFactory: IDistanceUnitFormatterFactory)
+                                                            private val distanceConverterFactory: IDistanceConverterFactory)
     : DashboardTileFragmentPresenter(view, appSettings, trackRecorderServiceController) {
 
-    private var distanceUnitFormatter: IDistanceUnitFormatter
+    private var distanceConverter: IDistanceConverter
 
     private var currentValue: Float = 0.0f
 
     private val defaultValue: Float= 0.0f
 
     init {
-        this.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
+        this.distanceConverter = this.distanceConverterFactory.createConverter()
     }
 
     protected override fun createSubscriptions(trackRecorderSession: ITrackRecordingSession): List<Disposable> {
@@ -42,13 +43,13 @@ internal abstract class AltitudeDashboardTileFragmentPresenter(view: DashboardTi
                             it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name
                         }
                         .doOnNext {
-                            this.distanceUnitFormatter = this.distanceUnitFormatterFactory.createFormatter()
+                            this.distanceConverter = this.distanceConverterFactory.createConverter()
                         }
                         .map {
                             this.currentValue
                         })
                 .map {
-                    this.distanceUnitFormatter.format(it)
+                    this.distanceConverter.format(it)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this.view.fragment_dashboard_tile_value.text()))
@@ -59,7 +60,7 @@ internal abstract class AltitudeDashboardTileFragmentPresenter(view: DashboardTi
     protected abstract fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float>
 
     override fun resetView() {
-        this.view.fragment_dashboard_tile_value.text = this.distanceUnitFormatter.format(this.defaultValue)
+        this.view.fragment_dashboard_tile_value.text = this.distanceConverter.format(this.defaultValue)
     }
 }
 

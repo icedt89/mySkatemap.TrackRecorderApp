@@ -1,8 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
+import com.janhafner.myskatemap.apps.trackrecorder.modules.ApplicationModule
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.appsettings.AppSettingsFragment
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings.UserProfileSettingsFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.DashboardTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
@@ -15,9 +15,9 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.AverageSpeedDashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.CurrentSpeedDashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.MaximumSpeedDashboardTileFragment
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.data.DataTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.debug.DebugTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings.UserProfileSettingsFragment
 import dagger.Component
 import javax.inject.Singleton
 
@@ -27,8 +27,6 @@ internal interface ApplicationComponent {
     fun inject(trackRecorderActivity: TrackRecorderActivity)
 
     fun inject(mapTabFragment: MapTabFragment)
-
-    fun inject(dataTabFragment: DataTabFragment)
 
     fun inject(debugTabFragment: DebugTabFragment)
 

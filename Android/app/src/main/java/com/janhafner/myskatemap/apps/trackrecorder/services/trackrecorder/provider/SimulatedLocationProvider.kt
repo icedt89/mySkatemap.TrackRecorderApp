@@ -3,9 +3,9 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 import android.content.Context
 import android.os.SystemClock
 import com.google.android.gms.maps.model.LatLng
-import com.janhafner.myskatemap.apps.trackrecorder.clone
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
-import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
+import com.janhafner.myskatemap.apps.trackrecorder.common.isLocationServicesEnabled
+import com.janhafner.myskatemap.apps.trackrecorder.services.clone
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
 import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
@@ -27,6 +27,8 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
     private var postLocationTimerTask: TimerTask? = this.createTimerTask()
 
+    private var sequenceNumber: Int = 0
+
     private fun createTimerTask(): TimerTask {
         return object: TimerTask() {
             override fun run() {
@@ -41,23 +43,6 @@ internal final class SimulatedLocationProvider(private val context: Context,
                 self.publishLocationUpdate(computedLocation)
             }
         }
-    }
-
-    public override fun overrideSequenceNumber(sequenceNumber: Int) {
-        if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
-        }
-
-        super.overrideSequenceNumber(-1)
-        this.lastComputedLocation = null
-
-        this.genericCoordinates.clear()
-
-        for (i in 0..sequenceNumber) {
-            this.computeLocation()
-        }
-
-        super.overrideSequenceNumber(sequenceNumber)
     }
 
     private fun computeNextLocation(counter: Int, initialLocation: Location, offsetLatitude: Double, offsetLongitude: Double): LatLng {
@@ -86,10 +71,10 @@ internal final class SimulatedLocationProvider(private val context: Context,
     }
 
     private fun computeLocation(): Location {
-        val sequenceNumber = this.generateSequenceNumber()
+        val sequenceNumber = ++this.sequenceNumber
 
         if (this.lastComputedLocation == null) {
-            this.lastComputedLocation = Location(sequenceNumber)
+            this.lastComputedLocation = Location()
 
             this.lastComputedLocation?.provider = "fake-gps"
             this.lastComputedLocation?.bearing = initialLocation.bearing
@@ -101,7 +86,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
             this.genericCoordinates.add(PointD(0.0, 0.0))
         } else {
-            this.lastComputedLocation = this.lastComputedLocation?.clone(sequenceNumber)
+            this.lastComputedLocation = this.lastComputedLocation?.clone()
 
             this.lastComputedLocation?.bearing = this.lastComputedLocation?.bearing?.plus(this.bearingStepping)
 
@@ -131,12 +116,12 @@ internal final class SimulatedLocationProvider(private val context: Context,
         return (Math.sin(sequenceNumber * 2 * Math.PI / period) * (maximum / 2) + (maximum / 2)) * maximum
     }
 
-    public override fun getlastKnownLocation(): Location? {
+    public override fun getLastKnownLocation(): Location? {
         if(this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
 
-        val result = Location(-1)
+        val result = Location()
 
         result.latitude = ThreadLocalRandom.current().nextDouble() * 50
         if(SystemClock.elapsedRealtimeNanos() % 2 == 0L) {
@@ -198,8 +183,5 @@ internal final class SimulatedLocationProvider(private val context: Context,
     }
 
     private final class PointD(public val x: Double, public val y: Double) {
-        public override fun toString(): String {
-            return "PointD(X:${this.x};Y:${this.y})"
-        }
     }
 }

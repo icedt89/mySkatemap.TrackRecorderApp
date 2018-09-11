@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':app.conversion', ':app.common', ':app.stilldetection', ':app.export', ':app.services.couchdb', ':app.settings', ':app.services'

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
-import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.Dashboard
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.IDashboardTileFragmentFactory
 import javax.inject.Inject

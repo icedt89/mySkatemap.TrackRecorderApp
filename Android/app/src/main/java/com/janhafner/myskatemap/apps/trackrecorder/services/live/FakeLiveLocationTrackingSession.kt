@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.live
 
-import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
 
 internal final class FakeLiveLocationTrackingSession(private val fakeLiveLocationTrackingService: FakeLiveLocationTrackingService,
                                                      private val sessionId: String) : ILiveLocationTrackingSession {

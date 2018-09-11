@@ -1,20 +1,23 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map
 
 import android.graphics.Bitmap
-import com.janhafner.myskatemap.apps.trackrecorder.*
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
+import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
+import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.common.filterNotEmpty
+import com.janhafner.myskatemap.apps.trackrecorder.services.toSimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecordingSessionState
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.settings.PropertyChangedData
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.*
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnMapSnapshotReadyCallback
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnTrackRecorderMapReadyCallback
+import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
 import java.util.concurrent.TimeUnit
 
 internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
@@ -113,7 +116,7 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                 trackRecorderSession.stateChanged
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe{
-                            this.trackRecorderMapFragment!!.gesturesEnabled = it != TrackRecordingSessionState.Running
+                            this.trackRecorderMapFragment!!.gesturesEnabled = it.state != TrackRecordingSessionState.Running
                         }
         )
 

@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.distance
 
-import com.janhafner.myskatemap.apps.trackrecorder.distanceTo
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.distanceTo
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
@@ -13,7 +13,7 @@ internal final class DistanceCalculator : IDistanceCalculator {
     public override val distanceCalculated: Observable<Float> = this.distanceCalculatedSubject.subscribeOn(Schedulers.computation())
 
     public override val distance: Float
-        get() = this.distanceCalculatedSubject.value
+        get() = this.distanceCalculatedSubject.value!!
 
     public override fun clear() {
         if(this.isDestroyed) {

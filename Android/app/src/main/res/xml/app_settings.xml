@@ -50,6 +50,11 @@
             android:title="@string/appsettings_preference_tracking_allow_live_tracking_label"
             android:summary="@string/appsettings_preference_tracking_allow_live_tracking_summary"
             android:defaultValue="false" />
+        <SwitchPreference
+            android:key="@string/appsettings_preference_enable_auto_pause_on_still_key"
+            android:title="@string/appsettings_preference_enable_auto_pause_on_still_label"
+            android:summary="@string/appsettings_preference_enable_auto_pause_on_still_summary"
+            android:defaultValue="true" />
         <ListPreference
             android:key="@string/appsettings_preference_default_met_activity_code_key"
             android:title="@string/appsettings_preference_tracking_default_met_activity_code_label"

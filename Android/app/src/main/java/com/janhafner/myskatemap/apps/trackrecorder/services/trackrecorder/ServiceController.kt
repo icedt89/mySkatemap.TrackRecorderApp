@@ -20,7 +20,7 @@ internal final class ServiceController<TService, TBinder: IBinder>(private val c
     public override val isClientBoundChanged: Observable<Boolean> = this.isClientBoundChangedSubject.subscribeOn(Schedulers.computation())
 
     public override val isClientBound: Boolean
-        get() = this.isClientBoundChangedSubject.value
+        get() = this.isClientBoundChangedSubject.value!!
 
     public override var currentBinder: TBinder? = null
         private set
@@ -29,7 +29,7 @@ internal final class ServiceController<TService, TBinder: IBinder>(private val c
 
     public override fun startAndBindService() : Disposable {
         if(this.serviceControllerSubscription != null) {
-            throw IllegalStateException("Service already started!")
+            return this.serviceControllerSubscription!!
         }
 
         // Starting from api level 26 a background services must be marked as "foreground"-service in order to get not killed by the OS

@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.live
 
 import android.util.Log
-import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
 import java.util.*
 
 internal final class FakeLiveLocationTrackingService() : ILiveLocationTrackingService {

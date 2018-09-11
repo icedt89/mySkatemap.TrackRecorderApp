@@ -9,4 +9,7 @@
     <android.support.v7.widget.AppCompatTextView
         style="@style/MySkatemap.TrackRecorder.Dashboard.Tile.Main.Value"
         android:id="@+id/fragment_dashboard_tile_value" />
+    <android.support.v7.widget.AppCompatTextView
+        style="@style/MySkatemap.TrackRecorder.Dashboard.Tile.Main.Unit"
+        android:id="@+id/fragment_dashboard_tile_unit" />
 </android.support.v7.widget.LinearLayoutCompat>

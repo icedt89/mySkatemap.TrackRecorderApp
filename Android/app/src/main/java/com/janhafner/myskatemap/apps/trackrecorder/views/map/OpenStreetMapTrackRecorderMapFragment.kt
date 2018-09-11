@@ -1,14 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.map
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
@@ -59,7 +57,8 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
     }
 
     private fun moveTrackIntoView() {
-        this.polyline.points = this.locations.map { GeoPoint(it.latitude, it.longitude) }
+        val points = this.locations.map { GeoPoint(it.latitude, it.longitude) }
+        this.polyline.setPoints(points)
 
         if (!this.polyline.points.any()) {
             return

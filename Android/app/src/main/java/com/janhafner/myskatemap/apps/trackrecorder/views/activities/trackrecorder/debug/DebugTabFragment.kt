@@ -5,12 +5,13 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.janhafner.myskatemap.apps.trackrecorder.*
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.energy.IEnergyUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.ISpeedUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.stilldetection.IStillDetector
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ILocationAvailabilityChangedDetector
+import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy.IEnergyConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.ISpeedConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.activitydetection.IActivityDetectorBroadcastReceiverFactory
+import com.janhafner.myskatemap.apps.trackrecorder.services.locationavailability.ILocationAvailabilityChangedDetector
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -23,22 +24,22 @@ internal final class DebugTabFragment : Fragment() {
     public lateinit var appSettings: IAppSettings
 
     @Inject
-    public lateinit var trackRecorderUnitFormatterFactory: IDistanceUnitFormatterFactory
+    public lateinit var distanceConverterFactory: IDistanceConverterFactory
 
     @Inject
-    public lateinit var energyUnitFormatterFactory: IEnergyUnitFormatterFactory
+    public lateinit var energyConverterFactory: IEnergyConverterFactory
 
     @Inject
-    public lateinit var speedUnitFormatterFactory: ISpeedUnitFormatterFactory
-
-    @Inject
-    public lateinit var stillDetector: IStillDetector
+    public lateinit var speedConverterFactory: ISpeedConverterFactory
 
     @Inject
     public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
     @Inject
     public lateinit var locationAvailabilityChangedDetector: ILocationAvailabilityChangedDetector
+
+    @Inject
+    public lateinit var activityDetectorBroadcastReceiverFactory: IActivityDetectorBroadcastReceiverFactory
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_debug_tab, container, false)
@@ -49,9 +50,9 @@ internal final class DebugTabFragment : Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.presenter = DebugTabFragmentPresenter(this, this.trackRecorderServiceController, this.appSettings, this.trackRecorderUnitFormatterFactory,
-                this.energyUnitFormatterFactory,
-                this.speedUnitFormatterFactory, this.stillDetector, this.locationAvailabilityChangedDetector)
+        this.presenter = DebugTabFragmentPresenter(this, this.trackRecorderServiceController, this.appSettings, this.distanceConverterFactory,
+                this.energyConverterFactory,
+                this.speedConverterFactory, this.activityDetectorBroadcastReceiverFactory, this.locationAvailabilityChangedDetector)
     }
 
     public override fun setUserVisibleHint(isVisibleToUser: Boolean) {

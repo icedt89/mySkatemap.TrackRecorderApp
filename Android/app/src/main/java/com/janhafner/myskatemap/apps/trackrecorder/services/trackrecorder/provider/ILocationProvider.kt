@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
-import com.janhafner.myskatemap.apps.trackrecorder.IDestroyable
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
 import io.reactivex.Observable
 
 internal interface ILocationProvider : IDestroyable {
@@ -9,17 +9,11 @@ internal interface ILocationProvider : IDestroyable {
 
     fun stopLocationUpdates()
 
-    fun resetSequenceNumber()
-
-    fun getlastKnownLocation(): Location?
-
-    fun overrideSequenceNumber(sequenceNumber: Int)
+    fun getLastKnownLocation(): Location?
 
     val isActive: Boolean
 
     val activityChanged: Observable<Boolean>
-
-    val sequenceNumberOverridden: Observable<Int>
 
     val locationsReceived: Observable<Location>
 }

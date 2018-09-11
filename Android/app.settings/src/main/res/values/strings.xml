@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">mySkatemap Track Recorder - Settings</string>
+
+    <string name="userprofilesettings_preference_enablecalculationofburnedenergy_key">userprofilesettings_preference_enablecalculationofburnedenergy</string>
+    <string name="userprofilesettings_preference_name_key">userprofilesettings_preference_name</string>
+    <string name="userprofilesettings_preference_age_key">userprofilesettings_preference_age</string>
+    <string name="userprofilesettings_preference_height_key">userprofilesettings_preference_height</string>
+    <string name="userprofilesettings_preference_weight_key">userprofilesettings_preference_weight</string>
+    <string name="userprofilesettings_preference_sex_key">userprofilesettings_preference_sex</string>
+
+    <string name="appsettings_preference_units_distance_key">appsettings_preference_units_distance</string>
+    <string name="appsettings_preference_units_speed_key">appsettings_preference_units_speed</string>
+    <string name="appsettings_preference_units_energy_key">appsettings_preference_units_energy</string>
+    <string name="appsettings_preference_tracking_location_provider_key">appsettings_preference_tracking_location_provider</string>
+    <string name="appsettings_preference_tracking_allow_live_tracking_key">appsettings_preference_tracking_allow_live_tracking</string>
+    <string name="appsettings_preference_notifications_vibrate_on_background_stop_key">appsettings_preference_notifications_vibrate_on_background_stop</string>
+    <string name="appsettings_preference_default_met_activity_code_key">appsettings_preference_default_met_activity_code</string>
+    <string name="appsettings_preference_map_control_key">appsettings_preference_map_control</string>
+    <string name="appsettings_preference_app_ui_locale_key">appsettings_preference_app_ui_locale</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_key">appsettings_preference_enable_auto_pause_on_still</string>
+</resources>

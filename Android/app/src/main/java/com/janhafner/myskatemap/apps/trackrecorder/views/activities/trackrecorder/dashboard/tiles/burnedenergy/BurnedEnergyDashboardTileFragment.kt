@@ -1,19 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.burnedenergy
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.annotation.LayoutRes
 import android.view.View
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.energy.IEnergyUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy.IEnergyConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
 import javax.inject.Inject
 
 internal final class BurnedEnergyDashboardTileFragment : DashboardTileFragment() {
     @Inject
-    public lateinit var energyUnitFormatterFactory: IEnergyUnitFormatterFactory
+    public lateinit var energyConverterFactory: IEnergyConverterFactory
 
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         this.context!!.getApplicationInjector().inject(this)
@@ -22,6 +19,6 @@ internal final class BurnedEnergyDashboardTileFragment : DashboardTileFragment()
     }
 
     protected override fun createPresenter(): DashboardTileFragmentPresenter {
-        return BurnedEnergyDashboardTileFragmentPresenter(this, this.appSettings, this.trackRecorderServiceController, this.energyUnitFormatterFactory)
+        return BurnedEnergyDashboardTileFragmentPresenter(this, this.appSettings, this.trackRecorderServiceController, this.energyConverterFactory)
     }
 }

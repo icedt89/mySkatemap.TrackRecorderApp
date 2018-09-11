@@ -2,13 +2,12 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import com.jakewharton.rxbinding2.widget.text
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatter
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.energy.IEnergyUnitFormatter
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.energy.IEnergyUnitFormatterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.IEnergyConverter
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.format
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy.IEnergyConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
@@ -19,16 +18,16 @@ import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.*
 internal final class BurnedEnergyDashboardTileFragmentPresenter(view: DashboardTileFragment,
                                                                 appSettings: IAppSettings,
                                                                 trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
-                                                                private val energyUnitFormatterFactory: IEnergyUnitFormatterFactory)
+                                                                private val energyConverterFactory: IEnergyConverterFactory)
     : DashboardTileFragmentPresenter(view, appSettings, trackRecorderServiceController) {
-    private var energyUnitFormatter: IEnergyUnitFormatter
+    private var energyConverter: IEnergyConverter
 
     private var currentValue: Float = 0.0f
 
     private val defaultValue: Float= 0.0f
 
     init {
-        this.energyUnitFormatter = energyUnitFormatterFactory.createFormatter()
+        this.energyConverter = energyConverterFactory.createConverter()
     }
 
     public override fun initialize() {
@@ -50,13 +49,13 @@ internal final class BurnedEnergyDashboardTileFragmentPresenter(view: DashboardT
                             it.hasChanged && it.propertyName == IAppSettings::energyUnitFormatterTypeName.name
                         }
                         .doOnNext {
-                            this.energyUnitFormatter = this.energyUnitFormatterFactory.createFormatter()
+                            this.energyConverter = this.energyConverterFactory.createConverter()
                         }
                         .map {
                             this.currentValue
                         })
                 .map {
-                    this.energyUnitFormatter.format(it)
+                    this.energyConverter.format(it)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this.view.fragment_dashboard_tile_value.text()))
@@ -65,6 +64,6 @@ internal final class BurnedEnergyDashboardTileFragmentPresenter(view: DashboardT
     }
 
     protected override fun resetView() {
-        this.view.fragment_dashboard_tile_value.text = this.energyUnitFormatter.format(this.defaultValue)
+        this.view.fragment_dashboard_tile_value.text = this.energyConverter.format(this.defaultValue)
     }
 }

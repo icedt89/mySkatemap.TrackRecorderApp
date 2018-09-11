@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.live
 
 import com.janhafner.myskatemap.apps.trackrecorder.*
+import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
 import java.util.*
 
 internal final class LiveLocationTrackingService(private val jsonRestApiClient: JsonRestApiClient)

@@ -8,8 +8,9 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.tasks.Tasks
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
-import com.janhafner.myskatemap.apps.trackrecorder.toLocation
+import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
+import com.janhafner.myskatemap.apps.trackrecorder.services.toLocation
 import java.util.concurrent.ExecutionException
 
 internal final class FusedLocationProvider(private val context: Context,
@@ -19,9 +20,7 @@ internal final class FusedLocationProvider(private val context: Context,
             val self = this@FusedLocationProvider
 
             for(sourceLocation in locationResult.locations) {
-                val sequenceNumber = self.generateSequenceNumber()
-
-                val location = sourceLocation.toLocation(sequenceNumber)
+                val location = sourceLocation.toLocation()
 
                 self.publishLocationUpdate(location)
             }
@@ -31,8 +30,10 @@ internal final class FusedLocationProvider(private val context: Context,
     private val locationRequest: LocationRequest = LocationRequest.create()
 
     init {
-        locationRequest.interval = 8000
-        locationRequest.fastestInterval = 4000
+        locationRequest.fastestInterval = BuildConfig.FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS.toLong()
+        locationRequest.interval = BuildConfig.FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS.toLong()
+        locationRequest.maxWaitTime = BuildConfig.FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS.toLong()
+        locationRequest.smallestDisplacement = BuildConfig.FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_METERS
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
@@ -68,7 +69,7 @@ internal final class FusedLocationProvider(private val context: Context,
         this.isActive = false
     }
 
-    public override fun getlastKnownLocation(): Location? {
+    public override fun getLastKnownLocation(): Location? {
         if(this.isDestroyed) {
             throw IllegalStateException("Object is destroyed!")
         }
@@ -80,7 +81,7 @@ internal final class FusedLocationProvider(private val context: Context,
         try {
             val result = Tasks.await(this.fusedLocationProviderClient.lastLocation)
 
-            return result.toLocation(-1)
+            return result.toLocation()
         } catch(exception: ExecutionException) {
             return null
         }

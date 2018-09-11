@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.distance
 
-import com.janhafner.myskatemap.apps.trackrecorder.IDestroyable
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.data.Location
+import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
+import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
 import io.reactivex.Observable
 
 internal interface IDistanceCalculator : IDestroyable {

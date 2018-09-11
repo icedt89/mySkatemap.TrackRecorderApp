@@ -1,5 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.appsettings
 
+import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.R
 
 internal final class AppSettingsFragmentPresenter(private val view: AppSettingsFragment) {
@@ -7,5 +8,13 @@ internal final class AppSettingsFragmentPresenter(private val view: AppSettingsF
         this.view.preferenceManager.setSharedPreferencesName("appsettings");
 
         this.view.addPreferencesFromResource(R.xml.app_settings)
+    }
+
+    public fun onViewCreated() {
+        val enableAutoPauseOnStillPreference = this.view.findPreference(this.view.getString(R.string.appsettings_preference_enable_auto_pause_on_still_key))
+        enableAutoPauseOnStillPreference.isEnabled = BuildConfig.ENABLE_STILLDETECTION
+
+        val allowLiveTrackingPreference = this.view.findPreference(this.view.getString(R.string.appsettings_preference_tracking_allow_live_tracking_key))
+        allowLiveTrackingPreference.isEnabled = BuildConfig.TRACKING_ENABLE_LIVELOCATIONTRACKING
     }
 }

@@ -1,18 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.annotation.LayoutRes
 import android.view.View
-import com.janhafner.myskatemap.apps.trackrecorder.formatting.distance.IDistanceUnitFormatterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
 import javax.inject.Inject
 
 internal final class MaximumAltitudeDashboardTileFragment : DashboardTileFragment() {
     @Inject
-    public lateinit var distanceUnitFormatterFactory: IDistanceUnitFormatterFactory
+    public lateinit var distanceConverterFactory: IDistanceConverterFactory
 
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         this.context!!.getApplicationInjector().inject(this)
@@ -21,6 +19,6 @@ internal final class MaximumAltitudeDashboardTileFragment : DashboardTileFragmen
     }
 
     protected override fun createPresenter(): DashboardTileFragmentPresenter {
-        return MaximumAltitudeDashboardTileFragmentPresenter(this, this.appSettings, this.trackRecorderServiceController, this.distanceUnitFormatterFactory)
+        return MaximumAltitudeDashboardTileFragmentPresenter(this, this.appSettings, this.trackRecorderServiceController, this.distanceConverterFactory)
     }
 }
