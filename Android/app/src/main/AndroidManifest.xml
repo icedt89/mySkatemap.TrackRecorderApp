@@ -16,10 +16,10 @@
         android:name=".TrackRecorderApplication"
         android:allowBackup="true"
         android:fullBackupContent="true"
-        android:icon="@mipmap/ic_launcher"
         android:configChanges="locale|orientation"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:roundIcon="@drawable/ic_home_screen_icon"
+        android:icon="@drawable/ic_home_screen_icon"
         android:theme="@style/MySkatemap.TrackRecorder.AppTheme.AppCompat">
         <activity
             android:name=".views.activities.SplashscreenActivity"
@@ -36,11 +36,17 @@
             android:label="@string/trackrecorderactivity_title"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
+            android:name=".views.activities.tracklist.TrackListActivity"
+            android:label="Aufgenommene Strecken" />
+        <activity
             android:name=".views.activities.userprofilesettings.UserProfileSettingsActivity"
             android:label="@string/userprofilesettingsactivity_title" />
         <activity
             android:name=".views.activities.appsettings.AppSettingsActivity"
             android:label="@string/settingsactivity_title" />
+        <activity
+            android:name=".views.activities.about.AboutActivity"
+            android:label="@string/aboutactivity_title" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -53,7 +59,10 @@
             android:name=".services.trackrecorder.TrackRecorderService"
             android:exported="false" />
         <service
-            android:name=".services.activitydetection.ActivityRecognizerIntentService"
+            android:name=".stilldetection.TransitioningActivityRecognizerIntentService"
+            android:exported="false" />
+        <service
+            android:name=".stilldetection.MostProbableDetectedActivityRecognizerIntentService"
             android:exported="false" />
     </application>
 </manifest>

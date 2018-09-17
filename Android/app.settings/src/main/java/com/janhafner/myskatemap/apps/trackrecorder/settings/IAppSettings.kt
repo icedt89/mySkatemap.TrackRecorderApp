@@ -2,30 +2,21 @@ package com.janhafner.myskatemap.apps.trackrecorder.settings
 
 import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
 import io.reactivex.Observable
-import java.util.*
 
 public interface IAppSettings {
     val propertyChanged: Observable<PropertyChangedData>
 
-    var distanceUnitFormatterTypeName: String
+    var distanceConverterTypeName: String
 
-    var speedUnitFormatterTypeName: String
+    var speedConverterTypeName: String
 
-    var energyUnitFormatterTypeName: String
-
-    var locationProviderTypeName: String
+    var energyConverterTypeName: String
 
     var enableAutoPauseOnStill: Boolean
 
     var mapControlTypeName: String
 
     var appUiLocale: String
-
-    var allowLiveTracking: Boolean
-
-    var currentTrackRecordingId: UUID?
-
-    var currentDashboardId: UUID?
 
     var vibrateOnLocationAvailabilityLoss: Boolean
 

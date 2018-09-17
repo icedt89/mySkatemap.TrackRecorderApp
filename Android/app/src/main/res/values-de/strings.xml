@@ -34,10 +34,6 @@
     <string name="appsettings_preference_units_energy_label">Energie</string>
     <string name="appsettings_preference_units_energy_summary">Energie wird angezeigt und formatiert als %s</string>
     <string name="appsettings_preference_tracking_title">Aufnahme</string>
-    <string name="appsettings_preference_tracking_location_provider_label">Standortprovider</string>
-    <string name="appsettings_preference_tracking_location_provider_summary">Standorte werden mittels des "%s"-Providers bereitgestellt</string>
-    <string name="appsettings_preference_tracking_allow_live_tracking_label">Live Tracking</string>
-    <string name="appsettings_preference_tracking_allow_live_tracking_summary">Sendet die Strecke während der Aufnahme anonym an MySkatemap</string>
     <string name="appsettings_preference_notifications_title">Benachrichtigungen</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_label">Vibrieren bei Stopp</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_summary">Vibrieren wenn die Standortsermittlung/Tracking im Hintergrund deaktiviert wurde, beispielsweise durch verlust der Standortdienste</string>
@@ -63,32 +59,26 @@
     <string name="userprofilesettings_preference_enablecalculationofburnedenergy_summary">Berechnet deine Kalorien basierend auf deinem Profil</string>
     <string name="appsettings_preference_tracking_default_met_activity_code_label">Standard Aktivitätstyp</string>
     <string name="appsettings_preference_tracking_default_met_activity_code_summary">Du bevorzugst %s als standard Aktivitätstyp für neue Aufnahmen</string>
-    <string name="userprofilesettingsactivity_title">Dein Profil</string>
+
+    <string name="tracklistactivity_title">Meine Strecken</string>
+    <string name="userprofilesettingsactivity_title">Mein Profil</string>
     <string name="settingsactivity_title">Einstellungen</string>
-    <string name="trackrecorderactivity_tab_debug_title">Debug Log</string>
-    <string name="trackrecorderactivity_tab_debug_log_output_empty">Um Debug Ausgaben zu sehen musst du zu erst eine Session starten</string>
+    <string name="aboutactivity_title">Über</string>
 
-    <string name="trackrecorderactivity_tab_debug_log_output_filter_hint">Filter mit Komma trennen</string>
-    <string name="gpx_metadata_name">Export der Aufnahmen vom %s</string>
-    <string name="gpx_metadata_description">Diese Datei wurde am %s gerzeugt und beinhaltet %s Aufnahmen.</string>
-
-    <string name="dashboard_tile_maximumspeeddashboardtilefragmentpresenter_title">max. Geschw.</string>
-    <string name="dashboard_tile_averagespeeddashboardtilefragmentpresenter_title">durchs. Geschw.</string>
+    <string name="dashboard_tile_maximumspeeddashboardtilefragmentpresenter_title">⤒ Geschw.</string>
+    <string name="dashboard_tile_averagespeeddashboardtilefragmentpresenter_title">Ø Geschw.</string>
     <string name="dashboard_tile_currentspeeddashboardtilefragmentpresenter_tile">Geschw.</string>
-    <string name="dashboard_tile_distancedashboardtilefragmentpresenter_tile">Entf.</string>
+    <string name="dashboard_tile_distancedashboardtilefragmentpresenter_tile">Entfernung</string>
     <string name="dashboard_tile_burnedenergydashboardtilefragmentpresenter_tile">Energie</string>
-    <string name="dashboard_tile_maximumaltitudedashboardtilefragmentpresenter_title">max. Höhe.</string>
-    <string name="dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title">durchs. Höhe</string>
-    <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">min. Höhe</string>
+    <string name="dashboard_tile_maximumaltitudedashboardtilefragmentpresenter_title">⤒ Höhe</string>
+    <string name="dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title">Ø Höhe</string>
+    <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">⤓ Höhe</string>
     <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">Höhe</string>
     <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Einstellungen</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">Dein Profil</string>
-
-    <string-array name="appsettings_preference_tracking_location_provider_names">
-        <item>Standard</item>
-        <item>Intervall</item>
-        <item>Simuliert</item>
-    </string-array>
+    <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">Mein Profil</string>
+    <string name="trackrecorderactivity_navigation_drawer_action_tracklist_label">Meine Strecken</string>
+    <string name="trackrecorderactivity_navigation_drawer_action_about_label">Über</string>
+    <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Dauer</string>
 
     <string-array name="appsettings_preference_units_distance_names">
         <item>Kilometer</item>

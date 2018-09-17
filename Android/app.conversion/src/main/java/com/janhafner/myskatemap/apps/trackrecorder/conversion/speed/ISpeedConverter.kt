@@ -1,8 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.conversion.speed
 
-import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.SpeedConversionResult
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.IConverter
 
-public interface ISpeedConverter {
-    fun convert(speedInMetersPerSecond: Float) : SpeedConversionResult
+public interface ISpeedConverter : IConverter<Float, SpeedUnit, SpeedConversionResult> {
 }
 

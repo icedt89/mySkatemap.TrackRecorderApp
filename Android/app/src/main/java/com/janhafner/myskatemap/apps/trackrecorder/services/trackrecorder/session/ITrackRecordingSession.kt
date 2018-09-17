@@ -20,6 +20,8 @@ internal interface ITrackRecordingSession : IDestroyable {
 
     val stateChanged: Observable<SessionStateInfo>
 
+    val currentState: SessionStateInfo
+
     val sessionClosed: Observable<ITrackRecordingSession>
 
     val trackingStartedAt: DateTime

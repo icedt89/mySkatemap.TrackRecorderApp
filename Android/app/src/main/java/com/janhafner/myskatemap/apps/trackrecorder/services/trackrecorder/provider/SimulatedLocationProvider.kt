@@ -1,14 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import android.content.Context
-import android.os.SystemClock
 import com.google.android.gms.maps.model.LatLng
 import com.janhafner.myskatemap.apps.trackrecorder.common.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.services.clone
 import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
 import org.joda.time.DateTime
 import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 import kotlin.collections.ArrayList
 
 internal final class SimulatedLocationProvider(private val context: Context,
@@ -27,7 +25,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
     private var postLocationTimerTask: TimerTask? = this.createTimerTask()
 
-    private var sequenceNumber: Int = 0
+    private var sequenceNumber: Int = -1
 
     private fun createTimerTask(): TimerTask {
         return object: TimerTask() {
@@ -114,26 +112,6 @@ internal final class SimulatedLocationProvider(private val context: Context,
         val maximum = 100
 
         return (Math.sin(sequenceNumber * 2 * Math.PI / period) * (maximum / 2) + (maximum / 2)) * maximum
-    }
-
-    public override fun getLastKnownLocation(): Location? {
-        if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
-        }
-
-        val result = Location()
-
-        result.latitude = ThreadLocalRandom.current().nextDouble() * 50
-        if(SystemClock.elapsedRealtimeNanos() % 2 == 0L) {
-            result.latitude = -result.latitude
-        }
-
-        result.longitude = ThreadLocalRandom.current().nextDouble() * 12
-        if(SystemClock.elapsedRealtimeNanos() % 4 == 0L) {
-            result.longitude = -result.longitude
-        }
-
-        return result
     }
 
     public override fun stopLocationUpdates() {

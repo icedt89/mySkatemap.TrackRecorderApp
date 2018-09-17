@@ -26,7 +26,7 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
     public override var isReady: Boolean = false
         private set
 
-    public override var gesturesEnabled: Boolean = false
+    public override var gesturesEnabled: Boolean = true
 
     public override fun getSnapshotAsync(callback: OnMapSnapshotReadyCallback) {
         val cached = this.map.drawingCache
@@ -95,13 +95,13 @@ internal final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFra
         this.map.setMultiTouchControls(false)
         this.map.isVerticalMapRepetitionEnabled = true
         this.map.isHorizontalMapRepetitionEnabled = true
-        // Inhibit touch gestures which could possibly move/drag the map view around
         this.map.setOnTouchListener {
             _, _ ->
                 !this.gesturesEnabled
         }
         this.map.setTileSource(TileSourceFactory.MAPNIK)
 
+        this.polyline.isGeodesic = true
         this.polyline.color = this.context!!.getColor(R.color.secondaryColor)
     }
 }

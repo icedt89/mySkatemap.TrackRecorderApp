@@ -2,22 +2,18 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.models
 
 import java.util.*
 
-public final class Dashboard {
-    public constructor(id: UUID) {
-        this.id = id
-    }
-
-    public var id: UUID = UUID.randomUUID()
+public final class Dashboard constructor(id: UUID = UUID.randomUUID()) {
+    public var id: UUID = id
         private set
 
-    public var topLeftTileImplementationTypeName: String = "DistanceDashboardTileFragment"
+    public var topLeftTileImplementationTypeName: String = "CurrentSpeedDashboardTileFragmentPresenter"
 
-    public var topRightTileImplementationTypeName: String = "BurnedEnergyDashboardTileFragment"
+    public var topRightTileImplementationTypeName: String = "DistanceDashboardTileFragmentPresenter"
 
-    public var middleCenterTileImplementationTypeName: String = "CurrentSpeedDashboardTileFragment"
+    public var middleCenterTileImplementationTypeName: String = "RecordingTimeDashboardTileFragmentPresenter"
 
-    public var bottomLeftTileImplementationTypeName: String = "AverageSpeedDashboardTileFragment"
+    public var bottomLeftTileImplementationTypeName: String = "AverageSpeedDashboardTileFragmentPresenter"
 
-    public var bottomRightTileImplementationTypeName: String = "CurrentAltitudeDashboardTileFragment"
+    public var bottomRightTileImplementationTypeName: String = "BurnedEnergyDashboardTileFragmentPresenter"
 
 }

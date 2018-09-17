@@ -14,11 +14,11 @@ internal final class EnergyConverterFactory(private val appSettings: IAppSetting
     private val wattHourEnergyUnitFormatter: IEnergyConverter = WattHourEnergyConverter()
 
     public override fun createConverter(): IEnergyConverter {
-        if(this.appSettings.energyUnitFormatterTypeName == KilojouleEnergyConverter::class.java.simpleName) {
+        if(this.appSettings.energyConverterTypeName == KilojouleEnergyConverter::class.java.simpleName) {
             return this.kilojoulEnergyUnitFormatter
         }
 
-        if(this.appSettings.energyUnitFormatterTypeName == WattHourEnergyConverter::class.java.simpleName) {
+        if(this.appSettings.energyConverterTypeName == WattHourEnergyConverter::class.java.simpleName) {
             return this.wattHourEnergyUnitFormatter
         }
 

@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.conversion.distance
 
-public interface IDistanceConverter {
-    fun convert(distanceInMeters: Float) : DistanceConversionResult
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.IConverter
+
+public interface IDistanceConverter : IConverter<Float, DistanceUnit, DistanceConversionResult> {
 }
 

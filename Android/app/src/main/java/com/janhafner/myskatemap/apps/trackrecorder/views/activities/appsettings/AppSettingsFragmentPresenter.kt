@@ -12,9 +12,6 @@ internal final class AppSettingsFragmentPresenter(private val view: AppSettingsF
 
     public fun onViewCreated() {
         val enableAutoPauseOnStillPreference = this.view.findPreference(this.view.getString(R.string.appsettings_preference_enable_auto_pause_on_still_key))
-        enableAutoPauseOnStillPreference.isEnabled = BuildConfig.ENABLE_STILLDETECTION
-
-        val allowLiveTrackingPreference = this.view.findPreference(this.view.getString(R.string.appsettings_preference_tracking_allow_live_tracking_key))
-        allowLiveTrackingPreference.isEnabled = BuildConfig.TRACKING_ENABLE_LIVELOCATIONTRACKING
+        enableAutoPauseOnStillPreference.isEnabled = BuildConfig.STILL_DETECTION_ENABLE
     }
 }

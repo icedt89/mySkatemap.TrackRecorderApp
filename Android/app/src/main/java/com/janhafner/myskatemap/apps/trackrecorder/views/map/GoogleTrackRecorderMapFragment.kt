@@ -7,7 +7,10 @@ import android.view.ViewGroup
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
 
@@ -56,7 +59,7 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
     public override val track: List<SimpleLocation>
         get() = this.locations
 
-    public override var gesturesEnabled: Boolean = false
+    public override var gesturesEnabled: Boolean = true
         set(value) {
             if (this.isReady) {
                 this.map.uiSettings.setAllGesturesEnabled(value)
@@ -103,15 +106,14 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
 
     private fun applyDefaults()  {
         val uiSettings = this.map.uiSettings
-        uiSettings.setAllGesturesEnabled(false)
-        uiSettings.isCompassEnabled = false
+        uiSettings.setAllGesturesEnabled(this.gesturesEnabled)
+        uiSettings.isCompassEnabled = true
         uiSettings.isZoomControlsEnabled = false
         uiSettings.isMapToolbarEnabled = false
 
         this.map.mapType = GoogleMap.MAP_TYPE_NORMAL
 
-        this.map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this.context!!, R.raw.mapstyle_fanticmotor))
-
+        this.polyline.isGeodesic = true
         this.polyline.color = this.context!!.getColor(R.color.secondaryColor)
     }
 

@@ -1,4 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.conversion.speed
 
-public final class SpeedConversionResult(public val value: Float, public val unit: SpeedUnit) {
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.ConversionResult
+
+public final class SpeedConversionResult(value: Float, unit: SpeedUnit) : ConversionResult<Float, SpeedUnit>(value, unit) {
 }

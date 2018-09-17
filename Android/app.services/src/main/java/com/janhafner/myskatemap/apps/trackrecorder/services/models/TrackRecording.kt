@@ -8,8 +8,6 @@ public final class TrackRecording (id: UUID = UUID.randomUUID()) {
     public var id: UUID = id
         private set
 
-    public lateinit var locationProviderTypeName: String
-
     public val locations: MutableList<Location> = ArrayList<Location>()
 
     private val stateChangeEntries: MutableList<StateChangeEntry> = ArrayList()
@@ -21,9 +19,6 @@ public final class TrackRecording (id: UUID = UUID.randomUUID()) {
     }
 
     public var userProfile: UserProfile? = null
-
-    public val isFinished: Boolean
-        get() = this.trackingFinishedAt != null
 
     public lateinit var trackingStartedAt: DateTime
 
@@ -69,10 +64,8 @@ public final class TrackRecording (id: UUID = UUID.randomUUID()) {
     }
 
     companion object {
-        public fun start(locationProviderTypeName: String): TrackRecording {
+        public fun start(): TrackRecording {
             val result = TrackRecording(UUID.randomUUID())
-
-            result.locationProviderTypeName = locationProviderTypeName
 
             result.trackingStartedAt = DateTime.now()
             result.stateChangeEntries.add(StateChangeEntry.start(result.trackingStartedAt))

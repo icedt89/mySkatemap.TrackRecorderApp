@@ -1,13 +1,15 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
+import android.content.IntentFilter
+import android.location.LocationManager.PROVIDERS_CHANGED_ACTION
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
-import com.janhafner.myskatemap.apps.trackrecorder.services.models.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.services.locationavailability.LocationAvailabilityChangedBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -21,10 +23,13 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
     public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
     @Inject
-    public lateinit var trackService: ICrudRepository<TrackRecording>
+    public lateinit var trackService: ITrackService
 
     @Inject
     public lateinit var appSettings: IAppSettings
+
+    @Inject
+    public lateinit var locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver
 
     @Inject
     public lateinit var userProfileSettings: IUserProfileSettings
@@ -40,7 +45,19 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
 
         super.onCreate(savedInstanceState)
 
-        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController, this.appSettings, this.userProfileSettings)
+        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController, this.appSettings, this.userProfileSettings, this.locationAvailabilityChangedBroadcastReceiver)
+    }
+
+    public override fun onResume() {
+        super.onResume()
+
+        this.registerReceiver(this.locationAvailabilityChangedBroadcastReceiver, IntentFilter(PROVIDERS_CHANGED_ACTION))
+    }
+
+    public override fun onPause() {
+        super.onPause()
+
+        this.unregisterReceiver(this.locationAvailabilityChangedBroadcastReceiver)
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -11,7 +11,7 @@ internal final class DistanceConverterFactory(private val appSettings: IAppSetti
     private val kilometersDistanceUnitFormatter: IDistanceConverter = KilometersDistanceConverter()
 
     public override fun createConverter(): IDistanceConverter {
-        if(this.appSettings.distanceUnitFormatterTypeName == MilesDistanceConverter::class.java.simpleName) {
+        if(this.appSettings.distanceConverterTypeName == MilesDistanceConverter::class.java.simpleName) {
             return this.milesDistanceUnitFormatter
         }
 

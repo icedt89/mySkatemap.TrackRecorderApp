@@ -13,42 +13,43 @@
         <item name="android:background">@drawable/splashscreen</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Fragment" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:layout_rowWeight">1</item>
-        <item name="android:layout_columnWeight">1</item>
-    </style>
-
     <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Title" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">24sp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
     <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Unit" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
     <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Value" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Title">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">30sp</item>
+        <item name="android:textSize">38sp</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
     <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Title" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:textSize">30sp</item>
+        <item name="android:textSize">32sp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
     <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Value" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Title">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">50sp</item>
+        <item name="android:textSize">58sp</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
     <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Unit" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:textSize">26sp</item>
+        <item name="android:textSize">24sp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 </resources>

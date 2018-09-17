@@ -1,27 +1,21 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session
 
 import android.app.Service
-import android.location.LocationManager
-import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.aggregations.ILocationsAggregation
 import com.janhafner.myskatemap.apps.trackrecorder.common.IObservableTimer
 import com.janhafner.myskatemap.apps.trackrecorder.common.filterNotEmpty
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.activitydetection.ActivityDetectorBroadcastReceiverBase
-import com.janhafner.myskatemap.apps.trackrecorder.services.activitydetection.ActivityRecognizerIntentService
-import com.janhafner.myskatemap.apps.trackrecorder.services.activitydetection.DetectedActivityType
 import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.BurnedEnergy
 import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IBurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.calculateMissingSpeed
 import com.janhafner.myskatemap.apps.trackrecorder.services.distance.IDistanceCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.live.ILiveLocationTrackingSession
-import com.janhafner.myskatemap.apps.trackrecorder.services.locationavailability.LocationAvailabilityChangedBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.services.locationavailability.ILocationAvailabilityChangedDetector
 import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
 import com.janhafner.myskatemap.apps.trackrecorder.services.models.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.services.toSimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.stilldetection.IStillDetector
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -42,10 +36,9 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                            private val burnedEnergyCalculator: IBurnedEnergyCalculator,
                                            private val locationProvider: ILocationProvider,
                                            private val recordingTimeTimer: IObservableTimer,
-                                           private val liveLocationTrackingSession: ILiveLocationTrackingSession,
                                            private val service: Service,
-                                           private val stillDetectorBroadcastReceiver: ActivityDetectorBroadcastReceiverBase,
-                                           private val locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver) : ITrackRecordingSession {
+                                           private val stillDetector: IStillDetector,
+                                           private val locationAvailabilityChangedDetector: ILocationAvailabilityChangedDetector) : ITrackRecordingSession {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     public override lateinit var recordingTimeChanged: Observable<Period>
@@ -63,6 +56,9 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
     private val stateChangedSubject: BehaviorSubject<SessionStateInfo> = BehaviorSubject.createDefault(SessionStateInfo(TrackRecordingSessionState.Paused))
     public override val stateChanged: Observable<SessionStateInfo> = this.stateChangedSubject.subscribeOn(Schedulers.computation())
+
+    public override val currentState: SessionStateInfo
+        get() = this.stateChangedSubject.value!!
 
     init {
         this.locationsChanged = this.locationProvider.locationsReceived
@@ -96,21 +92,27 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                 this.trackRecorderServiceNotification.vibrateOnLocationAvailabilityLoss = it.newValue as Boolean
 
                                 this.tryUpdateNotification()
-                            } else if (it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name) {
+                            } else if (it.propertyName == IAppSettings::distanceConverterTypeName.name) {
                                 this.trackRecorderServiceNotification.distanceConverter = this.distanceConverterFactory.createConverter()
 
                                 this.tryUpdateNotification()
+                            } else if(it.propertyName == IAppSettings::enableAutoPauseOnStill.name) {
+                                if(this.appSettings.enableAutoPauseOnStill) {
+                                    this.tryRegisterStillDetectorBroadcastReceiver()
+                                } else {
+                                    this.tryUnregisterStillDetectorBroadcastReceiver()
+                                }
                             }
                         },
                 this.recordingTimeChanged
                         .subscribe {
                             this.burnedEnergyCalculator.calculate(it.seconds)
-                        },
-                this.recordingTimeChanged
-                        .subscribe {
+
                             this.trackRecording.recordingTime = it
 
                             this.trackRecorderServiceNotification.recordingTime = it
+
+                            this.tryUpdateNotification()
                         },
                 this.locationsChanged
                         .buffer(1, TimeUnit.SECONDS)
@@ -122,23 +124,17 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
                             this.distanceCalculator.addAll(it)
                         },
-                this.locationsChanged
-                        .map {
-                            it.toSimpleLocation()
-                        }
-                        .buffer(5, TimeUnit.SECONDS)
-                        .filterNotEmpty()
-                        // This could also without any problems be executed on the computation-scheduler.
-                        // But there will be network IO involved so we switch to the io-scheduler!
-                        .observeOn(Schedulers.io())
-                        .subscribe {
-                            this.liveLocationTrackingSession.sendLocations(it)
-                        },
                 this.stateChanged
                         .subscribe {
                             this.trackRecorderServiceNotification.state = it
 
                             this.tryUpdateNotification()
+
+                            if (it.state == TrackRecordingSessionState.Running) {
+                                this.tryRegisterStillDetectorBroadcastReceiver()
+                            } else if(it.pausedReason == TrackingPausedReason.UserInitiated) {
+                                this.tryUnregisterStillDetectorBroadcastReceiver()
+                            }
                         },
                 this.distanceChanged
                         .subscribe {
@@ -148,42 +144,55 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                         })
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
-        this.initializeStillDetectorBroadcastReceiver()
     }
 
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
-        this.service.registerReceiver(this.locationAvailabilityChangedBroadcastReceiver, android.content.IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
-
-        this.subscriptions.add(this.locationAvailabilityChangedBroadcastReceiver.locationAvailabilityChanged
+        this.subscriptions.add(this.locationAvailabilityChangedDetector.locationAvailabilityChanged
                 .subscribe {
                     val currentState = this.stateChangedSubject.value!!
-                    if (!it) { // "Unavailable"-branch
-                        if (currentState.pausedReason == null || currentState.pausedReason != TrackingPausedReason.LocationServicesUnavailable) {
+
+                    if (it){
+                        if(currentState.pausedReason == TrackingPausedReason.LocationServicesUnavailable){
+                            this.pauseTrackingAndSetState(TrackingPausedReason.UserInitiated)
+                        }
+                    } else {
+                        if (currentState.pausedReason != TrackingPausedReason.LocationServicesUnavailable) {
                             this.pauseTrackingAndSetState(TrackingPausedReason.LocationServicesUnavailable)
                         }
-                    } else if(currentState.state != TrackRecordingSessionState.Running) {
-                        this.pauseTrackingAndSetState(TrackingPausedReason.UserInitiated)
                     }
                 })
     }
 
-    private fun initializeStillDetectorBroadcastReceiver() {
-        this.service.registerReceiver(this.stillDetectorBroadcastReceiver, android.content.IntentFilter(ActivityRecognizerIntentService.INTENT_ACTION_NAME))
+    private fun tryRegisterStillDetectorBroadcastReceiver() {
+        if(this.stillDetector.isDetecting) {
+            return
+        }
 
-        this.subscriptions.add(this.stillDetectorBroadcastReceiver.startDetection(BuildConfig.TRACKING_STILLDETECTOR_DETECTION_INTERVAL_IN_MILLISECONDS.toLong())
+        this.subscriptions.add(this.stillDetector.stillDetected
                 .subscribe {
                     val currentState = this.stateChangedSubject.value!!
-                    if(it.detectedActivityType == DetectedActivityType.Still) {
+
+                    if(it) {
                         if (currentState.state == TrackRecordingSessionState.Running) {
                             // this.pauseTrackingAndSetState(TrackingPausedReason.StillStandDetected)
                         }
-                    } else if(it.detectedActivityType != DetectedActivityType.Unknown) {
+                    } else {
                         if (currentState.state == TrackRecordingSessionState.Paused
                                 && currentState.pausedReason == TrackingPausedReason.StillStandDetected) {
                             // this.resumeTracking()
                         }
                     }
                 })
+
+        this.stillDetector.startDetection()
+    }
+
+    private fun tryUnregisterStillDetectorBroadcastReceiver() {
+        if(!this.stillDetector.isDetecting) {
+            return
+        }
+
+        this.stillDetector.stopDetection()
     }
 
     private fun tryUpdateNotification() {
@@ -213,7 +222,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         this.changeState(TrackRecordingSessionState.Running)
     }
 
-    private fun changeState(newState: TrackRecordingSessionState, pausedReason: TrackingPausedReason? = null) {
+    private fun changeState(newState: TrackRecordingSessionState, pausedReason: TrackingPausedReason = TrackingPausedReason.JustInitialized) {
         this.stateChangedSubject.onNext(SessionStateInfo(newState, pausedReason))
     }
 
@@ -284,17 +293,13 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
             return
         }
 
-        this.stillDetectorBroadcastReceiver.stopDetection()
-
-        this.service.unregisterReceiver(this.stillDetectorBroadcastReceiver)
-        this.service.unregisterReceiver(this.locationAvailabilityChangedBroadcastReceiver)
+        this.tryUnregisterStillDetectorBroadcastReceiver()
 
         this.locationsAggregation.destroy()
         this.recordingTimeTimer.destroy()
         this.burnedEnergyCalculator.destroy()
         this.distanceCalculator.destroy()
         this.locationProvider.destroy()
-        this.liveLocationTrackingSession.endSession()
 
         this.subscriptions.dispose()
 

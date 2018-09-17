@@ -1,6 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map
 
 import android.graphics.Bitmap
+import android.util.Log
+import com.jakewharton.rxbinding2.view.clicks
 import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
@@ -8,6 +10,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.filterNotEmpty
 import com.janhafner.myskatemap.apps.trackrecorder.services.toSimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.IMyCurrentLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -18,12 +21,14 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnTrackRecorderMapR
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.fragment_map_tab.*
 import java.util.concurrent.TimeUnit
 
 internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                                              private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                              private val trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory,
-                                             private val appSettings: IAppSettings)
+                                             private val appSettings: IAppSettings,
+                                             private val myCurrentLocationProvider: IMyCurrentLocationProvider)
     : OnTrackRecorderMapReadyCallback, OnMapSnapshotReadyCallback {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
@@ -40,59 +45,19 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     init {
         val trackRecorderMapFragment = this.trackRecorderMapFragmentFactory.createFragment()
         this.setupMapFragment(trackRecorderMapFragment)
-
-        this.subscriptions.addAll(
-                this.appSettings.propertyChanged
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            if (it.hasChanged) {
-                                if (it.propertyName == IAppSettings::mapControlTypeName.name) {
-                                    //                                  val mapFragment = this.trackRecorderMapFragmentFactory.createFragment()
-
-//                                    this.setupMapFragment(mapFragment)
-                                }
-                            }
-                        }
-        )
     }
 
     private fun setupMapFragment(trackRecorderMapFragment: TrackRecorderMapFragment) {
-        // Iam aware that using commitAllowingStateLoss() should only be used as a last restort!
+        // Iam aware that using commitAllowingStateLoss() should only be used as a last resort!
         // But I don`t know how to handle the fragment replacement any other.
         this.view.childFragmentManager.beginTransaction()
                 .replace(R.id.fragment_track_recorder_map_map_placeholder, trackRecorderMapFragment)
-                .runOnCommit({
-                    this.fragmentSubscriptions.addAll(
-                            this.trackRecorderServiceController.isClientBoundChanged
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe {
-                                        if (it) {
-                                            this.clientSubscriptions.add(
-                                                    this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
-                                                            .observeOn(AndroidSchedulers.mainThread())
-                                                            .subscribe {
-                                                                if (it) {
-                                                                    val binder = this.trackRecorderServiceController.currentBinder!!
+                .runOnCommit {
+                    trackRecorderMapFragment.getMapAsync(this)
 
-                                                                    this.trackRecorderMapFragment!!.getMapAsync(this)
-
-                                                                    this.trackRecorderSession = this.getInitializedSession(binder.currentSession!!)
-                                                                } else {
-                                                                    this.uninitializeSession()
-                                                                }
-                                                            }
-                                            )
-                                        } else {
-                                            this.uninitializeSession()
-
-                                            this.clientSubscriptions.clear()
-                                        }
-                                    }
-                    )
-                })
+                    this.trackRecorderMapFragment = trackRecorderMapFragment
+                }
                 .commitAllowingStateLoss() // <---- Evil!
-
-        this.trackRecorderMapFragment = trackRecorderMapFragment
     }
 
     public fun setUserVisibleHint(isVisibleToUser: Boolean) {
@@ -110,11 +75,17 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                         .buffer(1, TimeUnit.SECONDS)
                         .filterNotEmpty()
                         .observeOn(AndroidSchedulers.mainThread())
+                        .doAfterNext {
+                            Log.i("MTF/P", "SOURCE AND UI UPDATED")
+                        }
                         .subscribe {
                             this.trackRecorderMapFragment!!.addLocations(it)
                         },
                 trackRecorderSession.stateChanged
                         .observeOn(AndroidSchedulers.mainThread())
+                        .doAfterNext {
+                            Log.i("MTF/P", "SOURCE AND UI UPDATED")
+                        }
                         .subscribe{
                             this.trackRecorderMapFragment!!.gesturesEnabled = it.state != TrackRecordingSessionState.Running
                         }
@@ -135,6 +106,17 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
 
     public override fun onMapReady(trackRecorderMap: com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap) {
         trackRecorderMap.zoomToLocation(SimpleLocation(BuildConfig.MAP_INITIAL_LATITUDE, BuildConfig.MAP_INITIAL_LONGITUDE), BuildConfig.MAP_INITIAL_ZOOM)
+
+        this.view.fragment_track_recorder_map_fix_myposition.clicks().subscribe {
+            this.myCurrentLocationProvider.getMyCurrentLocation()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        result ->
+                            if(result.value != null) {
+                                this.trackRecorderMapFragment!!.zoomToLocation(result.value!!.toSimpleLocation(), 16.0f)
+                            }
+                    }
+        }
     }
 
     public override fun onSnapshotReady(bitmap: Bitmap) {
@@ -148,5 +130,52 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
         this.fragmentSubscriptions.dispose()
         this.clientSubscriptions.dispose()
         this.subscriptions.dispose()
+    }
+
+    public fun onResume() {
+        this.subscriptions.addAll(
+                this.appSettings.propertyChanged
+                        .filter {
+                            it.hasChanged && it.propertyName == IAppSettings::mapControlTypeName.name
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            // val mapFragment = this.trackRecorderMapFragmentFactory.createFragment()
+
+                            // this.setupMapFragment(mapFragment)
+                        },
+                this.trackRecorderServiceController.isClientBoundChanged
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            if (it) {
+                                this.clientSubscriptions.add(
+                                        this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe {
+                                                    if (it) {
+                                                        val binder = this.trackRecorderServiceController.currentBinder!!
+
+                                                        this.trackRecorderSession = this.getInitializedSession(binder.currentSession!!)
+                                                    } else {
+                                                        this.uninitializeSession()
+                                                    }
+                                                }
+                                )
+                            } else {
+                                this.uninitializeSession()
+
+                                this.clientSubscriptions.clear()
+                            }
+                        }
+        )
+    }
+
+    public fun onPause() {
+        this.uninitializeSession(true)
+
+        this.sessionSubscriptions.clear()
+        this.fragmentSubscriptions.clear()
+        this.clientSubscriptions.clear()
+        this.subscriptions.clear()
     }
 }

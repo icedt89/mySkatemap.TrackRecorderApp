@@ -61,3 +61,8 @@ public fun Float.roundWithTwoDecimals(): String {
 
     return decimalFormat.format(this)
 }
+
+
+public fun Float.roundWithTwoDecimalsAndFormatWithUnit(unitSymbol: String) : String {
+    return "${this.roundWithTwoDecimals()} ${unitSymbol}"
+}

@@ -1,49 +1,76 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
-import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import javax.inject.Inject
-
+import android.util.Log
+import com.jakewharton.rxbinding2.widget.text
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.view.*
 
 internal abstract class DashboardTileFragment : Fragment() {
-    @Inject
-    public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
+    private var presenter: DashboardTileFragmentPresenter? = null
 
-    @Inject
-    public lateinit var appSettings: IAppSettings
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    protected var presenter: DashboardTileFragmentPresenter? = null
+    public fun setPresenter(presenter: DashboardTileFragmentPresenter) {
+        this.presenter?.destroy()
+        this.subscriptions.clear()
 
-    public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val layout = this.arguments!!.getInt(DashboardTileFragment.EXTRAS_LAYOUT_ARGUMENT_KEY)
+        this.subscribeToPresenter(presenter)
+        presenter.onResume()
 
-        return inflater.inflate(layout, container, false)
+        this.presenter = presenter
     }
 
-    public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        this.context!!.getApplicationInjector().inject(this)
+    private fun subscribeToPresenter(presenter: DashboardTileFragmentPresenter) {
+        if(this.subscriptions.size() > 0) {
+            return
+        }
 
-        super.onViewCreated(view, savedInstanceState)
-
-        this.presenter = this.createPresenter()
+        this.subscriptions.addAll(
+                presenter.titleChanged
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doAfterNext {
+                            Log.i("DTF", "UI UPDATED")
+                        }
+                        .subscribe (this.view!!.fragment_dashboard_tile_title.text()),
+                presenter.valueChanged
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doAfterNext {
+                            Log.i("DTF", "UI UPDATED")
+                        }
+                        .subscribe(this.view!!.fragment_dashboard_tile_value.text()),
+                presenter.unitChanged
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doAfterNext {
+                            Log.i("DTF", "UI UPDATED")
+                        }
+                        .subscribe(this.view!!.fragment_dashboard_tile_unit.text())
+        )
     }
-
-    protected abstract fun createPresenter() : DashboardTileFragmentPresenter
 
     public override fun onDestroyView() {
-        this.presenter!!.destroy()
+        this.presenter?.destroy()
+
+        this.subscriptions.dispose()
 
         super.onDestroyView()
     }
 
-    public companion object {
-        public val EXTRAS_LAYOUT_ARGUMENT_KEY: String = "EXTRAS_LAYOUT_ARGUMENT"
+    public override fun onResume() {
+        super.onResume()
+
+        if(this.presenter != null) {
+            this.subscribeToPresenter(this.presenter!!)
+
+            this.presenter!!.onResume()
+        }
+    }
+
+    public override fun onPause() {
+        super.onPause()
+
+        this.subscriptions.clear()
+        this.presenter!!.onPause()
     }
 }

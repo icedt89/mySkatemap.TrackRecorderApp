@@ -1,35 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:columnCount="2"
-    android:orientation="vertical"
-    android:rowCount="3"
+    xmlns:tools="http://schemas.android.com/tools"
+    columnCount="2"
+    orientation="vertical"
+    rowCount="3"
     android:padding="10dp">
+    <fragment
+        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_top_left"
+        class="com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DefaultDashboardTileFragment"
+        app:layout_column="0"
+        app:layout_columnWeight="1"
+        app:layout_row="0"
+        app:layout_rowWeight="1"
+        tools:layout="@layout/fragment_dashboard_tile_default" />
 
-    <FrameLayout style="@style/MySkatemap.TrackRecorder.Dashboard.Tile.Fragment"
-        android:layout_column="0"
-        android:layout_row="0"
-        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_top_left" />
+    <fragment
+        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_top_right"
+        class="com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DefaultDashboardTileFragment"
+        app:layout_column="1"
+        app:layout_columnWeight="1"
+        app:layout_row="0"
+        app:layout_rowWeight="1"
+        tools:layout="@layout/fragment_dashboard_tile_default" />
 
-    <FrameLayout style="@style/MySkatemap.TrackRecorder.Dashboard.Tile.Fragment"
-        android:layout_column="1"
-        android:layout_row="0"
-        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_top_right" />
+    <fragment
+        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_middle_center"
+        class="com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.MainDashboardTileFragment"
+        app:layout_column="0"
+        app:layout_columnSpan="2"
+        app:layout_columnWeight="1"
+        app:layout_row="1"
+        app:layout_rowWeight="1"
+        tools:layout="@layout/fragment_dashboard_tile_main" />
 
-    <FrameLayout style="@style/MySkatemap.TrackRecorder.Dashboard.Tile.Fragment"
-        android:layout_column="0"
-        android:layout_columnSpan="2"
-        android:layout_row="1"
-        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_middle_center" />
+    <fragment
+        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_bottom_left"
+        class="com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DefaultDashboardTileFragment"
+        app:layout_column="0"
+        app:layout_columnWeight="1"
+        app:layout_row="2"
+        app:layout_rowWeight="1"
+        tools:layout="@layout/fragment_dashboard_tile_default" />
 
-    <FrameLayout style="@style/MySkatemap.TrackRecorder.Dashboard.Tile.Fragment"
-        android:layout_column="0"
-        android:layout_row="2"
-        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_bottom_left" />
-
-    <FrameLayout style="@style/MySkatemap.TrackRecorder.Dashboard.Tile.Fragment"
-        android:layout_column="1"
-        android:layout_row="2"
-        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_bottom_right" />
-</GridLayout>
+    <fragment
+        android:id="@+id/trackrecorderactivity_tab_dashboard_tile_bottom_right"
+        class="com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DefaultDashboardTileFragment"
+        app:layout_column="1"
+        app:layout_columnWeight="1"
+        app:layout_row="2"
+        app:layout_rowWeight="1"
+        tools:layout="@layout/fragment_dashboard_tile_default" />
+</android.support.v7.widget.GridLayout>

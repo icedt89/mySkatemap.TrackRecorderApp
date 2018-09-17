@@ -4,5 +4,4 @@ import dagger.Module
 
 @Module(includes = [GpxExportModule::class])
 internal final class ExportModule {
-
 }

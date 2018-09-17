@@ -1,10 +1,21 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.2.61'
-    ext.kotlin_version = "1.2.61"
-    ext.rxandroid_version = "2.1.1"
+    ext.junit_version = '4.12'
+    ext.support_test_runnter = '1.0.2'
+    ext.test_espresso_core = '3.0.2'
+
+    ext.kotlin_version = '1.2.70'
+
+    ext.joda_version = '2.9.9.4'
+
+    ext.rxjava_version = "2.2.2"
+    ext.rxandroid_version = "2.1.0"
+
     ext.dagger_version = "2.17"
+
+    ext.couchbase_lite_version = "2.0.2"
+
     ext.playservices_version = "15.0.1"
     ext.supportlibrary_version = "27.1.1"
 
@@ -24,6 +35,7 @@ allprojects {
         google()
         jcenter()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
 

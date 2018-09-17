@@ -21,17 +21,16 @@ android {
             ext.enableCrashlytics = false
             ext.alwaysUpdateBuildId = false
 
-            buildConfigField 'boolean', 'DEBUG_ENABLE_DEBUGACTIVITY', 'true'
-            buildConfigField 'boolean', 'ENABLE_STILLDETECTION', 'true'
+            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'false'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_INTERVAL_IN_MILLISECONDS', '2000'
+            buildConfigField 'boolean', 'STILL_DETECTION_USE_TRANSITIONS', 'false'
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
-            buildConfigField 'float', 'MAP_INITIAL_ZOOM', '1.0f'
+            buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
             buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
 
-            buildConfigField 'boolean', 'TRACKING_USE_FAKELIVELOCATIONTRACKINGSERVICE', 'true'
-            buildConfigField 'int', 'TRACKING_STILLDETECTOR_DETECTION_INTERVAL_IN_MILLISECONDS', '2000'
-            buildConfigField 'boolean', 'TRACKING_ENABLE_LIVELOCATIONTRACKING', 'true'
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '500'
@@ -41,10 +40,10 @@ android {
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
             buildConfigField 'boolean', 'SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES', 'true'
 
-            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_METERS', '5.0f'
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
             buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1000'
             buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '2500'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '5000'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '3500'
         }
         release {
             minifyEnabled true
@@ -52,17 +51,16 @@ android {
 
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
-            buildConfigField 'boolean', 'DEBUG_ENABLE_DEBUGACTIVITY', 'false'
-            buildConfigField 'boolean', 'ENABLE_STILLDETECTION', 'true'
+            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'false'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_INTERVAL_IN_MILLISECONDS', '2000'
+            buildConfigField 'boolean', 'STILL_DETECTION_USE_TRANSITIONS', 'false'
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
-            buildConfigField 'float', 'MAP_INITIAL_ZOOM', '1.0f'
+            buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
             buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
 
-            buildConfigField 'boolean', 'TRACKING_USE_FAKELIVELOCATIONTRACKINGSERVICE', 'true'
-            buildConfigField 'int', 'TRACKING_STILLDETECTOR_DETECTION_INTERVAL_IN_MILLISECONDS', '2000'
-            buildConfigField 'boolean', 'TRACKING_ENABLE_LIVELOCATIONTRACKING', 'true'
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '500'
@@ -72,23 +70,23 @@ android {
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
             buildConfigField 'boolean', 'SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES', 'true'
 
-            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_METERS', '5.0f'
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
             buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1000'
             buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '2500'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '5000'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '3500'
         }
     }
     buildToolsVersion '27.0.3'
 }
 
 dependencies {
+    implementation "io.reactivex.rxjava2:rxjava:$rxjava_version"
     implementation "com.jakewharton.rxbinding2:rxbinding-kotlin:$rxandroid_version"
     implementation "com.jakewharton.rxbinding2:rxbinding-support-v4-kotlin:$rxandroid_version"
     implementation "com.jakewharton.rxbinding2:rxbinding-appcompat-v7-kotlin:$rxandroid_version"
-    implementation "io.reactivex.rxjava2:rxjava:2.2.2"
-    implementation "io.reactivex.rxjava2:rxandroid:2.1.0"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
 
-    implementation "net.danlew:android.joda:2.9.9.4"
+    implementation "net.danlew:android.joda:$joda_version"
 
     implementation "com.karumi:dexter:5.0.0"
 
@@ -125,7 +123,9 @@ dependencies {
 
     implementation "org.osmdroid:osmdroid-android:6.0.2"
 
-    implementation "com.couchbase.lite:couchbase-lite-android:2.0.2"
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+
+    implementation "com.couchbase.lite:couchbase-lite-android:$couchbase_lite_version"
 
     implementation project(':app.common')
     implementation project(':app.conversion')

@@ -9,7 +9,7 @@ import android.support.v4.app.NotificationCompat
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.common.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
-import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.format
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.format
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.SessionStateInfo
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
@@ -68,13 +68,16 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
                 }
         }
 
-        this.notificationCompatBuilder.mActions.clear()
-
         val contentText = this.buildContentText()
         this.notificationCompatBuilder.setContentText(contentText)
 
+        this.notificationCompatBuilder.mActions.clear()
+
         if (this.state.state == TrackRecordingSessionState.Paused) {
-            this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_play_arrow_bright_24dp, this.context.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.context, 0, Intent(ACTION_RESUME, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
+            if(this.state.pausedReason != TrackingPausedReason.LocationServicesUnavailable) {
+                this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_play_arrow_bright_24dp, this.context.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.context, 0, Intent(ACTION_RESUME, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
+            }
+
         } else if (this.state.state == TrackRecordingSessionState.Running) {
             this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_pause_bright_24dp, this.context.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.context, 0, Intent(ACTION_PAUSE, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
         }
@@ -91,6 +94,10 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
         var displayedRecordingTime = Period.ZERO
         if(this.recordingTime != null) {
             displayedRecordingTime = this.recordingTime
+        }
+
+        if(displayedDistance == 0.0f && displayedRecordingTime == Period.ZERO) {
+            return ""
         }
 
         val recordingTimeDisplayTemplate = displayedRecordingTime.formatRecordingTime()

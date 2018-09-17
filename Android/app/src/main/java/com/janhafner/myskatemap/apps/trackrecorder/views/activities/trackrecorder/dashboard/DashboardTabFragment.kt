@@ -7,10 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.ICrudRepository
-import com.janhafner.myskatemap.apps.trackrecorder.services.models.Dashboard
+import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.IDashboardService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.IDashboardTileFragmentFactory
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.IDashboardTileFragmentPresenterFactory
 import javax.inject.Inject
 
 internal final class DashboardTabFragment : Fragment() {
@@ -20,10 +19,10 @@ internal final class DashboardTabFragment : Fragment() {
     public lateinit var appSettings: IAppSettings
 
     @Inject
-    public lateinit var dashboardTileFragmentFactory: IDashboardTileFragmentFactory
+    public lateinit var dashboardService: IDashboardService
 
     @Inject
-    public lateinit var dashboardService: ICrudRepository<Dashboard>
+    public lateinit var dashboardTileFragmentPresenterFactory: IDashboardTileFragmentPresenterFactory
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_dashboard_tab, container, false)
@@ -34,7 +33,7 @@ internal final class DashboardTabFragment : Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.presenter = DashboardTabFragmentPresenter(this, this.appSettings, this.dashboardService, this.dashboardTileFragmentFactory)
+        this.presenter = DashboardTabFragmentPresenter(this, this.dashboardService, this.dashboardTileFragmentPresenterFactory)
     }
 
     public override fun setUserVisibleHint(isVisibleToUser: Boolean) {

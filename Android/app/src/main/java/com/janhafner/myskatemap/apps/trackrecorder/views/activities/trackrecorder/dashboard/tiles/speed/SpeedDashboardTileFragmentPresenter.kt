@@ -1,25 +1,21 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed
 
-import com.jakewharton.rxbinding2.widget.text
+import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverter
-import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.format
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.ISpeedConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.getUnitSymbol
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.*
 
-internal abstract class SpeedDashboardTileFragmentPresenter(view: DashboardTileFragment,
-                                                            appSettings: IAppSettings,
+internal abstract class SpeedDashboardTileFragmentPresenter(private val appSettings: IAppSettings,
                                                             trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                             private val speedConverterFactory: ISpeedConverterFactory)
-    : DashboardTileFragmentPresenter(view, appSettings, trackRecorderServiceController) {
+    : DashboardTileFragmentPresenter(trackRecorderServiceController) {
     private var speedConverter: ISpeedConverter
 
     private var currentValue: Float = 0.0f
@@ -39,7 +35,7 @@ internal abstract class SpeedDashboardTileFragmentPresenter(view: DashboardTileF
                 }
                 .mergeWith(this.appSettings.propertyChanged
                         .filter {
-                            it.hasChanged && it.propertyName == IAppSettings::speedUnitFormatterTypeName.name
+                            it.hasChanged && it.propertyName == IAppSettings::speedConverterTypeName.name
                         }
                         .doOnNext {
                             this.speedConverter = this.speedConverterFactory.createConverter()
@@ -48,10 +44,12 @@ internal abstract class SpeedDashboardTileFragmentPresenter(view: DashboardTileF
                             this.currentValue
                         })
                 .map {
-                    this.speedConverter.format(it)
+                    this.speedConverter.convert(it)
                 }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this.view.fragment_dashboard_tile_value.text()))
+                .subscribe{
+                    this.valueChangedSubject.onNext(it.value.roundWithTwoDecimals())
+                    this.unitChangedSubject.onNext(it.unit.getUnitSymbol())
+                })
 
         return result
     }
@@ -59,7 +57,10 @@ internal abstract class SpeedDashboardTileFragmentPresenter(view: DashboardTileF
     protected abstract fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float>
 
     override fun resetView() {
-        this.view.fragment_dashboard_tile_value.text = this.speedConverter.format(this.defaultValue)
+        val result = this.speedConverter.convert(this.defaultValue)
+
+        this.valueChangedSubject.onNext(result.value.roundWithTwoDecimals())
+        this.unitChangedSubject.onNext(result.unit.getUnitSymbol())
     }
 }
 

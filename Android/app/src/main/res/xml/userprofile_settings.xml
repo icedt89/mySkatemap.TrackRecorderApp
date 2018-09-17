@@ -7,13 +7,13 @@
         android:key="@string/userprofilesettings_preference_enablecalculationofburnedenergy_key"
         android:title="@string/userprofilesettings_preference_enablecalculationofburnedenergy_label"
         android:summary="@string/userprofilesettings_preference_enablecalculationofburnedenergy_summary"
-        android:defaultValue="false" />
+        android:defaultValue="@string/userprofilesettings_preference_enablecalculationofburnedenergy_default_value" />
     <com.janhafner.myskatemap.apps.trackrecorder.settings.FixedEditTextPreference
         android:key="@string/userprofilesettings_preference_name_key"
         android:title="@string/userprofilesettings_preference_name_label"
         android:summary="@string/userprofilesettings_preference_name_summary"
         android:inputType="textPersonName"
-        android:defaultValue="Anonymous"
+        android:defaultValue="@string/userprofilesettings_preference_name_default_value"
         app:emptySummary="@string/userprofilesettings_preference_name_summary_empty"/>
     <com.janhafner.myskatemap.apps.trackrecorder.settings.FixedEditTextPreference
         android:key="@string/userprofilesettings_preference_age_key"
@@ -42,5 +42,5 @@
         android:summary="@string/userprofilesettings_preference_sex_summary"
         android:entries="@array/userprofilesettings_preference_sex_names"
         android:entryValues="@array/userprofilesettings_preference_sex_values"
-        android:defaultValue="Male" />
+        android:defaultValue="@string/userprofilesettings_preference_sex_default_value" />
 </PreferenceScreen>

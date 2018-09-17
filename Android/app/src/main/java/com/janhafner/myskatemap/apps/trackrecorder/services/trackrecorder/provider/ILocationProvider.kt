@@ -9,8 +9,6 @@ internal interface ILocationProvider : IDestroyable {
 
     fun stopLocationUpdates()
 
-    fun getLastKnownLocation(): Location?
-
     val isActive: Boolean
 
     val activityChanged: Observable<Boolean>

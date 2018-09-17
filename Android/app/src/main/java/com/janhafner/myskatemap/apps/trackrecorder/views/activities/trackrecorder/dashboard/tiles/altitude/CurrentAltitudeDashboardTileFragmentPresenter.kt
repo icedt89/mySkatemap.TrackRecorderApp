@@ -1,22 +1,23 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude
 
+import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import io.reactivex.Observable
-import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.*
 
-internal final class CurrentAltitudeDashboardTileFragmentPresenter(view: DashboardTileFragment,
+internal final class CurrentAltitudeDashboardTileFragmentPresenter(private val context: Context,
                                                                    appSettings: IAppSettings,
                                                                    trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                                    distanceConverterFactory: IDistanceConverterFactory)
-    : AltitudeDashboardTileFragmentPresenter(view, appSettings, trackRecorderServiceController, distanceConverterFactory) {
-    public override fun initialize() {
-        this.view.fragment_dashboard_tile_title.text = view.context!!.getString(R.string.dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile)
+    : AltitudeDashboardTileFragmentPresenter(appSettings, trackRecorderServiceController, distanceConverterFactory) {
+    init {
+        val title = this.context.getString(R.string.dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile)
+
+        this.titleChangedSubject.onNext(title)
     }
 
     protected override fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float> {

@@ -15,11 +15,11 @@ internal final class SpeedConverterFactory(private val appSettings: IAppSettings
     private val milesPerHourSpeedUnitFormatter: ISpeedConverter = MilesPerHourSpeedConverter()
 
     public override fun createConverter(): ISpeedConverter {
-        if(this.appSettings.speedUnitFormatterTypeName == MetersPerSecondSpeedConverter::class.java.simpleName) {
+        if(this.appSettings.speedConverterTypeName == MetersPerSecondSpeedConverter::class.java.simpleName) {
             return this.metersPerSecondSpeedUnitFormatter
         }
 
-        if(this.appSettings.speedUnitFormatterTypeName == MilesPerHourSpeedConverter::class.java.simpleName) {
+        if(this.appSettings.speedConverterTypeName == MilesPerHourSpeedConverter::class.java.simpleName) {
             return this.milesPerHourSpeedUnitFormatter
         }
 

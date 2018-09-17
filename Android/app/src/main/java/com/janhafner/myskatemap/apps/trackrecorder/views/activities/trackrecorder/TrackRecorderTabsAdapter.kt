@@ -4,10 +4,8 @@ import android.content.Context
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.DashboardTabFragment
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.debug.DebugTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
 
 internal final class TrackRecorderTabsAdapter(context: Context, fragmentManager: FragmentManager?) : FragmentPagerAdapter(fragmentManager) {
@@ -23,10 +21,7 @@ internal final class TrackRecorderTabsAdapter(context: Context, fragmentManager:
                 }, 0),
                 TabDefinition(context.getString(R.string.trackrecorderactivity_tab_map_title), {
                     MapTabFragment()
-                }, 1),
-                TabDefinition(context.getString(R.string.trackrecorderactivity_tab_debug_title), {
-                    DebugTabFragment()
-                }, 2, BuildConfig.DEBUG_ENABLE_DEBUGACTIVITY)
+                }, 1)
         )
 
         this.availableTabDefinitions = tabDefinitions.filter {

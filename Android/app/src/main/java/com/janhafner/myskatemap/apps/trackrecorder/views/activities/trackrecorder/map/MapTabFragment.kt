@@ -10,6 +10,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.IMyCurrentLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
@@ -24,6 +25,9 @@ internal final class MapTabFragment: Fragment() {
 
     @Inject
     public lateinit var trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory
+
+    @Inject
+    public lateinit var myCurrentLocationProvider: IMyCurrentLocationProvider
 
     @Inject
     public lateinit var appSettings: IAppSettings
@@ -45,7 +49,7 @@ internal final class MapTabFragment: Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragmentFactory, this.appSettings)
+        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragmentFactory, this.appSettings, this.myCurrentLocationProvider)
     }
 
     public override fun onAttach(context: Context?) {
@@ -54,6 +58,20 @@ internal final class MapTabFragment: Fragment() {
         if(this.activity is INeedFragmentVisibilityInfo) {
             (this.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this, true)
         }
+    }
+
+    public override fun onResume() {
+        super.onResume()
+
+        if(this.presenter != null) {
+            this.presenter!!.onResume()
+        }
+    }
+
+    public override fun onPause() {
+        super.onPause()
+
+        this.presenter!!.onPause()
     }
 
     public override fun onDestroyView() {

@@ -34,10 +34,6 @@
     <string name="appsettings_preference_units_energy_label">Energy</string>
     <string name="appsettings_preference_units_energy_summary">Energy will be display and formatted as %s</string>
     <string name="appsettings_preference_tracking_title">Recording</string>
-    <string name="appsettings_preference_tracking_location_provider_label">Location Provider</string>
-    <string name="appsettings_preference_tracking_location_provider_summary">Locations will be received using the "%s" provider</string>
-    <string name="appsettings_preference_tracking_allow_live_tracking_label">Live tracking</string>
-    <string name="appsettings_preference_tracking_allow_live_tracking_summary">Sends the currently recorded track anonymously to MySkatemap</string>
     <string name="appsettings_preference_tracking_map_control_label">Map</string>
     <string name="appsettings_preference_tracking_map_control_summary">Uses %s to display the map</string>
     <string name="appsettings_preference_notifications_title">Notifications</string>
@@ -71,56 +67,55 @@
     <string name="userprofilesettings_preference_weight_key">userprofilesettings_preference_weight</string>
     <string name="userprofilesettings_preference_sex_key">userprofilesettings_preference_sex</string>
 
+    <string name="userprofilesettings_preference_enablecalculationofburnedenergy_default_value">true</string>
+    <string name="userprofilesettings_preference_name_default_value">Anonymous</string>
+    <string name="userprofilesettings_preference_sex_default_value">Male</string>
+
     <string name="appsettings_preference_units_distance_key">appsettings_preference_units_distance</string>
     <string name="appsettings_preference_units_speed_key">appsettings_preference_units_speed</string>
     <string name="appsettings_preference_units_energy_key">appsettings_preference_units_energy</string>
-    <string name="appsettings_preference_tracking_location_provider_key">appsettings_preference_tracking_location_provider</string>
-    <string name="appsettings_preference_tracking_allow_live_tracking_key">appsettings_preference_tracking_allow_live_tracking</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_key">appsettings_preference_notifications_vibrate_on_background_stop</string>
     <string name="appsettings_preference_default_met_activity_code_key">appsettings_preference_default_met_activity_code</string>
     <string name="appsettings_preference_map_control_key">appsettings_preference_map_control</string>
     <string name="appsettings_preference_app_ui_locale_key">appsettings_preference_app_ui_locale</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_key">appsettings_preference_enable_auto_pause_on_still</string>
 
-    <string name="userprofilesettingsactivity_title">Your Profile</string>
+    <string name="appsettings_preference_units_distance_default_value">KilometersDistanceConverter</string>
+    <string name="appsettings_preference_units_speed_default_value">KilometersPerHourSpeedConverter</string>
+    <string name="appsettings_preference_units_energy_default_value">KilocalorieEnergyConverter</string>
+    <string name="appsettings_preference_notifications_vibrate_on_background_stop_default_value">true</string>
+    <string name="appsettings_preference_default_met_activity_code_default_value">01015</string>
+    <string name="appsettings_preference_map_control_default_value">GoogleTrackRecorderMapFragment</string>
+    <string name="appsettings_preference_app_ui_locale_default_value">de</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_default_value">true</string>
+
+    <string name="tracklistactivity_title">My tracks</string>
+    <string name="userprofilesettingsactivity_title">My Profile</string>
     <string name="settingsactivity_title">Settings</string>
-    <string name="trackrecorderactivity_tab_debug_title">Debug Log</string>
-    <string name="trackrecorderactivity_tab_debug_log_output_empty">Start a session first to collect debug data</string>
-    <string name="trackrecorderactivity_tab_debug_log_output_filter_hint">Enter comma separated filter here</string>
+    <string name="aboutactivity_title">About</string>
 
-    <string name="gpx_metadata_name">Recording export from %s</string>
-    <string name="gpx_metadata_description">This was generated on %s and contains %s recordings.</string>
-
-    <string name="dashboard_tile_maximumspeeddashboardtilefragmentpresenter_title">max. speed</string>
-    <string name="dashboard_tile_averagespeeddashboardtilefragmentpresenter_title">avg. speed</string>
-    <string name="dashboard_tile_currentspeeddashboardtilefragmentpresenter_tile">speed</string>
-    <string name="dashboard_tile_distancedashboardtilefragmentpresenter_tile">distance</string>
-    <string name="dashboard_tile_burnedenergydashboardtilefragmentpresenter_tile">energy</string>
-    <string name="dashboard_tile_maximumaltitudedashboardtilefragmentpresenter_title">max. alt.</string>
-    <string name="dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title">avg. alt.</string>
-    <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">min. alt.</string>
-    <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">altitude</string>
+    <string name="dashboard_tile_maximumspeeddashboardtilefragmentpresenter_title">⤒ Speed</string>
+    <string name="dashboard_tile_averagespeeddashboardtilefragmentpresenter_title">Ø Speed</string>
+    <string name="dashboard_tile_currentspeeddashboardtilefragmentpresenter_tile">Speed</string>
+    <string name="dashboard_tile_distancedashboardtilefragmentpresenter_tile">Distance</string>
+    <string name="dashboard_tile_burnedenergydashboardtilefragmentpresenter_tile">Energy</string>
+    <string name="dashboard_tile_maximumaltitudedashboardtilefragmentpresenter_title">⤒ Altitude</string>
+    <string name="dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title">Ø Altitude</string>
+    <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">⤓ Altitude</string>
+    <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">Altitude</string>
     <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Settings</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">Your Profile</string>
-
-    <string-array name="appsettings_preference_tracking_location_provider_names">
-        <item>Default</item>
-        <item>Interval</item>
-        <item>Simulated</item>
-    </string-array>
-    <string-array name="appsettings_preference_tracking_location_provider_values">
-        <item>FusedLocationProvider</item>
-        <item>LegacyLocationProvider</item>
-        <item>SimulatedLocationProvider</item>
-    </string-array>
+    <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">My profile</string>
+    <string name="trackrecorderactivity_navigation_drawer_action_tracklist_label">My tracks</string>
+    <string name="trackrecorderactivity_navigation_drawer_action_about_label">About</string>
+    <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Duration</string>
 
     <string-array name="appsettings_preference_units_distance_names">
         <item>Kilometers</item>
         <item>Miles</item>
     </string-array>
     <string-array name="appsettings_preference_units_distance_values">
-        <item>KilometersDistanceUnitFormatter</item>
-        <item>MilesDistanceUnitFormatter</item>
+        <item>KilometersDistanceConverter</item>
+        <item>MilesDistanceConverter</item>
     </string-array>
 
     <string-array name="appsettings_preference_units_speed_names">
@@ -129,9 +124,9 @@
         <item>Meters per second</item>
     </string-array>
     <string-array name="appsettings_preference_units_speed_values">
-        <item>KilometersPerHourSpeedUnitFormatter</item>
-        <item>MilesPerHourSpeedUnitFormatter</item>
-        <item>MetersPerSecondSpeedUnitFormatter</item>
+        <item>KilometersPerHourSpeedConverter</item>
+        <item>MilesPerHourSpeedConverter</item>
+        <item>MetersPerSecondSpeedConverter</item>
     </string-array>
 
     <string-array name="appsettings_preference_units_energy_names">
@@ -140,9 +135,9 @@
         <item>Watt Hour</item>
     </string-array>
     <string-array name="appsettings_preference_units_energy_values">
-        <item>KilocalorieBurnedEnergyUnitFormatter</item>
-        <item>KilojouleBurnedEnergyUnitFormatter</item>
-        <item>WattHourBurnedEnergyUnitFormatter</item>
+        <item>KilocalorieEnergyConverter</item>
+        <item>KilojouleEnergyConverter</item>
+        <item>WattHourEnergyConverter</item>
     </string-array>
 
     <string-array name="userprofilesettings_preference_sex_names">

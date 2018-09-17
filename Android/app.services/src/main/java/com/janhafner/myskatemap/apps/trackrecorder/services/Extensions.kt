@@ -11,59 +11,6 @@ import org.joda.time.DateTime
 import org.joda.time.Seconds
 import java.util.*
 
-public fun <TDocument> ICrudRepository<TDocument>.getByIdOrDefault(id: UUID?, default: TDocument) : TDocument {
-    if(id == null) {
-        return default
-    }
-
-    val result = this.getByIdOrNull(id.toString())
-    if (result == null) {
-        return default
-    }
-
-    return result
-}
-
-public fun <TDocument> ICrudRepository<TDocument>.getByIdOrDefaultAsync(id: UUID?, default: TDocument) : Single<TDocument> {
-    return Single.create {
-        emitter: SingleEmitter<TDocument> ->
-        try {
-            val result = this.getByIdOrDefault(id, default)
-
-            emitter.onSuccess(result)
-        } catch(exception: Exception) {
-            emitter.onError(exception)
-        }
-    }
-}
-
-public fun <TDocument> ICrudRepository<TDocument>.saveAsync(item: TDocument) : Single<Unit> {
-    return Single.create {
-        emitter: SingleEmitter<Unit> ->
-        try {
-            this.save(item)
-
-            emitter.onSuccess(Unit)
-        } catch(exception: Exception) {
-            emitter.onError(exception)
-        }
-    }
-}
-
-public fun <TDocument> ICrudRepository<TDocument>.deleteAsync(id: String) : Single<Unit> {
-    return Single.create {
-        emitter: SingleEmitter<Unit> ->
-        try {
-            this.delete(id)
-
-            emitter.onSuccess(Unit)
-        } catch(exception: Exception) {
-            emitter.onError(exception)
-        }
-    }
-}
-
-
 private fun Location.toLiteAndroidLocation(): android.location.Location {
     val result = android.location.Location(this.provider)
 

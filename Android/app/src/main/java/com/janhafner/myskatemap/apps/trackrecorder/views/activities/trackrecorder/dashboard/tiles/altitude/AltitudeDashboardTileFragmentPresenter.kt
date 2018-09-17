@@ -1,25 +1,22 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude
 
-import com.jakewharton.rxbinding2.widget.text
+import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
-import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.format
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.getUnitSymbol
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.*
 
-internal abstract class AltitudeDashboardTileFragmentPresenter(view: DashboardTileFragment,
-                                                            appSettings: IAppSettings,
-                                                            trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
-                                                            private val distanceConverterFactory: IDistanceConverterFactory)
-    : DashboardTileFragmentPresenter(view, appSettings, trackRecorderServiceController) {
+internal abstract class AltitudeDashboardTileFragmentPresenter(private val appSettings: IAppSettings,
+                                                               trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
+                                                               private val distanceConverterFactory: IDistanceConverterFactory)
+    : DashboardTileFragmentPresenter(trackRecorderServiceController) {
 
     private var distanceConverter: IDistanceConverter
 
@@ -40,7 +37,7 @@ internal abstract class AltitudeDashboardTileFragmentPresenter(view: DashboardTi
                 }
                 .mergeWith(this.appSettings.propertyChanged
                         .filter {
-                            it.hasChanged && it.propertyName == IAppSettings::distanceUnitFormatterTypeName.name
+                            it.hasChanged && it.propertyName == IAppSettings::distanceConverterTypeName.name
                         }
                         .doOnNext {
                             this.distanceConverter = this.distanceConverterFactory.createConverter()
@@ -49,10 +46,12 @@ internal abstract class AltitudeDashboardTileFragmentPresenter(view: DashboardTi
                             this.currentValue
                         })
                 .map {
-                    this.distanceConverter.format(it)
+                    this.distanceConverter.convert(it)
                 }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this.view.fragment_dashboard_tile_value.text()))
+                .subscribe{
+                    this.valueChangedSubject.onNext(it.value.roundWithTwoDecimals())
+                    this.unitChangedSubject.onNext(it.unit.getUnitSymbol())
+                })
 
         return result
     }
@@ -60,7 +59,10 @@ internal abstract class AltitudeDashboardTileFragmentPresenter(view: DashboardTi
     protected abstract fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float>
 
     override fun resetView() {
-        this.view.fragment_dashboard_tile_value.text = this.distanceConverter.format(this.defaultValue)
+        val result = this.distanceConverter.convert(this.defaultValue)
+
+        this.valueChangedSubject.onNext(result.value.roundWithTwoDecimals())
+        this.unitChangedSubject.onNext(result.unit.getUnitSymbol())
     }
 }
 
