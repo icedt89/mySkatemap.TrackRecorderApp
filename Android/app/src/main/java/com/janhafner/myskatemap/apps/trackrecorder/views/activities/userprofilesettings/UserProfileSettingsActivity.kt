@@ -2,19 +2,19 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofile
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.janhafner.myskatemap.apps.trackrecorder.R
-import kotlinx.android.synthetic.main.app_toolbar.*
+import android.view.MenuItem
 
 internal final class UserProfileSettingsActivity : AppCompatActivity() {
+    private var presenter: UserProfileSettingsActivityPresenter? = null
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.setContentView(R.layout.activity_userprofilesettings)
+        this.presenter = UserProfileSettingsActivityPresenter(this)
+    }
 
-        this.setSupportActionBar(this.app_toolbar)
-
-        this.fragmentManager.beginTransaction()
-                .replace(R.id.settingsfragment_host, UserProfileSettingsFragment())
-                .commit()
+    public override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return this.presenter!!.onOptionsItemSelected(item)
     }
 }
+

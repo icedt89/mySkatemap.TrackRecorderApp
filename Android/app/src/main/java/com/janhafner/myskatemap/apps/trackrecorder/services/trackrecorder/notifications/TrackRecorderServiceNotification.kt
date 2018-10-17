@@ -1,70 +1,128 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications
 
-import android.app.Notification
 import android.app.PendingIntent
-import android.content.Context
+import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
 import com.janhafner.myskatemap.apps.trackrecorder.common.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.format
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.SessionStateInfo
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackingPausedReason
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
+import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.Period
 
-internal final class TrackRecorderServiceNotification(private val context: Context,
-                                                      public var distanceConverter: IDistanceConverter) {
-    public var state: SessionStateInfo = SessionStateInfo(TrackRecordingSessionState.Paused)
 
-    public var recordingTime: Period? = null
+internal final class TrackRecorderServiceNotification(private val service: Service,
+                                                         private val appSettings: IAppSettings,
+                                                         trackRecordingSession: ITrackRecordingSession,
+                                                         private val distanceConverterFactory: IDistanceConverterFactory) : IDestroyable {
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    public var distance: Float? = null
+    private var trackRecorderSession: ITrackRecordingSession? = null
 
-    public var vibrateOnLocationAvailabilityLoss: Boolean = false
+    private var distanceConverter: IDistanceConverter
 
-    private val notificationCompatBuilder: NotificationCompat.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        NotificationCompat.Builder(this.context, TrackRecorderServiceNotificationChannel.ID)
-    } else {
-        @Suppress("DEPRECATION")
-        NotificationCompat.Builder(this.context)
-    }
+    private var state: SessionStateInfo = SessionStateInfo(TrackRecordingSessionState.Paused)
+
+    private var recordingTime: Period? = null
+
+    private var distance: Float? = null
+
+    private var vibrateOnLocationAvailabilityLoss: Boolean = false
+
+    private val notificationCompatBuilder: NotificationCompat.Builder
 
     init {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.notificationCompatBuilder = NotificationCompat.Builder(this.service, TrackRecorderServiceNotificationChannel.ID)
+        } else {
+            @Suppress("DEPRECATION")
+            this.notificationCompatBuilder = NotificationCompat.Builder(this.service)
+        }
+
+        this.distanceConverter = this.distanceConverterFactory.createConverter()
+
         this.notificationCompatBuilder.setBadgeIconType(NotificationCompat.BADGE_ICON_NONE)
         this.notificationCompatBuilder.setSmallIcon(R.drawable.ic_stat_track_recorder)
         this.notificationCompatBuilder.setShowWhen(false)
         this.notificationCompatBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         this.notificationCompatBuilder.setOngoing(true)
 
-        val intent = Intent(this.context, TrackRecorderActivity::class.java)
+        val intent = Intent(this.service, TrackRecorderActivity::class.java)
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
 
-        val pendingIntent = PendingIntent.getActivity(this.context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getActivity(this.service, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         this.notificationCompatBuilder.setContentIntent(pendingIntent)
+
+        this.subscriptions.addAll(
+                appSettings.propertyChanged
+                        .filter {
+                            it.hasChanged
+                        }
+                        .subscribe{
+                            if(it.propertyName == IAppSettings::vibrateOnLocationAvailabilityLoss.name) {
+                                this.vibrateOnLocationAvailabilityLoss = this.appSettings.vibrateOnLocationAvailabilityLoss
+
+                                this.update()
+                            }
+                        }
+        )
+
+        this.trackRecorderSession = this.getInitializedSession(trackRecordingSession)
     }
 
-    public fun update() : Notification? {
+    private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
+        this.subscriptions.addAll(
+                trackRecorderSession.recordingTimeChanged
+                        .subscribe {
+                            this.recordingTime = it
+
+                            this.update()
+                        },
+                trackRecorderSession.stateChanged
+                        .subscribe {
+                            this.state = it
+
+                            this.update()
+                        },
+                trackRecorderSession.distanceChanged
+                        .subscribe {
+                            this.distance = it
+
+                            this.update()
+                        }
+        )
+
+        return trackRecorderSession
+    }
+
+    private fun update() {
         this.notificationCompatBuilder.setVibrate(null)
 
         when(this.state.state) {
             TrackRecordingSessionState.Running ->
-                this.notificationCompatBuilder.setContentTitle(this.context.getString(R.string.trackrecorderservice_notification_status_running))
+                this.notificationCompatBuilder.setContentTitle(this.service.getString(R.string.trackrecorderservice_notification_status_running))
             TrackRecordingSessionState.Paused ->
                 if(this.state.pausedReason == TrackingPausedReason.LocationServicesUnavailable) {
-                    this.notificationCompatBuilder.setContentTitle(this.context.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
+                    this.notificationCompatBuilder.setContentTitle(this.service.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
 
                     if(this.vibrateOnLocationAvailabilityLoss) {
-                        this.notificationCompatBuilder.setVibrate(longArrayOf(1000, 500, 1000, 500, 1000, 500))
+                        this.notificationCompatBuilder.setVibrate(longArrayOf(500, 500, 500, 500, 500, 500))
                     }
 
                 } else {
-                    this.notificationCompatBuilder.setContentTitle(this.context.getString(R.string.trackrecorderservice_notification_status_paused))
+                    this.notificationCompatBuilder.setContentTitle(this.service.getString(R.string.trackrecorderservice_notification_status_paused))
                 }
         }
 
@@ -75,14 +133,15 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
 
         if (this.state.state == TrackRecordingSessionState.Paused) {
             if(this.state.pausedReason != TrackingPausedReason.LocationServicesUnavailable) {
-                this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_play_arrow_bright_24dp, this.context.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.context, 0, Intent(ACTION_RESUME, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
+                this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_play_arrow_bright_24dp, this.service.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.service, 0, Intent(ACTION_RESUME, null, this.service, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
             }
 
         } else if (this.state.state == TrackRecordingSessionState.Running) {
-            this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_pause_bright_24dp, this.context.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.context, 0, Intent(ACTION_PAUSE, null, this.context, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
+            this.notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_pause_bright_24dp, this.service.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.service, 0, Intent(ACTION_PAUSE, null, this.service, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
         }
 
-        return this.notificationCompatBuilder.build()
+        val notification = this.notificationCompatBuilder.build()
+        this.service.startForeground(TrackRecorderServiceNotification.ID, notification)
     }
 
     private fun buildContentText(): String {
@@ -103,7 +162,19 @@ internal final class TrackRecorderServiceNotification(private val context: Conte
         val recordingTimeDisplayTemplate = displayedRecordingTime.formatRecordingTime()
         val formattedDistance = this.distanceConverter.format(displayedDistance)
 
-        return this.context.getString(R.string.trackrecorderservice_notification_contenttext_template, formattedDistance, recordingTimeDisplayTemplate)
+        return this.service.getString(R.string.trackrecorderservice_notification_contenttext_template, formattedDistance, recordingTimeDisplayTemplate)
+    }
+
+    private var isDestroyed = false
+    public override fun destroy() {
+        if(this.isDestroyed) {
+            return
+        }
+
+        this.service.stopForeground(true)
+        this.subscriptions.dispose()
+
+        this.isDestroyed = true
     }
 
     companion object {

@@ -2,21 +2,20 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.couchdb
 
 import com.couchbase.lite.*
 import com.couchbase.lite.Dictionary
-import com.janhafner.myskatemap.apps.trackrecorder.common.Sex
-import com.janhafner.myskatemap.apps.trackrecorder.services.models.*
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.*
 import org.joda.time.DateTime
 import org.joda.time.Period
 import java.util.*
 
 internal class TrackInfoConverter {
     public companion object {
-        internal fun trackInfoFromCouchDbDocument(document: Document) : TrackInfo {
+        internal fun trackInfoFromCouchDbDictionary(dictionary: Dictionary, id: UUID) : TrackInfo {
             val result = TrackInfo()
 
-            result.id = UUID.fromString(document.id)
-            result.trackingFinishedAt = DateTime(document.getDate("trackingFinishedAt"))
-            result.trackingStartedAt = DateTime(document.getDate("trackingStartedAt"))
-            result.displayName = document.getString("displayName")
+            result.id = id
+            result.recordingTime = Period.seconds(dictionary.getInt("recordingTime"))
+            result.distance = dictionary.getFloat("distance")
+            result.displayName = dictionary.getString("displayName")
 
             return result
         }
@@ -30,8 +29,8 @@ internal class TrackRecordingConverter {
 
             val result = TrackRecording(id)
 
-            result.trackingFinishedAt = DateTime(document.getDate("trackingFinishedAt"))
-            result.trackingStartedAt = DateTime(document.getDate("trackingStartedAt"))
+            result.finishedAt = DateTime(document.getDate("finishedAt"))
+            result.startedAt = DateTime(document.getDate("startedAt"))
             result.recordingTime = Period.seconds(document.getInt("recordingTime"))
 
             val fitnessActivityDictionary = document.getDictionary("fitnessActivity")
@@ -50,7 +49,7 @@ internal class TrackRecordingConverter {
             for (locationDictionary in locationsArray.map { it as Dictionary }) {
                 val location = locationFromCouchDbDictionary(locationDictionary)
 
-                result.locations.add(location)
+                result.addLocation(location)
             }
 
             return result
@@ -66,8 +65,8 @@ internal class TrackRecordingConverter {
         internal fun trackRecordingFromCouchDbDictionary(dictionary: Dictionary, id: UUID) : TrackRecording {
             val result = TrackRecording(id)
 
-            result.trackingFinishedAt = DateTime(dictionary.getDate("trackingFinishedAt"))
-            result.trackingStartedAt = DateTime(dictionary.getDate("trackingStartedAt"))
+            result.finishedAt = DateTime(dictionary.getDate("finishedAt"))
+            result.startedAt = DateTime(dictionary.getDate("startedAt"))
             result.recordingTime = Period.seconds(dictionary.getInt("recordingTime"))
 
             val fitnessActivityDictionary = dictionary.getDictionary("fitnessActivity")
@@ -86,7 +85,7 @@ internal class TrackRecordingConverter {
             for (locationDictionary in locationsArray.map { it as Dictionary }) {
                 val location = locationFromCouchDbDictionary(locationDictionary)
 
-                result.locations.add(location)
+                result.addLocation(location)
             }
 
             return result
@@ -127,8 +126,8 @@ internal fun TrackInfo.toCouchDbDocument(): MutableDocument {
     result.setString("documentType", this.javaClass.simpleName)
 
     result.setString("displayName", this.displayName)
-    result.setDate("trackingStartedAt", this.trackingStartedAt.toDate())
-    result.setDate("trackingFinishedAt", this.trackingFinishedAt.toDate())
+    result.setFloat("distance", this.distance!!)
+    result.setInt("recordingTime", this.recordingTime.seconds)
 
     return result
 }
@@ -138,8 +137,8 @@ internal fun TrackRecording.toCouchDbDocument(): MutableDocument {
     result.setString("documentType", this.javaClass.simpleName)
 
     result.setInt("recordingTime", this.recordingTime.seconds)
-    result.setDate("trackingStartedAt", this.trackingStartedAt.toDate())
-    result.setDate("trackingFinishedAt", this.trackingFinishedAt?.toDate())
+    result.setDate("startedAt", this.startedAt.toDate())
+    result.setDate("finishedAt", this.finishedAt?.toDate())
 
     if(this.userProfile != null) {
         val fitnessActivityDictionary = this.userProfile!!.toCouchDbDictionary()

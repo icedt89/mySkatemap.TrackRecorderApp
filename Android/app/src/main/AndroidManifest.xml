@@ -37,7 +37,7 @@
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
             android:name=".views.activities.tracklist.TrackListActivity"
-            android:label="Aufgenommene Strecken" />
+            android:label="@string/tracklistactivity_title" />
         <activity
             android:name=".views.activities.userprofilesettings.UserProfileSettingsActivity"
             android:label="@string/userprofilesettingsactivity_title" />
@@ -59,10 +59,7 @@
             android:name=".services.trackrecorder.TrackRecorderService"
             android:exported="false" />
         <service
-            android:name=".stilldetection.TransitioningActivityRecognizerIntentService"
-            android:exported="false" />
-        <service
-            android:name=".stilldetection.MostProbableDetectedActivityRecognizerIntentService"
+            android:name=".activitydetection.ActivityDetectorIntentService"
             android:exported="false" />
     </application>
 </manifest>

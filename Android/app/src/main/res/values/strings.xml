@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">mySkatemap Track Recorder</string>
-    <string name="trackrecorderactivity_title">Track Recorder</string>
+    <string name="app_name">mySkatemap Activityboard</string>
+    <string name="trackrecorderactivity_title">Activity</string>
     <string name="trackrecorderactivity_toolbar_finish_currenttracking">Finish</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttracking">Discard</string>
     <string name="trackrecorderactivity_toast_recording_running">Recording active</string>
@@ -19,6 +19,9 @@
     <string name="trackrecorderactivity_show_location_services_confirmation_title">Location services unavailable</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_open_label">Open location</string>
 
+    <string name="aboutactivity_copyright">© Jan Hafner</string>
+    <string name="aboutactivity_version">Version %s</string>
+
     <string name="trackrecorderservice_notification_status_paused">Recording paused</string>
     <string name="trackrecorderservice_notification_status_locationservicesunavailable">Location services unavailable</string>
     <string name="trackrecorderservice_notification_status_running">Running</string>
@@ -35,7 +38,7 @@
     <string name="appsettings_preference_units_energy_summary">Energy will be display and formatted as %s</string>
     <string name="appsettings_preference_tracking_title">Recording</string>
     <string name="appsettings_preference_tracking_map_control_label">Map</string>
-    <string name="appsettings_preference_tracking_map_control_summary">Uses %s to display the map</string>
+    <string name="appsettings_preference_tracking_map_control_summary">Uses %s to display the map. The app must be restarted to take effect!</string>
     <string name="appsettings_preference_notifications_title">Notifications</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_label">Vibrate on background stop</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_summary">Let your phone vibrate if receiving locations was disabled e.g. due to connectivity issues</string>
@@ -48,26 +51,24 @@
     <string name="userprofilesettings_preference_height_label">Your height</string>
     <string name="userprofilesettings_preference_height_summary_empty">In centimeters</string>
     <string name="userprofilesettings_preference_height_summary">You are %s centimeters tall</string>
-    <string name="appsettings_preference_enable_auto_pause_on_still_label">Auto pause</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_label">Auto pause [exp.]</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_summary">Automatically pauses recording if still stand is detected</string>
     <string name="userprofilesettings_preference_sex_label">Your sex</string>
     <string name="userprofilesettings_preference_sex_summary">Your are %s</string>
     <string name="userprofilesettings_preference_name_label">Your name</string>
     <string name="userprofilesettings_preference_name_summary_empty">How you want it to get displayed in the app</string>
     <string name="userprofilesettings_preference_name_summary">I will call you %s</string>
-    <string name="userprofilesettings_preference_enablecalculationofburnedenergy_label">Enable burned energy calculation</string>
-    <string name="userprofilesettings_preference_enablecalculationofburnedenergy_summary">If enabled, calculates your burned energy based on your profile</string>
     <string name="appsettings_preference_tracking_default_met_activity_code_label">Default activity type</string>
-    <string name="appsettings_preference_tracking_default_met_activity_code_summary">You prefer %s as default activity type for new recordings</string>
+    <string name="appsettings_preference_tracking_default_met_activity_code_summary">You prefer %s as default activity type for new recordings. The activity is used for calorie consumption calculation.</string>
 
-    <string name="userprofilesettings_preference_enablecalculationofburnedenergy_key">userprofilesettings_preference_enablecalculationofburnedenergy</string>
+    <string name="trackrecorderactivity_map_mycurrentlocation_marker_title">Here are you</string>
+
     <string name="userprofilesettings_preference_name_key">userprofilesettings_preference_name</string>
     <string name="userprofilesettings_preference_age_key">userprofilesettings_preference_age</string>
     <string name="userprofilesettings_preference_height_key">userprofilesettings_preference_height</string>
     <string name="userprofilesettings_preference_weight_key">userprofilesettings_preference_weight</string>
     <string name="userprofilesettings_preference_sex_key">userprofilesettings_preference_sex</string>
 
-    <string name="userprofilesettings_preference_enablecalculationofburnedenergy_default_value">true</string>
     <string name="userprofilesettings_preference_name_default_value">Anonymous</string>
     <string name="userprofilesettings_preference_sex_default_value">Male</string>
 

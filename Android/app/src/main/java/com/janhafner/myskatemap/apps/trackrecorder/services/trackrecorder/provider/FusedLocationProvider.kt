@@ -7,7 +7,8 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.janhafner.myskatemap.apps.trackrecorder.services.toLocation
+import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
+import com.janhafner.myskatemap.apps.trackrecorder.common.toLocation
 
 internal final class FusedLocationProvider(private val context: Context,
                                            private val fusedLocationProviderClient: FusedLocationProviderClient,
@@ -39,7 +40,7 @@ internal final class FusedLocationProvider(private val context: Context,
 
     public override fun startLocationUpdates() {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if (this.isActive) {
@@ -57,7 +58,7 @@ internal final class FusedLocationProvider(private val context: Context,
 
     public override fun stopLocationUpdates() {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if (!this.isActive) {

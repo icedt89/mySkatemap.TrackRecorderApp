@@ -8,7 +8,8 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.locationavailability.LocationAvailabilityChangedBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
+import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
@@ -32,6 +33,9 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
     public lateinit var locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver
 
     @Inject
+    public lateinit var locationAvailabilityChangedSource: ILocationAvailabilityChangedSource
+
+    @Inject
     public lateinit var userProfileSettings: IUserProfileSettings
 
     private var presenter: TrackRecorderActivityPresenter? = null
@@ -45,7 +49,7 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
 
         super.onCreate(savedInstanceState)
 
-        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController, this.appSettings, this.userProfileSettings, this.locationAvailabilityChangedBroadcastReceiver)
+        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController, this.appSettings, this.userProfileSettings, this.locationAvailabilityChangedSource)
     }
 
     public override fun onResume() {
@@ -61,12 +65,7 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Setup of FAB and existing session must be done after the options menu was created! (DIRTY!)
         return this.presenter!!.onCreateOptionsMenu(menu)
-    }
-
-    public override fun onMenuOpened(featureId: Int, menu: Menu?): Boolean {
-        return this.presenter!!.onMenuOpened()
     }
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {

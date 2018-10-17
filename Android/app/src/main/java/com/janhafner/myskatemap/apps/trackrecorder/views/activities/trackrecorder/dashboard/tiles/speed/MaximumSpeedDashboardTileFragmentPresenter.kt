@@ -2,7 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.ISpeedConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession

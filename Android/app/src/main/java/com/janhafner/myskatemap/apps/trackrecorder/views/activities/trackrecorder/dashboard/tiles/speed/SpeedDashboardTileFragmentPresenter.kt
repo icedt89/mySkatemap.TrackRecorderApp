@@ -2,7 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.ISpeedConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.getUnitSymbol
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder

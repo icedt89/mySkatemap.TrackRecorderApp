@@ -5,12 +5,13 @@ buildscript {
     ext.support_test_runnter = '1.0.2'
     ext.test_espresso_core = '3.0.2'
 
-    ext.kotlin_version = '1.2.70'
+    ext.kotlin_version = '1.2.71'
 
     ext.joda_version = '2.9.9.4'
 
     ext.rxjava_version = "2.2.2"
     ext.rxandroid_version = "2.1.0"
+    ext.rxbinding_version = "2.1.1"
 
     ext.dagger_version = "2.17"
 
@@ -25,7 +26,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:3.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }

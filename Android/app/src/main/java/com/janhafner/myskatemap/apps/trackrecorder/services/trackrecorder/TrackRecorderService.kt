@@ -7,24 +7,21 @@ import android.content.IntentFilter
 import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
-import com.janhafner.myskatemap.apps.trackrecorder.aggregations.LocationsAggregation
-import com.janhafner.myskatemap.apps.trackrecorder.common.ObservableTimer
+import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.ActivityDetectorBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.IActivityDetectorSource
+import com.janhafner.myskatemap.apps.trackrecorder.burnedenergy.IBurnedEnergyCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.IDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.BurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IBurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.IMetActivityDefinitionFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.burnedenergy.NullBurnedEnergyCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.distance.DistanceCalculator
-import com.janhafner.myskatemap.apps.trackrecorder.services.locationavailability.LocationAvailabilityChangedBroadcastReceiver
-import com.janhafner.myskatemap.apps.trackrecorder.services.models.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
+import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotificationChannel
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.stilldetection.IStillDetector
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -43,20 +40,27 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public lateinit var locationProvider: ILocationProvider
 
     @Inject
-    public lateinit var metActivityDefinitionFactory: IMetActivityDefinitionFactory
-
-    @Inject
     public lateinit var locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver
 
     @Inject
-    public lateinit var stillDetector: IStillDetector
+    public lateinit var locationAvailabilityChangedSource: ILocationAvailabilityChangedSource
+
+    @Inject
+    public lateinit var  activityDetectorBroadcastReceiver: ActivityDetectorBroadcastReceiver
+
+    @Inject
+    public lateinit var activityDetectorSource: IActivityDetectorSource
+
+    @Inject
+    public lateinit var distanceCalculator: IDistanceCalculator
+
+    @Inject
+    public lateinit var burnedEnergyCalculator: IBurnedEnergyCalculator
 
     @Inject
     public lateinit var notificationManager: NotificationManager
 
     private lateinit var trackRecorderServiceNotificationChannel: TrackRecorderServiceNotificationChannel
-
-    private lateinit var trackRecorderServiceNotification: TrackRecorderServiceNotification
 
     private var sessionSubscription: Disposable? = null
 
@@ -67,9 +71,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             this.trackRecorderServiceNotificationChannel = TrackRecorderServiceNotificationChannel(notificationManager)
         }
-
-        this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this, this.distanceConverterFactory.createConverter())
-        this.trackRecorderServiceNotification.vibrateOnLocationAvailabilityLoss = this.appSettings.vibrateOnLocationAvailabilityLoss
 
         this.registerReceiver(this.locationAvailabilityChangedBroadcastReceiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
 
@@ -103,74 +104,29 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
             throw IllegalStateException("Tracking already in progress!")
         }
 
-        val observableTimer = ObservableTimer()
-        val trackRecordingStatistic = LocationsAggregation()
-        val distanceCalculator = DistanceCalculator()
-        val burnedEnergyCalculator: IBurnedEnergyCalculator
-
-        if(trackRecording.userProfile != null) {
-            val metActivityDefinition = this.metActivityDefinitionFactory.getMetActivityDefinitionByCode(trackRecording.userProfile!!.metActivityCode)
-            if(metActivityDefinition != null) {
-                burnedEnergyCalculator  = BurnedEnergyCalculator(trackRecording.userProfile!!.weightInKilograms,
-                        trackRecording.userProfile!!.heightInCentimeters,
-                        trackRecording.userProfile!!.age,
-                        trackRecording.userProfile!!.sex,
-                        metActivityDefinition.metValue)
-            } else {
-                burnedEnergyCalculator = NullBurnedEnergyCalculator()
-            }
-        } else {
-            burnedEnergyCalculator = NullBurnedEnergyCalculator()
-        }
-
         this.currentSession = TrackRecordingSession(
                 this.appSettings,
-                this.trackRecorderServiceNotification,
-                distanceCalculator,
+                this.distanceCalculator,
                 this.distanceConverterFactory,
                 trackRecording,
-                trackRecordingStatistic,
-                burnedEnergyCalculator,
+                this.burnedEnergyCalculator,
                 this.locationProvider,
-                observableTimer,
                 this,
-                this.stillDetector,
-                this.locationAvailabilityChangedBroadcastReceiver)
+                this.activityDetectorBroadcastReceiver,
+                this.activityDetectorSource,
+                this.locationAvailabilityChangedSource)
 
         return this.currentSession!!
     }
 
     public override fun onBind(intent: Intent?): IBinder {
-        this.serviceBound()
-
         return TrackRecorderServiceBinder(this)
     }
 
-    public override fun onRebind(intent: Intent?) {
-        this.serviceBound()
-    }
-
-    private fun serviceBound() {
-        this.tryUpdateNotification()
-    }
-
     public override fun onUnbind(intent: Intent?): Boolean {
-        this.serviceUnbind()
-
         this.terminateService()
 
         return false
-    }
-
-    private fun serviceUnbind() {
-        this.tryUpdateNotification()
-    }
-
-    private fun tryUpdateNotification() {
-        val notification = this.trackRecorderServiceNotification.update()
-        if(notification != null) {
-            this.startForeground(TrackRecorderServiceNotification.ID, notification)
-        }
     }
 
     public override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -183,7 +139,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
             }
         }
 
-        // return START_STICKY
         return START_NOT_STICKY
     }
 

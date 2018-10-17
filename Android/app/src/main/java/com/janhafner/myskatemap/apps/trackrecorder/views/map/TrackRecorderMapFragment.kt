@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
 
 internal abstract class TrackRecorderMapFragment : Fragment(), ITrackRecorderMap {
     public abstract override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View
@@ -17,6 +17,8 @@ internal abstract class TrackRecorderMapFragment : Fragment(), ITrackRecorderMap
     public abstract override val isReady: Boolean
 
     public abstract override var gesturesEnabled: Boolean
+
+    public abstract override val canAddMarker: Boolean
 
     public abstract override fun addLocations(locations: List<SimpleLocation>)
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">mySkatemap Track Recorder</string>
-    <string name="trackrecorderactivity_title">Streckenaufnahme</string>
+    <string name="app_name">mySkatemap Activityboard</string>
+    <string name="trackrecorderactivity_title">Aktivität</string>
     <string name="trackrecorderactivity_toolbar_finish_currenttracking">Abschließen</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttracking">Verwerfen</string>
     <string name="trackrecorderactivity_toast_recording_running">Aufnahme aktiv</string>
@@ -26,6 +26,11 @@
     <string name="trackrecorderactivity_show_location_services_confirmation_title">Standort nicht verfügbar</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_open_label">Standort öffnen</string>
 
+    <string name="aboutactivity_copyright">© Jan Hafner</string>
+    <string name="aboutactivity_version">Version %s</string>
+
+    <string name="trackrecorderactivity_map_mycurrentlocation_marker_title">hier bist du</string>
+
     <string name="appsettings_preference_units_title">Einheiten</string>
     <string name="appsettings_preference_units_distance_label">Entfernung</string>
     <string name="appsettings_preference_units_distance_summary">Entfernungen werden angezeigt und formatiert als %s</string>
@@ -38,14 +43,14 @@
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_label">Vibrieren bei Stopp</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_summary">Vibrieren wenn die Standortsermittlung/Tracking im Hintergrund deaktiviert wurde, beispielsweise durch verlust der Standortdienste</string>
     <string name="appsettings_preference_tracking_map_control_label">Karte</string>
-    <string name="appsettings_preference_tracking_map_control_summary">Verwendet %s zum anzeigen der Karte</string>
+    <string name="appsettings_preference_tracking_map_control_summary">Verwendet %s zum anzeigen der Karte. Wird erst nach einem Neustart der App angewendet!</string>
     <string name="userprofilesettings_preference_age_label">Dein Alter</string>
     <string name="userprofilesettings_preference_age_summary">Du bist %s Jahr(e) alt</string>
     <string name="userprofilesettings_preference_age_summary_empty">In Jahren</string>
     <string name="userprofilesettings_preference_weight_label">Dein Gwicht</string>
     <string name="userprofilesettings_preference_weight_summary_empty">In Kilogramm</string>
     <string name="userprofilesettings_preference_weight_summary">Du wiegst %s Kilogramm</string>
-    <string name="appsettings_preference_enable_auto_pause_on_still_label">Automatisch pausieren</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_label">Automatisch pausieren [Exp.]</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_summary">Pausiert die Aufnahme automatisch bei Stillstand</string>
     <string name="userprofilesettings_preference_height_label">Deine Größe</string>
     <string name="userprofilesettings_preference_height_summary_empty">In Zentimetern</string>
@@ -55,10 +60,8 @@
     <string name="userprofilesettings_preference_name_label">Dein Name</string>
     <string name="userprofilesettings_preference_name_summary_empty">Wie er in der App dargestellt werden soll</string>
     <string name="userprofilesettings_preference_name_summary">Ich werde dich %s nennen</string>
-    <string name="userprofilesettings_preference_enablecalculationofburnedenergy_label">Kalorienverbrauch berechnen</string>
-    <string name="userprofilesettings_preference_enablecalculationofburnedenergy_summary">Berechnet deine Kalorien basierend auf deinem Profil</string>
     <string name="appsettings_preference_tracking_default_met_activity_code_label">Standard Aktivitätstyp</string>
-    <string name="appsettings_preference_tracking_default_met_activity_code_summary">Du bevorzugst %s als standard Aktivitätstyp für neue Aufnahmen</string>
+    <string name="appsettings_preference_tracking_default_met_activity_code_summary">Du bevorzugst %s als standard Aktivitätstyp für neue Aufnahmen. Die Aktivität wird zur Berechnung deines Energieverbrauchs benötigt.</string>
 
     <string name="tracklistactivity_title">Meine Strecken</string>
     <string name="userprofilesettingsactivity_title">Mein Profil</string>

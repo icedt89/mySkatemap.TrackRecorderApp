@@ -3,11 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
-    <SwitchPreference
-        android:key="@string/userprofilesettings_preference_enablecalculationofburnedenergy_key"
-        android:title="@string/userprofilesettings_preference_enablecalculationofburnedenergy_label"
-        android:summary="@string/userprofilesettings_preference_enablecalculationofburnedenergy_summary"
-        android:defaultValue="@string/userprofilesettings_preference_enablecalculationofburnedenergy_default_value" />
     <com.janhafner.myskatemap.apps.trackrecorder.settings.FixedEditTextPreference
         android:key="@string/userprofilesettings_preference_name_key"
         android:title="@string/userprofilesettings_preference_name_label"

@@ -27,4 +27,6 @@ internal interface ApplicationComponent : DashboardTileFragmentPresenterComponen
     fun inject(userProfileSettingsFragment: UserProfileSettingsFragment)
 
     fun inject(trackRecorderService: TrackRecorderService)
+
+    fun inject(mapTabFragment: com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.neu.MapTabFragment)
 }

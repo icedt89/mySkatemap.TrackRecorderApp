@@ -3,7 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.settings
 import android.content.Context
 import android.content.SharedPreferences
 import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
-import com.janhafner.myskatemap.apps.trackrecorder.common.Sex
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.Sex
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -11,15 +11,6 @@ import io.reactivex.subjects.PublishSubject
 public final class UserProfileSettings : IUserProfileSettings {
     private val propertyChangedSubject: PublishSubject<PropertyChangedData> = PublishSubject.create()
     public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject.subscribeOn(Schedulers.computation())
-
-    public override var enableCalculationOfBurnedEnergy: Boolean = false
-        set(value) {
-            val oldValue = field
-
-            field = value
-
-            this.propertyChangedSubject.onNext(PropertyChangedData(IUserProfileSettings::enableCalculationOfBurnedEnergy.name, oldValue, value))
-        }
 
     public override var name: String? = null
         set(value) {
@@ -72,12 +63,6 @@ public final class UserProfileSettings : IUserProfileSettings {
     private final class SharedPreferencesUserProfileSettingsBinding(private val userProfileSettings: IUserProfileSettings, boundSharedPreferences: SharedPreferences, context: Context) : IUserProfileSettings {
         private val sharedPreferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
 
-        public override var enableCalculationOfBurnedEnergy: Boolean
-            get() = this.userProfileSettings.enableCalculationOfBurnedEnergy
-            set(value) {
-                this.userProfileSettings.enableCalculationOfBurnedEnergy = value
-            }
-
         public override var name: String?
             get() = this.userProfileSettings.name
             set(value) {
@@ -111,7 +96,6 @@ public final class UserProfileSettings : IUserProfileSettings {
         public override val propertyChanged: Observable<PropertyChangedData> = this.userProfileSettings.propertyChanged
 
         init {
-            val enableCalculationOfBurnedEnergyKey = context.getString(R.string.userprofilesettings_preference_enablecalculationofburnedenergy_key)
             val nameKey = context.getString(R.string.userprofilesettings_preference_name_key)
             val ageKey = context.getString(R.string.userprofilesettings_preference_age_key)
             val heightKey = context.getString(R.string.userprofilesettings_preference_height_key)
@@ -120,10 +104,6 @@ public final class UserProfileSettings : IUserProfileSettings {
 
             this.sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                 when (key) {
-                    enableCalculationOfBurnedEnergyKey -> {
-                        val currentValue = boundSharedPreferences.getBoolean(key, UserProfileSettings.DEFAULT_ENABLE_CALCULATION_OF_BURNED_ENERGY)
-                        this.userProfileSettings.enableCalculationOfBurnedEnergy = currentValue
-                    }
                     nameKey -> {
                         val currentValue = boundSharedPreferences.getString(key, UserProfileSettings.DEFAULT_NAME)
                         this.userProfileSettings.name = currentValue
@@ -150,7 +130,6 @@ public final class UserProfileSettings : IUserProfileSettings {
             boundSharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
 
             this.userProfileSettings.name = boundSharedPreferences.getString(nameKey, UserProfileSettings.DEFAULT_NAME)
-            this.userProfileSettings.enableCalculationOfBurnedEnergy = boundSharedPreferences.getBoolean(enableCalculationOfBurnedEnergyKey, UserProfileSettings.DEFAULT_ENABLE_CALCULATION_OF_BURNED_ENERGY)
             this.userProfileSettings.age = boundSharedPreferences.getInt(ageKey, UserProfileSettings.DEFAULT_AGE)
             this.userProfileSettings.height = boundSharedPreferences.getInt(heightKey, UserProfileSettings.DEFAULT_HEIGHT)
             this.userProfileSettings.weight = boundSharedPreferences.getFloat(weightKey, UserProfileSettings.DEFAULT_WEIGHT)
@@ -161,8 +140,6 @@ public final class UserProfileSettings : IUserProfileSettings {
     }
 
     companion object {
-        public const val DEFAULT_ENABLE_CALCULATION_OF_BURNED_ENERGY: Boolean = false
-
         public const val DEFAULT_NAME: String = "Anonymous"
 
         public const val DEFAULT_AGE: Int = 18

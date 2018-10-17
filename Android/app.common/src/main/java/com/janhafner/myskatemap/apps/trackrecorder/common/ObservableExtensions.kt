@@ -1,6 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder.common
 
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 import io.reactivex.Observable
+import org.joda.time.Seconds
 
 public fun <Upstream> Observable<Upstream>.pairWithPrevious() : Observable<Pair<Upstream?, Upstream?>> {
     return this.scan(Pair<Upstream?, Upstream?>(null, null), { t1, t2 ->
@@ -18,14 +20,40 @@ public fun <Upstream> Observable<List<Upstream>>.filterNotEmpty() : Observable<L
             }
 }
 
-public fun <Upstream> Observable<Float>.liveAverageFloat() : Observable<Double> {
-    val values = ArrayList<Float>()
 
-    return this.map {
-        values.add(it)
+public fun Observable<Location>.calculateMissingSpeed(): Observable<Location> {
+    return this
+            .pairWithPrevious()
+            .map {
+                if(it.first != null && it.second != null && it.second!!.speed == null) {
+                    val distanceInMeters = it.first!!.distanceTo(it.second!!)
+                    if (distanceInMeters != 0.0f) {
+                        val locationSecondsDifference = Seconds.secondsBetween(it.second!!.capturedAt, it.first!!.capturedAt)
 
-        values.average()
-    }
+                        it.second!!.speed = Math.abs(locationSecondsDifference.seconds) / distanceInMeters
+                    } else {
+                        it.second!!.speed = 0.0f
+                    }
+                }
+
+                it.second
+            }
+}
+
+public fun Observable<Location>.dropLocationsNotInDistance(maximumDistance: Double, includeEdge: Boolean = true): Observable<Location> {
+    return this.pairWithPrevious()
+            .filter {
+                if (it.first == null) {
+                    // Dont filter first real value [Pair(null, location)]
+                    true
+                } else {
+                    // Apply distance filter to suppress emitting values to close
+                    !it.second!!.isInDistance(it.first!!, maximumDistance, includeEdge)
+                }
+            }
+            .map {
+                it.second
+            }
 }
 
 public fun <Upstream> Observable<List<Upstream>>.liveCount() : Observable<Int> {

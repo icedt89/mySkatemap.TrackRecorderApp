@@ -9,6 +9,10 @@
         <item name="android:navigationBarColor">@color/primaryDarkColor</item>
     </style>
 
+    <style name="MySkatemap.TrackRecorder.AppTheme.AppCompat.SecondaryFab" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorAccent">@color/secondarLighterColor</item>
+    </style>
+
     <style name="MySkatemap.TrackRecorder.SplashscreenActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@drawable/splashscreen</item>
     </style>

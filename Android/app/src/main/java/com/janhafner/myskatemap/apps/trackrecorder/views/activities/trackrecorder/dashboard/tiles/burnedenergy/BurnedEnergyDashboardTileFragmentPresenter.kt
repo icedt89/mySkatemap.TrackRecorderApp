@@ -4,14 +4,13 @@ import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.IEnergyConverter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy.IEnergyConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.IEnergyConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy.getUnitSymbol
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 
 internal final class BurnedEnergyDashboardTileFragmentPresenter(private val context: Context,
@@ -37,9 +36,6 @@ internal final class BurnedEnergyDashboardTileFragmentPresenter(private val cont
         val result = ArrayList<Disposable>()
 
         result.add(trackRecorderSession.burnedEnergyChanged
-                .map {
-                    it.kiloCalories
-                }
                 .doOnNext{
                     this.currentValue = it
                 }

@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance
 
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.KilometersDistanceConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.MilesDistanceConverter
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings

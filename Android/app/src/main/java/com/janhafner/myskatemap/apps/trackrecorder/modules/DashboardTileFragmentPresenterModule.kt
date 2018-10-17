@@ -1,9 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.modules
 
 import android.content.Context
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy.IEnergyConverterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.ISpeedConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.IEnergyConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -62,41 +62,41 @@ internal final class DashboardTileFragmentPresenterModule {
 
     @Provides
     public fun provideDistanceDashboardTileFragmentPresenter(context: Context,
-                                                                    appSettings: IAppSettings,
-                                                                    trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
-                                                                    distanceConverterFactory: IDistanceConverterFactory): DistanceDashboardTileFragmentPresenter {
+                                                             appSettings: IAppSettings,
+                                                             trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
+                                                             distanceConverterFactory: IDistanceConverterFactory): DistanceDashboardTileFragmentPresenter {
         return DistanceDashboardTileFragmentPresenter(context, appSettings, trackRecorderServiceController, distanceConverterFactory)
     }
 
     @Provides
     public fun provideBurnedEnergyDashboardTileFragmentPresenter(context: Context,
-                                                                    appSettings: IAppSettings,
-                                                                    trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
-                                                                    energyConverterFactory: IEnergyConverterFactory): BurnedEnergyDashboardTileFragmentPresenter {
+                                                                 appSettings: IAppSettings,
+                                                                 trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
+                                                                 energyConverterFactory: IEnergyConverterFactory): BurnedEnergyDashboardTileFragmentPresenter {
         return BurnedEnergyDashboardTileFragmentPresenter(context, appSettings, trackRecorderServiceController, energyConverterFactory)
     }
 
     @Provides
     public fun provideAverageSpeedDashboardTileFragmentPresenter(context: Context,
-                                                                    appSettings: IAppSettings,
-                                                                    trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
+                                                                 appSettings: IAppSettings,
+                                                                 trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                                  speedConverterFactory: ISpeedConverterFactory): AverageSpeedDashboardTileFragmentPresenter {
         return AverageSpeedDashboardTileFragmentPresenter(context, appSettings, trackRecorderServiceController, speedConverterFactory)
     }
 
     @Provides
     public fun provideCurrentSpeedDashboardTileFragmentPresenter(context: Context,
-                                                                    appSettings: IAppSettings,
-                                                                    trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
+                                                                 appSettings: IAppSettings,
+                                                                 trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                                  speedConverterFactory: ISpeedConverterFactory): CurrentSpeedDashboardTileFragmentPresenter {
         return CurrentSpeedDashboardTileFragmentPresenter(context, appSettings, trackRecorderServiceController, speedConverterFactory)
     }
 
     @Provides
     public fun provideMaximumSpeedDashboardTileFragmentPresenter(context: Context,
-                                                                    appSettings: IAppSettings,
-                                                                    trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
-                                                                    speedConverterFactory: ISpeedConverterFactory): MaximumSpeedDashboardTileFragmentPresenter {
+                                                                 appSettings: IAppSettings,
+                                                                 trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
+                                                                 speedConverterFactory: ISpeedConverterFactory): MaximumSpeedDashboardTileFragmentPresenter {
         return MaximumSpeedDashboardTileFragmentPresenter(context, appSettings, trackRecorderServiceController, speedConverterFactory)
     }
 }

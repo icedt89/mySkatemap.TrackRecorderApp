@@ -11,7 +11,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 27
         versionCode 1
-        versionName "1.0"
+        versionName "0.5"
         resConfigs "en", "de"
     }
     buildTypes {
@@ -21,19 +21,19 @@ android {
             ext.enableCrashlytics = false
             ext.alwaysUpdateBuildId = false
 
-            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'false'
-            buildConfigField 'int', 'STILL_DETECTION_DETECTION_INTERVAL_IN_MILLISECONDS', '2000'
-            buildConfigField 'boolean', 'STILL_DETECTION_USE_TRANSITIONS', 'false'
+            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_INTERVAL_IN_MILLISECONDS', '1000'
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
             buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
+            buildConfigField 'double', 'MAP_INITIAL_ALTITUDE', '250.0'
 
-            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'true'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
-            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '500'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '100'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
@@ -51,19 +51,19 @@ android {
 
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
-            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'false'
+            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
             buildConfigField 'int', 'STILL_DETECTION_DETECTION_INTERVAL_IN_MILLISECONDS', '2000'
-            buildConfigField 'boolean', 'STILL_DETECTION_USE_TRANSITIONS', 'false'
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
             buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
+            buildConfigField 'double', 'MAP_INITIAL_ALTITUDE', '250.0'
 
             buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
-            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '500'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '1000'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
@@ -81,9 +81,9 @@ android {
 
 dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$rxjava_version"
-    implementation "com.jakewharton.rxbinding2:rxbinding-kotlin:$rxandroid_version"
-    implementation "com.jakewharton.rxbinding2:rxbinding-support-v4-kotlin:$rxandroid_version"
-    implementation "com.jakewharton.rxbinding2:rxbinding-appcompat-v7-kotlin:$rxandroid_version"
+    implementation "com.jakewharton.rxbinding2:rxbinding-kotlin:$rxbinding_version"
+    implementation "com.jakewharton.rxbinding2:rxbinding-support-v4-kotlin:$rxbinding_version"
+    implementation "com.jakewharton.rxbinding2:rxbinding-appcompat-v7-kotlin:$rxbinding_version"
     implementation "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
 
     implementation "net.danlew:android.joda:$joda_version"
@@ -94,9 +94,7 @@ dependencies {
     implementation "com.squareup.moshi:moshi:1.6.0"
     implementation "com.squareup.moshi:moshi-kotlin:1.6.0"
 
-    // Updating to v12.0.0 breaks maps on emulator!
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    //noinspection GradleCompatible
 
     implementation "com.google.android.gms:play-services-location:$playservices_version"
     implementation "com.google.android.gms:play-services-maps:$playservices_version"
@@ -123,15 +121,21 @@ dependencies {
 
     implementation "org.osmdroid:osmdroid-android:6.0.2"
 
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
-
     implementation "com.couchbase.lite:couchbase-lite-android:$couchbase_lite_version"
+
+    implementation 'com.github.MKergall:osmbonuspack:6.5.2'
 
     implementation project(':app.common')
     implementation project(':app.conversion')
-    implementation project(':app.stilldetection')
     implementation project(':app.export')
     implementation project(':app.settings')
     implementation project(':app.services.couchdb')
     implementation project(':app.services')
+    implementation project(':app.locationavailability')
+    implementation project(':app.distancecalculation')
+    implementation project(':app.burnedenergy')
+    implementation project(':app.activitydetection')
+    implementation project(':app.map')
+    implementation project(':app.map.google')
+    implementation project(':app.map.openstreetmap')
 }

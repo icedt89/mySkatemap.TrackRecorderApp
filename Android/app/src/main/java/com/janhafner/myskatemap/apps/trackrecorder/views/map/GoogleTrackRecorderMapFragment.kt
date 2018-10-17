@@ -7,12 +7,9 @@ import android.view.ViewGroup
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
 
 internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
     private lateinit var polyline: Polyline
@@ -23,12 +20,6 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_google_track_recorder_map, container, false)
-    }
-
-    public override fun getSnapshotAsync(callback: OnMapSnapshotReadyCallback) {
-        this.map.snapshot {
-            callback.onSnapshotReady(it)
-        }
     }
 
     public override fun getMapAsync(callback: OnTrackRecorderMapReadyCallback) {
@@ -56,6 +47,8 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
     public override var isReady: Boolean = false
         private set
 
+    public override val canAddMarker: Boolean = true
+
     public override val track: List<SimpleLocation>
         get() = this.locations
 
@@ -67,6 +60,22 @@ internal final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment()
 
             field = value
         }
+
+    public override fun addMarker(location: SimpleLocation, title: String, icon: Int?): MapMarkerToken {
+        val markerOptions = MarkerOptions()
+        markerOptions.title(title)
+        markerOptions.position(LatLng(location.latitude, location.longitude))
+
+        if (icon != null) {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(icon))
+        }
+
+        val marker = this.map.addMarker(markerOptions)
+
+        return MapMarkerToken({
+            marker.remove()
+        })
+    }
 
     public override fun addLocations(locations: List<SimpleLocation>) {
         this.locations.addAll(locations)

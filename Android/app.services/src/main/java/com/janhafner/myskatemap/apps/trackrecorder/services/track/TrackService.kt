@@ -1,8 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.track
 
 import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
-import com.janhafner.myskatemap.apps.trackrecorder.services.models.TrackInfo
-import com.janhafner.myskatemap.apps.trackrecorder.services.models.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackInfo
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import io.reactivex.Single
 
 public final class TrackService(private val localTracksDataSource: ITracksDataSource) : ITrackService {

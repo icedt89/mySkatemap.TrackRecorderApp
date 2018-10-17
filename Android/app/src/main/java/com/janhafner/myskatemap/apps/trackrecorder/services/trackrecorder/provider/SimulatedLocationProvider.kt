@@ -2,9 +2,9 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 
 import android.content.Context
 import com.google.android.gms.maps.model.LatLng
+import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
 import com.janhafner.myskatemap.apps.trackrecorder.common.isLocationServicesEnabled
-import com.janhafner.myskatemap.apps.trackrecorder.services.clone
-import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 import org.joda.time.DateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -72,32 +72,54 @@ internal final class SimulatedLocationProvider(private val context: Context,
         val sequenceNumber = ++this.sequenceNumber
 
         if (this.lastComputedLocation == null) {
-            this.lastComputedLocation = Location()
+            val location = Location()
 
-            this.lastComputedLocation?.provider = "fake-gps"
-            this.lastComputedLocation?.bearing = initialLocation.bearing
-            this.lastComputedLocation?.accuracy = initialLocation.accuracy
-            this.lastComputedLocation?.capturedAt = DateTime.now()
-            this.lastComputedLocation?.latitude = initialLocation.latitude
-            this.lastComputedLocation?.longitude = initialLocation.longitude
-            this.lastComputedLocation?.speed = initialLocation.speed
+            location.provider = "fake-gps"
+            location.bearing = initialLocation.bearing
+            location.accuracy = initialLocation.accuracy
+            location.altitude = initialLocation.altitude
+            location.capturedAt = DateTime.now()
+            location.latitude = initialLocation.latitude
+            location.longitude = initialLocation.longitude
+            location.speed = initialLocation.speed
+
+            this.lastComputedLocation = location
 
             this.genericCoordinates.add(PointD(0.0, 0.0))
         } else {
-            this.lastComputedLocation = this.lastComputedLocation?.clone()
+            val clonedLastComputedLocation = this.cloneLocation(this.lastComputedLocation!!)
 
-            this.lastComputedLocation?.bearing = this.lastComputedLocation?.bearing?.plus(this.bearingStepping)
+            clonedLastComputedLocation.bearing = clonedLastComputedLocation.bearing?.plus(this.bearingStepping)
 
             val nextComputedLocation = this.computeNextLocation(sequenceNumber, this.initialLocation, this.latitudeStepping, this.longitudeStepping)
 
-            this.lastComputedLocation?.latitude = nextComputedLocation.latitude
-            this.lastComputedLocation?.longitude = nextComputedLocation.longitude
+            clonedLastComputedLocation.latitude = nextComputedLocation.latitude
+            clonedLastComputedLocation.longitude = nextComputedLocation.longitude
 
-            this.lastComputedLocation?.speed = this.computeSpeed(sequenceNumber).toFloat()
-            this.lastComputedLocation?.altitude = this.computeAltitude(sequenceNumber)
+            clonedLastComputedLocation.speed = this.computeSpeed(sequenceNumber).toFloat()
+            clonedLastComputedLocation.altitude = this.computeAltitude(sequenceNumber)
+
+            this.lastComputedLocation = clonedLastComputedLocation
         }
 
         return this.lastComputedLocation!!
+    }
+
+    private fun cloneLocation(location: Location): Location {
+        val result = Location()
+
+        result.latitude = location.latitude
+        result.longitude = location.longitude
+        result.provider = location.provider
+        result.bearing = location.bearing
+        result.speed = location.speed
+        result.accuracy = location.accuracy
+        result.bearingAccuracyDegrees = location.bearingAccuracyDegrees
+        result.speedAccuracyMetersPerSecond = location.speedAccuracyMetersPerSecond
+        result.verticalAccuracyMeters = location.verticalAccuracyMeters
+        result.altitude = location.altitude
+
+        return result
     }
 
     private fun computeSpeed(sequenceNumber: Int): Double {
@@ -116,7 +138,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
     public override fun stopLocationUpdates() {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if (!this.isActive) {
@@ -131,7 +153,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
     public override fun startLocationUpdates() {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if (this.isActive) {

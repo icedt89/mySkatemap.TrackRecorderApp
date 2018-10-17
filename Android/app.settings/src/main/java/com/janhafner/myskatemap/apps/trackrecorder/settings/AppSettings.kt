@@ -84,11 +84,22 @@ public final class AppSettings: IAppSettings {
             this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::energyConverterTypeName.name, oldValue, value))
         }
 
+    private var isDestroyed: Boolean = false
+    public override fun destroy() {
+        if (this.isDestroyed) {
+            return
+        }
+
+        this.propertyChangedSubject.onComplete()
+
+        this.isDestroyed = true
+    }
+
     public fun bindToSharedPreferences(sharedPreferences: SharedPreferences, context: Context): IAppSettings {
         return SharedPreferencesAppSettingsBinding(this, sharedPreferences, context)
     }
 
-    private final class SharedPreferencesAppSettingsBinding(private val appSettings: IAppSettings, boundSharedPreferences: SharedPreferences, context: Context) : IAppSettings {
+    private final class SharedPreferencesAppSettingsBinding(private val appSettings: IAppSettings, private val boundSharedPreferences: SharedPreferences, context: Context) : IAppSettings {
         private val sharedPreferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
 
         public override var mapControlTypeName: String
@@ -140,6 +151,19 @@ public final class AppSettings: IAppSettings {
             }
 
         public override val propertyChanged: Observable<PropertyChangedData> = this.appSettings.propertyChanged
+
+        private var isDestroyed: Boolean = false
+        public override fun destroy() {
+            if (this.isDestroyed) {
+                return
+            }
+
+            this.boundSharedPreferences.unregisterOnSharedPreferenceChangeListener(this.sharedPreferenceChangeListener)
+
+            this.appSettings.destroy()
+
+            this.isDestroyed = true
+        }
 
         init {
             val distanceConverterTypeNameKey = context.getString(R.string.appsettings_preference_units_distance_key)

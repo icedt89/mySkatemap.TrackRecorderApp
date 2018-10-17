@@ -1,6 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
-import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
@@ -22,21 +21,12 @@ internal abstract class DashboardTileFragmentPresenter(protected val trackRecord
 
     protected val titleChangedSubject: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     public val titleChanged: Observable<String> = this.titleChangedSubject.subscribeOn(Schedulers.computation())
-            .doAfterNext {
-                Log.i("DTF/P", "SOURCE UPDATED")
-            }
 
     protected val valueChangedSubject: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     public val valueChanged: Observable<String> = this.valueChangedSubject.subscribeOn(Schedulers.computation())
-            .doAfterNext {
-                Log.i("DTF/P", "SOURCE UPDATED")
-            }
 
     protected val unitChangedSubject: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     public val unitChanged: Observable<String> = this.unitChangedSubject.subscribeOn(Schedulers.computation())
-            .doAfterNext {
-                Log.i("DTF/P", "SOURCE UPDATED")
-            }
 
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
         val subscriptions = this.createSubscriptions(trackRecorderSession)

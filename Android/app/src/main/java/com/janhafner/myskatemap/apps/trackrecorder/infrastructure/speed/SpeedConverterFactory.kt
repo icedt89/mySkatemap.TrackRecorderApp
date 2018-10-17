@@ -4,7 +4,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConver
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.KilometersPerHourSpeedConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.MetersPerSecondSpeedConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.MilesPerHourSpeedConverter
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.ISpeedConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 
 internal final class SpeedConverterFactory(private val appSettings: IAppSettings) : ISpeedConverterFactory {

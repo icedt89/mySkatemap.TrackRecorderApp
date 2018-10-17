@@ -3,6 +3,38 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
     <PreferenceCategory
+        android:title="@string/appsettings_preference_tracking_title"
+        android:key="appsettings_preference_tracking">
+        <ListPreference
+            android:key="@string/appsettings_preference_map_control_key"
+            android:title="@string/appsettings_preference_tracking_map_control_label"
+            android:summary="@string/appsettings_preference_tracking_map_control_summary"
+            android:entries="@array/appsettings_preference_tracking_map_control_names"
+            android:entryValues="@array/appsettings_preference_tracking_map_control_values"
+            android:defaultValue="@string/appsettings_preference_map_control_default_value" />
+        <SwitchPreference
+            android:key="@string/appsettings_preference_enable_auto_pause_on_still_key"
+            android:title="@string/appsettings_preference_enable_auto_pause_on_still_label"
+            android:summary="@string/appsettings_preference_enable_auto_pause_on_still_summary"
+            android:defaultValue="@string/appsettings_preference_enable_auto_pause_on_still_default_value" />
+        <ListPreference
+            android:key="@string/appsettings_preference_default_met_activity_code_key"
+            android:title="@string/appsettings_preference_tracking_default_met_activity_code_label"
+            android:summary="@string/appsettings_preference_tracking_default_met_activity_code_summary"
+            android:entries="@array/appsettings_preference_default_met_activity_code_names"
+            android:entryValues="@array/appsettings_preference_default_met_activity_code_values"
+            android:defaultValue="@string/appsettings_preference_default_met_activity_code_default_value"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/appsettings_preference_notifications_title"
+        android:key="appsettings_preference_notifications">
+        <SwitchPreference
+            android:key="@string/appsettings_preference_notifications_vibrate_on_background_stop_key"
+            android:title="@string/appsettings_preference_notifications_vibrate_on_background_stop_label"
+            android:summary="@string/appsettings_preference_notifications_vibrate_on_background_stop_summary"
+            android:defaultValue="@string/appsettings_preference_notifications_vibrate_on_background_stop_default_value" />
+    </PreferenceCategory>
+    <PreferenceCategory
         android:title="@string/appsettings_preference_units_title"
         android:key="appsettings_preference_units">
         <ListPreference
@@ -27,39 +59,4 @@
             android:entryValues="@array/appsettings_preference_units_energy_values"
             android:defaultValue="@string/appsettings_preference_units_energy_default_value" />
     </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/appsettings_preference_tracking_title"
-        android:key="appsettings_preference_tracking">
-        <ListPreference
-            android:key="@string/appsettings_preference_map_control_key"
-            android:title="@string/appsettings_preference_tracking_map_control_label"
-            android:summary="@string/appsettings_preference_tracking_map_control_summary"
-            android:entries="@array/appsettings_preference_tracking_map_control_names"
-            android:entryValues="@array/appsettings_preference_tracking_map_control_values"
-            android:defaultValue="@string/appsettings_preference_map_control_default_value" />
-        <SwitchPreference
-            android:key="@string/appsettings_preference_enable_auto_pause_on_still_key"
-            android:title="@string/appsettings_preference_enable_auto_pause_on_still_label"
-            android:summary="@string/appsettings_preference_enable_auto_pause_on_still_summary"
-            android:defaultValue="@string/appsettings_preference_enable_auto_pause_on_still_default_value" />
-        <ListPreference
-            android:key="@string/appsettings_preference_default_met_activity_code_key"
-            android:title="@string/appsettings_preference_tracking_default_met_activity_code_label"
-            android:summary="@string/appsettings_preference_tracking_default_met_activity_code_summary"
-            android:entries="@array/appsettings_preference_default_met_activity_code_names"
-            android:entryValues="@array/appsettings_preference_default_met_activity_code_values"
-            android:defaultValue="@string/appsettings_preference_default_met_activity_code_default_value"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/appsettings_preference_notifications_title"
-        android:key="appsettings_preference_notifications">
-        <SwitchPreference
-            android:key="@string/appsettings_preference_notifications_vibrate_on_background_stop_key"
-            android:title="@string/appsettings_preference_notifications_vibrate_on_background_stop_label"
-            android:summary="@string/appsettings_preference_notifications_vibrate_on_background_stop_summary"
-            android:defaultValue="@string/appsettings_preference_notifications_vibrate_on_background_stop_default_value" />
-    </PreferenceCategory>
-
 </PreferenceScreen>

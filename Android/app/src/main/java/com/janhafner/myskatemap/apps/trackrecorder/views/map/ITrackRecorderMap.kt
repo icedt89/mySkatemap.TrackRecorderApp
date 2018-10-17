@@ -1,11 +1,14 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.map
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.SimpleLocation
+import android.support.annotation.DrawableRes
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
 
 internal interface ITrackRecorderMap {
     val track: List<SimpleLocation>
 
     val isReady: Boolean
+
+    val canAddMarker: Boolean
 
     var gesturesEnabled: Boolean
 
@@ -15,8 +18,8 @@ internal interface ITrackRecorderMap {
 
     fun zoomToLocation(location: SimpleLocation, zoom: Float)
 
-    fun getMapAsync(callback: OnTrackRecorderMapReadyCallback)
+    fun addMarker(location: SimpleLocation, title: String, @DrawableRes icon: Int? = null): MapMarkerToken
 
-    fun getSnapshotAsync(callback: OnMapSnapshotReadyCallback)
+    fun getMapAsync(callback: OnTrackRecorderMapReadyCallback)
 }
 

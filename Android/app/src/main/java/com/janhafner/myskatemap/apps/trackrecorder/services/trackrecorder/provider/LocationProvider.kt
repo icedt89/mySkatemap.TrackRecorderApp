@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
-import com.janhafner.myskatemap.apps.trackrecorder.services.models.Location
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject

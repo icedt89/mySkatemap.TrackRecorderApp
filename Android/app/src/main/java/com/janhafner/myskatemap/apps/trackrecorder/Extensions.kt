@@ -23,6 +23,10 @@ internal fun Context.getApplicationInjector(): ApplicationComponent {
     return result.injector
 }
 
+internal fun Context.getManifestVersionName(): String {
+    return this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+}
+
 internal fun AppCompatActivity.checkAllAppPermissions() : Single<Boolean> {
     return Single.fromPublisher<Boolean>{
         Dexter.withActivity(this)
@@ -39,5 +43,5 @@ internal fun AppCompatActivity.checkAllAppPermissions() : Single<Boolean> {
 }
 
 internal fun IUserProfileSettings.isValidForBurnedEnergyCalculation() : Boolean {
-    return this.enableCalculationOfBurnedEnergy && this.age != null && this.weight != null && this.height != null && this.sex != null
+    return this.age != null && this.weight != null && this.height != null && this.sex != null
 }

@@ -5,10 +5,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import com.google.android.gms.location.ActivityRecognitionClient
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionRequest
 import com.google.android.gms.location.DetectedActivity
+import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
@@ -51,11 +53,17 @@ public final class TransitioningStillDetectorBroadcastReceiver(private val conte
         }
 
         val activityType = intent.getIntExtra(com.janhafner.myskatemap.apps.trackrecorder.stilldetection.TransitioningActivityRecognizerIntentService.INTENT_EXTRA_ACTIVITY_TYPE_KEY, DetectedActivity.UNKNOWN)
+
+        Log.i("TSDBR", "RECEIVED ACTIVITY TYPE ${activityType}")
+
         if (activityType != DetectedActivity.STILL) {
             return
         }
 
         val transitionType = intent.getIntExtra(TransitioningActivityRecognizerIntentService.INTENT_EXTRA_TRANSITION_TYPE_KEY, -1)
+
+        Log.i("TSDBR", "RECEIVED TRANSITION TYPE ${transitionType}")
+
         if (transitionType == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
            this.stillDetectedSubject.onNext(false)
         } else if(transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
@@ -67,7 +75,7 @@ public final class TransitioningStillDetectorBroadcastReceiver(private val conte
 
     public override fun startDetection() {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if(this.isDetecting) {
@@ -83,7 +91,7 @@ public final class TransitioningStillDetectorBroadcastReceiver(private val conte
 
     public override fun stopDetection() {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if(!this.isDetecting) {

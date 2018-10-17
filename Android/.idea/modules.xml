@@ -4,13 +4,19 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Android.iml" filepath="$PROJECT_DIR$/.idea/Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.activitydetection/app.activitydetection.iml" filepath="$PROJECT_DIR$/app.activitydetection/app.activitydetection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.burnedenergy/app.burnedenergy.iml" filepath="$PROJECT_DIR$/app.burnedenergy/app.burnedenergy.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.common/app.common.iml" filepath="$PROJECT_DIR$/app.common/app.common.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.conversion/app.conversion.iml" filepath="$PROJECT_DIR$/app.conversion/app.conversion.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.distancecalculation/app.distancecalculation.iml" filepath="$PROJECT_DIR$/app.distancecalculation/app.distancecalculation.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.export/app.export.iml" filepath="$PROJECT_DIR$/app.export/app.export.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.locationavailability/app.locationavailability.iml" filepath="$PROJECT_DIR$/app.locationavailability/app.locationavailability.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.map/app.map.iml" filepath="$PROJECT_DIR$/app.map/app.map.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.map.google/app.map.google.iml" filepath="$PROJECT_DIR$/app.map.google/app.map.google.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.map.openstreetmap/app.map.openstreetmap.iml" filepath="$PROJECT_DIR$/app.map.openstreetmap/app.map.openstreetmap.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.services/app.services.iml" filepath="$PROJECT_DIR$/app.services/app.services.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.services.couchdb/app.services.couchdb.iml" filepath="$PROJECT_DIR$/app.services.couchdb/app.services.couchdb.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.settings/app.settings.iml" filepath="$PROJECT_DIR$/app.settings/app.settings.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app.stilldetection/app.stilldetection.iml" filepath="$PROJECT_DIR$/app.stilldetection/app.stilldetection.iml" />
     </modules>
   </component>
 </project>

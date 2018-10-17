@@ -46,7 +46,7 @@ public final class ObservableTimer : IObservableTimer {
 
     public override fun set(elapsedSecondsSinceStart: Int) {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if (elapsedSecondsSinceStart < 0) {
@@ -69,7 +69,7 @@ public final class ObservableTimer : IObservableTimer {
 
     public override fun start() {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if (this.isRunning) {
@@ -87,7 +87,7 @@ public final class ObservableTimer : IObservableTimer {
 
     public override fun stop() {
         if(this.isDestroyed) {
-            throw IllegalStateException("Object is destroyed!")
+            throw ObjectDestroyedException()
         }
 
         if (!this.isRunning) {

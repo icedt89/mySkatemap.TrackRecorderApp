@@ -2,10 +2,10 @@ package com.janhafner.myskatemap.apps.trackrecorder.modules
 
 import com.janhafner.myskatemap.apps.trackrecorder.formatting.speed.SpeedConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.DistanceConverterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy.EnergyConverterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy.IEnergyConverterFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.ISpeedConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.IEnergyConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import dagger.Module
 import dagger.Provides

@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
 import android.support.v4.app.Fragment
-import android.util.Log
 import com.jakewharton.rxbinding2.widget.text
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -30,21 +29,12 @@ internal abstract class DashboardTileFragment : Fragment() {
         this.subscriptions.addAll(
                 presenter.titleChanged
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doAfterNext {
-                            Log.i("DTF", "UI UPDATED")
-                        }
                         .subscribe (this.view!!.fragment_dashboard_tile_title.text()),
                 presenter.valueChanged
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doAfterNext {
-                            Log.i("DTF", "UI UPDATED")
-                        }
                         .subscribe(this.view!!.fragment_dashboard_tile_value.text()),
                 presenter.unitChanged
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doAfterNext {
-                            Log.i("DTF", "UI UPDATED")
-                        }
                         .subscribe(this.view!!.fragment_dashboard_tile_unit.text())
         )
     }
