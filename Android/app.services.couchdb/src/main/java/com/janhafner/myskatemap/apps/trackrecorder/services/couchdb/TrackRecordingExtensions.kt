@@ -32,6 +32,7 @@ internal class TrackRecordingConverter {
             result.finishedAt = DateTime(document.getDate("finishedAt"))
             result.startedAt = DateTime(document.getDate("startedAt"))
             result.recordingTime = Period.seconds(document.getInt("recordingTime"))
+            result.activityCode = document.getString("activityCode")
 
             val fitnessActivityDictionary = document.getDictionary("fitnessActivity")
             if(fitnessActivityDictionary != null) {
@@ -68,6 +69,7 @@ internal class TrackRecordingConverter {
             result.finishedAt = DateTime(dictionary.getDate("finishedAt"))
             result.startedAt = DateTime(dictionary.getDate("startedAt"))
             result.recordingTime = Period.seconds(dictionary.getInt("recordingTime"))
+            result.activityCode = dictionary.getString("activityCode")
 
             val fitnessActivityDictionary = dictionary.getDictionary("fitnessActivity")
             if(fitnessActivityDictionary != null) {
@@ -111,12 +113,11 @@ internal class TrackRecordingConverter {
 
         private fun userProfileFromCouchDbDictionary(dictionary : Dictionary) : UserProfile {
             val age = dictionary.getInt("age")
-            val metActivityCode = dictionary.getString("metActivityCode")
             val weightInKilograms = dictionary.getFloat("weightInKilograms")
             val heightInCentimeters = dictionary.getInt("heightInCentimeters")
             val sex = Sex.valueOf(dictionary.getString("sex"))
 
-            return UserProfile(age, metActivityCode, weightInKilograms, heightInCentimeters, sex)
+            return UserProfile(age, weightInKilograms, heightInCentimeters, sex)
         }
     }
 }
@@ -139,6 +140,7 @@ internal fun TrackRecording.toCouchDbDocument(): MutableDocument {
     result.setInt("recordingTime", this.recordingTime.seconds)
     result.setDate("startedAt", this.startedAt.toDate())
     result.setDate("finishedAt", this.finishedAt?.toDate())
+    result.setString("activityCode", this.activityCode)
 
     if(this.userProfile != null) {
         val fitnessActivityDictionary = this.userProfile!!.toCouchDbDictionary()
@@ -223,7 +225,6 @@ private fun UserProfile.toCouchDbDictionary() : Dictionary {
     val result = MutableDictionary()
 
     result.setInt("age", this.age)
-    result.setString("metActivityCode", this.metActivityCode)
     result.setFloat("weightInKilograms", this.weightInKilograms)
     result.setInt("heightInCentimeters", this.heightInCentimeters)
     result.setString("sex", this.sex.toString())

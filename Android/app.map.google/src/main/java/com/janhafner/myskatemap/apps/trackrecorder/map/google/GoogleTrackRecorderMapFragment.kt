@@ -1,5 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.map.google
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -48,6 +49,21 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         })
     }
 
+    public override val providesNativeMyLocation: Boolean = true
+
+    public override var myLocationActivated: Boolean = false
+        set(value) {
+            if(!this.providesNativeMyLocation) {
+                throw UnsupportedOperationException()
+            }
+
+            if (this.isReady) {
+                this.setMyLocation(value)
+            }
+
+            field = value
+        }
+
     public override var isReady: Boolean = false
         private set
 
@@ -65,20 +81,13 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
             field = value
         }
 
-    public override var trackColor: Int
-        get() {
-            if(!this.isReady) {
-                throw IllegalStateException("Map needs to be initialized first!")
-            }
-
-            return this.polyline.color
-        }
+    public override var trackColor: Int = Color.RED
         set(value) {
-            if(!this.isReady) {
-                throw IllegalStateException("Map needs to be initialized first!")
+            if (this.isReady) {
+                this.polyline.color = value
             }
 
-            this.polyline.color = value
+            field = value
         }
 
     public override fun addMarker(location: SimpleLocation, title: String, icon: Int?): MapMarkerToken {
@@ -133,6 +142,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         this.map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
     }
 
+    @SuppressLint("MissingPermission")
     private fun applyDefaults()  {
         val uiSettings = this.map.uiSettings
         uiSettings.setAllGesturesEnabled(this.gesturesEnabled)
@@ -143,11 +153,19 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         this.map.mapType = GoogleMap.MAP_TYPE_NORMAL
 
         this.polyline.isGeodesic = true
-        this.polyline.color = Color.RED
+        this.polyline.color = this.trackColor
+
+        this.setMyLocation(this.myLocationActivated)
     }
 
     private fun locationToLatLng(location: SimpleLocation): LatLng {
         return LatLng(location.latitude, location.longitude)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun setMyLocation(value: Boolean) {
+        this.map.uiSettings.isMyLocationButtonEnabled = value
+        this.map.isMyLocationEnabled = value
     }
 }
 

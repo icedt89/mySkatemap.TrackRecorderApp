@@ -2,6 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.sessi
 
 import android.app.Service
 import android.util.Log
+import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.ActivityDetectorBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.ActivityType
 import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.IActivityDetectorSource
@@ -16,6 +17,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.IDistance
 import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.toObservableTransformer
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggregation
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.LocationsAggregation
+import com.janhafner.myskatemap.apps.trackrecorder.isStill
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
@@ -57,6 +59,9 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
     public override lateinit var distanceChanged: Observable<Float>
         private set
+
+    public override val activityCode: String
+        get() = this.trackRecording.activityCode
 
     private val sessionClosedSubject: Subject<ITrackRecordingSession> = PublishSubject.create()
     public override val sessionClosed: Observable<ITrackRecordingSession> = this.sessionClosedSubject.subscribeOn(Schedulers.computation())
@@ -138,7 +143,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         )
 
         if(this.trackRecording.userProfile != null) {
-            val metActivityDefinition = MetDefinition.getMetDefinitionByCode(this.trackRecording.userProfile!!.metActivityCode)
+            val metActivityDefinition = MetDefinition.getMetDefinitionByCode(this.trackRecording.activityCode)
             if (metActivityDefinition != null) {
                 this.burnedEnergyChanged = this.recordingTimeChanged
                             .map{
@@ -179,6 +184,16 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         }
 
         this.subscriptions.add(this.activityDetectorSource.activityDetected
+                .isStill()
+                .subscribe{
+                    if(it) {
+                        Log.i("ABDR", "Current activity is assumed as \"STILL\"")
+                    } else {
+                        Log.i("ADBR", "Current activity is NOT assumed as \"still\"")
+                    }
+                })
+
+        this.subscriptions.add(this.activityDetectorSource.activityDetected
                 .subscribe {
                     val currentState = this.stateChangedSubject.value!!
 
@@ -190,7 +205,9 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                         if (currentState.state == TrackRecordingSessionState.Running) {
                             Log.i("ADBR", "Pausing tracking without stopping location")
 
-                            this.pauseTrackingAndSetState(TrackingPausedReason.StillStandDetected)
+                            if(BuildConfig.STILL_DETECTION_ENABLE_PAUSERESUME){
+                                this.pauseTrackingAndSetState(TrackingPausedReason.StillStandDetected)
+                            }
                         }
                     } else {
                         Log.i("ADBR", "No still detected")
@@ -199,7 +216,9 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                 && currentState.pausedReason == TrackingPausedReason.StillStandDetected) {
                             Log.i("ADBR", "Resuming tracking")
 
-                            this.resumeTracking()
+                            if(BuildConfig.STILL_DETECTION_ENABLE_PAUSERESUME) {
+                                this.resumeTracking()
+                            }
                         }
                     }
                 })

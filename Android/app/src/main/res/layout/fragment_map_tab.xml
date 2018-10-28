@@ -10,7 +10,7 @@
     <android.support.v7.widget.LinearLayoutCompat
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end">
+        android:layout_gravity="top|start">
         <android.support.design.widget.FloatingActionButton
             android:theme="@style/MySkatemap.TrackRecorder.AppTheme.AppCompat.SecondaryFab"
             android:id="@+id/fragment_track_recorder_map_add_poi"

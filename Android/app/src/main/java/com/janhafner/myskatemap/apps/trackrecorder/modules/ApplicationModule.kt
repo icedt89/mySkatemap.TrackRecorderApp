@@ -5,18 +5,14 @@ import android.location.LocationManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimeDateTimeMoshiAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.jodatime.JodaTimePeriodMoshiAdapter
-import com.janhafner.myskatemap.apps.trackrecorder.jodatime.UuidMoshiAdapter
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ITrackRecorderMapFragmentFactory
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.TrackRecorderMapFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.*
 import com.janhafner.myskatemap.apps.trackrecorder.settings.*
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragmentFactory
-import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -30,20 +26,22 @@ import javax.inject.Singleton
     ActivityDetectionModule::class,
     LocationAvailabilityModule::class,
     DistanceCalculationModule::class,
-    BurnedEnergyModule::class])
+    BurnedEnergyModule::class,
+    LiveLocationModule::class])
 internal final class ApplicationModule(private val applicationContext: Context) {
     @Singleton
     @Provides
-    public fun providerMyCurrentLocationProvider(context: Context, locationManager: LocationManager) : IMyLocationProvider {
-        if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
-            return SimulatedMyLocationProvider()
-        }
+        public fun providerMyCurrentLocationProvider(context: Context, locationManager: LocationManager, fusedLocationProviderClient: FusedLocationProviderClient): IMyLocationProvider {
+            if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
+                return SimulatedMyLocationProvider()
+            }
 
-        return MyLocationProvider(context, locationManager)
+        return FusedMyLocationProvider(context, fusedLocationProviderClient)
+        // return LegacyMyLocationProvider(context, locationManager)
     }
 
     @Provides
-    public fun provideLocationProvider(context: Context, fusedLocationProviderClient: FusedLocationProviderClient) : ILocationProvider {
+    public fun provideLocationProvider(context: Context, fusedLocationProviderClient: FusedLocationProviderClient): ILocationProvider {
         if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
             val initialLocation = Location()
 
@@ -66,12 +64,6 @@ internal final class ApplicationModule(private val applicationContext: Context) 
                 BuildConfig.FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS,
                 BuildConfig.FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS,
                 BuildConfig.FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS)
-    }
-
-    @Singleton
-    @Provides
-    public fun provideNeuTrackRecorderMapFactory(context: Context, appSettings: IAppSettings): com.janhafner.myskatemap.apps.trackrecorder.views.map.neu.ITrackRecorderMapFragmentFactory {
-        return com.janhafner.myskatemap.apps.trackrecorder.views.map.neu.TrackRecorderMapFragmentFactory(context, appSettings)
     }
 
     @Singleton
@@ -111,16 +103,4 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
         return UserProfileSettings().bindToSharedPreferences(sharedPreferences, context)
     }
-
-    @Singleton
-    @Provides
-    public fun provideMoshi(): Moshi {
-        return Moshi.Builder()
-                .add(JodaTimeDateTimeMoshiAdapter())
-                .add(JodaTimePeriodMoshiAdapter())
-                .add(UuidMoshiAdapter())
-                // .add(KotlinJsonAdapterFactory())
-                .build()
-    }
 }
-

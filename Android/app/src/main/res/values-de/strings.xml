@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">mySkatemap Activityboard</string>
+    <string name="app_name">mySkatemap</string>
     <string name="trackrecorderactivity_title">Aktivität</string>
     <string name="trackrecorderactivity_toolbar_finish_currenttracking">Abschließen</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttracking">Verwerfen</string>
@@ -60,8 +60,10 @@
     <string name="userprofilesettings_preference_name_label">Dein Name</string>
     <string name="userprofilesettings_preference_name_summary_empty">Wie er in der App dargestellt werden soll</string>
     <string name="userprofilesettings_preference_name_summary">Ich werde dich %s nennen</string>
-    <string name="appsettings_preference_tracking_default_met_activity_code_label">Standard Aktivitätstyp</string>
-    <string name="appsettings_preference_tracking_default_met_activity_code_summary">Du bevorzugst %s als standard Aktivitätstyp für neue Aufnahmen. Die Aktivität wird zur Berechnung deines Energieverbrauchs benötigt.</string>
+    <string name="appsettings_preference_tracking_default_met_activity_code_label">Standard Aktivität</string>
+    <string name="appsettings_preference_tracking_default_met_activity_code_summary">Du bevorzugst %s als standard Aktivität für neue Aufnahmen. Die Aktivität wird zur Berechnung deines Energieverbrauchs benötigt.</string>
+    <string name="appsettings_preference_enable_live_location_label">Live-Standort [Exp.]</string>
+    <string name="appsettings_preference_enable_live_location_summary">Veröffentlicht deine aufgenommene Strecke Online während du sie aufnimmst</string>
 
     <string name="tracklistactivity_title">Meine Strecken</string>
     <string name="userprofilesettingsactivity_title">Mein Profil</string>
@@ -77,11 +79,17 @@
     <string name="dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title">Ø Höhe</string>
     <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">⤓ Höhe</string>
     <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">Höhe</string>
+    <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Dauer</string>
+
     <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Einstellungen</string>
     <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">Mein Profil</string>
     <string name="trackrecorderactivity_navigation_drawer_action_tracklist_label">Meine Strecken</string>
     <string name="trackrecorderactivity_navigation_drawer_action_about_label">Über</string>
-    <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Dauer</string>
+
+    <string name="trackrecorderactivity_navigation_drawer_info_title">Info</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_label">Aktivität</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Automatisch pausieren [Exp.]</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_live_location_label">Live-Standort [Exp.]</string>
 
     <string-array name="appsettings_preference_units_distance_names">
         <item>Kilometer</item>

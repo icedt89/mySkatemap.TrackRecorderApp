@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.*
@@ -101,6 +102,8 @@ public final class AppSettings: IAppSettings {
 
     private final class SharedPreferencesAppSettingsBinding(private val appSettings: IAppSettings, private val boundSharedPreferences: SharedPreferences, context: Context) : IAppSettings {
         private val sharedPreferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
+
+        private val subscriptions: CompositeDisposable = CompositeDisposable()
 
         public override var mapControlTypeName: String
             get() = this.appSettings.mapControlTypeName
@@ -218,6 +221,23 @@ public final class AppSettings: IAppSettings {
             this.appSettings.mapControlTypeName = boundSharedPreferences.getString(mapControlTypeNameKey, AppSettings.DEFAULT_MAP_CONTROL_TYPENAME)
             this.appSettings.enableAutoPauseOnStill = boundSharedPreferences.getBoolean(enableAutoPauseOnStillKey, AppSettings.DEFAULT_ENABLE_AUTO_PAUSE_ON_STILL)
             this.appSettings.vibrateOnLocationAvailabilityLoss = boundSharedPreferences.getBoolean(vibrateOnLocationAvailabilityLossKey, AppSettings.DEFAULT_VIBRATE_ON_LOCATION_AVAILABILITY_LOSS)
+
+            this.subscriptions.add(
+                this.propertyChanged
+                        .filter {
+                            it.hasChanged
+                        }
+                        .subscribe{
+                            when(it.propertyName) {
+                                this::enableAutoPauseOnStill.name -> {
+                                    this.boundSharedPreferences.edit().putBoolean(enableAutoPauseOnStillKey, it.newValue as Boolean).apply()
+                                }
+                                /* TODO: this::enableLiveLocation.name -> {
+                                    this.boundSharedPreferences.edit().putBoolean(enableLiveLocationKey, it.newValue as Boolean).apply()
+                                } */
+                            }
+                        }
+            )
         }
     }
 

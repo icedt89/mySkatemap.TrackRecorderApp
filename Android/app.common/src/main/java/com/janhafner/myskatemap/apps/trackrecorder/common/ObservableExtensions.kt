@@ -20,7 +20,6 @@ public fun <Upstream> Observable<List<Upstream>>.filterNotEmpty() : Observable<L
             }
 }
 
-
 public fun Observable<Location>.calculateMissingSpeed(): Observable<Location> {
     return this
             .pairWithPrevious()

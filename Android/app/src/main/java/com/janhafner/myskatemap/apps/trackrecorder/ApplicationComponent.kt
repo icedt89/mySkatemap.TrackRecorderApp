@@ -18,8 +18,6 @@ internal interface ApplicationComponent : DashboardTileFragmentPresenterComponen
 
     fun inject(trackListActivity: TrackListActivity)
 
-    fun inject(mapTabFragment: MapTabFragment)
-
     fun inject(dashboardTabFragment: DashboardTabFragment)
 
     fun inject(appSettingsFragment: AppSettingsFragment)
@@ -28,5 +26,5 @@ internal interface ApplicationComponent : DashboardTileFragmentPresenterComponen
 
     fun inject(trackRecorderService: TrackRecorderService)
 
-    fun inject(mapTabFragment: com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.neu.MapTabFragment)
+    fun inject(mapTabFragment: MapTabFragment)
 }

@@ -45,21 +45,24 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
         callback.onMapReady(this)
     }
 
-
-    public override var trackColor: Int
-        get() {
-            if(!this.isReady) {
-                throw IllegalStateException("Map needs to be initialized first!")
-            }
-
-            return this.polyline.color
-        }
+    public override var trackColor: Int = Color.RED
         set(value) {
-            if(!this.isReady) {
-                throw IllegalStateException("Map needs to be initialized first!")
+            if(this.isReady) {
+                this.polyline.color = value
             }
 
-            this.polyline.color = value
+            field = value
+        }
+
+    public override val providesNativeMyLocation: Boolean = false
+
+    public override var myLocationActivated: Boolean = false
+        set(value) {
+            if(!this.providesNativeMyLocation) {
+                throw UnsupportedOperationException()
+            }
+
+            field = value
         }
 
     public override fun addLocations(locations: List<SimpleLocation>) {
@@ -139,6 +142,6 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
         this.map.setTileSource(TileSourceFactory.MAPNIK)
 
         this.polyline.isGeodesic = true
-        this.polyline.color = Color.RED
+        this.polyline.color = this.trackColor
     }
 }

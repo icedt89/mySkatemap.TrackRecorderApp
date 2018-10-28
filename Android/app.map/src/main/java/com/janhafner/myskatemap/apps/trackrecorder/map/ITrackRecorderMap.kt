@@ -12,6 +12,10 @@ public interface ITrackRecorderMap {
 
     val canAddMarker: Boolean
 
+    val providesNativeMyLocation: Boolean
+
+    var myLocationActivated: Boolean
+
     var gesturesEnabled: Boolean
 
     fun addLocations(locations: List<SimpleLocation>)

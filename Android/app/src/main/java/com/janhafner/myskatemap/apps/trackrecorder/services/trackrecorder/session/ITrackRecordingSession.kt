@@ -17,6 +17,8 @@ internal interface ITrackRecordingSession : IDestroyable {
 
     val burnedEnergyChanged: Observable<Float>
 
+    val activityCode: String;
+
     val stateChanged: Observable<SessionStateInfo>
 
     val currentState: SessionStateInfo

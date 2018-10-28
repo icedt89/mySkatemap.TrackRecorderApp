@@ -10,6 +10,7 @@
       <module fileurl="file://$PROJECT_DIR$/app.conversion/app.conversion.iml" filepath="$PROJECT_DIR$/app.conversion/app.conversion.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.distancecalculation/app.distancecalculation.iml" filepath="$PROJECT_DIR$/app.distancecalculation/app.distancecalculation.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.export/app.export.iml" filepath="$PROJECT_DIR$/app.export/app.export.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.livelocation/app.livelocation.iml" filepath="$PROJECT_DIR$/app.livelocation/app.livelocation.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.locationavailability/app.locationavailability.iml" filepath="$PROJECT_DIR$/app.locationavailability/app.locationavailability.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.map/app.map.iml" filepath="$PROJECT_DIR$/app.map/app.map.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.map.google/app.map.google.iml" filepath="$PROJECT_DIR$/app.map.google/app.map.google.iml" />

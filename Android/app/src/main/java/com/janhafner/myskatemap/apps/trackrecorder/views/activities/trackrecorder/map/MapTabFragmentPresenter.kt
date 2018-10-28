@@ -8,7 +8,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.common.filterNotEmpty
 import com.janhafner.myskatemap.apps.trackrecorder.common.toSimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ITrackRecorderMapFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
+import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
+import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapReadyCallback
+import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.IMyLocationProvider
@@ -16,9 +20,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provid
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.OnTrackRecorderMapReadyCallback
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.TrackRecorderMapFragment
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -105,7 +106,9 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
         this.trackRecorderSession = null
     }
 
-    public override fun onMapReady(trackRecorderMap: com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMap) {
+    public override fun onMapReady(trackRecorderMap: ITrackRecorderMap) {
+        trackRecorderMap.trackColor = this.view.context!!.getColor(R.color.secondaryColor)
+
         trackRecorderMap.zoomToLocation(SimpleLocation(BuildConfig.MAP_INITIAL_LATITUDE, BuildConfig.MAP_INITIAL_LONGITUDE), BuildConfig.MAP_INITIAL_ZOOM)
     }
 

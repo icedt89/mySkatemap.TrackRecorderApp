@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
+    android:layout_height="128dp"
+    android:gravity="bottom|start"
     android:padding="6dp"
-    android:background="@color/primaryDarkColor"
+    android:background="@color/primaryColor"
     android:orientation="horizontal">
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/app_name"
-        />
-
+        android:contentDescription="@string/app_name" />
     <TextView
-        android:id="@+id/txtName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="6dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-        android:textColor="@android:color/white" />
-
+        android:textColor="@color/primaryTextColor"
+        android:text="@string/app_name" />
 </android.support.v7.widget.LinearLayoutCompat>

@@ -16,6 +16,10 @@ public abstract class TrackRecorderMapFragment : Fragment(), ITrackRecorderMap {
 
     public abstract override val isReady: Boolean
 
+    public abstract override val providesNativeMyLocation: Boolean
+
+    public abstract override var myLocationActivated: Boolean
+
     public abstract override var trackColor: Int
 
     public abstract override var gesturesEnabled: Boolean

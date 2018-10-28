@@ -16,7 +16,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.IMyLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
-import com.janhafner.myskatemap.apps.trackrecorder.views.map.ITrackRecorderMapFragmentFactory
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ITrackRecorderMapFragmentFactory
 import javax.inject.Inject
 
 

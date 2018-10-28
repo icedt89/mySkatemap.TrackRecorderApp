@@ -31,6 +31,8 @@ public final class TrackRecording (id: UUID = UUID.randomUUID()) {
 
     public var userProfile: UserProfile? = null
 
+    public lateinit var activityCode: String
+
     public lateinit var startedAt: DateTime
 
     public var finishedAt: DateTime? = null
@@ -57,9 +59,10 @@ public final class TrackRecording (id: UUID = UUID.randomUUID()) {
     }
 
     companion object {
-        public fun start(): TrackRecording {
+        public fun start(activityCode: String): TrackRecording {
             val result = TrackRecording(UUID.randomUUID())
 
+            result.activityCode = activityCode
             result.startedAt = DateTime.now()
             result.stateChangeEntries.add(StateChangeEntry.start(result.startedAt))
 
