@@ -8,7 +8,6 @@ import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
@@ -144,13 +143,14 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
     private fun setupRightNavigationView() {
         this.view.navigation_drawer_trackrecorder_activity_info_auto_pause_on_still.isChecked = this.appSettings.enableAutoPauseOnStill
+        this.view.navigation_drawer_trackrecorder_activity_info_live_location.isChecked = this.appSettings.enableLiveLocation
 
         this.subscriptions.addAll(
             this.view.navigation_drawer_trackrecorder_activity_info_auto_pause_on_still.checkedChanges().subscribe{
                 this.appSettings.enableAutoPauseOnStill = it
             },
             this.view.navigation_drawer_trackrecorder_activity_info_live_location.checkedChanges().subscribe{
-                Log.i("TRAP", "LIVE LOCATION FEATURE NEEDS TO BE IMPLEMENTED FIRST!")
+                this.appSettings.enableLiveLocation = it
             },
             this.appSettings.propertyChanged
                     .filter {
@@ -160,6 +160,9 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                         when(it.propertyName) {
                             IAppSettings::enableAutoPauseOnStill.name -> {
                                 this.view.navigation_drawer_trackrecorder_activity_info_auto_pause_on_still.isChecked = it.newValue as Boolean
+                            }
+                            IAppSettings::enableLiveLocation.name -> {
+                                this.view.navigation_drawer_trackrecorder_activity_info_live_location.isChecked = it.newValue as Boolean
                             }
                         }
                     }
@@ -392,6 +395,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                             this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, AboutActivity::class.java))
                         } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_tracklist) {
                             this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, TrackListActivity::class.java))
+                        } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_signin) {
+                            throw NotImplementedError()
                         }
 
                         this@TrackRecorderActivityPresenter.view.trackrecorderactivity_navigationdrawer.closeDrawers()

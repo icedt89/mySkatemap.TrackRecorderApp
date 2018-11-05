@@ -31,6 +31,24 @@ public final class AppSettings: IAppSettings {
             this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::enableAutoPauseOnStill.name, oldValue, value))
         }
 
+    public override var enableLiveLocation: Boolean = DEFAULT_ENABLE_LIVE_LOCATION
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::enableLiveLocation.name, oldValue, value))
+        }
+
+    public override var enableShowMyLocation: Boolean = DEFAULT_ENABLE_SHOW_MY_LOCATION
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::enableShowMyLocation.name, oldValue, value))
+        }
+
     public override var mapControlTypeName: String = AppSettings.DEFAULT_MAP_CONTROL_TYPENAME
         set(value) {
             val oldValue = field
@@ -117,6 +135,18 @@ public final class AppSettings: IAppSettings {
                 this.appSettings.defaultMetActivityCode = value
             }
 
+        public override var enableLiveLocation: Boolean
+            get() = this.appSettings.enableLiveLocation
+            set(value) {
+                this.appSettings.enableLiveLocation = value
+            }
+
+        public override var enableShowMyLocation: Boolean
+            get() = this.appSettings.enableShowMyLocation
+            set(value) {
+                this.appSettings.enableShowMyLocation = value
+            }
+
         public override var distanceConverterTypeName: String
             get() = this.appSettings.distanceConverterTypeName
             set(value) {
@@ -176,13 +206,19 @@ public final class AppSettings: IAppSettings {
             val defaultMetActivityCodeKey = context.getString(R.string.appsettings_preference_default_met_activity_code_key)
             val mapControlTypeNameKey = context.getString(R.string.appsettings_preference_map_control_key)
             val enableAutoPauseOnStillKey = context.getString(R.string.appsettings_preference_enable_auto_pause_on_still_key)
+            val enableLiveLocationKey = context.getString(R.string.appsettings_preference_enable_live_location_key)
             val vibrateOnLocationAvailabilityLossKey = context.getString(R.string.appsettings_preference_notifications_vibrate_on_background_stop_key)
+            val enableShowMyLocationKey = context.getString(R.string.appsettings_preference_enable_show_my_location_key)
 
             this.sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                 when (key) {
                     distanceConverterTypeNameKey -> {
                         val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_DISTANCE_CONVERTER_TYPENAME)
                         this.appSettings.distanceConverterTypeName = currentValue
+                    }
+                    enableShowMyLocationKey -> {
+                        val currentValue = boundSharedPreferences.getBoolean(key, AppSettings.DEFAULT_ENABLE_SHOW_MY_LOCATION)
+                        this.appSettings.enableShowMyLocation = currentValue
                     }
                     speedConverterTypeNameKey -> {
                         val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_SPEED_CONVERTER_TYPENAME)
@@ -204,6 +240,10 @@ public final class AppSettings: IAppSettings {
                         val currentValue = boundSharedPreferences.getBoolean(key, AppSettings.DEFAULT_ENABLE_AUTO_PAUSE_ON_STILL)
                         this.appSettings.enableAutoPauseOnStill = currentValue
                     }
+                    enableLiveLocationKey -> {
+                        val currentValue = boundSharedPreferences.getBoolean(key, AppSettings.DEFAULT_ENABLE_LIVE_LOCATION)
+                        this.appSettings.enableLiveLocation = currentValue
+                    }
                     vibrateOnLocationAvailabilityLossKey -> {
                         val currentValue = boundSharedPreferences.getBoolean(key, AppSettings.DEFAULT_VIBRATE_ON_LOCATION_AVAILABILITY_LOSS)
                         this.appSettings.vibrateOnLocationAvailabilityLoss = currentValue
@@ -220,6 +260,8 @@ public final class AppSettings: IAppSettings {
             this.appSettings.defaultMetActivityCode = boundSharedPreferences.getString(defaultMetActivityCodeKey, AppSettings.DEFAULT_MET_ACTIVITY_CODE)
             this.appSettings.mapControlTypeName = boundSharedPreferences.getString(mapControlTypeNameKey, AppSettings.DEFAULT_MAP_CONTROL_TYPENAME)
             this.appSettings.enableAutoPauseOnStill = boundSharedPreferences.getBoolean(enableAutoPauseOnStillKey, AppSettings.DEFAULT_ENABLE_AUTO_PAUSE_ON_STILL)
+            this.appSettings.enableLiveLocation = boundSharedPreferences.getBoolean(enableLiveLocationKey, AppSettings.DEFAULT_ENABLE_LIVE_LOCATION)
+            this.appSettings.enableShowMyLocation = boundSharedPreferences.getBoolean(enableShowMyLocationKey, AppSettings.DEFAULT_ENABLE_SHOW_MY_LOCATION)
             this.appSettings.vibrateOnLocationAvailabilityLoss = boundSharedPreferences.getBoolean(vibrateOnLocationAvailabilityLossKey, AppSettings.DEFAULT_VIBRATE_ON_LOCATION_AVAILABILITY_LOSS)
 
             this.subscriptions.add(
@@ -232,9 +274,12 @@ public final class AppSettings: IAppSettings {
                                 this::enableAutoPauseOnStill.name -> {
                                     this.boundSharedPreferences.edit().putBoolean(enableAutoPauseOnStillKey, it.newValue as Boolean).apply()
                                 }
-                                /* TODO: this::enableLiveLocation.name -> {
+                                this::enableLiveLocation.name -> {
                                     this.boundSharedPreferences.edit().putBoolean(enableLiveLocationKey, it.newValue as Boolean).apply()
-                                } */
+                                }
+                                this::enableShowMyLocation.name -> {
+                                    this.boundSharedPreferences.edit().putBoolean(enableShowMyLocationKey, it.newValue as Boolean).apply()
+                                }
                             }
                         }
             )
@@ -257,5 +302,9 @@ public final class AppSettings: IAppSettings {
         public const val DEFAULT_ENABLE_AUTO_PAUSE_ON_STILL: Boolean = true
 
         public const val DEFAULT_VIBRATE_ON_LOCATION_AVAILABILITY_LOSS: Boolean = true
+
+        public const val DEFAULT_ENABLE_LIVE_LOCATION: Boolean = false
+
+        public const val DEFAULT_ENABLE_SHOW_MY_LOCATION: Boolean = false
     }
 }

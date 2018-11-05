@@ -2,6 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.modules
 
 import android.content.Context
 import android.location.LocationManager
+import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
@@ -43,6 +44,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
     @Provides
     public fun provideLocationProvider(context: Context, fusedLocationProviderClient: FusedLocationProviderClient): ILocationProvider {
         if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
+            Log.v("ApplicationModule", "Using SimulatedLocationProvider as location provider")
+
             val initialLocation = Location()
 
             initialLocation.bearing = BuildConfig.SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING
@@ -58,6 +61,8 @@ internal final class ApplicationModule(private val applicationContext: Context) 
                     BuildConfig.SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS,
                     BuildConfig.SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES)
         }
+
+        Log.v("ApplicationModule", "Using FusedLocationProvider as location provider")
 
         return FusedLocationProvider(context, fusedLocationProviderClient,
                 BuildConfig.FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS,

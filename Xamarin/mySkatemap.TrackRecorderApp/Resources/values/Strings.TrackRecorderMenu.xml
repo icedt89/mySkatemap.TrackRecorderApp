@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-	<string name="trackrecordermenu_currenttrackrecording_attachments_text">Aufnahmeanhänge</string>
-	<string name="trackrecordermenu_currenttrackrecording_finish_text">Abschließen</string>
-	<string name="trackrecordermenu_currenttrackrecording_discard_text">Verwerfen</string>
-</resources>

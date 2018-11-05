@@ -1,7 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.modules
 
+import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.live.*
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ILiveSessionController
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.LiveSessionController
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -13,13 +16,15 @@ internal final class LiveLocationModule {
     @Provides
     @Singleton
     public fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient()
+        return OkHttpClient.Builder().build()
     }
 
     @Singleton
     @Provides
     public fun provideHttpLiveSessionApiClient(httpClient: OkHttpClient): HttpLiveSessionApiClient {
         val baseUrl = BuildConfig.LIVE_LOCATION_HTTP_BASE_URL
+
+        Log.v("LiveLocationModule", "Using \"${baseUrl}\" as base url for requests")
 
         return HttpLiveSessionApiClient(httpClient, baseUrl)
     }
@@ -28,10 +33,19 @@ internal final class LiveLocationModule {
     @Singleton
     public fun provideLiveSessionProvider(httpLiveSessionApiClient: HttpLiveSessionApiClient, moshi: Moshi) : ILiveSessionProvider {
         if (BuildConfig.LIVE_LOCATION_USE_HTTP) {
+            Log.v("LiveLocationModule", "Using HttpLiveSessionProvider implementation")
+
             return HttpLiveSessionProvider(httpLiveSessionApiClient, moshi)
         }
 
+        Log.v("LiveLocationModule", "Using NullLiveSessionProvider implementation")
+
         return NullLiveSessionProvider()
+    }
+
+    @Provides
+    public fun provideLiveSessionController(liveSessionProvider: ILiveSessionProvider): ILiveSessionController {
+        return LiveSessionController(liveSessionProvider)
     }
 
     @Singleton
@@ -40,7 +54,6 @@ internal final class LiveLocationModule {
         return Moshi.Builder()
                 .add(JodaTimeDateTimeMoshiAdapter())
                 .add(JodaTimePeriodMoshiAdapter())
-                .add(UuidMoshiAdapter())
                 // .add(KotlinJsonAdapterFactory())
                 .build()
     }

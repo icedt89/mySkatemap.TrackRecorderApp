@@ -60,6 +60,9 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     @Inject
     public lateinit var notificationManager: NotificationManager
 
+    @Inject
+    public lateinit var liveSessionController: ILiveSessionController
+
     private lateinit var trackRecorderServiceNotificationChannel: TrackRecorderServiceNotificationChannel
 
     private var sessionSubscription: Disposable? = null
@@ -114,7 +117,8 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                 this,
                 this.activityDetectorBroadcastReceiver,
                 this.activityDetectorSource,
-                this.locationAvailabilityChangedSource)
+                this.locationAvailabilityChangedSource,
+                this.liveSessionController)
 
         return this.currentSession!!
     }

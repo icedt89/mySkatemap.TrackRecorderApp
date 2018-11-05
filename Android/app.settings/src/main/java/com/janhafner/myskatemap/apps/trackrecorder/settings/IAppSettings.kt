@@ -15,7 +15,11 @@ public interface IAppSettings : IDestroyable {
 
     var enableAutoPauseOnStill: Boolean
 
+    var enableLiveLocation: Boolean
+
     var mapControlTypeName: String
+
+    var enableShowMyLocation: Boolean
 
     var appUiLocale: String
 

@@ -17,8 +17,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.IDistance
 import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.toObservableTransformer
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggregation
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.LocationsAggregation
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.MetCodeActivityTypeMapping
 import com.janhafner.myskatemap.apps.trackrecorder.isStill
+import com.janhafner.myskatemap.apps.trackrecorder.live.LiveLocation
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ILiveSessionController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -41,7 +44,8 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                            private val service: Service,
                                            private val activityDetectorBroadcastReceiver: ActivityDetectorBroadcastReceiver,
                                            private val activityDetectorSource: IActivityDetectorSource,
-                                           private val locationAvailabilityChangedSource: ILocationAvailabilityChangedSource) : ITrackRecordingSession {
+                                           private val locationAvailabilityChangedSource: ILocationAvailabilityChangedSource,
+                                           private val liveSessionController: ILiveSessionController) : ITrackRecordingSession {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     public override val locationsAggregation: ILocationsAggregation = LocationsAggregation()
@@ -120,6 +124,12 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                 } else {
                                     this.tryUnregisterActivityDetectorBroadcastReceiver()
                                 }
+                            } else if(it.propertyName == IAppSettings::enableLiveLocation.name) {
+                                if(this.appSettings.enableLiveLocation) {
+                                    this.liveSessionController.startSession()
+                                } else {
+                                    this.liveSessionController.endSession()
+                                }
                             }
                         },
                 this.recordingTimeChanged
@@ -131,6 +141,14 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                             this.locationsAggregation.add(it)
 
                             this.trackRecording.addLocations(listOf(it))
+                        },
+                this.locationsChanged
+                        .map {
+                            LiveLocation(it.capturedAt, it.latitude, it.longitude)
+                        }
+                        .buffer(1, TimeUnit.MINUTES, 20)
+                        .subscribe {
+                            this.liveSessionController.sendLocations(it)
                         },
                 this.stateChanged
                         .subscribe {
@@ -159,6 +177,10 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
         this.tryRegisterActivityDetectorBroadcastReceiver()
+
+        if(this.appSettings.enableLiveLocation){
+            this.liveSessionController.startSession()
+        }
     }
 
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
@@ -183,13 +205,32 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
             return
         }
 
+        val activityMap = MetCodeActivityTypeMapping.getActivityTypeByCode(this.trackRecording.activityCode)
+        if (activityMap != null) {
+            Log.i("ADBR_IS_F_AM", "Mapped activity type is \"${activityMap}\"")
+
+            this.subscriptions.add(this.activityDetectorSource.activityDetected
+                    .map {
+                        it == ActivityType.Still || (it != activityMap)
+                    }
+                    .subscribe{
+                        if(it) {
+                            Log.i("ADBR_IS_F_AM", "Current activity is assumed as \"STILL\"")
+                        } else {
+                            Log.i("ADBR_IS_F_AM", "Current activity is NOT assumed as \"still\"")
+                        }
+                    })
+        } else {
+            Log.i("ADBR_IS_F_AM", "Invalid Met activity code!")
+        }
+
         this.subscriptions.add(this.activityDetectorSource.activityDetected
                 .isStill()
                 .subscribe{
                     if(it) {
-                        Log.i("ABDR", "Current activity is assumed as \"STILL\"")
+                        Log.i("ADBR_IS_F", "Current activity is assumed as \"STILL\"")
                     } else {
-                        Log.i("ADBR", "Current activity is NOT assumed as \"still\"")
+                        Log.i("ADBR_IS_F", "Current activity is NOT assumed as \"still\"")
                     }
                 })
 
@@ -328,6 +369,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         }
 
         this.tryUnregisterActivityDetectorBroadcastReceiver()
+        this.liveSessionController.endSession()
 
         this.trackRecorderServiceNotification.destroy()
 

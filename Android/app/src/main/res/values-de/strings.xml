@@ -81,6 +81,7 @@
     <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">Höhe</string>
     <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Dauer</string>
 
+    <string name="trackrecorderactivity_navigation_drawer_action_signin_label">Anmelden</string>
     <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Einstellungen</string>
     <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">Mein Profil</string>
     <string name="trackrecorderactivity_navigation_drawer_action_tracklist_label">Meine Strecken</string>

@@ -27,7 +27,7 @@ android {
 
             buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
-            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://localhost:555/api"'
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:/api"'
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
@@ -103,6 +103,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation "com.google.android.gms:play-services-location:$playservices_version"
+    // implementation "com.google.android.gms:play-services-auth:$playservices_version"
     implementation "com.android.support:support-compat:$supportlibrary_version"
     implementation "com.android.support:support-core-ui:$supportlibrary_version"
     implementation "com.android.support:support-fragment:$supportlibrary_version"
