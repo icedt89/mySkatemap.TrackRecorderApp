@@ -3,6 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.settings
 import android.content.Context
 import android.content.SharedPreferences
 import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
+import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -213,7 +214,7 @@ public final class AppSettings: IAppSettings {
             this.sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                 when (key) {
                     distanceConverterTypeNameKey -> {
-                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_DISTANCE_CONVERTER_TYPENAME)
+                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_DISTANCE_CONVERTER_TYPENAME)!!
                         this.appSettings.distanceConverterTypeName = currentValue
                     }
                     enableShowMyLocationKey -> {
@@ -221,19 +222,19 @@ public final class AppSettings: IAppSettings {
                         this.appSettings.enableShowMyLocation = currentValue
                     }
                     speedConverterTypeNameKey -> {
-                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_SPEED_CONVERTER_TYPENAME)
+                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_SPEED_CONVERTER_TYPENAME)!!
                         this.appSettings.speedConverterTypeName = currentValue
                     }
                     energyConverterTypeNameKey -> {
-                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_ENERGY_CONVERTER_TYPENAME)
+                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_ENERGY_CONVERTER_TYPENAME)!!
                         this.appSettings.energyConverterTypeName = currentValue
                     }
                     mapControlTypeNameKey -> {
-                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_MAP_CONTROL_TYPENAME)
+                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_MAP_CONTROL_TYPENAME)!!
                         this.appSettings.mapControlTypeName = currentValue
                     }
                     appUiLocaleKey -> {
-                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_APP_UI_LOCALE)
+                        val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_APP_UI_LOCALE)!!
                         this.appSettings.appUiLocale = currentValue
                     }
                     enableAutoPauseOnStillKey -> {
@@ -253,12 +254,12 @@ public final class AppSettings: IAppSettings {
 
             boundSharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
 
-            this.appSettings.distanceConverterTypeName = boundSharedPreferences.getString(distanceConverterTypeNameKey, AppSettings.DEFAULT_DISTANCE_CONVERTER_TYPENAME)
-            this.appSettings.energyConverterTypeName = boundSharedPreferences.getString(energyConverterTypeNameKey, AppSettings.DEFAULT_ENERGY_CONVERTER_TYPENAME)
-            this.appSettings.speedConverterTypeName = boundSharedPreferences.getString(speedConverterTypeNameKey, AppSettings.DEFAULT_SPEED_CONVERTER_TYPENAME)
-            this.appSettings.appUiLocale = boundSharedPreferences.getString(appUiLocaleKey, AppSettings.DEFAULT_APP_UI_LOCALE)
-            this.appSettings.defaultMetActivityCode = boundSharedPreferences.getString(defaultMetActivityCodeKey, AppSettings.DEFAULT_MET_ACTIVITY_CODE)
-            this.appSettings.mapControlTypeName = boundSharedPreferences.getString(mapControlTypeNameKey, AppSettings.DEFAULT_MAP_CONTROL_TYPENAME)
+            this.appSettings.distanceConverterTypeName = boundSharedPreferences.getString(distanceConverterTypeNameKey, AppSettings.DEFAULT_DISTANCE_CONVERTER_TYPENAME)!!
+            this.appSettings.energyConverterTypeName = boundSharedPreferences.getString(energyConverterTypeNameKey, AppSettings.DEFAULT_ENERGY_CONVERTER_TYPENAME)!!
+            this.appSettings.speedConverterTypeName = boundSharedPreferences.getString(speedConverterTypeNameKey, AppSettings.DEFAULT_SPEED_CONVERTER_TYPENAME)!!
+            this.appSettings.appUiLocale = boundSharedPreferences.getString(appUiLocaleKey, AppSettings.DEFAULT_APP_UI_LOCALE)!!
+            this.appSettings.defaultMetActivityCode = boundSharedPreferences.getString(defaultMetActivityCodeKey, AppSettings.DEFAULT_MET_ACTIVITY_CODE)!!
+            this.appSettings.mapControlTypeName = boundSharedPreferences.getString(mapControlTypeNameKey, AppSettings.DEFAULT_MAP_CONTROL_TYPENAME)!!
             this.appSettings.enableAutoPauseOnStill = boundSharedPreferences.getBoolean(enableAutoPauseOnStillKey, AppSettings.DEFAULT_ENABLE_AUTO_PAUSE_ON_STILL)
             this.appSettings.enableLiveLocation = boundSharedPreferences.getBoolean(enableLiveLocationKey, AppSettings.DEFAULT_ENABLE_LIVE_LOCATION)
             this.appSettings.enableShowMyLocation = boundSharedPreferences.getBoolean(enableShowMyLocationKey, AppSettings.DEFAULT_ENABLE_SHOW_MY_LOCATION)
@@ -266,9 +267,7 @@ public final class AppSettings: IAppSettings {
 
             this.subscriptions.add(
                 this.propertyChanged
-                        .filter {
-                            it.hasChanged
-                        }
+                        .hasChanged()
                         .subscribe{
                             when(it.propertyName) {
                                 this::enableAutoPauseOnStill.name -> {

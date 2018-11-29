@@ -1,16 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackQueryService
 import javax.inject.Inject
 
 
 internal final class TrackListActivity: AppCompatActivity(){
     @Inject
-    public lateinit var trackService: ITrackService
+    public lateinit var trackQueryService: ITrackQueryService
 
     private var presenter: TrackListActivityPresenter? = null
 
@@ -19,7 +19,7 @@ internal final class TrackListActivity: AppCompatActivity(){
 
         super.onCreate(savedInstanceState)
 
-        this.presenter = TrackListActivityPresenter(this, this.trackService)
+        this.presenter = TrackListActivityPresenter(this, this.trackQueryService)
     }
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {

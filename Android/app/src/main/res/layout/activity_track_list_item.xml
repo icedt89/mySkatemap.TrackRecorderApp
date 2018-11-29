@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v7.widget.CardView
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:res="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -8,13 +8,13 @@
     android:layout_margin="4dp"
     android:layout_marginBottom="6dp"
     res:cardCornerRadius="4dp">
-    <android.support.v7.widget.GridLayout
+    <androidx.gridlayout.widget.GridLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         res:rowCount="3"
         android:layout_margin="6dp"
         res:columnCount="2">
-        <android.support.v7.widget.AppCompatTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/activity_track_list_item_displayname"
@@ -23,7 +23,7 @@
             res:layout_columnSpan="2"
             res:layout_row="0"
             />
-        <android.support.v7.widget.AppCompatTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/activity_track_list_item_distance"
@@ -31,7 +31,7 @@
             res:layout_columnSpan="2"
             res:layout_row="1"
             />
-        <android.support.v7.widget.AppCompatTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/activity_track_list_item_recordingtime"
@@ -39,5 +39,5 @@
             res:layout_columnSpan="2"
             res:layout_row="2"
             />
-    </android.support.v7.widget.GridLayout>
-</android.support.v7.widget.CardView>
+    </androidx.gridlayout.widget.GridLayout>
+</androidx.cardview.widget.CardView>

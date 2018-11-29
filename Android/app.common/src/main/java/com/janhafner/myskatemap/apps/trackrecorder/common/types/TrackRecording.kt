@@ -21,10 +21,6 @@ public final class TrackRecording (id: UUID = UUID.randomUUID()) {
         this.stateChangeEntries.add(stateChangeEntry)
     }
 
-    public fun addLocation(location: Location) {
-        this.locationEntries.add(location)
-    }
-
     public fun addLocations(locations: Iterable<Location>) {
         this.locationEntries.addAll(locations)
     }

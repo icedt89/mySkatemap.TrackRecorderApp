@@ -2,16 +2,42 @@ package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.Manifest
 import android.content.Context
-import android.support.annotation.IdRes
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
-import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.ActivityType
+import android.util.Log
+import android.view.inputmethod.InputMethodManager
+import androidx.annotation.IdRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.janhafner.myskatemap.apps.trackrecorder.common.distanceTo
+import com.janhafner.myskatemap.apps.trackrecorder.common.pairWithPrevious
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.common.withCount
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfileSettings
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.listener.multi.BaseMultiplePermissionsListener
 import io.reactivex.Observable
 import io.reactivex.Single
+import org.joda.time.Seconds
+import java.util.concurrent.TimeUnit
+
+internal fun Context.isGooglePlayServicesAvailable() : Boolean {
+    val googleApiAvailability = GoogleApiAvailability.getInstance()
+    val isGooglePlayServicesAvailable = googleApiAvailability.isGooglePlayServicesAvailable(this)
+
+    return isGooglePlayServicesAvailable == ConnectionResult.SUCCESS
+}
+
+public fun Context.getFusedLocationProviderClient(): FusedLocationProviderClient {
+    return LocationServices.getFusedLocationProviderClient(this)
+}
+
+public fun Context.getInputMethodManager(): InputMethodManager {
+    return this.getSystemService(InputMethodManager::class.java)
+}
 
 internal fun  <T : Fragment> Fragment.findChildFragmentById(@IdRes id: Int) : T {
     return this.childFragmentManager.fragments.first {
@@ -19,20 +45,12 @@ internal fun  <T : Fragment> Fragment.findChildFragmentById(@IdRes id: Int) : T 
     } as T
 }
 
-/**
- * Returns an Observable that tries to determine if the current activity type is assumed as "still".
- *
- * @return an Observable that emits true if "still" is assumed, otherweise, false.
- */
-internal fun Observable<ActivityType>.isStill() : Observable<Boolean> {
-    return this.map {
-        it == ActivityType.Still || (it != ActivityType.OnBicycle && it != ActivityType.OnFoot && it != ActivityType.Running && it != ActivityType.Walking)
-    }
-}
-
-internal fun Context.getActivityName(code: String): String {
+internal fun Context.getActivityName(code: String): String? {
     val codesArray = this.resources.getStringArray(R.array.appsettings_preference_default_met_activity_code_values)
     val index = codesArray.indexOf(code)
+    if(index == -1) {
+        return null
+    }
 
     val namesArray = this.resources.getStringArray(R.array.appsettings_preference_default_met_activity_code_names)
 

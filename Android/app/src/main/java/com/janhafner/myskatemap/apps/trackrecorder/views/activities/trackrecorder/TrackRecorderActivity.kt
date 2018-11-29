@@ -3,11 +3,12 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 import android.content.IntentFilter
 import android.location.LocationManager.PROVIDERS_CHANGED_ACTION
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.eventing.TrackRecordingEventsSubscriber
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
@@ -37,6 +38,9 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
 
     @Inject
     public lateinit var userProfileSettings: IUserProfileSettings
+
+    @Inject
+    public lateinit var trackRecordingEventsSubscriber: TrackRecordingEventsSubscriber
 
     private var presenter: TrackRecorderActivityPresenter? = null
 

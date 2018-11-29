@@ -1,13 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.track
 
 import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackInfo
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import io.reactivex.Single
 
-public interface ITracksDataSource {
-    fun getTrackRecordings(request: GetTracksRequest) : Single<List<TrackInfo>>
-
+public interface ITrackServiceDataSource {
     fun getTrackRecordingByIdOrNull(id: String) : Single<Optional<TrackRecording>>
 
     fun saveTrackRecording(trackRecording: TrackRecording) : Single<String>

@@ -2,6 +2,8 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
+import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
 import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.IEnergyConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.IEnergyConverterFactory
@@ -40,9 +42,8 @@ internal final class BurnedEnergyDashboardTileFragmentPresenter(private val cont
                     this.currentValue = it
                 }
                 .mergeWith(this.appSettings.propertyChanged
-                        .filter {
-                            it.hasChanged && it.propertyName == IAppSettings::energyConverterTypeName.name
-                        }
+                        .hasChanged()
+                        .isNamed(IAppSettings::energyConverterTypeName.name)
                         .doOnNext {
                             this.energyConverter = this.energyConverterFactory.createConverter()
                         }

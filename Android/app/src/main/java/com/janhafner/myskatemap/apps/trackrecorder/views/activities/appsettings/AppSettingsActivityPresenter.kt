@@ -14,7 +14,7 @@ internal final class AppSettingsActivityPresenter(private val view: AppSettingsA
         actionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_bright_24dp)
 
-        this.view.fragmentManager.beginTransaction()
+        this.view.supportFragmentManager.beginTransaction()
                 .replace(R.id.settingsfragment_host, AppSettingsFragment())
                 .commit()
     }

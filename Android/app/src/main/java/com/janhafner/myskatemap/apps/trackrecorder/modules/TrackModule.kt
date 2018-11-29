@@ -2,12 +2,12 @@ package com.janhafner.myskatemap.apps.trackrecorder.modules
 
 import android.content.Context
 import com.couchbase.lite.DatabaseConfiguration
+import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.INotifier
 import com.janhafner.myskatemap.apps.trackrecorder.services.couchdb.CouchDbFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.couchdb.CouchDbTracksDataSource
+import com.janhafner.myskatemap.apps.trackrecorder.services.couchdb.CouchDbTrackQueryServiceDataSource
+import com.janhafner.myskatemap.apps.trackrecorder.services.couchdb.CouchDbTrackServiceDataSource
 import com.janhafner.myskatemap.apps.trackrecorder.services.couchdb.ICouchDbFactory
-import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
-import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITracksDataSource
-import com.janhafner.myskatemap.apps.trackrecorder.services.track.TrackService
+import com.janhafner.myskatemap.apps.trackrecorder.services.track.*
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -17,23 +17,45 @@ import javax.inject.Singleton
 internal final class TrackModule {
     @Singleton
     @Provides
-    @Named("TracksCouchDbFactory")
-    public fun provideTrackDataSourceCouchDbFactory(context: Context) : ICouchDbFactory {
+    @Named("TrackServiceCouchDbFactory")
+    public fun provideTrackServiceDataSourceCouchDbFactory(context: Context) : ICouchDbFactory {
         val databaseConfiguration = DatabaseConfiguration(context)
 
         return CouchDbFactory("tracks", databaseConfiguration)
     }
 
     @Provides
-    @Named("LocalTracksDataSource")
+    @Named("LocalTrackServiceDataSource")
     @Singleton
-    public fun provideLocalTracksDataSource(@Named("TracksCouchDbFactory") tracksCouchDbFactory: ICouchDbFactory) : ITracksDataSource {
-        return CouchDbTracksDataSource(tracksCouchDbFactory)
+    public fun provideLocalTrackServiceDataSource(@Named("TrackServiceCouchDbFactory") trackServiceCouchDbFactory: ICouchDbFactory) : ITrackServiceDataSource {
+        return CouchDbTrackServiceDataSource(trackServiceCouchDbFactory)
     }
 
     @Provides
     @Singleton
-    public fun provideTrackService(@Named("LocalTracksDataSource") localTracksDataSource: ITracksDataSource) : ITrackService {
-        return TrackService(localTracksDataSource)
+    public fun provideTrackService(@Named("LocalTrackServiceDataSource") localTrackServiceDataSource: ITrackServiceDataSource, notifier: INotifier) : ITrackService {
+        return TrackService(localTrackServiceDataSource, notifier)
+    }
+
+    @Singleton
+    @Provides
+    @Named("TrackQueryServiceCouchDbFactory")
+    public fun provideTrackQueryServiceDataSourceCouchDbFactory(context: Context) : ICouchDbFactory {
+        val databaseConfiguration = DatabaseConfiguration(context)
+
+        return CouchDbFactory("tracks-info", databaseConfiguration)
+    }
+
+    @Provides
+    @Named("LocalTrackQueryServiceDataSource")
+    @Singleton
+    public fun provideLocalTrackQueryServiceDataSource(@Named("TrackQueryServiceCouchDbFactory") trackQueryServiceCouchDbFactory: ICouchDbFactory) : ITrackQueryServiceDataSource {
+        return CouchDbTrackQueryServiceDataSource(trackQueryServiceCouchDbFactory)
+    }
+
+    @Provides
+    @Singleton
+    public fun provideTrackQueryService(@Named("LocalTrackQueryServiceDataSource") localTrackQueryServiceDataSource: ITrackQueryServiceDataSource, notifier: INotifier) : ITrackQueryService {
+        return TrackQueryService(localTrackQueryServiceDataSource, notifier)
     }
 }

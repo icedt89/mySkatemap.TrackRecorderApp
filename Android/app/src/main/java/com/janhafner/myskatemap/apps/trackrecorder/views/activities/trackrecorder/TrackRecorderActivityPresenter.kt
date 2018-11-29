@@ -1,26 +1,26 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.support.design.widget.NavigationView
-import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
-import android.support.v4.view.GravityCompat
-import android.support.v4.view.ViewPager
 import android.view.Menu
 import android.view.MenuItem
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.view.GravityCompat
+import androidx.fragment.app.Fragment
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.widget.checkedChanges
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
 import com.janhafner.myskatemap.apps.trackrecorder.common.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.common.pairWithPrevious
 import com.janhafner.myskatemap.apps.trackrecorder.common.startLocationServicesSettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.UserProfile
 import com.janhafner.myskatemap.apps.trackrecorder.getActivityName
+import com.janhafner.myskatemap.apps.trackrecorder.getInputMethodManager
 import com.janhafner.myskatemap.apps.trackrecorder.isValidForBurnedEnergyCalculation
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
@@ -131,14 +131,27 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                     return
                 }
 
-                val inputMethodManager = view.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.hideSoftInputFromWindow(self.currentFocus?.windowToken, 0)
+                view.getInputMethodManager().hideSoftInputFromWindow(self.currentFocus?.windowToken, 0)
             }
         })
 
         this.setupMainFloatingActionButton()
         this.setupLeftNavigationView()
         this.setupRightNavigationView()
+    }
+
+    private fun getCurrentActivityTextForInfo(trackRecorderSession: ITrackRecordingSession?): String {
+        if (trackRecorderSession != null) {
+            val activityCode = trackRecorderSession.activityCode
+            val activityName = this.view.getActivityName(activityCode)
+            if (activityName != null) {
+                return activityName
+            }
+
+            return this.view.getString(R.string.trackrecorderactivity_navigation_drawer_info_activity_content_unknownactivity, activityCode)
+        }
+
+        return this.view.getString(R.string.trackrecorderactivity_navigation_drawer_info_activity_content_nosession)
     }
 
     private fun setupRightNavigationView() {
@@ -153,9 +166,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                 this.appSettings.enableLiveLocation = it
             },
             this.appSettings.propertyChanged
-                    .filter {
-                        it.hasChanged
-                    }
+                    .hasChanged()
                     .subscribe{
                         when(it.propertyName) {
                             IAppSettings::enableAutoPauseOnStill.name -> {
@@ -231,6 +242,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                             if (currentState.state == TrackRecordingSessionState.Paused
                                     && currentState.pausedReason == TrackingPausedReason.LocationServicesUnavailable) {
                                 Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_SHORT).show()
 
                                 this.buildAndShowLocationServicesDialog()
                             } else if(previousState != null) {
@@ -243,11 +255,15 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                     }
                                 }
                             }
+                        },
+                trackRecorderSession.sessionClosed
+                        .subscribe {
+                            this.uninitializeSession()
+
+                            this.clientSubscriptions.clear()
+                            this.trackRecorderSubscription!!.dispose()
                         }
         )
-
-        val activityName = this.view.getActivityName(trackRecorderSession.activityCode)
-        this.view.navigation_drawer_trackrecorder_activity_info_activity.text = activityName
 
         return trackRecorderSession
     }
@@ -274,13 +290,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                             this.trackService.saveTrackRecording(trackRecording)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe {
-                                        _ ->
-                                        this.uninitializeSession()
-
-                                        this.clientSubscriptions.clear()
-                                        this.trackRecorderSubscription!!.dispose()
-                                    }
+                                    .subscribe()
                         })
 
                         finishRecordingAlertDialogBuilder.show()
@@ -295,11 +305,6 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                         val discardRecordingAlertDialogBuilder = DiscardRecordingAlertDialogBuilder(this.view)
                         discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, { _, _ ->
                             this.trackRecorderSession!!.discardTracking()
-
-                            this.uninitializeSession()
-
-                            this.clientSubscriptions.clear()
-                            this.trackRecorderSubscription!!.dispose()
                         })
 
                         discardRecordingAlertDialogBuilder.show()
@@ -339,6 +344,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                                     } else {
                                                         this.uninitializeSession()
                                                     }
+
+                                                    this.view.navigation_drawer_trackrecorder_activity_info_activity.text = this.getCurrentActivityTextForInfo(this.trackRecorderSession)
                                                 }
                                 )
                             } else {
@@ -346,6 +353,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
                                 this.clientSubscriptions.clear()
                             }
+
+                            this.view.navigation_drawer_trackrecorder_activity_info_activity.text = this.getCurrentActivityTextForInfo(this.trackRecorderSession)
                         }
         )
 
@@ -419,28 +428,28 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                     this.view.trackrecorderactivity_main_floatingactionbutton.setImageResource(iconId)
                 },
                 this.view.trackrecorderactivity_main_floatingactionbutton.clicks()
-                .subscribe {
-                    if(!this.view.isLocationServicesEnabled()) {
-                        this.buildAndShowLocationServicesDialog()
-                    } else {
-                        if (this.trackRecorderSession == null) {
-                            this.trackRecorderSubscription = this.startNewTrackRecording()
+                    .subscribe {
+                        if(!this.view.isLocationServicesEnabled()) {
+                            this.buildAndShowLocationServicesDialog()
                         } else {
-                            val currentState = this.trackRecorderSession!!.currentState
+                            if (this.trackRecorderSession == null) {
+                                this.trackRecorderSubscription = this.startNewTrackRecording()
+                            } else {
+                                val currentState = this.trackRecorderSession!!.currentState
 
-                            when (currentState.state) {
-                                TrackRecordingSessionState.Running ->
-                                    this.trackRecorderSession!!.pauseTracking()
-                                TrackRecordingSessionState.Paused ->
-                                    if(currentState.pausedReason == TrackingPausedReason.LocationServicesUnavailable) {
-                                        this.buildAndShowLocationServicesDialog()
-                                    } else {
-                                        this.trackRecorderSession!!.resumeTracking()
-                                    }
+                                when (currentState.state) {
+                                    TrackRecordingSessionState.Running ->
+                                        this.trackRecorderSession!!.pauseTracking()
+                                    TrackRecordingSessionState.Paused ->
+                                        if(currentState.pausedReason == TrackingPausedReason.LocationServicesUnavailable) {
+                                            this.buildAndShowLocationServicesDialog()
+                                        } else {
+                                            this.trackRecorderSession!!.resumeTracking()
+                                        }
+                                }
                             }
                         }
-                    }
-                })
+                    })
     }
 
     private fun startNewTrackRecording(): Disposable {

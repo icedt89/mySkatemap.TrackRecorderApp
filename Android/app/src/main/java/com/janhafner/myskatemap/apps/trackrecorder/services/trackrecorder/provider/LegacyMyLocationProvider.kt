@@ -9,31 +9,32 @@ import android.os.Bundle
 import android.os.Looper
 import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
 import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
+import com.janhafner.myskatemap.apps.trackrecorder.common.getLocationManager
 import com.janhafner.myskatemap.apps.trackrecorder.common.toLocation
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.reactivestreams.Subscriber
 
-internal final class LegacyMyLocationProvider(private val context: Context,
-                                              private val locationManager: LocationManager) : IMyLocationProvider {
+internal final class LegacyMyLocationProvider(private val context: Context) : IMyLocationProvider {
 
     public override fun getMyCurrentLocation(): IMyLocationRequestState {
         if(this.context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             throw IllegalStateException("ACCESS_FINE_LOCATION must be granted!")
         }
 
+        val locationManager = this.context.getLocationManager()
         val locationListener = MyLocationListener()
         val location = Single.fromPublisher<Optional<Location>> {
             publisher ->
                 locationListener.publisher = publisher
 
-            this.locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
+            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
                     locationListener,
                     Looper.getMainLooper())
         }.subscribeOn(Schedulers.computation())
 
-        return MyLocationRequestState(location, locationListener, this.locationManager)
+        return MyLocationRequestState(location, locationListener, locationManager)
     }
 
     private final class MyLocationListener : LocationListener {

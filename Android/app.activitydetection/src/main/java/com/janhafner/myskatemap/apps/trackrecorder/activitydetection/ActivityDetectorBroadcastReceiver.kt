@@ -36,30 +36,21 @@ public final class ActivityDetectorBroadcastReceiver(private val context: Contex
         val intent = Intent(context, ActivityDetectorIntentService::class.java)
         this.pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        Log.i("ADBR", "Initialized using interval of ${this.detectionIntervalInMilliseconds}ms")
+        Log.v("ADBR", "Initialized using interval of ${this.detectionIntervalInMilliseconds}ms")
     }
 
     public override fun onReceive(context: Context?, intent: Intent?) {
-        Log.i("ADBR", "Intent received: ${intent} ${intent?.action}")
         if(this.isDestroyed || intent == null || intent.action != ActivityDetectorIntentService.INTENT_ACTION_NAME) {
-            Log.i("ADBR", "Skipping receive")
+            Log.d("ADBR", "Skipping receive")
 
             return
         }
 
         val androidActivityType = intent.getIntExtra(ActivityDetectorIntentService.INTENT_EXTRA_TYPE_KEY, DetectedActivity.UNKNOWN)
 
-        Log.i("ADBR", "Andorid activity type is ${androidActivityType}")
-
         val activityType = this.activityTypeMapping[androidActivityType]!!
 
-        Log.i("ADBR", "Detected activity type is ${activityType}")
-
-        if(activityType == ActivityType.Unknown) {
-            Log.i("ADBR", "Skipping emit")
-
-            return
-        }
+        Log.i("ADBR", "Received Intent with action ${intent.action}. Activity ${androidActivityType} => ${activityType}")
 
         this.activityDetectorEmitter.emit(activityType)
     }
@@ -79,7 +70,7 @@ public final class ActivityDetectorBroadcastReceiver(private val context: Contex
 
         this.isDetecting = true
 
-        Log.i("ADBR", "Detection started")
+        Log.d("ADBR", "Detection started")
     }
 
     public fun stopDetection() {
@@ -97,7 +88,7 @@ public final class ActivityDetectorBroadcastReceiver(private val context: Contex
 
         this.isDetecting = false
 
-        Log.i("ADBR", "Detection stopped")
+        Log.d("ADBR", "Detection stopped")
     }
 
     private var isDestroyed = false
@@ -112,6 +103,6 @@ public final class ActivityDetectorBroadcastReceiver(private val context: Contex
 
         this.isDestroyed = true
 
-        Log.i("ADBR", "Broadcast Receiver destroyed")
+        Log.v("ADBR", "Broadcast Receiver destroyed")
     }
 }

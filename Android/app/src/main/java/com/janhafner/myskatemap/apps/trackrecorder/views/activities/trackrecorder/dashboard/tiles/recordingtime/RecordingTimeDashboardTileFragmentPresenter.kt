@@ -13,8 +13,6 @@ import org.joda.time.Period
 internal final class RecordingTimeDashboardTileFragmentPresenter(private val context: Context,
                                                             trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>)
     : DashboardTileFragmentPresenter(trackRecorderServiceController) {
-    private var currentValue: Period = Period.ZERO
-
     private val defaultValue: Period = Period.ZERO
 
     init {
@@ -27,9 +25,6 @@ internal final class RecordingTimeDashboardTileFragmentPresenter(private val con
         val result = ArrayList<Disposable>()
 
         result.add(trackRecorderSession.recordingTimeChanged
-                .doOnNext{
-                    this.currentValue = it
-                }
                 .map {
                     it.formatRecordingTime()
                 }

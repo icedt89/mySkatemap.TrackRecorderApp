@@ -3,24 +3,23 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.tasks.Task
 import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
 import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
 import com.janhafner.myskatemap.apps.trackrecorder.common.toLocation
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.getFusedLocationProviderClient
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
-internal final class FusedMyLocationProvider(private val context: Context,
-                                             private val fusedLocationProviderClient: FusedLocationProviderClient) : IMyLocationProvider {
+internal final class FusedMyLocationProvider(private val context: Context) : IMyLocationProvider {
 
     public override fun getMyCurrentLocation(): IMyLocationRequestState {
         if(this.context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             throw IllegalStateException("ACCESS_FINE_LOCATION must be granted!")
         }
 
-        val lastLocationTask = this.fusedLocationProviderClient.lastLocation
+        val lastLocationTask = context.getFusedLocationProviderClient().lastLocation
 
         val location = Single.fromPublisher<Optional<Location>> {
             publisher ->

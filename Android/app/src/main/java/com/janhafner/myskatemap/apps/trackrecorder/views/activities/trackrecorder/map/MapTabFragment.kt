@@ -4,19 +4,19 @@ import android.content.Context
 import android.content.IntentFilter
 import android.location.LocationManager
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.LocationAvailabilityChangedBroadcastReceiver
+import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.IMyLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ITrackRecorderMapFragmentFactory
 import javax.inject.Inject
 
 
@@ -27,7 +27,7 @@ internal final class MapTabFragment: Fragment() {
     public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
     @Inject
-    public lateinit var trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory
+    public lateinit var trackRecorderMapFragment: TrackRecorderMapFragment
 
     @Inject
     public lateinit var locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver
@@ -55,7 +55,7 @@ internal final class MapTabFragment: Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragmentFactory, this.myLocationProvider, this.locationAvailabilityChangedSource)
+        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragment, this.myLocationProvider, this.locationAvailabilityChangedSource)
     }
 
     public override fun onAttach(context: Context?) {

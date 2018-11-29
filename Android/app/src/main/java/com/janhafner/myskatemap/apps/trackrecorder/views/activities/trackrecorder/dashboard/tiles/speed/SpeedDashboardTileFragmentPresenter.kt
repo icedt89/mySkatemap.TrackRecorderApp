@@ -1,5 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed
 
+import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
+import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
 import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverterFactory
@@ -34,9 +36,8 @@ internal abstract class SpeedDashboardTileFragmentPresenter(private val appSetti
                     this.currentValue = it
                 }
                 .mergeWith(this.appSettings.propertyChanged
-                        .filter {
-                            it.hasChanged && it.propertyName == IAppSettings::speedConverterTypeName.name
-                        }
+                        .hasChanged()
+                        .isNamed(IAppSettings::speedConverterTypeName.name)
                         .doOnNext {
                             this.speedConverter = this.speedConverterFactory.createConverter()
                         }

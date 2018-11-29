@@ -100,3 +100,4 @@ internal final class DashboardTileFragmentPresenterModule {
         return MaximumSpeedDashboardTileFragmentPresenter(context, appSettings, trackRecorderServiceController, speedConverterFactory)
     }
 }
+

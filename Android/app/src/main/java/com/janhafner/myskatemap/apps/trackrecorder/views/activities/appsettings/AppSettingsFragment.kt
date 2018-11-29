@@ -1,20 +1,18 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.appsettings
 
 import android.os.Bundle
-import android.preference.PreferenceFragment
 import android.view.View
+import androidx.preference.PreferenceFragmentCompat
 
 
-internal final class AppSettingsFragment : PreferenceFragment() {
+internal final class AppSettingsFragment : PreferenceFragmentCompat() {
     private lateinit var presenter: AppSettingsFragmentPresenter
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
+    public override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         this.presenter = AppSettingsFragmentPresenter(this)
     }
 
-    public override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         this.presenter.onViewCreated()

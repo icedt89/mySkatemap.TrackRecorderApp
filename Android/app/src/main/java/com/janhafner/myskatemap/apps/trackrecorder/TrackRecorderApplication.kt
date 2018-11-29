@@ -1,10 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
-import android.accounts.AccountManager
 import android.app.Application
 import android.os.StrictMode
 import com.janhafner.myskatemap.apps.trackrecorder.modules.ApplicationModule
-
 
 
 internal final class TrackRecorderApplication: Application() {

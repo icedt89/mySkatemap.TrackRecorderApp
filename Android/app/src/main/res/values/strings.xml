@@ -21,11 +21,15 @@
 
     <string name="aboutactivity_copyright">© Jan Hafner</string>
     <string name="aboutactivity_version">Version %s</string>
+    <string name="aboutactivity_app_pid">PID: %s</string>
+    <string name="aboutactivity_app_pid_copied_toast">PID copied to clipboard</string>
 
     <string name="trackrecorderservice_notification_status_paused">Recording paused</string>
     <string name="trackrecorderservice_notification_status_locationservicesunavailable">Location services unavailable</string>
     <string name="trackrecorderservice_notification_status_running">Running</string>
     <string name="trackrecorderservice_notification_action_resume">Resume</string>
+    <string name="trackrecorderservice_notification_action_finish">Finish</string>
+    <string name="trackrecorderservice_notification_action_discard">Discard</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
     <string name="trackrecorderservice_notification_contenttext_template">%s in %s</string>
 
@@ -102,6 +106,8 @@
 
     <string name="trackrecorderactivity_navigation_drawer_info_title">Info</string>
     <string name="trackrecorderactivity_navigation_drawer_info_activity_label">Activity</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_nosession">No active session</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_unknownactivity">Unknown activity: %s</string>
     <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Auto pause [exp.]</string>
     <string name="trackrecorderactivity_navigation_drawer_info_live_location_label">Live-Location [exp.]</string>
 

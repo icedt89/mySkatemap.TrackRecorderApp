@@ -121,7 +121,7 @@ public final class UserProfileSettings : IUserProfileSettings {
                         this.userProfileSettings.weight = currentValue
                     }
                     sexKey -> {
-                        val currentValue = boundSharedPreferences.getString(key, UserProfileSettings.DEFAULT_SEX.name)
+                        val currentValue = boundSharedPreferences.getString(key, UserProfileSettings.DEFAULT_SEX.name)!!
                         this.userProfileSettings.sex = Sex.valueOf(currentValue)
                     }
                 }
@@ -134,7 +134,7 @@ public final class UserProfileSettings : IUserProfileSettings {
             this.userProfileSettings.height = boundSharedPreferences.getInt(heightKey, UserProfileSettings.DEFAULT_HEIGHT)
             this.userProfileSettings.weight = boundSharedPreferences.getFloat(weightKey, UserProfileSettings.DEFAULT_WEIGHT)
 
-            val sex = boundSharedPreferences.getString(sexKey, UserProfileSettings.DEFAULT_SEX.name)
+            val sex = boundSharedPreferences.getString(sexKey, UserProfileSettings.DEFAULT_SEX.name)!!
             this.userProfileSettings.sex = Sex.valueOf(sex)
         }
     }

@@ -1,8 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder.settings
 
 import android.content.Context
-import android.preference.EditTextPreference
 import android.util.AttributeSet
+import androidx.preference.EditTextPreference
 import com.janhafner.myskatemap.apps.trackrecorder.common.R
 
 internal final class FixedEditTextPreference(context: Context, attrs: AttributeSet) : EditTextPreference(context, attrs) {

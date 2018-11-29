@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
+    android:theme="@style/MySkatemap.TrackRecorder.AppTheme.AppCompat.Panel"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/fragment_track_recorder_map_map_placeholder"/>
-    <android.support.v7.widget.LinearLayoutCompat
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|start">
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:theme="@style/MySkatemap.TrackRecorder.AppTheme.AppCompat.SecondaryFab"
             android:id="@+id/fragment_track_recorder_map_add_poi"
             android:layout_width="wrap_content"
@@ -20,7 +21,7 @@
             android:visibility="gone"
             app:fabSize="mini"
             android:src="@drawable/ic_add_location_dark_24dp" />
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:theme="@style/MySkatemap.TrackRecorder.AppTheme.AppCompat.SecondaryFab"
             android:id="@+id/fragment_track_recorder_map_fix_myposition"
             android:layout_width="wrap_content"
@@ -28,5 +29,5 @@
             android:layout_margin="10dp"
             app:fabSize="mini"
             android:src="@drawable/ic_gps_fixed_dark_24dp" />
-    </android.support.v7.widget.LinearLayoutCompat>
-</android.support.design.widget.CoordinatorLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

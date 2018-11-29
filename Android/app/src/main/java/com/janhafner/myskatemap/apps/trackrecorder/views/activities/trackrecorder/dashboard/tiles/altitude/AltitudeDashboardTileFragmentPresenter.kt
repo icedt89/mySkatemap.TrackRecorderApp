@@ -1,5 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude
 
+import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
+import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
 import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
@@ -35,9 +37,8 @@ internal abstract class AltitudeDashboardTileFragmentPresenter(private val appSe
                     this.currentValue = it
                 }
                 .mergeWith(this.appSettings.propertyChanged
-                        .filter {
-                            it.hasChanged && it.propertyName == IAppSettings::distanceConverterTypeName.name
-                        }
+                        .hasChanged()
+                        .isNamed(IAppSettings::distanceConverterTypeName.name)
                         .doOnNext {
                             this.distanceConverter = this.distanceConverterFactory.createConverter()
                         }

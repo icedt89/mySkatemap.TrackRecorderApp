@@ -8,7 +8,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.common.filterNotEmpty
 import com.janhafner.myskatemap.apps.trackrecorder.common.toSimpleLocation
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ITrackRecorderMapFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
 import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
 import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapReadyCallback
@@ -28,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                                              private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
-                                             private val trackRecorderMapFragmentFactory: ITrackRecorderMapFragmentFactory,
+                                             private val trackRecorderMapFragment: TrackRecorderMapFragment,
                                              private val myLocationProvider: IMyLocationProvider,
                                              private val locationAvailabilityChangedSource: ILocationAvailabilityChangedSource)
     : OnTrackRecorderMapReadyCallback {
@@ -44,11 +43,8 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
 
     private var currentMyLocationRequestState: IMyLocationRequestState? = null
 
-    private var trackRecorderMapFragment: TrackRecorderMapFragment? = null
-
     init {
-        val trackRecorderMapFragment = this.trackRecorderMapFragmentFactory.createFragment()
-        this.setupMapFragment(trackRecorderMapFragment)
+        this.setupMapFragment(this.trackRecorderMapFragment)
     }
 
     private fun setupMapFragment(trackRecorderMapFragment: TrackRecorderMapFragment) {
@@ -58,8 +54,6 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                 .replace(R.id.fragment_track_recorder_map_map_placeholder, trackRecorderMapFragment)
                 .runOnCommit {
                     trackRecorderMapFragment.getMapAsync(this)
-
-                    this.trackRecorderMapFragment = trackRecorderMapFragment
                 }
                 .commitAllowingStateLoss() // <---- Evil!
     }
@@ -81,12 +75,12 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                         .filterNotEmpty()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
-                            this.trackRecorderMapFragment!!.addLocations(it)
+                            this.trackRecorderMapFragment.addLocations(it)
                         },
                 trackRecorderSession.stateChanged
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe{
-                            this.trackRecorderMapFragment!!.gesturesEnabled = it.state != TrackRecordingSessionState.Running
+                            this.trackRecorderMapFragment.gesturesEnabled = it.state != TrackRecordingSessionState.Running
                         },
                 this.view.fragment_track_recorder_map_add_poi.clicks().subscribe {
                     // TODO: Add POI TO CURRENT SESSION
@@ -99,15 +93,15 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     private fun uninitializeSession(clearTrack: Boolean = true) {
         this.sessionSubscriptions.clear()
 
-        if (clearTrack && this.trackRecorderMapFragment != null && this.trackRecorderMapFragment!!.isReady) {
-            this.trackRecorderMapFragment!!.clearTrack()
+        if (clearTrack && this.trackRecorderMapFragment.isReady) {
+            this.trackRecorderMapFragment.clearTrack()
         }
 
         this.trackRecorderSession = null
     }
 
     public override fun onMapReady(trackRecorderMap: ITrackRecorderMap) {
-        trackRecorderMap.trackColor = this.view.context!!.getColor(R.color.secondaryColor)
+        trackRecorderMap.trackColor = this.view.context!!.getColor(R.color.accentColor)
 
         trackRecorderMap.zoomToLocation(SimpleLocation(BuildConfig.MAP_INITIAL_LATITUDE, BuildConfig.MAP_INITIAL_LONGITUDE), BuildConfig.MAP_INITIAL_ZOOM)
     }
@@ -132,10 +126,10 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                                 .subscribe {
                                     result ->
                                     if(result.value != null) {
-                                        this.trackRecorderMapFragment!!.zoomToLocation(result.value!!.toSimpleLocation(), 18.0f)
+                                        this.trackRecorderMapFragment.zoomToLocation(result.value!!.toSimpleLocation(), 18.0f)
 
-                                        if(this.trackRecorderMapFragment!!.canAddMarker) {
-                                            val mapMarkerToken = this.trackRecorderMapFragment!!.addMarker(result.value!!.toSimpleLocation(), this.view.getString(R.string.trackrecorderactivity_map_mycurrentlocation_marker_title))
+                                        if(this.trackRecorderMapFragment.canAddMarker) {
+                                            val mapMarkerToken = this.trackRecorderMapFragment.addMarker(result.value!!.toSimpleLocation(), this.view.getString(R.string.trackrecorderactivity_map_mycurrentlocation_marker_title))
                                             Single.just(mapMarkerToken)
                                                     .delay(10, TimeUnit.SECONDS)
                                                     .observeOn(AndroidSchedulers.mainThread())

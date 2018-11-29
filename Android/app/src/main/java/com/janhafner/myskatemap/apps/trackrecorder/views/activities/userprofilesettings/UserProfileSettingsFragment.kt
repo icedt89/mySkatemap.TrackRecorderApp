@@ -1,17 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings
 
 import android.os.Bundle
-import android.preference.PreferenceFragment
-import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import androidx.preference.PreferenceFragmentCompat
 
-internal final class UserProfileSettingsFragment : PreferenceFragment() {
+internal final class UserProfileSettingsFragment : PreferenceFragmentCompat() {
     private lateinit var presenter: UserProfileSettingsFragmentPresenter
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
-        this.context.getApplicationInjector().inject(this)
-
-        super.onCreate(savedInstanceState)
-
+    public override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         this.presenter = UserProfileSettingsFragmentPresenter(this)
     }
 }

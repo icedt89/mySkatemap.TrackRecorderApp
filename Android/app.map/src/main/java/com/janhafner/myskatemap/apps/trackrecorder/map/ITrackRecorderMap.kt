@@ -1,11 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.map
 
-import android.support.annotation.DrawableRes
+import androidx.annotation.DrawableRes
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
 
 public interface ITrackRecorderMap {
-    val track: List<SimpleLocation>
-
     var trackColor: Int
 
     val isReady: Boolean

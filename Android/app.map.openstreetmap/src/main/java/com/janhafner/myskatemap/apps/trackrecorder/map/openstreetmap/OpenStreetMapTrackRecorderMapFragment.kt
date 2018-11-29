@@ -15,7 +15,6 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
 public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragment() {
@@ -24,9 +23,6 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
     private val locations: MutableList<SimpleLocation> = ArrayList()
 
     private lateinit var map: MapView
-
-    public override val track: List<SimpleLocation>
-        get() = this.locations
 
     public override var isReady: Boolean = false
         private set
@@ -93,6 +89,7 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
     public override fun addMarker(location: SimpleLocation, title: String, icon: Int?): MapMarkerToken {
         throw NotImplementedError("This function is not stable at the moment.")
 
+        /* TODO: THIS NEEDS TO BE IMPLEMENTED!
         val marker = Marker(this.map)
         marker.title = title
         marker.position = GeoPoint(location.latitude, location.longitude)
@@ -107,6 +104,7 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
         return MapMarkerToken({
             marker.remove(this.map)
         })
+        */
     }
 
     public override fun zoomToLocation(location: SimpleLocation, zoom: Float) {

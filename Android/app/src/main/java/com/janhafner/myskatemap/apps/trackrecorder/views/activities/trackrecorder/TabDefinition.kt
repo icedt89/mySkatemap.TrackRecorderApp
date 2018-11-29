@@ -1,8 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
-import android.support.annotation.DrawableRes
-import android.support.annotation.LayoutRes
-import android.support.v4.app.Fragment
+import androidx.annotation.DrawableRes
+import androidx.annotation.LayoutRes
+import androidx.fragment.app.Fragment
 
 internal final class TabDefinition(public val pageTitle: String,
                                    public val tabFragmentFactory: () -> Fragment,

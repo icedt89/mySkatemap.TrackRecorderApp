@@ -17,7 +17,7 @@ public final class HttpLiveSessionProvider(private val httpLiveSessionApiClient:
                         throw IllegalArgumentException("SessionId not available!")
                     }
 
-                    HttpLiveSession(httpLiveSessionApiClient, sessionId!!, this.moshi)
+                    HttpLiveSession(httpLiveSessionApiClient, sessionId, this.moshi)
                 }
     }
 }

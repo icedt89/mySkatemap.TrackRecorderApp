@@ -1,6 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.IntentFilter
@@ -10,6 +9,7 @@ import android.os.IBinder
 import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.ActivityDetectorBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.IActivityDetectorSource
 import com.janhafner.myskatemap.apps.trackrecorder.burnedenergy.IBurnedEnergyCalculator
+import com.janhafner.myskatemap.apps.trackrecorder.common.getNotificationManager
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.IDistanceCalculator
@@ -58,9 +58,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public lateinit var burnedEnergyCalculator: IBurnedEnergyCalculator
 
     @Inject
-    public lateinit var notificationManager: NotificationManager
-
-    @Inject
     public lateinit var liveSessionController: ILiveSessionController
 
     private lateinit var trackRecorderServiceNotificationChannel: TrackRecorderServiceNotificationChannel
@@ -72,7 +69,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
 
         // Starting from api level 26 a Notification channel needs to be created!
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.trackRecorderServiceNotificationChannel = TrackRecorderServiceNotificationChannel(notificationManager)
+            this.trackRecorderServiceNotificationChannel = TrackRecorderServiceNotificationChannel(this.getNotificationManager())
         }
 
         this.registerReceiver(this.locationAvailabilityChangedBroadcastReceiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
@@ -140,6 +137,10 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                     this.currentSession!!.resumeTracking()
                 TrackRecorderServiceNotification.ACTION_PAUSE ->
                     this.currentSession!!.pauseTracking()
+                TrackRecorderServiceNotification.ACTION_FINISH ->
+                    this.currentSession!!.finishTracking()
+                TrackRecorderServiceNotification.ACTION_DISCARD ->
+                    this.currentSession!!.discardTracking()
             }
         }
 

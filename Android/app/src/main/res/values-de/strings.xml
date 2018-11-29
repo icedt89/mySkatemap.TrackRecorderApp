@@ -18,6 +18,8 @@
     <string name="trackrecorderservice_notification_status_locationservicesunavailable">Standort nicht verfügbar</string>
     <string name="trackrecorderservice_notification_status_running">Läuft</string>
     <string name="trackrecorderservice_notification_action_resume">Fortfahren</string>
+    <string name="trackrecorderservice_notification_action_discard">Verwerfen</string>
+    <string name="trackrecorderservice_notification_action_finish">Abschließen</string>
     <string name="trackrecorderservice_notification_action_pause">Pausieren</string>
     <string name="trackrecorderservice_notification_contenttext_template">%s in %s</string>
     <string name="trackrecorderactivity_discard_confirmation_message">Alle Daten der derzeitigen Aufnahme gehen unwiderruflich verloren! Möchtest du fortfahren?</string>
@@ -28,6 +30,7 @@
 
     <string name="aboutactivity_copyright">© Jan Hafner</string>
     <string name="aboutactivity_version">Version %s</string>
+    <string name="aboutactivity_app_pid_copied_toast">PID in Zwischenablage kopiert</string>
 
     <string name="trackrecorderactivity_map_mycurrentlocation_marker_title">hier bist du</string>
 
@@ -89,6 +92,8 @@
 
     <string name="trackrecorderactivity_navigation_drawer_info_title">Info</string>
     <string name="trackrecorderactivity_navigation_drawer_info_activity_label">Aktivität</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_nosession">Keine aktive Aufnahme</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_unknownactivity">Unbekannte Aktivität: %s</string>
     <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Automatisch pausieren [Exp.]</string>
     <string name="trackrecorderactivity_navigation_drawer_info_live_location_label">Live-Standort [Exp.]</string>
 

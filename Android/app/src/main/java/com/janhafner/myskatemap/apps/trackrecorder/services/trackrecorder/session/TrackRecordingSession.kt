@@ -17,14 +17,13 @@ import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.IDistance
 import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.toObservableTransformer
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggregation
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.LocationsAggregation
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.MetCodeActivityTypeMapping
-import com.janhafner.myskatemap.apps.trackrecorder.isStill
 import com.janhafner.myskatemap.apps.trackrecorder.live.LiveLocation
 import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ILiveSessionController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.StillPlayground.StillPlaygroundActivity
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -76,7 +75,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
     public override val currentState: SessionStateInfo
         get() = this.stateChangedSubject.value!!
 
-    private lateinit var trackRecorderServiceNotification: TrackRecorderServiceNotification
+    private var trackRecorderServiceNotification: TrackRecorderServiceNotification
 
     init {
         this.locationsChanged = this.locationProvider.locationsReceived
@@ -114,9 +113,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
     private fun initializeSession() {
         this.subscriptions.addAll(
                 this.appSettings.propertyChanged
-                        .filter {
-                            it.hasChanged
-                        }
+                        .hasChanged()
                         .subscribe {
                             if(it.propertyName == IAppSettings::enableAutoPauseOnStill.name) {
                                 if(this.appSettings.enableAutoPauseOnStill) {
@@ -147,6 +144,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                             LiveLocation(it.capturedAt, it.latitude, it.longitude)
                         }
                         .buffer(1, TimeUnit.MINUTES, 20)
+                        .filterNotEmpty()
                         .subscribe {
                             this.liveSessionController.sendLocations(it)
                         },
@@ -205,32 +203,21 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
             return
         }
 
-        val activityMap = MetCodeActivityTypeMapping.getActivityTypeByCode(this.trackRecording.activityCode)
-        if (activityMap != null) {
-            Log.i("ADBR_IS_F_AM", "Mapped activity type is \"${activityMap}\"")
-
-            this.subscriptions.add(this.activityDetectorSource.activityDetected
-                    .map {
-                        it == ActivityType.Still || (it != activityMap)
-                    }
-                    .subscribe{
-                        if(it) {
-                            Log.i("ADBR_IS_F_AM", "Current activity is assumed as \"STILL\"")
-                        } else {
-                            Log.i("ADBR_IS_F_AM", "Current activity is NOT assumed as \"still\"")
-                        }
-                    })
-        } else {
-            Log.i("ADBR_IS_F_AM", "Invalid Met activity code!")
-        }
-
-        this.subscriptions.add(this.activityDetectorSource.activityDetected
-                .isStill()
-                .subscribe{
-                    if(it) {
-                        Log.i("ADBR_IS_F", "Current activity is assumed as \"STILL\"")
+        val timeoutTimewindow = BuildConfig.FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS
+                .times(2)
+                .coerceAtMost(BuildConfig.FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS)
+                .toLong()
+        this.subscriptions.add(this.locationsChanged
+                .map {
+                    false
+                }
+                .debounce(2, TimeUnit.SECONDS)
+                .compose(StillPlaygroundActivity.TimeoutTransformer(timeoutTimewindow, { true }, TimeUnit.MILLISECONDS))
+                .subscribe {
+                    if (it) {
+                        Log.i("IS_PG", "User does'nt move!")
                     } else {
-                        Log.i("ADBR_IS_F", "Current activity is NOT assumed as \"still\"")
+                        Log.i("IS_PG", "User is moving!")
                     }
                 })
 
@@ -244,7 +231,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                         Log.i("ADRB", "Still detected")
 
                         if (currentState.state == TrackRecordingSessionState.Running) {
-                            Log.i("ADBR", "Pausing tracking without stopping location")
+                            Log.i("ADBR", "Pausing tracking")
 
                             if(BuildConfig.STILL_DETECTION_ENABLE_PAUSERESUME){
                                 this.pauseTrackingAndSetState(TrackingPausedReason.StillStandDetected)
@@ -314,9 +301,9 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         this.pauseTrackingAndSetState(TrackingPausedReason.UserInitiated)
     }
 
-    private fun pauseTrackingAndSetState(pausedReason: TrackingPausedReason) {
+    private fun pauseTrackingAndSetState(pausedReason: TrackingPausedReason, stopLocationProvider: Boolean = true) {
         if (this.stateChangedSubject.value!!.state == TrackRecordingSessionState.Running) {
-            if (this.locationProvider.isActive) {
+            if (this.locationProvider.isActive && stopLocationProvider) {
                 this.locationProvider.stopLocationUpdates()
             }
 

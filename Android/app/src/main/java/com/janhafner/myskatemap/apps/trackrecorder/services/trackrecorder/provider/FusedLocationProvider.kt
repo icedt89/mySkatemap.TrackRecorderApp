@@ -9,9 +9,9 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
 import com.janhafner.myskatemap.apps.trackrecorder.common.toLocation
+import com.janhafner.myskatemap.apps.trackrecorder.getFusedLocationProviderClient
 
 internal final class FusedLocationProvider(private val context: Context,
-                                           private val fusedLocationProviderClient: FusedLocationProviderClient,
                                            fastestIntervalInMilliseconds: Int,
                                            intervalInMilliseconds: Int,
                                            maxWaitTimeInMilliseconds: Int,
@@ -27,6 +27,8 @@ internal final class FusedLocationProvider(private val context: Context,
             }
         }
     }
+
+    private val fusedLocationProviderClient: FusedLocationProviderClient = context.getFusedLocationProviderClient()
 
     private val locationRequest: LocationRequest = LocationRequest.create()
 

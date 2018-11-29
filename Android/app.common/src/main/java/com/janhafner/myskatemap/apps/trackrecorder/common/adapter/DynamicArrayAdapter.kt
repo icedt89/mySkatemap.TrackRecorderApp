@@ -1,12 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder.common.adapter
 
 import android.content.Context
-import android.support.annotation.LayoutRes
 import android.util.ArrayMap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.annotation.LayoutRes
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -32,7 +32,7 @@ public open class DynamicArrayAdapter<T>(context: Context, @LayoutRes private va
             this.viewCache[position] = itemLayout
         }
 
-        val item = this.getItem(position)
+        val item = this.getItem(position)!!
 
         this.onItemViewCreated(itemLayout!!, item, position)
 

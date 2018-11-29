@@ -1,8 +1,8 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 
 internal final class TrackRecorderTabsAdapter(tabDefinitions: List<TabDefinition>, fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
     private var availableTabCount: Int = 0

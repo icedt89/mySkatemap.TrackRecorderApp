@@ -50,7 +50,7 @@ internal class TrackRecordingConverter {
             for (locationDictionary in locationsArray.map { it as Dictionary }) {
                 val location = locationFromCouchDbDictionary(locationDictionary)
 
-                result.addLocation(location)
+                result.addLocations(listOf(location))
             }
 
             return result
@@ -87,7 +87,7 @@ internal class TrackRecordingConverter {
             for (locationDictionary in locationsArray.map { it as Dictionary }) {
                 val location = locationFromCouchDbDictionary(locationDictionary)
 
-                result.addLocation(location)
+                result.addLocations(listOf(location))
             }
 
             return result

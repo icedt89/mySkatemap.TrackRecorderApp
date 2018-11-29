@@ -30,6 +30,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!--<activity
+            android:name=".views.activities.StillPlayground.StillPlaygroundActivity"
+            android:label="STILL PLAYGROUND">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>-->
         <activity
             android:name=".views.activities.trackrecorder.TrackRecorderActivity"
             android:launchMode="singleTask"

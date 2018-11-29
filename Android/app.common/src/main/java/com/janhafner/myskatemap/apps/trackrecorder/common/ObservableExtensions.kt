@@ -39,22 +39,7 @@ public fun Observable<Location>.calculateMissingSpeed(): Observable<Location> {
             }
 }
 
-public fun Observable<Location>.dropLocationsNotInDistance(maximumDistance: Double, includeEdge: Boolean = true): Observable<Location> {
-    return this.pairWithPrevious()
-            .filter {
-                if (it.first == null) {
-                    // Dont filter first real value [Pair(null, location)]
-                    true
-                } else {
-                    // Apply distance filter to suppress emitting values to close
-                    !it.second!!.isInDistance(it.first!!, maximumDistance, includeEdge)
-                }
-            }
-            .map {
-                it.second
-            }
-}
-
+// TODO: Remove if not used
 public fun <Upstream> Observable<List<Upstream>>.liveCount() : Observable<Int> {
     var totalCount = 0
 
@@ -63,6 +48,7 @@ public fun <Upstream> Observable<List<Upstream>>.liveCount() : Observable<Int> {
     }
 }
 
+// TODO: Remove if not used
 public fun <Upstream> Observable<Upstream>.withCount() : Observable<Counted<Upstream>> {
     var totalCount = 0
 

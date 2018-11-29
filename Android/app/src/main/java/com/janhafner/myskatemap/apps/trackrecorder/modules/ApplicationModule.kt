@@ -1,13 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.modules
 
 import android.content.Context
-import android.location.LocationManager
 import android.util.Log
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ITrackRecorderMapFragmentFactory
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.TrackRecorderMapFragmentFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
@@ -19,7 +15,6 @@ import dagger.Provides
 import javax.inject.Singleton
 
 @Module(includes = [
-    SystemServicesModule::class,
     ConversionModule::class,
     ExportModule::class,
     TrackModule::class,
@@ -28,21 +23,12 @@ import javax.inject.Singleton
     LocationAvailabilityModule::class,
     DistanceCalculationModule::class,
     BurnedEnergyModule::class,
-    LiveLocationModule::class])
+    LiveLocationModule::class,
+    EventingModule::class,
+    MapModule::class])
 internal final class ApplicationModule(private val applicationContext: Context) {
-    @Singleton
     @Provides
-        public fun providerMyCurrentLocationProvider(context: Context, locationManager: LocationManager, fusedLocationProviderClient: FusedLocationProviderClient): IMyLocationProvider {
-            if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
-                return SimulatedMyLocationProvider()
-            }
-
-        return FusedMyLocationProvider(context, fusedLocationProviderClient)
-        // return LegacyMyLocationProvider(context, locationManager)
-    }
-
-    @Provides
-    public fun provideLocationProvider(context: Context, fusedLocationProviderClient: FusedLocationProviderClient): ILocationProvider {
+    public fun provideLocationProvider(context: Context): ILocationProvider {
         if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
             Log.v("ApplicationModule", "Using SimulatedLocationProvider as location provider")
 
@@ -64,7 +50,7 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
         Log.v("ApplicationModule", "Using FusedLocationProvider as location provider")
 
-        return FusedLocationProvider(context, fusedLocationProviderClient,
+        return FusedLocationProvider(context,
                 BuildConfig.FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS,
                 BuildConfig.FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS,
                 BuildConfig.FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS,
@@ -73,8 +59,17 @@ internal final class ApplicationModule(private val applicationContext: Context) 
 
     @Singleton
     @Provides
-    public fun provideTrackRecorderMapFactory(context: Context, appSettings: IAppSettings): ITrackRecorderMapFragmentFactory {
-        return TrackRecorderMapFragmentFactory(context, appSettings)
+    public fun providerMyCurrentLocationProvider(context: Context): IMyLocationProvider {
+        if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
+            Log.v("ApplicationModule", "Using SimulatedMyLocationProvider as my location provider")
+
+            return SimulatedMyLocationProvider()
+        }
+
+        Log.v("ApplicationModule", "Using FusedMyLocationProvider as my location provider")
+
+        return FusedMyLocationProvider(context)
+        // return LegacyMyLocationProvider(context)
     }
 
     @Provides
