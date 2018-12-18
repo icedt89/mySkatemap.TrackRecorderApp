@@ -15,11 +15,11 @@ internal final class TrackRecorderApplication: Application() {
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder()
                     .detectAll()
                     .penaltyLog()
+                    .penaltyDialog()
                     .build())
             StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder()
                     .detectAll()
                     .penaltyLog()
-                    .penaltyDeath()
                     .build())
         }
 

@@ -4,6 +4,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggregation
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.INewLocationsAggregation
 import io.reactivex.Observable
 import org.joda.time.DateTime
 import org.joda.time.Period
@@ -17,6 +18,8 @@ internal interface ITrackRecordingSession : IDestroyable {
 
     val burnedEnergyChanged: Observable<Float>
 
+    val isStillChanged: Observable<Boolean>
+
     val activityCode: String;
 
     val stateChanged: Observable<SessionStateInfo>
@@ -27,7 +30,7 @@ internal interface ITrackRecordingSession : IDestroyable {
 
     val trackingStartedAt: DateTime
 
-    val locationsAggregation: ILocationsAggregation
+    val locationsAggregation: INewLocationsAggregation
 
     fun resumeTracking()
 

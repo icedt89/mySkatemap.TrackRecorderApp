@@ -60,7 +60,19 @@ internal class TrackRecordingConverter {
             val at = DateTime(dictionary.getDate("at"))
             val stateChangeReason = StateChangeReason.valueOf(dictionary.getString("stateChangeReason"))
 
-            return StateChangeEntry(at, stateChangeReason)
+            var pausedReason: TrackingPausedReason? = null
+            val pausedReasonValue = dictionary.getString("pausedReason")
+            if(pausedReasonValue != null) {
+                pausedReason = TrackingPausedReason.valueOf(pausedReasonValue)
+            }
+
+            var resumedReason: TrackingResumedReason? = null
+            val resumedReasonValue = dictionary.getString("resumedReason")
+            if(resumedReasonValue != null) {
+                resumedReason = TrackingResumedReason.valueOf(resumedReasonValue)
+            }
+
+            return StateChangeEntry(at, stateChangeReason, pausedReason, resumedReason)
         }
 
         internal fun trackRecordingFromCouchDbDictionary(dictionary: Dictionary, id: UUID) : TrackRecording {
@@ -216,6 +228,14 @@ private fun StateChangeEntry.toCouchDbDictionary(): Dictionary {
 
     result.setDate("at", this.at.toDate())
     result.setString("stateChangeReason", this.stateChangeReason.toString())
+
+    if(this.pausedReason != null){
+        result.setString("pausedReason", this.pausedReason.toString())
+    }
+
+    if(this.resumedReason != null){
+        result.setString("resumedReason", this.resumedReason.toString())
+    }
 
     return result
 }

@@ -6,21 +6,32 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
-import com.janhafner.myskatemap.apps.trackrecorder.map.MapMarkerToken
-import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapLoadedCallback
-import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapReadyCallback
-import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment
+import com.janhafner.myskatemap.apps.trackrecorder.map.*
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
 public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragment() {
-    private lateinit var polyline: Polyline
+    private val trackSegmentCollection = TrackSegmentCollection {
+        object : ILatitudeLongitudeBoundsBuilder {
+            private val locations = mutableListOf<MapLocation>()
 
-    private val locations: MutableList<SimpleLocation> = ArrayList()
+            public override fun include(location: MapLocation) {
+                this.locations.add(location)
+            }
+
+            public override fun build(): MapLocationBounds {
+                val boundingBox = BoundingBox.fromGeoPoints(this.locations.map {
+                    GeoPoint(it.latitude, it.longitude)
+                })
+
+                return MapLocationBounds(MapLocation(boundingBox.latSouth, boundingBox.lonWest), MapLocation(boundingBox.latNorth, boundingBox.lonEast))
+            }
+        }
+    }
 
     private lateinit var map: MapView
 
@@ -44,7 +55,7 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
     public override var trackColor: Int = Color.RED
         set(value) {
             if(this.isReady) {
-                this.polyline.color = value
+                this.trackSegmentCollection.trackColor = value
             }
 
             field = value
@@ -61,35 +72,39 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
             field = value
         }
 
-    public override fun addLocations(locations: List<SimpleLocation>) {
-        this.locations.addAll(locations)
+    public override fun addLocations(locations: List<MapLocation>) {
+        if (!this.trackSegmentCollection.hasSegments) {
+            this.createAndAppendNewTrackSegment()
+        }
 
-        this.moveTrackIntoView()
+        this.trackSegmentCollection.addLocations(locations)
+    }
+
+    public override fun beginNewTrackSegment() {
+        if (this.trackSegmentCollection.hasSegments) {
+            this.createAndAppendNewTrackSegment()
+        }
     }
 
     public override fun clearTrack() {
-        this.locations.clear()
+        this.trackSegmentCollection.clear()
 
-        this.moveTrackIntoView()
+        this.focusTrack()
     }
 
-    private fun moveTrackIntoView() {
-        val points = this.locations.map { GeoPoint(it.latitude, it.longitude) }
-        this.polyline.setPoints(points)
-
-        if (!this.polyline.points.any()) {
+    public override fun focusTrack() {
+        if (!this.trackSegmentCollection.hasSegments) {
             return
         }
 
-        val boundingBox = BoundingBox.fromGeoPoints(this.polyline.points)
+        val cameraBounds = this.trackSegmentCollection.getCameraBounds()
+
+        val boundingBox = BoundingBox.fromGeoPoints(listOf(GeoPoint(cameraBounds.southWest.latitude, cameraBounds.southWest.longitude), GeoPoint(cameraBounds.northEast.latitude, cameraBounds.northEast.longitude)))
 
         this.map.zoomToBoundingBox(boundingBox.increaseByScale(1.1f), false,0)
     }
 
-    public override fun addMarker(location: SimpleLocation, title: String, icon: Int?): MapMarkerToken {
-        throw NotImplementedError("This function is not stable at the moment.")
-
-        /* TODO: THIS NEEDS TO BE IMPLEMENTED!
+    public override fun addMarker(location: MapLocation, title: String, icon: Int?): MapMarkerToken {
         val marker = Marker(this.map)
         marker.title = title
         marker.position = GeoPoint(location.latitude, location.longitude)
@@ -101,13 +116,12 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
 
         this.map.overlays.add(marker)
 
-        return MapMarkerToken({
+        return MapMarkerToken {
             marker.remove(this.map)
-        })
-        */
+        }
     }
 
-    public override fun zoomToLocation(location: SimpleLocation, zoom: Float) {
+    public override fun zoomToLocation(location: MapLocation, zoom: Float) {
         this.map.controller.setCenter(GeoPoint(location.latitude, location.longitude))
         this.map.controller.setZoom(16.0 * zoom)
     }
@@ -121,10 +135,18 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
 
         this.map = this.view!!.findViewById(R.id.trackrecordermapfragment_openstreetmap_mapview)
 
-        this.polyline = Polyline(this.map)
-        this.map.overlayManager.add(this.polyline)
-
         this.applyDefaults()
+    }
+
+    private fun createAndAppendNewTrackSegment() {
+        val polyline = Polyline(this.map)
+
+        polyline.color = this.trackColor
+        polyline.isGeodesic = true
+
+        this.trackSegmentCollection.appendSegment(TrackSegment(polyline, this.map.overlayManager))
+
+        this.map.overlayManager.add(polyline)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -138,8 +160,5 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
                 !this.gesturesEnabled
         }
         this.map.setTileSource(TileSourceFactory.MAPNIK)
-
-        this.polyline.isGeodesic = true
-        this.polyline.color = this.trackColor
     }
 }

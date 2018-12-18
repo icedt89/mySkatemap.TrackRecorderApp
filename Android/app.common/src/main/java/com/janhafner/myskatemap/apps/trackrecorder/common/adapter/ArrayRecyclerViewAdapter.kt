@@ -145,12 +145,12 @@ public open class ArrayRecyclerViewAdapter<T>(@LayoutRes private val itemLayoutI
 
         @Deprecated("Experimental")
         public fun show() {
-            this.itemView!!.visibility = VISIBLE
+            this.itemView.visibility = VISIBLE
         }
 
         @Deprecated("Experimental")
         public fun hide() {
-            this.itemView!!.visibility = GONE
+            this.itemView.visibility = GONE
         }
     }
 }

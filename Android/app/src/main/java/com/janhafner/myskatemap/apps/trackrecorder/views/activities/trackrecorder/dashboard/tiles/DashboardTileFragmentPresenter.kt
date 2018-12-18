@@ -19,8 +19,8 @@ internal abstract class DashboardTileFragmentPresenter(protected val trackRecord
 
     private var trackRecorderSession: ITrackRecordingSession? = null
 
-    protected val titleChangedSubject: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    public val titleChanged: Observable<String> = this.titleChangedSubject.subscribeOn(Schedulers.computation())
+    public var title: String = ""
+        protected set
 
     protected val valueChangedSubject: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     public val valueChanged: Observable<String> = this.valueChangedSubject.subscribeOn(Schedulers.computation())
@@ -84,7 +84,6 @@ internal abstract class DashboardTileFragmentPresenter(protected val trackRecord
         this.uninitializeSession()
 
         this.unitChangedSubject.onComplete()
-        this.titleChangedSubject.onComplete()
         this.valueChangedSubject.onComplete()
 
         this.sessionSubscriptions.dispose()

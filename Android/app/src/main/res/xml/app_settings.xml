@@ -40,6 +40,20 @@
             android:defaultValue="@string/appsettings_preference_notifications_vibrate_on_background_stop_default_value" />
     </PreferenceCategory>
     <PreferenceCategory
+        android:title="@string/appsettings_preference_common_title"
+        android:key="appsettings_preference_common">
+        <SwitchPreference
+            android:key="@string/appsettings_preference_keep_screen_on_key"
+            android:title="@string/appsettings_preference_keep_screen_on_label"
+            android:summary="@string/appsettings_preference_keep_screen_on_summary"
+            android:defaultValue="@string/appsettings_preference_keep_screen_on_default_value" />
+        <SwitchPreference
+            android:key="@string/appsettings_preference_show_my_location_key"
+            android:title="@string/appsettings_preference_show_my_location_label"
+            android:summary="@string/appsettings_preference_show_my_location_summary"
+            android:defaultValue="@string/appsettings_preference_show_my_location_default_value" />
+    </PreferenceCategory>
+    <PreferenceCategory
         android:title="@string/appsettings_preference_units_title"
         android:key="appsettings_preference_units">
         <ListPreference

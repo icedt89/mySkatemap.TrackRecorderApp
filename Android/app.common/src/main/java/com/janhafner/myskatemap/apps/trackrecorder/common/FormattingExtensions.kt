@@ -56,13 +56,20 @@ public fun Period.formatRecordingTime(): String {
 }
 
 public fun Float.roundWithTwoDecimals(): String {
+    return this.toDouble().roundWithTwoDecimals()
+}
+
+public fun Double.roundWithTwoDecimals(): String {
     val decimalFormat = DecimalFormat("#.##")
     decimalFormat.roundingMode = RoundingMode.CEILING
 
     return decimalFormat.format(this)
 }
 
-
 public fun Float.roundWithTwoDecimalsAndFormatWithUnit(unitSymbol: String) : String {
+    return this.toDouble().roundWithTwoDecimalsAndFormatWithUnit(unitSymbol)
+}
+
+public fun Double.roundWithTwoDecimalsAndFormatWithUnit(unitSymbol: String) : String {
     return "${this.roundWithTwoDecimals()} ${unitSymbol}"
 }

@@ -9,6 +9,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="vertical">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_icon" />
+
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,16 +29,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Version -0.0"
-            android:textColor="@color/textColor"
-            android:textSize="20sp" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
+            android:textSize="14sp"
             android:layout_marginBottom="10dp"
-            app:srcCompat="@drawable/ic_icon" />
+            android:text="Version -0.0"
+            android:textColor="@color/textDarkColor" />
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,12 +40,20 @@
             android:textSize="20sp"
             android:textColor="@color/textColor"
             android:text="@string/aboutactivity_copyright" />
-
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:id="@+id/activity_about_website"
+            android:textColor="@color/textDarkColor"
+            android:text="@string/aboutactivity_website" />
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/activity_about_app_pid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:visibility="gone"
             android:gravity="center"
             android:text="PID: -1"
             android:textColor="@color/textDarkColor"

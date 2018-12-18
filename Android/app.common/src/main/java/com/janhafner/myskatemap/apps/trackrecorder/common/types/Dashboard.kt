@@ -6,14 +6,14 @@ public final class Dashboard constructor(id: UUID = UUID.randomUUID()) {
     public var id: UUID = id
         private set
 
-    public var topLeftTileImplementationTypeName: String = "CurrentSpeedDashboardTileFragmentPresenter"
+    public lateinit var topLeftTileImplementationTypeName: String
 
-    public var topRightTileImplementationTypeName: String = "DistanceDashboardTileFragmentPresenter"
+    public lateinit var topRightTileImplementationTypeName: String
 
-    public var middleCenterTileImplementationTypeName: String = "RecordingTimeDashboardTileFragmentPresenter"
+    public lateinit var middleCenterTileImplementationTypeName: String
 
-    public var bottomLeftTileImplementationTypeName: String = "AverageSpeedDashboardTileFragmentPresenter"
+    public lateinit var bottomLeftTileImplementationTypeName: String
 
-    public var bottomRightTileImplementationTypeName: String = "BurnedEnergyDashboardTileFragmentPresenter"
+    public lateinit var bottomRightTileImplementationTypeName: String
 
 }

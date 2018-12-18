@@ -17,18 +17,19 @@ internal final class TrackRecordingEventsSubscriber(notifier: INotifier, trackQu
             notifier.notifications
                 .ofType(TrackRecordingSavedEvent::class.java)
                 .map {
-                    it.trackRecording
-                }
-                .subscribe {
                     val trackInfo = TrackInfo()
-                    trackInfo.displayName = it.startedAt.formatDefault()
-                    trackInfo.id = it.id
-                    trackInfo.recordingTime = it.recordingTime
-                    trackInfo.distance = distanceCalculator.calculateDistance(it.locations)
+                    trackInfo.displayName = it.trackRecording.startedAt.formatDefault()
+                    trackInfo.id = it.trackRecording.id
+                    trackInfo.recordingTime = it.trackRecording.recordingTime
+                    trackInfo.distance = distanceCalculator.calculateDistance(it.trackRecording.locations)
 
-                    // TODO: Implement error handling
-                    trackQueryService.saveTrackInfo(trackInfo).subscribe()
+                    trackInfo
                 }
+                .flatMapSingle {
+                    // TODO: Implement error handling
+                    trackQueryService.saveTrackInfo(it)
+                }
+                .subscribe()
         )
     }
 

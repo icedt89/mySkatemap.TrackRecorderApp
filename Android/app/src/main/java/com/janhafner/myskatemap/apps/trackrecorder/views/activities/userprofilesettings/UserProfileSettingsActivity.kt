@@ -1,11 +1,11 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 
 internal final class UserProfileSettingsActivity : AppCompatActivity() {
-    private var presenter: UserProfileSettingsActivityPresenter? = null
+    private lateinit var presenter: UserProfileSettingsActivityPresenter
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -14,7 +14,7 @@ internal final class UserProfileSettingsActivity : AppCompatActivity() {
     }
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return this.presenter!!.onOptionsItemSelected(item)
+        return this.presenter.onOptionsItemSelected(item)
     }
 }
 

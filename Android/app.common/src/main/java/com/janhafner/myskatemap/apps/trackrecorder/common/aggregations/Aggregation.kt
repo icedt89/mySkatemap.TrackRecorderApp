@@ -5,37 +5,23 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 
+@Deprecated("")
 public final class Aggregation : IAggregation {
     private val minimumValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
     public override val minimumValueChanged: Observable<Float> = this.minimumValueChangedSubject.subscribeOn(Schedulers.computation())
 
-    public override val minimumValue: Float?
-        get() = this.minimumValueChangedSubject.value
-
     private val maximumValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
     public override val maximumValueChanged: Observable<Float> = this.maximumValueChangedSubject.subscribeOn(Schedulers.computation())
-
-    public override val maximumValue: Float?
-        get() = this.maximumValueChangedSubject.value
 
     private val averageComputationValueSource: ArrayList<Float> = ArrayList()
     private val averageValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
     public override val averageValueChanged: Observable<Float> = this.averageValueChangedSubject.subscribeOn(Schedulers.computation())
 
-    public override val averageValue: Float?
-        get() = this.averageValueChangedSubject.value
-
     private val firstValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
     public override val firstValueChanged: Observable<Float> = this.firstValueChangedSubject.subscribeOn(Schedulers.computation())
 
-    public override val firstValue: Float?
-        get() = this.firstValueChangedSubject.value
-
     private val lastValueChangedSubject: BehaviorSubject<Float> = BehaviorSubject.create<Float>()
     public override val lastValueChanged: Observable<Float> = this.lastValueChangedSubject.subscribeOn(Schedulers.computation())
-
-    public override val lastValue: Float?
-        get() = this.lastValueChangedSubject.value
 
     public override fun addAll(values: List<Float>) {
         if(this.isDestroyed) {

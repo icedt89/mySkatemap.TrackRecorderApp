@@ -5,4 +5,6 @@ import io.reactivex.Single
 
 public interface IDashboardService {
     fun getCurrentDashboardOrDefault() : Single<Dashboard>
+
+    fun saveDashboard(dashboard: Dashboard): Single<Unit>
 }

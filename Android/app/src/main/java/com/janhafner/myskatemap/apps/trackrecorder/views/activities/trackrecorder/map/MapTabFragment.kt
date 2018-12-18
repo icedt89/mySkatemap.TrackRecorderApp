@@ -1,8 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map
 
 import android.content.Context
-import android.content.IntentFilter
-import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,12 +8,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
-import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.IMyLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import javax.inject.Inject
 
@@ -30,13 +26,7 @@ internal final class MapTabFragment: Fragment() {
     public lateinit var trackRecorderMapFragment: TrackRecorderMapFragment
 
     @Inject
-    public lateinit var locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver
-
-    @Inject
-    public lateinit var locationAvailabilityChangedSource: ILocationAvailabilityChangedSource
-
-    @Inject
-    public lateinit var myLocationProvider: IMyLocationProvider
+    public lateinit var appSettings: IAppSettings
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_map_tab, container, false)
@@ -55,7 +45,7 @@ internal final class MapTabFragment: Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragment, this.myLocationProvider, this.locationAvailabilityChangedSource)
+        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragment, this.appSettings)
     }
 
     public override fun onAttach(context: Context?) {
@@ -69,8 +59,6 @@ internal final class MapTabFragment: Fragment() {
     public override fun onResume() {
         super.onResume()
 
-        this.activity!!.registerReceiver(this.locationAvailabilityChangedBroadcastReceiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
-
         if(this.presenter != null) {
             this.presenter!!.onResume()
         }
@@ -78,8 +66,6 @@ internal final class MapTabFragment: Fragment() {
 
     public override fun onPause() {
         super.onPause()
-
-        this.activity!!.unregisterReceiver(this.locationAvailabilityChangedBroadcastReceiver)
 
         this.presenter!!.onPause()
     }

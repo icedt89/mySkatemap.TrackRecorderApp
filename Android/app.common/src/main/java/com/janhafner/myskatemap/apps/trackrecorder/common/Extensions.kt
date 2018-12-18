@@ -7,7 +7,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.provider.Settings
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
 import io.reactivex.Observable
 import org.joda.time.DateTime
 
@@ -60,10 +59,6 @@ private fun Location.toLiteAndroidLocation(): android.location.Location {
     return result
 }
 
-public fun Location.toSimpleLocation(): SimpleLocation {
-    return SimpleLocation(this.latitude, this.longitude)
-}
-
 public fun Location.distanceTo(location: Location): Float {
     val androidLocation = this.toLiteAndroidLocation()
     val otherAndroidLocation = location.toLiteAndroidLocation()
@@ -71,14 +66,10 @@ public fun Location.distanceTo(location: Location): Float {
     return androidLocation.distanceTo(otherAndroidLocation)
 }
 
-public fun Location.isInDistance(location: Location, maximumDistance: Double, includeEdge: Boolean = true): Boolean {
+public fun Location.isInDistance(location: Location, maximumDistanceInMeter: Float): Boolean {
     val distance = this.distanceTo(location)
 
-    if (includeEdge) {
-        return distance <= maximumDistance
-    }
-
-    return distance < maximumDistance
+    return distance <= maximumDistanceInMeter
 }
 
 public fun android.location.Location.toLocation(): Location {

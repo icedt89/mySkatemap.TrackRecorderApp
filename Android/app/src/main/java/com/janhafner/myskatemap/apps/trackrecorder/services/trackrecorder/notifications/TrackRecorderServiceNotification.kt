@@ -10,6 +10,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
 import com.janhafner.myskatemap.apps.trackrecorder.common.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
 import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackingPausedReason
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.format
@@ -17,7 +18,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackR
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.SessionStateInfo
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackingPausedReason
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import io.reactivex.disposables.CompositeDisposable
@@ -112,12 +112,14 @@ internal final class TrackRecorderServiceNotification(private val service: Servi
                 notificationCompatBuilder.setContentTitle(this.service.getString(R.string.trackrecorderservice_notification_status_running))
             TrackRecordingSessionState.Paused ->
                 if(this.state.pausedReason == TrackingPausedReason.LocationServicesUnavailable) {
-                    notificationCompatBuilder.setContentTitle(this.service.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable))
+                    notificationCompatBuilder.setContentTitle(this.service.getString(R.string.trackrecorderservice_notification_status_locationservicesunavailable_paused))
 
                     if(this.vibrateOnLocationAvailabilityLoss) {
                         notificationCompatBuilder.setVibrate(longArrayOf(500, 500, 500, 500, 500, 500))
                     }
 
+                } else if(this.state.pausedReason == TrackingPausedReason.StillStandDetected) {
+                    notificationCompatBuilder.setContentTitle(this.service.getString(R.string.trackrecorderservice_notification_status_stillstand_paused))
                 } else {
                     notificationCompatBuilder.setContentTitle(this.service.getString(R.string.trackrecorderservice_notification_status_paused))
                 }

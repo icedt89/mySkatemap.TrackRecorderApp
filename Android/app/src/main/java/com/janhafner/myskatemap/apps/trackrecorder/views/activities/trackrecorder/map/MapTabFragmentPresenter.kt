@@ -1,35 +1,32 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map
 
+import android.content.IntentFilter
+import android.location.LocationManager
 import android.view.View
+import com.github.karczews.rxbroadcastreceiver.RxBroadcastReceivers
 import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.view.visibility
-import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
-import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.filterNotEmpty
-import com.janhafner.myskatemap.apps.trackrecorder.common.toSimpleLocation
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
-import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
+import com.janhafner.myskatemap.apps.trackrecorder.*
+import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
+import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
 import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
+import com.janhafner.myskatemap.apps.trackrecorder.map.MapLocation
 import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapReadyCallback
 import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.IMyLocationProvider
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.IMyLocationRequestState
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
+import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_map_tab.*
-import java.util.concurrent.TimeUnit
 
 internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                                              private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                              private val trackRecorderMapFragment: TrackRecorderMapFragment,
-                                             private val myLocationProvider: IMyLocationProvider,
-                                             private val locationAvailabilityChangedSource: ILocationAvailabilityChangedSource)
+                                             private val appSettings: IAppSettings)
     : OnTrackRecorderMapReadyCallback {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
@@ -40,8 +37,6 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private var trackRecorderSession: ITrackRecordingSession? = null
-
-    private var currentMyLocationRequestState: IMyLocationRequestState? = null
 
     init {
         this.setupMapFragment(this.trackRecorderMapFragment)
@@ -69,10 +64,11 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
         this.sessionSubscriptions.addAll(
                 trackRecorderSession.locationsChanged
                         .map {
-                            it.toSimpleLocation()
+                            listOf(it.toMapLocation())
                         }
-                        .buffer(250, TimeUnit.MILLISECONDS, 250)
-                        .filterNotEmpty()
+                        // Buffering removed because it is not necessary in real world scenaries
+                        //.buffer(250, TimeUnit.MILLISECONDS, 250)
+                        //.filterNotEmpty()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             this.trackRecorderMapFragment.addLocations(it)
@@ -81,6 +77,15 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe{
                             this.trackRecorderMapFragment.gesturesEnabled = it.state != TrackRecordingSessionState.Running
+                        },
+                trackRecorderSession.stateChanged
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe{
+                            if(it.state == TrackRecordingSessionState.Paused) {
+                                this.trackRecorderMapFragment.beginNewTrackSegment()
+                            }
+
+                            this.trackRecorderMapFragment.focusTrack()
                         },
                 this.view.fragment_track_recorder_map_add_poi.clicks().subscribe {
                     // TODO: Add POI TO CURRENT SESSION
@@ -103,13 +108,15 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     public override fun onMapReady(trackRecorderMap: ITrackRecorderMap) {
         trackRecorderMap.trackColor = this.view.context!!.getColor(R.color.accentColor)
 
-        trackRecorderMap.zoomToLocation(SimpleLocation(BuildConfig.MAP_INITIAL_LATITUDE, BuildConfig.MAP_INITIAL_LONGITUDE), BuildConfig.MAP_INITIAL_ZOOM)
+        trackRecorderMap.zoomToLocation(MapLocation(BuildConfig.MAP_INITIAL_LATITUDE, BuildConfig.MAP_INITIAL_LONGITUDE), BuildConfig.MAP_INITIAL_ZOOM)
+
+        if(trackRecorderMap.providesNativeMyLocation) {
+            trackRecorderMap.myLocationActivated = this.appSettings.showMyLocation
+        }
     }
 
     public fun destroy() {
         this.uninitializeSession(false)
-
-        this.tryCancelCurrentMyLocationRequest()
 
         this.sessionSubscriptions.dispose()
         this.fragmentSubscriptions.dispose()
@@ -119,34 +126,19 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
 
     public fun onResume() {
         this.subscriptions.addAll(
-                this.view.fragment_track_recorder_map_fix_myposition.clicks().subscribe {
-                    if (this.currentMyLocationRequestState == null) {
-                        val currentLocationRequest = this.myLocationProvider.getMyCurrentLocation()
-                        currentLocationRequest.location.observeOn(AndroidSchedulers.mainThread())
-                                .subscribe {
-                                    result ->
-                                    if(result.value != null) {
-                                        this.trackRecorderMapFragment.zoomToLocation(result.value!!.toSimpleLocation(), 18.0f)
-
-                                        if(this.trackRecorderMapFragment.canAddMarker) {
-                                            val mapMarkerToken = this.trackRecorderMapFragment.addMarker(result.value!!.toSimpleLocation(), this.view.getString(R.string.trackrecorderactivity_map_mycurrentlocation_marker_title))
-                                            Single.just(mapMarkerToken)
-                                                    .delay(10, TimeUnit.SECONDS)
-                                                    .observeOn(AndroidSchedulers.mainThread())
-                                                    .subscribe {
-                                                        emitter ->
-                                                        emitter.destroy()
-                                                    }
-                                        }
-                                    }
-                                }
-
-                        this.currentMyLocationRequestState = currentLocationRequest
-                    } else {
-                        this.tryCancelCurrentMyLocationRequest()
-                    }
-                },
-                this.locationAvailabilityChangedSource.locationAvailable
+                this.appSettings.propertyChanged
+                        .hasChanged()
+                        .isNamed(IAppSettings::showMyLocation.name)
+                        .map {
+                            it.newValue as Boolean
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe{
+                            this.trackRecorderMapFragment.myLocationActivated = it
+                        },
+                LocationAvailability.changed(this.view.context!!)
+                        .subscribeOn(AndroidSchedulers.mainThread())
+                        .distinctUntilChanged()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe{
                             var visibility = View.VISIBLE
@@ -155,7 +147,6 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                             }
 
                             this.view.fragment_track_recorder_map_add_poi.visibility = visibility
-                            this.view.fragment_track_recorder_map_fix_myposition.visibility = visibility
                         },
                 this.trackRecorderServiceController.isClientBoundChanged
                         .observeOn(AndroidSchedulers.mainThread())
@@ -184,24 +175,18 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                             }
                         }
         )
+
+        if(this.trackRecorderMapFragment.providesNativeMyLocation) {
+            this.trackRecorderMapFragment.myLocationActivated = this.appSettings.showMyLocation
+        }
     }
 
     public fun onPause() {
         this.uninitializeSession(true)
 
-        this.tryCancelCurrentMyLocationRequest()
-
         this.sessionSubscriptions.clear()
         this.fragmentSubscriptions.clear()
         this.clientSubscriptions.clear()
         this.subscriptions.clear()
-    }
-
-    private fun tryCancelCurrentMyLocationRequest() {
-        if (this.currentMyLocationRequestState != null) {
-            this.currentMyLocationRequestState!!.cancel()
-
-            this.currentMyLocationRequestState = null
-        }
     }
 }

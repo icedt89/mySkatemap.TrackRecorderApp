@@ -7,9 +7,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.CurrentAltitudeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.MaximumAltitudeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.MinimumAltitudeDashboardTileFragmentPresenter
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.burnedenergy.BurnedEnergyDashboardTileFragmentPresenter
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.distance.DistanceDashboardTileFragmentPresenter
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.recordingtime.RecordingTimeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.AverageSpeedDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.CurrentSpeedDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.MaximumSpeedDashboardTileFragmentPresenter
@@ -37,6 +34,8 @@ internal final class DashboardTileFragmentPresenterFactory(context: Context) : I
                 return this.injector.provideBurnedEnergyDashboardTileFragmentPresenter()
             DistanceDashboardTileFragmentPresenter::class.java.simpleName ->
                 return this.injector.provideDistanceDashboardTileFragmentPresenter()
+            NumberOfLocationsDashboardTileFragmentPresenter::class.java.simpleName ->
+                return this.injector.provideNumberOfLocationsDashboardTileFragmentPresenter()
             RecordingTimeDashboardTileFragmentPresenter::class.java.simpleName ->
                 return this.injector.provideRecordingTimeDashboardTileFragmentPresenter()
         }

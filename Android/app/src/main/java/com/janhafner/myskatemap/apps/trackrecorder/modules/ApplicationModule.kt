@@ -8,7 +8,9 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.*
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.FusedLocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
+import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.SimulatedLocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.settings.*
 import dagger.Module
 import dagger.Provides
@@ -19,8 +21,6 @@ import javax.inject.Singleton
     ExportModule::class,
     TrackModule::class,
     DashboardModule::class,
-    ActivityDetectionModule::class,
-    LocationAvailabilityModule::class,
     DistanceCalculationModule::class,
     BurnedEnergyModule::class,
     LiveLocationModule::class,
@@ -55,21 +55,6 @@ internal final class ApplicationModule(private val applicationContext: Context) 
                 BuildConfig.FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS,
                 BuildConfig.FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS,
                 BuildConfig.FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS)
-    }
-
-    @Singleton
-    @Provides
-    public fun providerMyCurrentLocationProvider(context: Context): IMyLocationProvider {
-        if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
-            Log.v("ApplicationModule", "Using SimulatedMyLocationProvider as my location provider")
-
-            return SimulatedMyLocationProvider()
-        }
-
-        Log.v("ApplicationModule", "Using FusedMyLocationProvider as my location provider")
-
-        return FusedMyLocationProvider(context)
-        // return LegacyMyLocationProvider(context)
     }
 
     @Provides

@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.map
 
 import androidx.annotation.DrawableRes
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
 
 public interface ITrackRecorderMap {
     var trackColor: Int
@@ -16,14 +15,18 @@ public interface ITrackRecorderMap {
 
     var gesturesEnabled: Boolean
 
-    fun addLocations(locations: List<SimpleLocation>)
+    fun addLocations(locations: List<MapLocation>)
+
+    fun beginNewTrackSegment()
 
     fun clearTrack()
 
-    fun zoomToLocation(location: SimpleLocation, zoom: Float)
+    fun zoomToLocation(location: MapLocation, zoom: Float)
 
-    fun addMarker(location: SimpleLocation, title: String, @DrawableRes icon: Int? = null): MapMarkerToken
+    fun addMarker(location: MapLocation, title: String, @DrawableRes icon: Int? = null): MapMarkerToken
 
     fun getMapAsync(callback: OnTrackRecorderMapReadyCallback)
+
+    fun focusTrack()
 }
 

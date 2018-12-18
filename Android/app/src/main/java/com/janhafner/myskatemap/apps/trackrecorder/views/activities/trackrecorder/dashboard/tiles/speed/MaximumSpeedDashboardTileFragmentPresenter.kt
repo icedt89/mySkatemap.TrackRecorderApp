@@ -15,12 +15,10 @@ internal final class MaximumSpeedDashboardTileFragmentPresenter(private val cont
                                                                 speedConverterFactory: ISpeedConverterFactory)
     : SpeedDashboardTileFragmentPresenter(appSettings, trackRecorderServiceController, speedConverterFactory) {
     init {
-        val title = this.context.getString(R.string.dashboard_tile_maximumspeeddashboardtilefragmentpresenter_title)
-
-        this.titleChangedSubject.onNext(title)
+        this.title = this.context.getString(R.string.dashboard_tile_maximumspeeddashboardtilefragmentpresenter_title)
     }
 
     protected override fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float> {
-        return trackRecorderSession.locationsAggregation.speed.maximumValueChanged
+        return trackRecorderSession.locationsAggregation.speed.maximumValueChanged.map { it.toFloat() }
     }
 }

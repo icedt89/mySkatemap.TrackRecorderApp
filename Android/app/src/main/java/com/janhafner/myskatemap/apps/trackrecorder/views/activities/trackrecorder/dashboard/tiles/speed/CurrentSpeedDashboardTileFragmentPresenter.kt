@@ -15,13 +15,11 @@ internal final class CurrentSpeedDashboardTileFragmentPresenter(private val cont
                                                                 speedConverterFactory: ISpeedConverterFactory)
     : SpeedDashboardTileFragmentPresenter(appSettings, trackRecorderServiceController, speedConverterFactory) {
     init {
-        val title = this.context.getString(R.string.dashboard_tile_currentspeeddashboardtilefragmentpresenter_tile)
-
-        this.titleChangedSubject.onNext(title)
+        this.title = this.context.getString(R.string.dashboard_tile_currentspeeddashboardtilefragmentpresenter_tile)
     }
 
     protected override fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float> {
-        return trackRecorderSession.locationsAggregation.speed.lastValueChanged
+        return trackRecorderSession.locationsAggregation.speed.lastValueChanged.map { it.toFloat() }
     }
 }
 

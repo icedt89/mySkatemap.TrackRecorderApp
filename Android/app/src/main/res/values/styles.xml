@@ -23,10 +23,6 @@
         <item name="android:textColor">@color/accentColor</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.AppTheme.AppCompat.Panel" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="background">@color/primaryLightColor</item>
-    </style>
-
     <style name="MySkatemap.TrackRecorder.AppTheme.AppCompat.SecondaryFab" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorAccent">@color/textDarkColor</item>
     </style>
@@ -36,9 +32,9 @@
     </style>
 
     <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Content" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="MySkatemap.TrackRecorder.ActivityInfo.Container" parent="MySkatemap.TrackRecorder.AppTheme.AppCompat">

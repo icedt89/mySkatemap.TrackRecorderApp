@@ -2,11 +2,14 @@ package com.janhafner.myskatemap.apps.trackrecorder.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.preference.EditTextPreference
 import com.janhafner.myskatemap.apps.trackrecorder.common.R
 
-internal final class FixedEditTextPreference(context: Context, attrs: AttributeSet) : EditTextPreference(context, attrs) {
+
+
+public final class FixedEditTextPreference(context: Context, attrs: AttributeSet) : com.takisoft.preferencex.EditTextPreference(context, attrs) {
     private var emptySummaryText: String? = null
+
+    private val initialSummaryText: String
 
     init {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.FixedEditTextPreferenceAttributes, 0, 0)
@@ -14,6 +17,8 @@ internal final class FixedEditTextPreference(context: Context, attrs: AttributeS
         this.emptySummaryText = typedArray.getString(R.styleable.FixedEditTextPreferenceAttributes_emptySummary)
 
         typedArray.recycle()
+
+        this.initialSummaryText = super.getSummary().toString()
     }
 
     public override fun getSummary(): CharSequence {
@@ -23,11 +28,15 @@ internal final class FixedEditTextPreference(context: Context, attrs: AttributeS
                 return this.emptySummaryText!!
             }
 
-            return super.getSummary()
+            return this.initialSummaryText
         }
 
-        val summary = super.getSummary().toString()
+        return String.format(this.initialSummaryText, currentValue)
+    }
 
-        return String.format(summary, currentValue)
+    public fun invalidateSummary() {
+        val summary = this.summary
+
+        this.summary = summary
     }
 }

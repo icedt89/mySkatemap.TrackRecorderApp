@@ -1,41 +1,52 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
+import android.view.View.GONE
 import androidx.fragment.app.Fragment
+import com.jakewharton.rxbinding2.view.visibility
 import com.jakewharton.rxbinding2.widget.text
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.view.*
 
 internal abstract class DashboardTileFragment : Fragment() {
-    private var presenter: DashboardTileFragmentPresenter? = null
-
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    public fun setPresenter(presenter: DashboardTileFragmentPresenter) {
-        this.presenter?.destroy()
-        this.subscriptions.clear()
+    public var presenter: DashboardTileFragmentPresenter? = null
+        public set(value) {
+            field?.destroy()
+            this.subscriptions.clear()
 
-        this.subscribeToPresenter(presenter)
-        presenter.onResume()
+            if(value != null) {
+                this.subscribeToPresenter(value)
+                value.onResume()
 
-        this.presenter = presenter
-    }
+                field = value
+            }
+        }
 
     private fun subscribeToPresenter(presenter: DashboardTileFragmentPresenter) {
         if(this.subscriptions.size() > 0) {
             return
         }
 
+        this.view!!.fragment_dashboard_tile_title.text().accept(presenter.title)
+
         this.subscriptions.addAll(
-                presenter.titleChanged
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe (this.view!!.fragment_dashboard_tile_title.text()),
                 presenter.valueChanged
+                        .distinctUntilChanged()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this.view!!.fragment_dashboard_tile_value.text()),
                 presenter.unitChanged
+                        .distinctUntilChanged()
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this.view!!.fragment_dashboard_tile_unit.text())
+                        .subscribe(this.view!!.fragment_dashboard_tile_unit.text()),
+                presenter.unitChanged
+                        .map {
+                            !it.isBlank()
+                        }
+                        .distinctUntilChanged()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this.view!!.fragment_dashboard_tile_unit.visibility(GONE))
         )
     }
 

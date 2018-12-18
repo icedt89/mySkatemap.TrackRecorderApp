@@ -15,12 +15,10 @@ internal final class MaximumAltitudeDashboardTileFragmentPresenter(private val c
                                                                    distanceConverterFactory: IDistanceConverterFactory)
     : AltitudeDashboardTileFragmentPresenter(appSettings, trackRecorderServiceController, distanceConverterFactory) {
     init {
-        val title = this.context.getString(R.string.dashboard_tile_maximumaltitudedashboardtilefragmentpresenter_title)
-
-        this.titleChangedSubject.onNext(title)
+        this.title = this.context.getString(R.string.dashboard_tile_maximumaltitudedashboardtilefragmentpresenter_title)
     }
 
     protected override fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float> {
-        return trackRecorderSession.locationsAggregation.altitude.maximumValueChanged
+        return trackRecorderSession.locationsAggregation.altitude.maximumValueChanged.map { it.toFloat() }
     }
 }

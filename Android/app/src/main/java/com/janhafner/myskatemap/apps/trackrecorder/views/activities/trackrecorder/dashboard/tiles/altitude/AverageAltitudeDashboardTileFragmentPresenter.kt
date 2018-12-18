@@ -15,12 +15,10 @@ internal final class AverageAltitudeDashboardTileFragmentPresenter(private val c
                                                                    distanceConverterFactory: IDistanceConverterFactory)
     : AltitudeDashboardTileFragmentPresenter(appSettings, trackRecorderServiceController, distanceConverterFactory) {
     init {
-        val title = this.context.getString(R.string.dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title)
-
-        this.titleChangedSubject.onNext(title)
+        this.title = this.context.getString(R.string.dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title)
     }
 
     protected override fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float> {
-        return trackRecorderSession.locationsAggregation.altitude.averageValueChanged
+        return trackRecorderSession.locationsAggregation.altitude.averageValueChanged.map { it.toFloat() }
     }
 }

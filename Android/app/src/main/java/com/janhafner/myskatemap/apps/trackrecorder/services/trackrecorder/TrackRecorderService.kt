@@ -2,20 +2,14 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder
 
 import android.app.Service
 import android.content.Intent
-import android.content.IntentFilter
-import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
-import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.ActivityDetectorBroadcastReceiver
-import com.janhafner.myskatemap.apps.trackrecorder.activitydetection.IActivityDetectorSource
 import com.janhafner.myskatemap.apps.trackrecorder.burnedenergy.IBurnedEnergyCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.common.getNotificationManager
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.IDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
-import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.LocationAvailabilityChangedBroadcastReceiver
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotificationChannel
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
@@ -40,18 +34,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
     public lateinit var locationProvider: ILocationProvider
 
     @Inject
-    public lateinit var locationAvailabilityChangedBroadcastReceiver: LocationAvailabilityChangedBroadcastReceiver
-
-    @Inject
-    public lateinit var locationAvailabilityChangedSource: ILocationAvailabilityChangedSource
-
-    @Inject
-    public lateinit var  activityDetectorBroadcastReceiver: ActivityDetectorBroadcastReceiver
-
-    @Inject
-    public lateinit var activityDetectorSource: IActivityDetectorSource
-
-    @Inject
     public lateinit var distanceCalculator: IDistanceCalculator
 
     @Inject
@@ -71,8 +53,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             this.trackRecorderServiceNotificationChannel = TrackRecorderServiceNotificationChannel(this.getNotificationManager())
         }
-
-        this.registerReceiver(this.locationAvailabilityChangedBroadcastReceiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
 
         super.onCreate()
     }
@@ -112,9 +92,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                 this.burnedEnergyCalculator,
                 this.locationProvider,
                 this,
-                this.activityDetectorBroadcastReceiver,
-                this.activityDetectorSource,
-                this.locationAvailabilityChangedSource,
                 this.liveSessionController)
 
         return this.currentSession!!
@@ -160,8 +137,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         }
 
         this.currentSession?.destroy()
-
-        this.unregisterReceiver(this.locationAvailabilityChangedBroadcastReceiver)
 
         this.hasCurrentSessionChangedSubject.onComplete()
 

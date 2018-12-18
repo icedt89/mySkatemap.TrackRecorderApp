@@ -19,11 +19,13 @@ public interface IAppSettings : IDestroyable {
 
     var mapControlTypeName: String
 
-    var enableShowMyLocation: Boolean
+    var showMyLocation: Boolean
 
     var appUiLocale: String
 
     var vibrateOnLocationAvailabilityLoss: Boolean
 
     var defaultMetActivityCode: String
+
+    var keepScreenOn: Boolean
 }

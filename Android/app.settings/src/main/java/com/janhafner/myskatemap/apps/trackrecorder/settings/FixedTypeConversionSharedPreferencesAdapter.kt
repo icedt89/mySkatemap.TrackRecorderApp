@@ -21,7 +21,7 @@ public final class FixedTypeConversionSharedPreferencesAdapter(private val share
             return defValue
         }
 
-        return rawValue.toInt()
+        return rawValue.toIntOrNull() ?: return defValue
     }
 
     public override fun getAll(): MutableMap<String, *> {
@@ -38,7 +38,7 @@ public final class FixedTypeConversionSharedPreferencesAdapter(private val share
             return defValue
         }
 
-        return rawValue.toLong()
+        return rawValue.toLongOrNull() ?: defValue
     }
 
     public override fun getFloat(key: String?, defValue: Float): Float {
@@ -47,7 +47,7 @@ public final class FixedTypeConversionSharedPreferencesAdapter(private val share
             return defValue
         }
 
-        return rawValue.toFloat()
+        return rawValue.toFloatOrNull() ?: defValue
     }
 
     public override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? {

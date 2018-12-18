@@ -4,10 +4,11 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedExcepti
 import com.janhafner.myskatemap.apps.trackrecorder.common.aggregations.Aggregation
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 
-internal final class LocationsAggregation : ILocationsAggregation {
-    public override val speed: Aggregation = Aggregation()
 
-    public override val altitude: Aggregation = Aggregation()
+internal final class LocationsAggregation : ILocationsAggregation {
+    public override val speed = Aggregation()
+
+    public override val altitude = Aggregation()
 
     public override fun addAll(location: List<Location>) {
         if(this.isDestroyed) {

@@ -6,9 +6,9 @@ import com.janhafner.myskatemap.apps.trackrecorder.map.IMapFeatures
 public final class OpenStreetMapTrackRecorderMapFeatureInvestigator : IMapFeatureInvestigator {
     public override fun provideMapFeatures(): IMapFeatures {
         return object : IMapFeatures {
-            public override val providesNativeMyLocation: Boolean = false
+            public override val providesNativeMyLocation: Boolean = true
 
-            public override val canAddMarker: Boolean = false
+            public override val canAddMarker: Boolean = true
         }
     }
 }

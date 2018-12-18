@@ -3,11 +3,12 @@ package com.janhafner.myskatemap.apps.trackrecorder.common
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 import io.reactivex.Observable
 import org.joda.time.Seconds
+import java.util.concurrent.atomic.AtomicInteger
 
 public fun <Upstream> Observable<Upstream>.pairWithPrevious() : Observable<Pair<Upstream?, Upstream?>> {
-    return this.scan(Pair<Upstream?, Upstream?>(null, null), { t1, t2 ->
+    return this.scan(Pair<Upstream?, Upstream?>(null, null)) { t1, t2 ->
         Pair(t1.second, t2!!)
-    }).filter {
+    }.filter {
         // Filter seed [Pair(null, null)]
         it.second != null
     }
@@ -39,20 +40,26 @@ public fun Observable<Location>.calculateMissingSpeed(): Observable<Location> {
             }
 }
 
-// TODO: Remove if not used
-public fun <Upstream> Observable<List<Upstream>>.liveCount() : Observable<Int> {
-    var totalCount = 0
-
-    return this.map {
-        ++totalCount
-    }
+public fun Observable<Location>.inDistance(maximumDistanceInMeter: Float): Observable<Location> {
+    return this
+            .pairWithPrevious()
+            .filter {
+                if(it.first != null && it.second != null) {
+                    it.first!!.isInDistance(it.second!!, maximumDistanceInMeter)
+                } else {
+                    false
+                }
+            }
+            .map {
+                it.second
+            }
 }
 
 // TODO: Remove if not used
 public fun <Upstream> Observable<Upstream>.withCount() : Observable<Counted<Upstream>> {
-    var totalCount = 0
+    val totalCount = AtomicInteger()
 
     return this.map {
-        Counted(++totalCount, it)
+        Counted(totalCount.incrementAndGet(), it)
     }
 }

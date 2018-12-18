@@ -1,13 +1,14 @@
 package com.janhafner.myskatemap.apps.trackrecorder
 
 import com.janhafner.myskatemap.apps.trackrecorder.modules.ApplicationModule
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.BurnedEnergyDashboardTileFragmentPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DistanceDashboardTileFragmentPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.NumberOfLocationsDashboardTileFragmentPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.RecordingTimeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.AverageAltitudeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.CurrentAltitudeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.MaximumAltitudeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.MinimumAltitudeDashboardTileFragmentPresenter
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.burnedenergy.BurnedEnergyDashboardTileFragmentPresenter
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.distance.DistanceDashboardTileFragmentPresenter
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.recordingtime.RecordingTimeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.AverageSpeedDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.CurrentSpeedDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.MaximumSpeedDashboardTileFragmentPresenter
@@ -32,6 +33,8 @@ internal interface DashboardTileFragmentPresenterComponent {
     fun provideCurrentSpeedDashboardTileFragmentPresenter() : CurrentSpeedDashboardTileFragmentPresenter
 
     fun provideDistanceDashboardTileFragmentPresenter() : DistanceDashboardTileFragmentPresenter
+
+    fun provideNumberOfLocationsDashboardTileFragmentPresenter() : NumberOfLocationsDashboardTileFragmentPresenter
 
     fun provideRecordingTimeDashboardTileFragmentPresenter() : RecordingTimeDashboardTileFragmentPresenter
 

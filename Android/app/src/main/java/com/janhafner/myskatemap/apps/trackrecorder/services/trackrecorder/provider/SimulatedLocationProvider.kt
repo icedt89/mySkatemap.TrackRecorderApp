@@ -4,7 +4,7 @@ import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
 import com.janhafner.myskatemap.apps.trackrecorder.common.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.SimpleLocation
+import com.janhafner.myskatemap.apps.trackrecorder.map.MapLocation
 import org.joda.time.DateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -43,7 +43,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
         }
     }
 
-    private fun computeNextLocation(counter: Int, initialLocation: Location, offsetLatitude: Double, offsetLongitude: Double): SimpleLocation {
+    private fun computeNextLocation(counter: Int, initialLocation: Location, offsetLatitude: Double, offsetLongitude: Double): MapLocation {
         val previousCoordinates = genericCoordinates[counter - 1]
 
         var x = previousCoordinates.x
@@ -65,7 +65,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
         genericCoordinates.add(PointD(x, y))
 
-        return SimpleLocation(x + initialLocation.latitude, y + initialLocation.longitude)
+        return MapLocation(x + initialLocation.latitude, y + initialLocation.longitude)
     }
 
     private fun computeLocation(): Location {

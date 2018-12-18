@@ -11,7 +11,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
-        versionName "0.7"
+        versionName "0.8"
         resConfigs "en", "de"
     }
     buildTypes {
@@ -21,13 +21,16 @@ android {
             ext.enableCrashlytics = false
             ext.alwaysUpdateBuildId = false
 
+            buildConfigField 'String', 'APP_BACKEND_OAUTH2_CLIENTID', '"643337282862-qhd7j93t6nbj3agaih035f8nl44al7ak.apps.googleusercontent.com"'
+
             buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
-            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE_PAUSERESUME', 'false'
-            buildConfigField 'int', 'STILL_DETECTION_DETECTION_INTERVAL_IN_MILLISECONDS', '1000'
+            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE_PAUSERESUME', 'true'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '5000'
+            buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
 
             buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
-            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:/api"'
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:/api"' //10.0.2.2 is the ip of the host if executed in the emulator
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
@@ -35,17 +38,17 @@ android {
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
             buildConfigField 'double', 'MAP_INITIAL_ALTITUDE', '250.0'
 
-            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'true'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
-            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '100'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '250'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
             buildConfigField 'boolean', 'SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES', 'true'
 
-            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
             buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1000'
             buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '2500'
             buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '3500'
@@ -56,13 +59,16 @@ android {
 
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
+            buildConfigField 'String', 'APP_BACKEND_OAUTH2_CLIENTID', '"643337282862-qhd7j93t6nbj3agaih035f8nl44al7ak.apps.googleusercontent.com"'
+
             buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
-            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE_PAUSERESUME', 'false'
-            buildConfigField 'int', 'STILL_DETECTION_DETECTION_INTERVAL_IN_MILLISECONDS', '1000'
+            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE_PAUSERESUME', 'true'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '5000'
+            buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
 
             buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
-            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL',  '"http://localhost:555/api"'
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:/api"' //10.0.2.2 is the ip of the host if executed in the emulator
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
@@ -73,7 +79,7 @@ android {
             buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
-            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '1000'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '500'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
@@ -94,7 +100,6 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    // implementation "com.google.android.gms:play-services-auth:$playservices_version"
     implementation "androidx.core:core:$androidx_core_version"
     implementation "androidx.fragment:fragment:$androidx_fragment_version"
     implementation "androidx.constraintlayout:constraintlayout:$androidx_constraintlayout_version"
@@ -103,8 +108,11 @@ dependencies {
     implementation "androidx.gridlayout:gridlayout:$androidx_gridlayout_version"
     implementation "androidx.recyclerview:recyclerview:$androidx_recyclerview_version"
     implementation "androidx.preference:preference:$androidx_preference_version"
+    implementation 'com.takisoft.preferencex:preferencex:1.0.0'
 
+    // implementation "com.google.android.gms:play-services-fitness:16.0.1"
     implementation "com.google.android.gms:play-services-location:$playservices_version"
+    implementation "com.google.android.gms:play-services-auth:16.0.1"
     implementation "com.google.android.material:material:$android_material_version"
     implementation "com.google.dagger:dagger:$dagger_version"
     implementation "com.google.dagger:dagger-android:$dagger_android_version"
@@ -115,6 +123,7 @@ dependencies {
     implementation "com.couchbase.lite:couchbase-lite-android:$couchbase_lite_version"
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
+    implementation 'com.github.karczews:rx2-broadcast-receiver:1.0.5'
     implementation "net.danlew:android.joda:$joda_version"
     implementation "com.karumi:dexter:$dexter_version"
     implementation "com.squareup.moshi:moshi:$moshi_version"
@@ -130,10 +139,8 @@ dependencies {
     implementation project(':app.settings')
     implementation project(':app.services.couchdb')
     implementation project(':app.services')
-    implementation project(':app.locationavailability')
     implementation project(':app.distancecalculation')
     implementation project(':app.burnedenergy')
-    implementation project(':app.activitydetection')
     implementation project(':app.map')
     implementation project(':app.map.google')
     implementation project(':app.map.openstreetmap')

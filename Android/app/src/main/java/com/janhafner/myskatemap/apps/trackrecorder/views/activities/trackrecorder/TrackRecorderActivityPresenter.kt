@@ -4,36 +4,37 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.view.Menu
 import android.view.MenuItem
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.widget.checkedChanges
+import com.janhafner.myskatemap.apps.trackrecorder.*
+import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
-import com.janhafner.myskatemap.apps.trackrecorder.common.isLocationServicesEnabled
-import com.janhafner.myskatemap.apps.trackrecorder.common.pairWithPrevious
-import com.janhafner.myskatemap.apps.trackrecorder.common.startLocationServicesSettingsActivity
+import com.janhafner.myskatemap.apps.trackrecorder.common.*
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackingPausedReason
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.UserProfile
-import com.janhafner.myskatemap.apps.trackrecorder.getActivityName
-import com.janhafner.myskatemap.apps.trackrecorder.getInputMethodManager
-import com.janhafner.myskatemap.apps.trackrecorder.isValidForBurnedEnergyCalculation
-import com.janhafner.myskatemap.apps.trackrecorder.locationavailability.ILocationAvailabilityChangedSource
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
-import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackingPausedReason
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfileSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.about.AboutActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.appsettings.AppSettingsActivity
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.playground.PlaygroundActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist.TrackListActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.DashboardTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.DiscardRecordingAlertDialogBuilder
@@ -50,12 +51,12 @@ import kotlinx.android.synthetic.main.app_toolbar.*
 import kotlinx.android.synthetic.main.navigation_drawer_trackrecorder_activity_info.*
 
 
+
 internal final class TrackRecorderActivityPresenter(private val view: TrackRecorderActivity,
                                                     private val trackService: ITrackService,
                                                     private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                     private val appSettings: IAppSettings,
-                                                    private val userProfileSettings: IUserProfileSettings,
-                                                    private val locationAvailabilityChangedSource: ILocationAvailabilityChangedSource) : INeedFragmentVisibilityInfo {
+                                                    private val userProfileSettings: IUserProfileSettings) : INeedFragmentVisibilityInfo {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     private val clientSubscriptions: CompositeDisposable = CompositeDisposable()
@@ -74,6 +75,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
     private var discardTrackRecordingMenuItem: MenuItem? = null
 
+    private var identity: Identity = Identity.anonymous()
+
     init {
         this.view.setContentView(R.layout.activity_track_recorder)
 
@@ -89,12 +92,14 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                 TabDefinition(this.view.getString(R.string.trackrecorderactivity_tab_dashboard_title), {
                     DashboardTabFragment()
                 }, 0,
-                R.drawable.ic_dashboard_bright_24dp),
+                null),
+                // R.drawable.ic_dashboard_bright_24dp),
                 TabDefinition(this.view.getString(R.string.trackrecorderactivity_tab_map_title), {
                     //MapTabFragment()
                     MapTabFragment()
                 }, 1,
-                R.drawable.ic_map_bright_24dp)
+                // R.drawable.ic_map_bright_24dp)
+                null)
         )
         viewPager.adapter = TrackRecorderTabsAdapter(tabDefinitions, this.view.supportFragmentManager)
         viewPager.offscreenPageLimit = viewPager.adapter!!.count
@@ -157,6 +162,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
     private fun setupRightNavigationView() {
         this.view.navigation_drawer_trackrecorder_activity_info_auto_pause_on_still.isChecked = this.appSettings.enableAutoPauseOnStill
         this.view.navigation_drawer_trackrecorder_activity_info_live_location.isChecked = this.appSettings.enableLiveLocation
+        this.view.navigation_drawer_trackrecorder_activity_info_keep_screen_on.isChecked = this.appSettings.keepScreenOn
+        this.view.navigation_drawer_trackrecorder_activity_info_show_my_location.isChecked = this.appSettings.showMyLocation
 
         this.subscriptions.addAll(
             this.view.navigation_drawer_trackrecorder_activity_info_auto_pause_on_still.checkedChanges().subscribe{
@@ -165,6 +172,26 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
             this.view.navigation_drawer_trackrecorder_activity_info_live_location.checkedChanges().subscribe{
                 this.appSettings.enableLiveLocation = it
             },
+            this.view.navigation_drawer_trackrecorder_activity_info_keep_screen_on.checkedChanges().subscribe{
+                this.appSettings.keepScreenOn = it
+            },
+            this.view.navigation_drawer_trackrecorder_activity_info_show_my_location.checkedChanges().subscribe{
+                this.appSettings.showMyLocation = it
+            },
+            this.appSettings.propertyChanged
+                    .hasChanged()
+                    .isNamed(IAppSettings::keepScreenOn.name)
+                    .map {
+                        it.newValue as  Boolean
+                    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        if (it) {
+                            this@TrackRecorderActivityPresenter.view.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        } else {
+                            this@TrackRecorderActivityPresenter.view.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        }
+                    },
             this.appSettings.propertyChanged
                     .hasChanged()
                     .subscribe{
@@ -175,9 +202,19 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                             IAppSettings::enableLiveLocation.name -> {
                                 this.view.navigation_drawer_trackrecorder_activity_info_live_location.isChecked = it.newValue as Boolean
                             }
+                            IAppSettings::keepScreenOn.name -> {
+                                this.view.navigation_drawer_trackrecorder_activity_info_keep_screen_on.isChecked = it.newValue as Boolean
+                            }
+                            IAppSettings::showMyLocation.name -> {
+                                this.view.navigation_drawer_trackrecorder_activity_info_show_my_location.isChecked = it.newValue as Boolean
+                            }
                         }
                     }
         )
+
+        if(this.appSettings.keepScreenOn) {
+            this@TrackRecorderActivityPresenter.view.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     private fun showMenuItems(isVisible: Boolean) {
@@ -241,8 +278,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
                             if (currentState.state == TrackRecordingSessionState.Paused
                                     && currentState.pausedReason == TrackingPausedReason.LocationServicesUnavailable) {
-                                Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_SHORT).show()
-                                Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_locationservicesunavailable_paused, Toast.LENGTH_SHORT).show()
 
                                 this.buildAndShowLocationServicesDialog()
                             } else if(previousState != null) {
@@ -251,7 +287,11 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                         Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_running, Toast.LENGTH_SHORT).show()
                                     }
                                     TrackRecordingSessionState.Paused -> {
-                                        Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_SHORT).show()
+                                        if(currentState.pausedReason == TrackingPausedReason.StillStandDetected) {
+                                            Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_stillstand_paused, Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(this.view, R.string.trackrecorderactivity_toast_recording_paused, Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 }
                             }
@@ -285,13 +325,13 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
             this.sessionMenuSubscriptions.add(this.finishTrackRecordingMenuItem!!.clicks()
                     .subscribe {
                         val finishRecordingAlertDialogBuilder = FinishRecordingAlertDialogBuilder(this.view)
-                        finishRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label, { _, _ ->
+                        finishRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label) { _, _ ->
                             val trackRecording = this.trackRecorderSession!!.finishTracking()
                             this.trackService.saveTrackRecording(trackRecording)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe()
-                        })
+                        }
 
                         finishRecordingAlertDialogBuilder.show()
                     })
@@ -303,9 +343,9 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
             this.sessionMenuSubscriptions.add(this.discardTrackRecordingMenuItem!!.clicks()
                     .subscribe {
                         val discardRecordingAlertDialogBuilder = DiscardRecordingAlertDialogBuilder(this.view)
-                        discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label, { _, _ ->
+                        discardRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_discard_confirmation_button_yes_label) { _, _ ->
                             this.trackRecorderSession!!.discardTracking()
-                        })
+                        }
 
                         discardRecordingAlertDialogBuilder.show()
                     })
@@ -370,6 +410,9 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
     }
 
     public fun destroy() {
+        // IMPORTANT: Do not dispose the trackRecorderSubscription on destroy!
+        // Because this would terminate the current session and make a reinitialization
+        // after activity creation, with an ongoing session, impossible.
         this.uninitializeSession()
 
         this.sessionSubscriptions.dispose()
@@ -377,9 +420,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.clientSubscriptions.dispose()
         this.subscriptions.dispose()
 
-        // IMPORTANT: Do not dispose the trackRecorderSubscription on destroy!
-        // Because this would terminate the current session and make a reinitialization
-        // after activity creation, with an ongoing session, impossible.
+        this@TrackRecorderActivityPresenter.view.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     private fun buildAndShowLocationServicesDialog() {
@@ -405,7 +446,11 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                         } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_tracklist) {
                             this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, TrackListActivity::class.java))
                         } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_signin) {
-                            throw NotImplementedError()
+                            val googleSignInClient = this@TrackRecorderActivityPresenter.getGoogleSinInClient()
+
+                            this@TrackRecorderActivityPresenter.view.startActivityForResult(googleSignInClient.signInIntent, GOOGLE_SIGNIN_REQUEST_CODE)
+                        } else if(menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_playground) {
+                            this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, PlaygroundActivity::class.java))
                         }
 
                         this@TrackRecorderActivityPresenter.view.trackrecorderactivity_navigationdrawer.closeDrawers()
@@ -417,7 +462,9 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
     private fun setupMainFloatingActionButton() {
         this.subscriptions.addAll(
-                this.locationAvailabilityChangedSource.locationAvailable
+                LocationAvailability.changed(this.view)
+                        .subscribeOn(AndroidSchedulers.mainThread())
+                        .distinctUntilChanged()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe{
                     var iconId = R.drawable.ic_play_arrow_bright_24dp
@@ -478,5 +525,35 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
     }
 
     public override fun onFragmentVisibilityChange(fragment: Fragment, isVisibleToUser: Boolean) {
+    }
+
+    public fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == GOOGLE_SIGNIN_REQUEST_CODE) {
+            val completedTask = GoogleSignIn.getSignedInAccountFromIntent(data)
+
+            val account = completedTask.getResult(ApiException::class.java)
+
+            val displayName = account!!.displayName!!
+            val username = account.email!!
+            val accessToken = account.idToken!!
+
+            val googleIdentity = Identity(displayName, username, "Google")
+            googleIdentity.accessToken = accessToken
+
+            this.identity = googleIdentity
+        }
+    }
+
+    private fun getGoogleSinInClient(): GoogleSignInClient {
+        val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(BuildConfig.APP_BACKEND_OAUTH2_CLIENTID)
+                .build()
+
+        return GoogleSignIn.getClient(this.view, googleSignInOptions)
+    }
+
+    companion object {
+        public const val GOOGLE_SIGNIN_REQUEST_CODE: Int = 1
     }
 }

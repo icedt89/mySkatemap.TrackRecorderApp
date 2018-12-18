@@ -42,14 +42,14 @@ public final class TrackRecording (id: UUID = UUID.randomUUID()) {
         this.stateChangeEntries.add(stateChangeEntry)
     }
 
-    public fun pause() {
-        val stateChangeEntry = this.stateChangeEntries.last().pause()
+    public fun pause(pausedReason: TrackingPausedReason) {
+        val stateChangeEntry = this.stateChangeEntries.last().pause(pausedReason)
 
         this.stateChangeEntries.add(stateChangeEntry)
     }
 
-    public fun resume() {
-        val stateChangeEntry = this.stateChangeEntries.last().resume()
+    public fun resume(resumedReason: TrackingResumedReason) {
+        val stateChangeEntry = this.stateChangeEntries.last().resume(resumedReason)
 
         this.stateChangeEntries.add(stateChangeEntry)
     }
