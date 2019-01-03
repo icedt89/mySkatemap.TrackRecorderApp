@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.common
 
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import java.util.*
@@ -13,7 +12,7 @@ public final class ObservableTimeout(private val timeout: Long, private val time
     private var timerTask: TimerTask? = this.createTimerTask()
 
     private val timedOutSubject: Subject<Unit> = PublishSubject.create()
-    public override val timedOut: Observable<Unit> = this.timedOutSubject.subscribeOn(Schedulers.computation())
+    public override val timedOut: Observable<Unit> = this.timedOutSubject
 
     private fun createTimerTask(): TimerTask {
         return object: TimerTask() {

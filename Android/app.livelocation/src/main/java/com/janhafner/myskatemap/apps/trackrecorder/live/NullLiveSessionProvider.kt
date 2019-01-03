@@ -6,6 +6,7 @@ import java.util.*
 
 public final class NullLiveSessionProvider: ILiveSessionProvider {
     public override fun createSession(): Single<ILiveSession> {
+
         return Single.fromCallable {
             val sessionId = UUID.randomUUID().toString()
 

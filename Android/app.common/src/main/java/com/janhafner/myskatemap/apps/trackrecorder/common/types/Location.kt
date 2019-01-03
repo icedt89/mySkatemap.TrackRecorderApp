@@ -26,3 +26,4 @@ public final class Location {
 
     public var verticalAccuracyMeters: Float? = null
 }
+

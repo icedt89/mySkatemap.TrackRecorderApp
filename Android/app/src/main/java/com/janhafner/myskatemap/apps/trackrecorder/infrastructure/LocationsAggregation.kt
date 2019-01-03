@@ -1,63 +1,50 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
 import com.janhafner.myskatemap.apps.trackrecorder.common.aggregations.Aggregation
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 
+internal final class LocationsAggregation(values: Observable<Location>) : ILocationsAggregation {
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-internal final class LocationsAggregation : ILocationsAggregation {
-    public override val speed = Aggregation()
-
-    public override val altitude = Aggregation()
-
-    public override fun addAll(location: List<Location>) {
-        if(this.isDestroyed) {
-            throw ObjectDestroyedException()
+    public override val speed = Aggregation(values.map {
+        if(it.speed == null) {
+            0.0
+        } else {
+            it.speed!!.toDouble()
         }
+    })
 
-        this.speed.addAll(location.map {
-            if(it.speed == null) {
-                0.0f
-            } else {
-                it.speed!!
-            }
-        })
+    public override val altitude = Aggregation(values.map {
+        if(it.altitude == null) {
+            0.0
+        } else {
+            it.altitude!!
+        }
+    })
 
-        this.altitude.addAll(location.map {
-            if(it.altitude == null) {
-                0.0f
-            } else {
-                it.altitude!!.toFloat()
-            }
-        })
+    init {
+        this.altitude.minimumValueChanged.subscribe()
+        this.altitude.maximumValueChanged.subscribe()
+        this.altitude.averageValueChanged.subscribe()
+        this.altitude.firstValueChanged.subscribe()
+        this.altitude.latestValueChanged.subscribe()
+
+        this.speed.minimumValueChanged.subscribe()
+        this.speed.maximumValueChanged.subscribe()
+        this.speed.averageValueChanged.subscribe()
+        this.speed.firstValueChanged.subscribe()
+        this.speed.latestValueChanged.subscribe()
     }
 
-    public override fun add(location: Location) {
-        if(this.isDestroyed) {
-            throw ObjectDestroyedException()
-        }
-
-        if(location.speed == null) {
-            this.speed.add(0.0f)
-        } else {
-            this.speed.add(location.speed!!.toFloat())
-        }
-
-        if(location.altitude == null) {
-            this.altitude.add(0.0f)
-        } else {
-            this.altitude.add(location.altitude!!.toFloat())
-        }
-    }
-
-    private var isDestroyed: Boolean = false
+    private var isDestroyed = false
     public override fun destroy() {
-        if(this.isDestroyed) {
+        if(isDestroyed) {
             return
         }
 
-        this.altitude.destroy()
-        this.speed.destroy()
+        this.subscriptions.dispose()
 
         this.isDestroyed = true
     }

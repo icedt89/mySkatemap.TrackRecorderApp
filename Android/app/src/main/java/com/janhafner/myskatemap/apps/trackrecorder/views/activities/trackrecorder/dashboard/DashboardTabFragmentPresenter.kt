@@ -27,7 +27,6 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
     init {
         this.dashboardService.getCurrentDashboardOrDefault()
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.computation())
                 .map {
                     val topLeftFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(it.topLeftTileImplementationTypeName)
                     val topRightFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(it.topRightTileImplementationTypeName)
@@ -69,7 +68,7 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
 
                         val bottomLeftFragment = this.view.findChildFragmentById<DashboardTileFragment>(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_left)
                         bottomLeftFragment.presenter = dashboardResult.bottomLeftFragmentPresenter
-                        this.subscriptions.add(bottomLeftFragment.view!!.longClicks().subscribe{
+                        this.subscriptions.add(bottomLeftFragment.view!!.longClicks().subscribe {
                             this.changeTileFragmentPresenter(dashboardResult.dashboard, bottomLeftFragment, "bottomLeft")
                         })
 
@@ -135,6 +134,7 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
 
         if (newDashboardTileFragmentPresenter != null) {
             this.dashboardService.saveDashboard(dashboard)
+                    .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { _ ->
                         dashboardTileFragment.presenter = newDashboardTileFragmentPresenter

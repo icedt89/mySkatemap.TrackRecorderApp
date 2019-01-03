@@ -5,7 +5,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackServiceDataSource
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 
 public final class CouchDbTrackServiceDataSource(private val couchDbFactory: ICouchDbFactory) : ITrackServiceDataSource {
     public override fun getTrackRecordingByIdOrNull(id: String): io.reactivex.Single<Optional<TrackRecording>> {
@@ -24,7 +23,6 @@ public final class CouchDbTrackServiceDataSource(private val couchDbFactory: ICo
                 Optional(trackRecording)
             }
         }
-        .subscribeOn(Schedulers.io())
     }
 
     public override fun saveTrackRecording(trackRecording: TrackRecording): io.reactivex.Single<String> {
@@ -40,7 +38,6 @@ public final class CouchDbTrackServiceDataSource(private val couchDbFactory: ICo
 
             trackRecordingId
         }
-        .subscribeOn(Schedulers.io())
     }
 
     public override fun deleteTrackRecordingById(id: String): io.reactivex.Single<Unit> {
@@ -51,6 +48,5 @@ public final class CouchDbTrackServiceDataSource(private val couchDbFactory: ICo
                 it.delete(result)
             }
         }
-        .subscribeOn(Schedulers.io())
     }
 }

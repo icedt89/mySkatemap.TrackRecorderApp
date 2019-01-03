@@ -61,6 +61,11 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
             field = value
         }
 
+    public override var showPositions: Boolean = false
+        set(value) {
+            throw NotImplementedError()
+        }
+
     public override val providesNativeMyLocation: Boolean = false
 
     public override var myLocationActivated: Boolean = false

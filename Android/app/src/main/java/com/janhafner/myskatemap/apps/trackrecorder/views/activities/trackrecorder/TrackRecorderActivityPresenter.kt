@@ -31,7 +31,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.sessio
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfileSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.about.AboutActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.appsettings.AppSettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.playground.PlaygroundActivity
@@ -56,7 +55,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                                     private val trackService: ITrackService,
                                                     private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                     private val appSettings: IAppSettings,
-                                                    private val userProfileSettings: IUserProfileSettings) : INeedFragmentVisibilityInfo {
+                                                    private val userProfileSettings: IUserProfileSettings) {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     private val clientSubscriptions: CompositeDisposable = CompositeDisposable()
@@ -179,12 +178,12 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                 this.appSettings.showMyLocation = it
             },
             this.appSettings.propertyChanged
+                    .subscribeOn(Schedulers.computation())
                     .hasChanged()
                     .isNamed(IAppSettings::keepScreenOn.name)
                     .map {
                         it.newValue as  Boolean
                     }
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {
                         if (it) {
                             this@TrackRecorderActivityPresenter.view.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -193,7 +192,9 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                         }
                     },
             this.appSettings.propertyChanged
+                    .subscribeOn(Schedulers.computation())
                     .hasChanged()
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe{
                         when(it.propertyName) {
                             IAppSettings::enableAutoPauseOnStill.name -> {
@@ -245,6 +246,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
         this.sessionSubscriptions.addAll(
                 trackRecorderSession.stateChanged
+                        .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe{
                             var iconId = R.drawable.ic_play_arrow_bright_24dp
@@ -270,7 +272,9 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                 this.finishTrackRecordingMenuItem!!.isEnabled = it.state != TrackRecordingSessionState.Running
                             }
                         },
-                trackRecorderSession.stateChanged.pairWithPrevious()
+                trackRecorderSession.stateChanged
+                        .subscribeOn(Schedulers.computation())
+                        .pairWithPrevious()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe { pair ->
                             val previousState = pair.first
@@ -295,15 +299,18 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                     }
                                 }
                             }
-                        },
-                trackRecorderSession.sessionClosed
-                        .subscribe {
-                            this.uninitializeSession()
-
-                            this.clientSubscriptions.clear()
-                            this.trackRecorderSubscription!!.dispose()
                         }
         )
+
+        trackRecorderSession.sessionClosed
+                .subscribeOn(Schedulers.computation())
+                .singleElement()
+                .subscribe {
+                    this.uninitializeSession()
+
+                    this.clientSubscriptions.clear()
+                    this.trackRecorderSubscription!!.dispose()
+                }
 
         return trackRecorderSession
     }
@@ -329,7 +336,6 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                             val trackRecording = this.trackRecorderSession!!.finishTracking()
                             this.trackService.saveTrackRecording(trackRecording)
                                     .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe()
                         }
 
@@ -364,11 +370,13 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
         this.subscriptions.addAll(
                 this.trackRecorderServiceController.isClientBoundChanged
+                        .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             if (it) {
                                 this.clientSubscriptions.addAll(
                                         this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
+                                                .subscribeOn(Schedulers.computation())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe {
                                                     if (it) {
@@ -465,7 +473,6 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                 LocationAvailability.changed(this.view)
                         .subscribeOn(AndroidSchedulers.mainThread())
                         .distinctUntilChanged()
-                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe{
                     var iconId = R.drawable.ic_play_arrow_bright_24dp
                     if (!it) {
@@ -502,29 +509,29 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
     private fun startNewTrackRecording(): Disposable {
         this.trackRecorderServiceController
                 .isClientBoundChanged
+                .subscribeOn(Schedulers.computation())
                 .filter {
                     it
                 }
                 .first(false)
-                .subscribe { _ ->
+                .flatMapMaybe {
                     this.trackRecorderServiceController.currentBinder!!
                             .hasCurrentSessionChanged
-                            .filter {
-                                !it
-                            }
+                            .subscribeOn(Schedulers.computation())
                             .first(false)
-                            .subscribe { _ ->
-                                val binder = this.trackRecorderServiceController.currentBinder!!
-                                val newTrackRecording = this.createNewTrackRecording()
+                            .toMaybe()
+                }
+                .filter {
+                    !it
+                }
+                .subscribe {
+                    val binder = this.trackRecorderServiceController.currentBinder!!
+                    val newTrackRecording = this.createNewTrackRecording()
 
-                                binder.useTrackRecording(newTrackRecording)
-                            }
+                    binder.useTrackRecording(newTrackRecording)
                 }
 
         return this.trackRecorderServiceController.startAndBindService()
-    }
-
-    public override fun onFragmentVisibilityChange(fragment: Fragment, isVisibleToUser: Boolean) {
     }
 
     public fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

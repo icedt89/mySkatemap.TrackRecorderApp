@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 
 public open class ArrayRecyclerViewAdapter<T>(@LayoutRes private val itemLayoutId: Int)
@@ -21,10 +20,10 @@ public open class ArrayRecyclerViewAdapter<T>(@LayoutRes private val itemLayoutI
     public var filterRegex: String? = null
 
     protected val itemViewCreatedSubject: PublishSubject<ItemViewCreatedArgs<View, T>> = PublishSubject.create<ItemViewCreatedArgs<View, T>>()
-    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject.subscribeOn(Schedulers.computation())
+    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject
 
     private val arrayChangedSubject: PublishSubject<Unit> = PublishSubject.create()
-    public val arrayChanged: Observable<Unit> = this.arrayChangedSubject.subscribeOn(Schedulers.computation())
+    public val arrayChanged: Observable<Unit> = this.arrayChangedSubject
 
     init {
         this.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {

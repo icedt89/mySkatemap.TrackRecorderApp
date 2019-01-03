@@ -22,6 +22,8 @@ public abstract class TrackRecorderMapFragment : Fragment(), ITrackRecorderMap {
 
     public abstract override var gesturesEnabled: Boolean
 
+    public abstract override var showPositions: Boolean
+
     public abstract override val canAddMarker: Boolean
 
     public abstract override fun addMarker(location: MapLocation, title: String, @DrawableRes icon: Int?): MapMarkerToken

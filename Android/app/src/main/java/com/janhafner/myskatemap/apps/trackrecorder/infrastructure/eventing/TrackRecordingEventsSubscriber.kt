@@ -8,6 +8,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackInfo
 import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.IDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackQueryService
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 
 internal final class TrackRecordingEventsSubscriber(notifier: INotifier, trackQueryService: ITrackQueryService, distanceCalculator: IDistanceCalculator) : IDestroyable {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
@@ -15,6 +16,7 @@ internal final class TrackRecordingEventsSubscriber(notifier: INotifier, trackQu
     init {
         this.subscriptions.addAll(
             notifier.notifications
+                .subscribeOn(Schedulers.computation())
                 .ofType(TrackRecordingSavedEvent::class.java)
                 .map {
                     val trackInfo = TrackInfo()
@@ -29,6 +31,7 @@ internal final class TrackRecordingEventsSubscriber(notifier: INotifier, trackQu
                     // TODO: Implement error handling
                     trackQueryService.saveTrackInfo(it)
                 }
+                .retry(2)
                 .subscribe()
         )
     }

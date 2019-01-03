@@ -1,14 +1,18 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map
 
-import android.content.IntentFilter
-import android.location.LocationManager
 import android.view.View
-import com.github.karczews.rxbroadcastreceiver.RxBroadcastReceivers
 import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.view.visibility
-import com.janhafner.myskatemap.apps.trackrecorder.*
+import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
+import com.janhafner.myskatemap.apps.trackrecorder.LocationAvailability
+import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
+import com.janhafner.myskatemap.apps.trackrecorder.common.filterNotEmpty
 import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
 import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.LocationReceivedActivityStreamItem
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.MapActivityStreamItem
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.StartNewSegmentActivityStreamItem
 import com.janhafner.myskatemap.apps.trackrecorder.map.ITrackRecorderMap
 import com.janhafner.myskatemap.apps.trackrecorder.map.MapLocation
 import com.janhafner.myskatemap.apps.trackrecorder.map.OnTrackRecorderMapReadyCallback
@@ -21,7 +25,9 @@ import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_map_tab.*
+import java.util.concurrent.TimeUnit
 
 internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                                              private val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
@@ -54,6 +60,12 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     }
 
     public fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        if (isVisibleToUser) {
+            this.initialize()
+        } else {
+            this.uninitialize()
+        }
+
         if (this.view.activity is INeedFragmentVisibilityInfo) {
             (this.view.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.view, isVisibleToUser)
         }
@@ -62,34 +74,65 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
     private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
         // TODO: Rapid FAB: https://github.com/wangjiegulu/RapidFloatingActionButton
         this.sessionSubscriptions.addAll(
-                trackRecorderSession.locationsChanged
+                trackRecorderSession.mapActivityStream
+                        .subscribeOn(Schedulers.computation())
+                        .buffer(250, TimeUnit.MILLISECONDS, 500)
+                        .filterNotEmpty()
                         .map {
-                            listOf(it.toMapLocation())
+                            val result = mutableListOf<() -> Unit>()
+
+                            val items = mutableListOf<LocationReceivedActivityStreamItem>()
+                            for (item in it) {
+                                if (item is LocationReceivedActivityStreamItem) {
+                                    items.add(item)
+                                } else if (item is StartNewSegmentActivityStreamItem) {
+                                    if(!items.any()) {
+                                        continue
+                                    }
+
+                                    val closureItems = items.map {
+                                        MapLocation(it.latitude, it.longitude)
+                                    }
+                                    result.add {
+                                        this.trackRecorderMapFragment.addLocations(closureItems)
+                                    }
+
+                                    items.clear()
+
+                                    result.add {
+                                        this.trackRecorderMapFragment.beginNewTrackSegment()
+                                    }
+                                }
+                            }
+
+                            val closureItems = items.map {
+                                MapLocation(it.latitude, it.longitude)
+                            }
+                            result.add {
+                                this.trackRecorderMapFragment.addLocations(closureItems)
+                            }
+
+                            result
                         }
-                        // Buffering removed because it is not necessary in real world scenaries
-                        //.buffer(250, TimeUnit.MILLISECONDS, 250)
-                        //.filterNotEmpty()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
-                            this.trackRecorderMapFragment.addLocations(it)
-                        },
-                trackRecorderSession.stateChanged
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe{
-                            this.trackRecorderMapFragment.gesturesEnabled = it.state != TrackRecordingSessionState.Running
-                        },
-                trackRecorderSession.stateChanged
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe{
-                            if(it.state == TrackRecordingSessionState.Paused) {
-                                this.trackRecorderMapFragment.beginNewTrackSegment()
+                            for (action in it) {
+                                action()
                             }
 
                             this.trackRecorderMapFragment.focusTrack()
                         },
-                this.view.fragment_track_recorder_map_add_poi.clicks().subscribe {
-                    // TODO: Add POI TO CURRENT SESSION
-                }
+                trackRecorderSession.stateChanged
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            this.trackRecorderMapFragment.gesturesEnabled = it.state != TrackRecordingSessionState.Running
+                        },
+                this.view.fragment_track_recorder_map_add_poi.clicks()
+                        .subscribeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            // TODO: Add POI TO CURRENT SESSION
+                        }
         )
 
         return trackRecorderSession
@@ -109,51 +152,41 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
         trackRecorderMap.trackColor = this.view.context!!.getColor(R.color.accentColor)
 
         trackRecorderMap.zoomToLocation(MapLocation(BuildConfig.MAP_INITIAL_LATITUDE, BuildConfig.MAP_INITIAL_LONGITUDE), BuildConfig.MAP_INITIAL_ZOOM)
-
-        if(trackRecorderMap.providesNativeMyLocation) {
-            trackRecorderMap.myLocationActivated = this.appSettings.showMyLocation
-        }
     }
 
-    public fun destroy() {
-        this.uninitializeSession(false)
-
-        this.sessionSubscriptions.dispose()
-        this.fragmentSubscriptions.dispose()
-        this.clientSubscriptions.dispose()
-        this.subscriptions.dispose()
-    }
-
-    public fun onResume() {
+    private fun initialize() {
         this.subscriptions.addAll(
                 this.appSettings.propertyChanged
+                        .subscribeOn(Schedulers.computation())
                         .hasChanged()
                         .isNamed(IAppSettings::showMyLocation.name)
+                        .startWith(PropertyChangedData(IAppSettings::showMyLocation.name, null, this.trackRecorderMapFragment.providesNativeMyLocation && this.appSettings.showMyLocation))
                         .map {
-                            it.newValue as Boolean
+                            this.trackRecorderMapFragment.providesNativeMyLocation && it.newValue as Boolean
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe{
+                        .subscribe {
                             this.trackRecorderMapFragment.myLocationActivated = it
                         },
                 LocationAvailability.changed(this.view.context!!)
                         .subscribeOn(AndroidSchedulers.mainThread())
                         .distinctUntilChanged()
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe{
+                        .subscribe {
                             var visibility = View.VISIBLE
-                            if(!it) {
+                            if (!it) {
                                 visibility = View.GONE
                             }
 
                             this.view.fragment_track_recorder_map_add_poi.visibility = visibility
                         },
                 this.trackRecorderServiceController.isClientBoundChanged
+                        .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             if (it) {
                                 this.clientSubscriptions.addAll(
                                         this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
+                                                .subscribeOn(Schedulers.computation())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe {
                                                     if (it) {
@@ -165,6 +198,7 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                                                     }
                                                 },
                                         this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
+                                                .subscribeOn(Schedulers.computation())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe(this.view.fragment_track_recorder_map_add_poi.visibility())
                                 )
@@ -175,13 +209,9 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                             }
                         }
         )
-
-        if(this.trackRecorderMapFragment.providesNativeMyLocation) {
-            this.trackRecorderMapFragment.myLocationActivated = this.appSettings.showMyLocation
-        }
     }
 
-    public fun onPause() {
+    private fun uninitialize() {
         this.uninitializeSession(true)
 
         this.sessionSubscriptions.clear()

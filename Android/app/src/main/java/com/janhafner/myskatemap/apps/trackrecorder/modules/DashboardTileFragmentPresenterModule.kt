@@ -62,8 +62,8 @@ internal final class DashboardTileFragmentPresenterModule {
     }
 
     @Provides
-    public fun provideNumberOfLocationsDashboardTileFragmentPresenter(trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>): NumberOfLocationsDashboardTileFragmentPresenter {
-        return NumberOfLocationsDashboardTileFragmentPresenter(trackRecorderServiceController)
+    public fun provideNumberOfLocationsDashboardTileFragmentPresenter(context: Context, trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>): NumberOfLocationsDashboardTileFragmentPresenter {
+        return NumberOfLocationsDashboardTileFragmentPresenter(context, trackRecorderServiceController)
     }
 
     @Provides

@@ -21,6 +21,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.sessio
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import org.joda.time.Period
 
 
@@ -43,6 +44,7 @@ internal final class TrackRecorderServiceNotification(private val service: Servi
     init {
         this.subscriptions.addAll(
                 appSettings.propertyChanged
+                        .subscribeOn(Schedulers.computation())
                         .hasChanged()
                         .isNamed(IAppSettings::vibrateOnLocationAvailabilityLoss.name)
                         .subscribe{
@@ -83,18 +85,21 @@ internal final class TrackRecorderServiceNotification(private val service: Servi
     private fun subscribeToSession(trackRecorderSession: ITrackRecordingSession) {
         this.subscriptions.addAll(
                 trackRecorderSession.recordingTimeChanged
+                        .subscribeOn(Schedulers.computation())
                         .subscribe {
                             this.recordingTime = it
 
                             this.update()
                         },
                 trackRecorderSession.stateChanged
+                        .subscribeOn(Schedulers.computation())
                         .subscribe {
                             this.state = it
 
                             this.update()
                         },
                 trackRecorderSession.distanceChanged
+                        .subscribeOn(Schedulers.computation())
                         .subscribe {
                             this.distance = it
 

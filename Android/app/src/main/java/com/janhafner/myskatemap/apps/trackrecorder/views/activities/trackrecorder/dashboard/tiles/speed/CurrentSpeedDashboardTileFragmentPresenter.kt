@@ -19,7 +19,9 @@ internal final class CurrentSpeedDashboardTileFragmentPresenter(private val cont
     }
 
     protected override fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float> {
-        return trackRecorderSession.locationsAggregation.speed.lastValueChanged.map { it.toFloat() }
+        return trackRecorderSession.locationsAggregation.speed.latestValueChanged.map {
+            it.toFloat()
+        }
     }
 }
 

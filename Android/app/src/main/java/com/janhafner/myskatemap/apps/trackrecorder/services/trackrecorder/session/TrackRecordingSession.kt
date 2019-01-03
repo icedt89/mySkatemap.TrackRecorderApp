@@ -8,15 +8,12 @@ import com.janhafner.myskatemap.apps.trackrecorder.burnedenergy.IBurnedEnergyCal
 import com.janhafner.myskatemap.apps.trackrecorder.burnedenergy.MetDefinition
 import com.janhafner.myskatemap.apps.trackrecorder.burnedenergy.calculateBurnedEnergy
 import com.janhafner.myskatemap.apps.trackrecorder.common.*
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackingPausedReason
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackingResumedReason
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.*
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.IDistanceCalculator
 import com.janhafner.myskatemap.apps.trackrecorder.distancecalculation.calculateDistance
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.INewLocationsAggregation
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.NewLocationsAggregation
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggregation
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.LocationsAggregation
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.TimeoutTransformer
 import com.janhafner.myskatemap.apps.trackrecorder.live.LiveLocation
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ILiveSessionController
@@ -44,13 +41,16 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                            private val liveSessionController: ILiveSessionController) : ITrackRecordingSession {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    public override lateinit var locationsAggregation: INewLocationsAggregation
+    public override lateinit var locationsAggregation: ILocationsAggregation
 
     private val recordingTimeTimer: IObservableTimer = ObservableTimer()
 
     private val isStillObservableTimeout: IObservableTimeout
 
     public override lateinit var recordingTimeChanged: Observable<Period>
+        private set
+
+    public override lateinit var mapActivityStream: Observable<MapActivityStreamItem>
         private set
 
     public override lateinit var locationsChanged: Observable<Location>
@@ -69,10 +69,10 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         get() = this.trackRecording.activityCode
 
     private val sessionClosedSubject: Subject<ITrackRecordingSession> = PublishSubject.create()
-    public override val sessionClosed: Observable<ITrackRecordingSession> = this.sessionClosedSubject.subscribeOn(Schedulers.computation())
+    public override val sessionClosed: Observable<ITrackRecordingSession> = this.sessionClosedSubject
 
     private val stateChangedSubject: BehaviorSubject<SessionStateInfo> = BehaviorSubject.createDefault(SessionStateInfo(TrackRecordingSessionState.Paused))
-    public override val stateChanged: Observable<SessionStateInfo> = this.stateChangedSubject.subscribeOn(Schedulers.computation())
+    public override val stateChanged: Observable<SessionStateInfo> = this.stateChangedSubject
 
     public override val currentState: SessionStateInfo
         get() = this.stateChangedSubject.value!!
@@ -92,26 +92,41 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
             this.locationsChanged = locationsChanged.startWith(sortedLocations)
         }
 
-        this.locationsAggregation = NewLocationsAggregation(this.locationsChanged)
+        this.locationsAggregation = LocationsAggregation(this.locationsChanged)
 
         this.recordingTimeChanged = this.recordingTimeTimer.secondElapsed
         if (trackRecording.recordingTime != Period.ZERO && trackRecording.recordingTime.seconds > 0) {
             this.recordingTimeTimer.set(trackRecording.recordingTime.seconds)
         }
 
-        // Awesome: Because without .defer() all subscriptions would share
-        // the one transformer and results would be nonsense!
-        // .defer() gives each subscriptions a new one =)
-        this.distanceChanged = Observable.defer {
-            this.locationsChanged
-                    // Buffering removed because it is not necessary in real world scenaries
-                    //.buffer(250, TimeUnit.MILLISECONDS, 250)
-                    //.filterNotEmpty()
-                    .map {
-                        listOf(it)
-                    }
-                    .calculateDistance(this.distanceCalculator)
+        this.distanceChanged = this.locationsChanged.map {
+            listOf(it)
         }
+        .calculateDistance(this.distanceCalculator)
+        .replay(1)
+        .autoConnect()
+
+        val sessionActivityStream = trackRecording.locations.map {
+            LocationReceivedActivityStreamItem(it.capturedAt, it.latitude, it.longitude) as MapActivityStreamItem
+        }.toMutableList()
+        sessionActivityStream.addAll(trackRecording.stateChanges.map {
+            StartNewSegmentActivityStreamItem(it.at)
+        })
+        sessionActivityStream.sortBy {
+            it.at
+        }
+        this.mapActivityStream = Observable.fromIterable(sessionActivityStream)
+                .mergeWith(this.locationsChanged.map {
+                    LocationReceivedActivityStreamItem(it.capturedAt, it.latitude, it.longitude)
+                })
+                .mergeWith(this.stateChanged.filter{
+                    it.state == TrackRecordingSessionState.Paused && it.pausedReason != null
+                }.map {
+                    StartNewSegmentActivityStreamItem(DateTime.now())
+                })
+                .replay()
+                .autoConnect()
+        this.subscriptions.add(this.mapActivityStream.subscribe())
 
         this.isStillObservableTimeout = ObservableTimeout(BuildConfig.STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS.toLong())
         this.isStillChanged = this.locationsChanged
@@ -120,6 +135,21 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                 }
                 .compose(TimeoutTransformer(this.isStillObservableTimeout) { true })
 
+        /* TODO: ALG_#2
+        this.isStillChanged = this.locationsChanged
+                .map {
+                    false
+                }
+                .mergeWith(this.locationsChanged
+                        .debounce(BuildConfig.STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS.toLong(), TimeUnit.MILLISECONDS)
+                        .filter {
+                            this.currentState.state == TrackRecordingSessionState.Running
+                        }
+                        .map {
+                            true
+                        })
+        */
+
         this.initializeSession()
 
         this.trackRecorderServiceNotification = TrackRecorderServiceNotification(this.service, this.appSettings, this, this.distanceConverterFactory)
@@ -127,7 +157,9 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
     private fun initializeSession() {
         this.subscriptions.addAll(
-                this.isStillChanged.subscribe {
+                this.isStillChanged
+                        .subscribeOn(Schedulers.computation())
+                        .subscribe {
                     if (it) {
                         Log.i("STILLDETECTION", "User does'nt move!")
 
@@ -135,7 +167,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                             if (BuildConfig.STILL_DETECTION_ENABLE_PAUSERESUME) {
                                 this.pauseTrackingAndSetState(TrackingPausedReason.StillStandDetected, false)
 
-                                Log.i("STILLDETECTION", "Tracking was paused but location was keeped on!")
+                                Log.i("STILLDETECTION", "Tracking was paused but location was kept on!")
                             } else {
                                 Log.i("STILLDETECTION", "Tracking was NOT paused because feature is disabled!")
                             }
@@ -159,42 +191,61 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                     }
                 },
                 this.appSettings.propertyChanged
+                        .subscribeOn(Schedulers.computation())
                         .hasChanged()
+                        .isNamed(IAppSettings::enableLiveLocation.name)
+                        .startWith(PropertyChangedData(IAppSettings::enableLiveLocation.name, !this.appSettings.enableLiveLocation, this.appSettings.enableLiveLocation))
+                        .flatMap {
+                            if (this.appSettings.enableLiveLocation) {
+                                this.liveSessionController.startSession()
+                                        .onErrorReturn {  }
+                                        .toObservable()
+                            } else {
+                                this.liveSessionController.endSession()
+                                        .onErrorReturn {  }
+                                        .toObservable()
+                            }
+                        }
+                        .retry(3)
+                        .subscribe(),
+                this.appSettings.propertyChanged
+                        .subscribeOn(Schedulers.computation())
+                        .hasChanged()
+                        .isNamed(IAppSettings::enableAutoPauseOnStill.name)
                         .subscribe {
-                            if (it.propertyName == IAppSettings::enableAutoPauseOnStill.name) {
-                                if (this.appSettings.enableAutoPauseOnStill) {
-                                    this.tryStartAutoPauseTimeout()
-                                } else {
-                                    this.isStillObservableTimeout.stop()
-                                }
-                            } else if (it.propertyName == IAppSettings::enableLiveLocation.name) {
-                                if (this.appSettings.enableLiveLocation) {
-                                    this.liveSessionController.startSession()
-                                } else {
-                                    this.liveSessionController.endSession()
-                                }
+                            if (this.appSettings.enableAutoPauseOnStill) {
+                                this.tryStartAutoPauseTimeout()
+                            } else {
+                                this.isStillObservableTimeout.stop()
                             }
                         },
                 this.recordingTimeChanged
+                        .subscribeOn(Schedulers.computation())
                         .subscribe {
                             this.trackRecording.recordingTime = it
                         },
                 this.locationsChanged
+                        .subscribeOn(Schedulers.computation())
                         .subscribe {
-                            this.locationsAggregation.add(it)
-
                             this.trackRecording.addLocations(listOf(it))
                         },
                 this.locationsChanged
+                        .subscribeOn(Schedulers.computation())
                         .map {
                             LiveLocation(it.capturedAt, it.latitude, it.longitude)
                         }
-                        .buffer(1, TimeUnit.MINUTES, 20)
+                        .buffer(30, TimeUnit.SECONDS, 20)
                         .filterNotEmpty()
-                        .subscribe {
+                        .observeOn(Schedulers.io())
+                        .flatMap {
                             this.liveSessionController.sendLocations(it)
-                        },
+                                    .subscribeOn(Schedulers.io())
+                                    .onErrorReturn {  }
+                                    .toObservable()
+                        }
+                        .subscribe(),
                 this.stateChanged
+                        .subscribeOn(Schedulers.computation())
                         .subscribe {
                             if (it.state == TrackRecordingSessionState.Running) {
                                 this.tryStartAutoPauseTimeout()
@@ -221,10 +272,6 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
         this.initializeLocationAvailabilityChangedBroadcastReceiver()
         this.tryStartAutoPauseTimeout()
-
-        if (this.appSettings.enableLiveLocation) {
-            this.liveSessionController.startSession()
-        }
     }
 
     private fun initializeLocationAvailabilityChangedBroadcastReceiver() {
@@ -353,11 +400,14 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         }
 
         this.isStillObservableTimeout.destroy()
+        this.locationsAggregation.destroy()
         this.liveSessionController.endSession()
+                .subscribeOn(Schedulers.io())
+                .onErrorReturn {  }
+                .subscribe()
 
         this.trackRecorderServiceNotification.destroy()
 
-        this.locationsAggregation.destroy()
         this.recordingTimeTimer.destroy()
         this.locationProvider.destroy()
 

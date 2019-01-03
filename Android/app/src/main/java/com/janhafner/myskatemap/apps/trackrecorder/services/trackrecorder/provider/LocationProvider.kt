@@ -1,17 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 
 internal abstract class LocationProvider: ILocationProvider {
     private val locationReceivedSubject: Subject<Location> = PublishSubject.create<Location>()
-    public final override val locationsReceived: io.reactivex.Observable<Location> = this.locationReceivedSubject.subscribeOn(Schedulers.computation())
+    public final override val locationsReceived: io.reactivex.Observable<Location> = this.locationReceivedSubject
 
     private val activityChangedSubject: Subject<Boolean> = BehaviorSubject.createDefault(false)
-    public final override val activityChanged: io.reactivex.Observable<Boolean> = this.activityChangedSubject.subscribeOn(Schedulers.computation())
+    public final override val activityChanged: io.reactivex.Observable<Boolean> = this.activityChangedSubject
 
     public override var isActive: Boolean = false
         protected set(value) {

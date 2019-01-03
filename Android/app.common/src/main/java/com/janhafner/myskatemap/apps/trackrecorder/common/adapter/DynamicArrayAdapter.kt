@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.annotation.LayoutRes
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 
 public open class DynamicArrayAdapter<T>(context: Context, @LayoutRes private val itemLayoutId: Int)
@@ -18,7 +17,7 @@ public open class DynamicArrayAdapter<T>(context: Context, @LayoutRes private va
     protected val viewCache: MutableMap<Int, View> = ArrayMap<Int, View>()
 
     protected val itemViewCreatedSubject: PublishSubject<ItemViewCreatedArgs<View, T>> = PublishSubject.create<ItemViewCreatedArgs<View, T>>()
-    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject.subscribeOn(Schedulers.computation())
+    public val itemViewCreated: Observable<ItemViewCreatedArgs<View, T>> = this.itemViewCreatedSubject
 
     init {
         this.setNotifyOnChange(false)

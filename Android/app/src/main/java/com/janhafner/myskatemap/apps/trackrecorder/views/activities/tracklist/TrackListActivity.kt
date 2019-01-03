@@ -12,7 +12,7 @@ internal final class TrackListActivity: AppCompatActivity(){
     @Inject
     public lateinit var trackQueryService: ITrackQueryService
 
-    private var presenter: TrackListActivityPresenter? = null
+    private lateinit var presenter: TrackListActivityPresenter
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         this.getApplicationInjector().inject(this)
@@ -23,11 +23,11 @@ internal final class TrackListActivity: AppCompatActivity(){
     }
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return this.presenter!!.onOptionsItemSelected(item)
+        return this.presenter.onOptionsItemSelected(item)
     }
 
     public override fun onDestroy() {
-        this.presenter!!.destroy()
+        this.presenter.destroy()
 
         super.onDestroy()
     }

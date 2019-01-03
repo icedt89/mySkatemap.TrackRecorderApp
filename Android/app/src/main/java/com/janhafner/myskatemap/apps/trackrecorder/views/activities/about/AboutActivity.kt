@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 
 internal final class AboutActivity : AppCompatActivity() {
-    public var presenter: AboutActivityPresenter? = null
+    public lateinit var presenter: AboutActivityPresenter
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         this.getApplicationInjector().inject(this)
@@ -18,6 +18,6 @@ internal final class AboutActivity : AppCompatActivity() {
     public override fun onDestroy() {
         super.onDestroy()
 
-        this.presenter!!.destroy()
+        this.presenter.destroy()
     }
 }

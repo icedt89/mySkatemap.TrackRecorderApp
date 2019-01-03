@@ -110,6 +110,7 @@
     <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">min. Altitude</string>
     <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">Altitude</string>
     <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Duration</string>
+    <string name="dashboard_tile_numberoflocationsdashboardtilefragmentpresenter_tile">Locations</string>
 
     <string name="trackrecorderactivity_navigation_drawer_action_signin_label">Sign in</string>
     <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Settings</string>

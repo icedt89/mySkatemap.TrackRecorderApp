@@ -4,8 +4,8 @@ import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackQueryService
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_track_list.*
 import kotlinx.android.synthetic.main.app_toolbar.*
 
@@ -28,7 +28,7 @@ internal final class TrackListActivityPresenter(private val view: TrackListActiv
         this.view.tracklistactivity_recorded_tracks_list.adapter = adapter
 
         this.trackQueryService.getTrackRecordings()
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
                 .subscribe {
                     items ->
                         val items = items.map {

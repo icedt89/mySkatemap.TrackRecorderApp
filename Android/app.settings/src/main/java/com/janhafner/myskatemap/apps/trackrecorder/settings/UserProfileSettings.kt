@@ -5,12 +5,11 @@ import android.content.SharedPreferences
 import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Sex
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 
 public final class UserProfileSettings : IUserProfileSettings {
     private val propertyChangedSubject: PublishSubject<PropertyChangedData> = PublishSubject.create()
-    public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject.subscribeOn(Schedulers.computation())
+    public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject
 
     public override var name: String? = null
         set(value) {

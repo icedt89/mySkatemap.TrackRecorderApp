@@ -11,8 +11,9 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackR
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.FormattedDisplayValue
 import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
+import io.reactivex.functions.BiFunction
 
 internal abstract class SpeedDashboardTileFragmentPresenter(private val appSettings: IAppSettings,
                                                             trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
@@ -20,48 +21,35 @@ internal abstract class SpeedDashboardTileFragmentPresenter(private val appSetti
     : DashboardTileFragmentPresenter(trackRecorderServiceController) {
     private var speedConverter: ISpeedConverter
 
-    private var currentValue: Float = 0.0f
-
-    private val defaultValue: Float= 0.0f
-
     init {
         this.speedConverter = this.speedConverterFactory.createConverter()
     }
 
-    protected override fun createSubscriptions(trackRecorderSession: ITrackRecordingSession): List<Disposable> {
-        val result = ArrayList<Disposable>()
+    protected override fun getResetObservable(): Observable<FormattedDisplayValue> {
+        val result = this.speedConverter.convert(0.0f)
 
-        result.add(this.getValueSourceObservable(trackRecorderSession)
-                .doOnNext {
-                    this.currentValue = it
-                }
-                .mergeWith(this.appSettings.propertyChanged
+        return Observable.just(FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol()))
+    }
+
+    protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
+        return this.getValueSourceObservable(trackRecorderSession)
+                .startWith(0.0f)
+                .withLatestFrom(this.appSettings.propertyChanged
                         .hasChanged()
                         .isNamed(IAppSettings::speedConverterTypeName.name)
-                        .doOnNext {
-                            this.speedConverter = this.speedConverterFactory.createConverter()
-                        }
                         .map {
-                            this.currentValue
-                        })
-                .map {
-                    this.speedConverter.convert(it)
-                }
-                .subscribe{
-                    this.valueChangedSubject.onNext(it.value.roundWithTwoDecimals())
-                    this.unitChangedSubject.onNext(it.unit.getUnitSymbol())
-                })
+                            this.speedConverterFactory.createConverter()
+                        }
+                        .mergeWith(Observable.just(this.speedConverterFactory.createConverter())),
+                        BiFunction<Float, ISpeedConverter, FormattedDisplayValue> {
+                            value, converter ->
+                            val result = converter.convert(value)
 
-        return result
+                            FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol())
+                        })
+                .replay(1)
+                .autoConnect()
     }
 
     protected abstract fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float>
-
-    override fun resetView() {
-        val result = this.speedConverter.convert(this.defaultValue)
-
-        this.valueChangedSubject.onNext(result.value.roundWithTwoDecimals())
-        this.unitChangedSubject.onNext(result.unit.getUnitSymbol())
-    }
 }
-

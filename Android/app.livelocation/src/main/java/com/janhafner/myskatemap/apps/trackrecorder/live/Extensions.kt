@@ -7,7 +7,7 @@ import okhttp3.Response
 import java.io.IOException
 
 internal fun Call.toSingle(): Single<Response> {
-    return Single.fromPublisher{
+    return Single.fromPublisher {
         observer ->
         this.enqueue(object: Callback {
             public override fun onFailure(call: Call, e: IOException) {
@@ -15,9 +15,13 @@ internal fun Call.toSingle(): Single<Response> {
             }
 
             public override fun onResponse(call: Call, response: Response) {
-                observer.onNext(response)
+                if(response.isSuccessful) {
+                    observer.onNext(response)
 
-                observer.onComplete()
+                    observer.onComplete()
+                } else {
+                    observer.onError(Throwable(response.message()))
+                }
             }
         })
     }

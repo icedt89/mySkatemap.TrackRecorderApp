@@ -58,7 +58,7 @@
     <string name="userprofilesettings_preference_age_label">Dein Alter</string>
     <string name="userprofilesettings_preference_age_summary">Du bist %s Jahr(e) alt</string>
     <string name="userprofilesettings_preference_age_summary_empty">In Jahren</string>
-    <string name="userprofilesettings_preference_weight_label">Dein Gwicht</string>
+    <string name="userprofilesettings_preference_weight_label">Dein Gewicht</string>
     <string name="userprofilesettings_preference_weight_summary_empty">In Kilogramm</string>
     <string name="userprofilesettings_preference_weight_summary">Du wiegst %s Kilogramm</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_label">Automatisch pausieren [Exp.]</string>
@@ -93,6 +93,7 @@
     <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">min. Höhe</string>
     <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">Höhe</string>
     <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Dauer</string>
+    <string name="dashboard_tile_numberoflocationsdashboardtilefragmentpresenter_tile">Positionen</string>
 
     <string name="trackrecorderactivity_navigation_drawer_action_signin_label">Anmelden</string>
     <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Einstellungen</string>

@@ -11,22 +11,20 @@ public final class NullLiveSession(private val sessionId: String): ILiveSession 
     }
 
     public override fun postLocations(locations: List<LiveLocation>): Single<Unit> {
-        return Single.fromCallable {
-            if (this.currentSessionId != null) {
-                Log.d("NullLiveLocation", "Sending ${locations.count()} locations to the void")
-            }
-
-            Unit
-        }
+        return Single.just(Unit)
+                .doOnSubscribe {
+                    if (this.currentSessionId != null) {
+                        Log.d("NullLiveLocation", "Sending ${locations.count()} locations to the void")
+                    }
+                }
     }
 
     public override fun close(): Single<Unit> {
-        return Single.fromCallable {
-            Log.d("NullLiveLocation", "Closing session ${this.sessionId}")
+        return Single.just(Unit)
+                .doOnSubscribe {
+                    Log.d("NullLiveLocation", "Live session ${this.sessionId} closed")
 
-            this.currentSessionId = null
-
-            Unit
-        }
+                    this.currentSessionId = null
+                }
     }
 }

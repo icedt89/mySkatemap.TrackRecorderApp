@@ -1,6 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
 
-import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.common.IObservableTimeout
 import io.reactivex.Observable
 import io.reactivex.ObservableSource

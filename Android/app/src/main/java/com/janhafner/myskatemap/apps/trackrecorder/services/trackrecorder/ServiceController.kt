@@ -10,14 +10,13 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 
 internal final class ServiceController<TService, TBinder: IBinder>(private val context: Context,
                                                                    private val serviceClass: Class<TService>)
         : IServiceController<TBinder> {
     private val isClientBoundChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
-    public override val isClientBoundChanged: Observable<Boolean> = this.isClientBoundChangedSubject.subscribeOn(Schedulers.computation())
+    public override val isClientBoundChanged: Observable<Boolean> = this.isClientBoundChangedSubject
 
     public override val isClientBound: Boolean
         get() = this.isClientBoundChangedSubject.value!!

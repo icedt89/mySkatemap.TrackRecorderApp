@@ -12,7 +12,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import io.reactivex.disposables.Disposable
+import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 
 internal final class DistanceDashboardTileFragmentPresenter(private val context: Context,
                                                             private val appSettings: IAppSettings,
@@ -21,48 +22,36 @@ internal final class DistanceDashboardTileFragmentPresenter(private val context:
     : DashboardTileFragmentPresenter(trackRecorderServiceController) {
     private var distanceConverter: IDistanceConverter
 
-    private var currentValue: Float = 0.0f
-
-    private val defaultValue: Float= 0.0f
-
     init {
         this.distanceConverter = distanceConverterFactory.createConverter()
 
         this.title = this.context.getString(R.string.dashboard_tile_distancedashboardtilefragmentpresenter_tile)
     }
 
-    protected override fun createSubscriptions(trackRecorderSession: ITrackRecordingSession): List<Disposable> {
-        val result = ArrayList<Disposable>()
+    protected override fun getResetObservable(): Observable<FormattedDisplayValue> {
+        val result = this.distanceConverter.convert(0.0f)
 
-        result.add(trackRecorderSession.distanceChanged
-                .doOnNext{
-                    this.currentValue = it
-                }
-                .mergeWith(this.appSettings.propertyChanged
-                        .hasChanged()
-                        .isNamed(IAppSettings::distanceConverterTypeName.name)
-                        .doOnNext {
-                            this.distanceConverter = this.distanceConverterFactory.createConverter()
-                        }
-                        .map {
-                            this.currentValue
-                        })
-                .map {
-                    this.distanceConverter.convert(it)
-                }
-                .subscribe{
-                    this.valueChangedSubject.onNext(it.value.roundWithTwoDecimals())
-                    this.unitChangedSubject.onNext(it.unit.getUnitSymbol())
-                })
-
-        return result
+        return Observable.just(FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol()))
     }
 
-    protected override fun resetView() {
-        val result = this.distanceConverter.convert(this.defaultValue)
+    protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
+        return trackRecorderSession.distanceChanged
+                .startWith(0.0f)
+                .withLatestFrom(this.appSettings.propertyChanged
+                        .hasChanged()
+                        .isNamed(IAppSettings::distanceConverterTypeName.name)
+                        .map {
+                            this.distanceConverterFactory.createConverter()
+                        }
+                        .mergeWith(Observable.just(this.distanceConverterFactory.createConverter())),
+                        BiFunction<Float, IDistanceConverter, FormattedDisplayValue> {
+                            value, converter ->
+                            val result = converter.convert(value)
 
-        this.valueChangedSubject.onNext(result.value.roundWithTwoDecimals())
-        this.unitChangedSubject.onNext(result.unit.getUnitSymbol())
+                            FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol())
+                        })
+                .replay(1)
+                .autoConnect()
     }
 }
 

@@ -12,7 +12,7 @@ import java.util.*
 
 public final class AppSettings: IAppSettings {
     private val propertyChangedSubject: PublishSubject<PropertyChangedData> = PublishSubject.create()
-    public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject.subscribeOn(Schedulers.computation())
+    public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject
 
     public override var vibrateOnLocationAvailabilityLoss: Boolean = DEFAULT_VIBRATE_ON_LOCATION_AVAILABILITY_LOSS
         set(value) {
@@ -288,6 +288,7 @@ public final class AppSettings: IAppSettings {
 
             this.subscriptions.add(
                 this.propertyChanged
+                        .subscribeOn(Schedulers.computation())
                         .hasChanged()
                         .subscribe{
                             when(it.propertyName) {

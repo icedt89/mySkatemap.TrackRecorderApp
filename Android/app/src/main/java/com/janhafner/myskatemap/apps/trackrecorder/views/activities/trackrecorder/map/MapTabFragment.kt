@@ -35,9 +35,7 @@ internal final class MapTabFragment: Fragment() {
     public override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
 
-        if(this.presenter != null) {
-            this.presenter!!.setUserVisibleHint(isVisibleToUser)
-        }
+        this.presenter?.setUserVisibleHint(isVisibleToUser)
     }
 
     public override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,23 +54,9 @@ internal final class MapTabFragment: Fragment() {
         }
     }
 
-    public override fun onResume() {
-        super.onResume()
+    public override fun onDestroy() {
+        super.onDestroy()
 
-        if(this.presenter != null) {
-            this.presenter!!.onResume()
-        }
-    }
-
-    public override fun onPause() {
-        super.onPause()
-
-        this.presenter!!.onPause()
-    }
-
-    public override fun onDestroyView() {
-        this.presenter!!.destroy()
-
-        super.onDestroyView()
+        this.presenter?.setUserVisibleHint(false)
     }
 }

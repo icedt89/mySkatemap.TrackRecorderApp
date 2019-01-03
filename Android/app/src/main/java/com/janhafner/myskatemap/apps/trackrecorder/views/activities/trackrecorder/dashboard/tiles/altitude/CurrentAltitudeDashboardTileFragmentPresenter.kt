@@ -19,7 +19,9 @@ internal final class CurrentAltitudeDashboardTileFragmentPresenter(private val c
     }
 
     protected override fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float> {
-        return trackRecorderSession.locationsAggregation.altitude.lastValueChanged.map { it.toFloat() }
+        return trackRecorderSession.locationsAggregation.altitude.latestValueChanged.map {
+            it.toFloat()
+        }
     }
 }
 

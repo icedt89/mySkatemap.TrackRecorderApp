@@ -5,7 +5,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.IDashboardServiceDataSource
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 
 public final class CouchDbDashboardServiceDataSource(private val couchDbFactory: ICouchDbFactory) : IDashboardServiceDataSource {
     public override fun getDashboardByIdOrNull(id: String): Single<Optional<Dashboard>> {
@@ -24,7 +23,6 @@ public final class CouchDbDashboardServiceDataSource(private val couchDbFactory:
                 Optional(trackRecording)
             }
         }
-        .subscribeOn(Schedulers.io())
     }
 
     public override fun saveDashboard(dashboard: Dashboard): Single<String> {
@@ -40,6 +38,5 @@ public final class CouchDbDashboardServiceDataSource(private val couchDbFactory:
 
             dashboardId
         }
-        .subscribeOn(Schedulers.io())
     }
 }

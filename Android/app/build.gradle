@@ -25,8 +25,8 @@ android {
 
             buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
             buildConfigField 'boolean', 'STILL_DETECTION_ENABLE_PAUSERESUME', 'true'
-            buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '5000'
-            buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '6500'
+            buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
 
             buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
@@ -38,20 +38,20 @@ android {
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
             buildConfigField 'double', 'MAP_INITIAL_ALTITUDE', '250.0'
 
-            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'true'
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
-            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '250'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '125'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
             buildConfigField 'boolean', 'SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES', 'true'
 
-            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1000'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '2500'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '3500'
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '3000'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '4000'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '5000'
         }
         release {
             minifyEnabled true
@@ -63,8 +63,8 @@ android {
 
             buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
             buildConfigField 'boolean', 'STILL_DETECTION_ENABLE_PAUSERESUME', 'true'
-            buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '5000'
-            buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '6500'
+            buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
 
             buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
@@ -86,10 +86,10 @@ android {
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
             buildConfigField 'boolean', 'SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES', 'true'
 
-            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1000'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '2500'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '3500'
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '3000'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '4000'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '5000'
         }
     }
     buildToolsVersion '28.0.3'

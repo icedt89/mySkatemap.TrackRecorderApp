@@ -1,24 +1,15 @@
 package com.janhafner.myskatemap.apps.trackrecorder.common.aggregations
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
 import io.reactivex.Observable
 
-public interface IAggregation
-    // DEPRECATED
-    : IDestroyable {
-    val minimumValueChanged: Observable<Float>
+public interface IAggregation<TValue: Number> {
+    val minimumValueChanged: Observable<TValue>
 
-    val maximumValueChanged: Observable<Float>
+    val maximumValueChanged: Observable<TValue>
 
-    val averageValueChanged: Observable<Float>
+    val averageValueChanged: Observable<TValue>
 
-    val firstValueChanged: Observable<Float>
+    val firstValueChanged: Observable<TValue>
 
-    val lastValueChanged: Observable<Float>
-
-    @Deprecated("")
-    fun addAll(values: List<Float>)
-
-    @Deprecated("")
-    fun add(value: Float)
+    val latestValueChanged: Observable<TValue>
 }

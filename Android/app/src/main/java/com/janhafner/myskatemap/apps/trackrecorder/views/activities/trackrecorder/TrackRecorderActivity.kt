@@ -1,13 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
 
 import android.content.Intent
-import android.content.IntentFilter
-import android.location.LocationManager.PROVIDERS_CHANGED_ACTION
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.eventing.TrackRecordingEventsSubscriber
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
@@ -15,11 +12,10 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfileSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import javax.inject.Inject
 
 
-internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVisibilityInfo {
+internal final class TrackRecorderActivity: AppCompatActivity() {
     @Inject
     public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
@@ -36,10 +32,6 @@ internal final class TrackRecorderActivity: AppCompatActivity(), INeedFragmentVi
     public lateinit var trackRecordingEventsSubscriber: TrackRecordingEventsSubscriber
 
     private var presenter: TrackRecorderActivityPresenter? = null
-
-    public override fun onFragmentVisibilityChange(fragment: Fragment, isVisibleToUser: Boolean) {
-        this.presenter?.onFragmentVisibilityChange(fragment, isVisibleToUser)
-    }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         this.getApplicationInjector().inject(this)

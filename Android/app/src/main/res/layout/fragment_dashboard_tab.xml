@@ -15,6 +15,8 @@
         app:layout_columnWeight="1"
         app:layout_row="0"
         app:layout_rowWeight="1"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
         tools:layout="@layout/fragment_dashboard_tile_default" />
 
     <fragment
@@ -24,6 +26,8 @@
         app:layout_columnWeight="1"
         app:layout_row="0"
         app:layout_rowWeight="1"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
         tools:layout="@layout/fragment_dashboard_tile_default" />
 
     <fragment
@@ -35,6 +39,8 @@
         app:layout_row="1"
         app:layout_rowWeight="1"
         android:layout_marginTop="10dp"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
         tools:layout="@layout/fragment_dashboard_tile_main" />
 
     <fragment
@@ -44,7 +50,9 @@
         app:layout_columnWeight="1"
         app:layout_row="2"
         app:layout_rowWeight="1"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="25dp"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
         tools:layout="@layout/fragment_dashboard_tile_default" />
 
     <fragment
@@ -54,6 +62,8 @@
         app:layout_columnWeight="1"
         app:layout_row="2"
         app:layout_rowWeight="1"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="25dp"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
         tools:layout="@layout/fragment_dashboard_tile_default" />
 </androidx.gridlayout.widget.GridLayout>

@@ -31,6 +31,8 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
 
     private lateinit var map: GoogleMap
 
+    private val positionCircles = mutableListOf<Circle>()
+
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_google_track_recorder_map, container, false)
     }
@@ -54,6 +56,15 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
             callback.onMapReady(this)
         }
     }
+
+    public override var showPositions: Boolean = false
+        set(value) {
+            for (positionCircle in this.positionCircles) {
+                positionCircle.isVisible = value
+            }
+
+            field = value
+        }
 
     public override val providesNativeMyLocation: Boolean = true
 
@@ -115,6 +126,23 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         }
 
         this.trackSegmentCollection.addLocations(locations)
+
+        val positionCircles = locations.map {
+            this.addPositionCircle(it)
+        }
+        this.positionCircles.addAll(positionCircles)
+    }
+
+    private fun addPositionCircle(mapLocation: MapLocation): Circle {
+        val circleOptions = CircleOptions()
+        circleOptions.center(LatLng(mapLocation.latitude, mapLocation.longitude))
+        circleOptions.fillColor(this.trackColor)
+        circleOptions.radius(1.0)
+        circleOptions.strokeColor(Color.RED)
+        circleOptions.strokeWidth(2.0f)
+        circleOptions.visible(this.showPositions)
+
+        return this.map.addCircle(circleOptions)
     }
 
     public override fun beginNewTrackSegment() {
@@ -124,7 +152,9 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
     }
 
     public override fun clearTrack() {
+        this.positionCircles.clear()
         this.trackSegmentCollection.clear()
+        this.map.clear()
 
         this.focusTrack()
     }

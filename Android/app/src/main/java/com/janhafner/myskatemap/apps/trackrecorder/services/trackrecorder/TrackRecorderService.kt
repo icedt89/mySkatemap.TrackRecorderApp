@@ -61,6 +61,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         private set(value) {
             if(value != null && value != field) {
                 this.sessionSubscription = value.sessionClosed
+                        .subscribeOn(Schedulers.computation())
                         .subscribe {
                             this.currentSession = null
                         }
@@ -77,7 +78,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
         }
 
     private val hasCurrentSessionChangedSubject: Subject<Boolean> = BehaviorSubject.createDefault(false)
-    public override val hasCurrentSessionChanged: Observable<Boolean> = this.hasCurrentSessionChangedSubject.subscribeOn(Schedulers.computation())
+    public override val hasCurrentSessionChanged: Observable<Boolean> = this.hasCurrentSessionChangedSubject
 
     public override fun useTrackRecording(trackRecording: TrackRecording): ITrackRecordingSession {
         if (this.currentSession != null) {

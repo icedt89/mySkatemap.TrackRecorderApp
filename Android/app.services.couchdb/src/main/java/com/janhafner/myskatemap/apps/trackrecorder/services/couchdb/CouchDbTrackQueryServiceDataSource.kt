@@ -5,7 +5,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackInfo
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.GetTracksQuery
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackQueryServiceDataSource
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 public final class CouchDbTrackQueryServiceDataSource(private val couchDbFactory: ICouchDbFactory) : ITrackQueryServiceDataSource {
@@ -32,7 +31,6 @@ public final class CouchDbTrackQueryServiceDataSource(private val couchDbFactory
 
             trackRecordings as List<TrackInfo>
         }
-        .subscribeOn(Schedulers.io())
     }
 
     public override fun saveTrackInfo(trackInfo: TrackInfo): Single<String> {
@@ -48,6 +46,5 @@ public final class CouchDbTrackQueryServiceDataSource(private val couchDbFactory
 
             trackRecordingId
         }
-        .subscribeOn(Schedulers.io())
     }
 }

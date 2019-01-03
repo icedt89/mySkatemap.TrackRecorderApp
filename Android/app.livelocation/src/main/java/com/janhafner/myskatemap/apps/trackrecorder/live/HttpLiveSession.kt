@@ -6,7 +6,7 @@ import io.reactivex.Single
 public final class HttpLiveSession(private val httpLiveSessionApiClient: HttpLiveSessionApiClient, private val sessionId: String, private val moshi: Moshi): ILiveSession {
     public override fun close(): Single<Unit> {
         return this.httpLiveSessionApiClient.delete(this.sessionId)
-                .map {  }
+                .map { }
     }
 
     public override fun postLocations(locations: List<LiveLocation>): Single<Unit> {

@@ -15,6 +15,8 @@ public interface ITrackRecorderMap {
 
     var gesturesEnabled: Boolean
 
+    var showPositions: Boolean
+
     fun addLocations(locations: List<MapLocation>)
 
     fun beginNewTrackSegment()

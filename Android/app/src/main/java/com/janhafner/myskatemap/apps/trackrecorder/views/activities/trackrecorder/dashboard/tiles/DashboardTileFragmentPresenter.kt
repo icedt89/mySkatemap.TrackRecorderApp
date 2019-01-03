@@ -1,16 +1,17 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
+import com.jakewharton.rxbinding2.widget.text
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
+import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.*
 
-internal abstract class DashboardTileFragmentPresenter(protected val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>) {
+internal abstract class DashboardTileFragmentPresenter(
+        protected val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>) {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     private val clientSubscriptions: CompositeDisposable = CompositeDisposable()
@@ -19,35 +20,56 @@ internal abstract class DashboardTileFragmentPresenter(protected val trackRecord
 
     private var trackRecorderSession: ITrackRecordingSession? = null
 
+    protected var dashboardTileFragment: DashboardTileFragment? = null
+
     public var title: String = ""
         protected set
 
-    protected val valueChangedSubject: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    public val valueChanged: Observable<String> = this.valueChangedSubject.subscribeOn(Schedulers.computation())
+    public var formattedValueChanged: Observable<FormattedDisplayValue> = Observable.empty()
+        protected set
 
-    protected val unitChangedSubject: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    public val unitChanged: Observable<String> = this.unitChangedSubject.subscribeOn(Schedulers.computation())
-
-    private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
-        val subscriptions = this.createSubscriptions(trackRecorderSession)
-        for (subscription in subscriptions) {
-            this.sessionSubscriptions.addAll(subscription)
-        }
-
-        return trackRecorderSession
+    private fun subscribe(dashboardTileFragment: DashboardTileFragment, source: Observable<FormattedDisplayValue>) {
+        this.sessionSubscriptions.addAll(
+                source.map {
+                    it.value
+                }
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(dashboardTileFragment.fragment_dashboard_tile_value.text()),
+                source.map {
+                    it.unit
+                }
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(dashboardTileFragment.fragment_dashboard_tile_unit.text())
+        )
     }
-
-    protected abstract fun createSubscriptions(trackRecorderSession: ITrackRecordingSession): List<Disposable>
 
     private fun uninitializeSession() {
         this.sessionSubscriptions.clear()
 
         this.trackRecorderSession = null
 
-        this.resetView()
+        this.reset()
     }
 
-    protected abstract fun resetView()
+    protected abstract fun getResetObservable(): Observable<FormattedDisplayValue>
+
+    private fun reset() {
+        val observable = this.getResetObservable()
+
+        this.subscribe(this.dashboardTileFragment!!, observable)
+    }
+
+    protected abstract fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue>
+
+    private fun getInitializedSession(trackRecorderSession: ITrackRecordingSession): ITrackRecordingSession {
+        val observable = this.getSessionBoundObservable(trackRecorderSession)
+
+        this.subscribe(this.dashboardTileFragment!!, observable)
+
+        return trackRecorderSession
+    }
 
     public fun onPause() {
         this.uninitializeSession()
@@ -56,17 +78,25 @@ internal abstract class DashboardTileFragmentPresenter(protected val trackRecord
         this.subscriptions.clear()
     }
 
-    public fun onResume() {
+    public fun onResume(dashboardTileFragment: DashboardTileFragment) {
+        this.subscriptions.clear()
+
+        this.dashboardTileFragment = dashboardTileFragment
+
+        dashboardTileFragment.fragment_dashboard_tile_title.text = this.title
+
+        this.reset()
+
         this.subscriptions.addAll(
                 this.trackRecorderServiceController.isClientBoundChanged
-                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.computation())
                         .subscribe {
                             if (it) {
                                 this.clientSubscriptions.addAll(
                                         this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
-                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribeOn(Schedulers.computation())
                                                 .subscribe {
-                                                    if (it) {
+                                                    if (it && this.dashboardTileFragment != null) {
                                                         this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
                                                     } else {
                                                         this.uninitializeSession()
@@ -82,9 +112,6 @@ internal abstract class DashboardTileFragmentPresenter(protected val trackRecord
 
     public fun destroy() {
         this.uninitializeSession()
-
-        this.unitChangedSubject.onComplete()
-        this.valueChangedSubject.onComplete()
 
         this.sessionSubscriptions.dispose()
         this.clientSubscriptions.dispose()

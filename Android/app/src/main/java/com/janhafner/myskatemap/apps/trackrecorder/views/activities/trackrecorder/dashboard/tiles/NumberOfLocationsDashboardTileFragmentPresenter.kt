@@ -1,37 +1,32 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
+import android.content.Context
+import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.common.withCount
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
-import io.reactivex.disposables.Disposable
+import io.reactivex.Observable
 
-internal final class NumberOfLocationsDashboardTileFragmentPresenter(trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>)
+internal final class NumberOfLocationsDashboardTileFragmentPresenter(private val context: Context,
+                                                                     trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>)
     : DashboardTileFragmentPresenter(trackRecorderServiceController) {
-    private val defaultValue: Int= 0
-
     init {
-        this.title = "Locations"
-
-        this.unitChangedSubject.onNext("#")
+        this.title = this.context.getString(R.string.dashboard_tile_numberoflocationsdashboardtilefragmentpresenter_tile)
     }
 
-    protected override fun createSubscriptions(trackRecorderSession: ITrackRecordingSession): List<Disposable> {
-        val result = ArrayList<Disposable>()
+    protected override fun getResetObservable(): Observable<FormattedDisplayValue> {
+        return Observable.just(FormattedDisplayValue("0", "#"))
+    }
 
-        result.add(trackRecorderSession.locationsChanged
+    protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
+        return trackRecorderSession.locationsChanged
+                .startWith(com.janhafner.myskatemap.apps.trackrecorder.common.types.Location())
                 .withCount()
                 .map {
-                    it.count
+                    FormattedDisplayValue(it.count.toString(), "#")
                 }
-                .subscribe{
-                    this.valueChangedSubject.onNext(it.toString())
-                })
-
-        return result
-    }
-
-    protected override fun resetView() {
-        this.valueChangedSubject.onNext(this.defaultValue.toString())
+                .replay(1)
+                .autoConnect()
     }
 }

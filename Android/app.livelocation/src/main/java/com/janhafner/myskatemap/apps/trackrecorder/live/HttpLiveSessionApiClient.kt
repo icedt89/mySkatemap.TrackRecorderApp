@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.live
 
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import okhttp3.*
 
 public final class HttpLiveSessionApiClient(private val httpClient: OkHttpClient, private val baseUrl: String) {
@@ -17,7 +16,7 @@ public final class HttpLiveSessionApiClient(private val httpClient: OkHttpClient
 
         val call = this.httpClient.newCall(request)
 
-        return call.toSingle().subscribeOn(Schedulers.io())
+        return call.toSingle()
     }
 
     public fun put(sessionId: String, body: String): Single<Response> {
@@ -30,7 +29,7 @@ public final class HttpLiveSessionApiClient(private val httpClient: OkHttpClient
 
         val call = this.httpClient.newCall(request)
 
-        return call.toSingle().subscribeOn(Schedulers.io())
+        return call.toSingle()
     }
 
     public fun delete(sessionId: String): Single<Response> {
@@ -41,6 +40,6 @@ public final class HttpLiveSessionApiClient(private val httpClient: OkHttpClient
 
         val call = this.httpClient.newCall(request)
 
-        return call.toSingle().subscribeOn(Schedulers.io())
+        return call.toSingle()
     }
 }

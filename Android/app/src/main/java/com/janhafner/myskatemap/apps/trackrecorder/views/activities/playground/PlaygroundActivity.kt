@@ -11,7 +11,7 @@ internal final class PlaygroundActivity : AppCompatActivity() {
     @Inject
     public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
-    private var presenter: PlaygroundActivityPresenter? = null
+    private lateinit var presenter: PlaygroundActivityPresenter
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         this.getApplicationInjector().inject(this)
@@ -22,7 +22,7 @@ internal final class PlaygroundActivity : AppCompatActivity() {
     }
 
     public override fun onDestroy() {
-        this.presenter!!.destroy()
+        this.presenter.destroy()
 
         super.onDestroy()
     }
