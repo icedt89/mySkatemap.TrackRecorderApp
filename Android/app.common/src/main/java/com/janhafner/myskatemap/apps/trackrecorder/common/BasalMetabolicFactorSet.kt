@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.burnedenergy
+package com.janhafner.myskatemap.apps.trackrecorder.common
 
 internal final class BasalMetabolicFactorSet(public val factor1: Float,
                                              public val factor2: Float,

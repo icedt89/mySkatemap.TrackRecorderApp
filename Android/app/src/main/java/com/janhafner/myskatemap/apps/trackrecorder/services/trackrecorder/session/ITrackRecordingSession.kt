@@ -2,7 +2,6 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.sessi
 
 import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.MapActivityStreamItem
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggregation
 import io.reactivex.Observable
@@ -18,17 +17,11 @@ internal interface ITrackRecordingSession : IDestroyable {
 
     val burnedEnergyChanged: Observable<Float>
 
-    val isStillChanged: Observable<Boolean>
-
     val activityCode: String
 
     val stateChanged: Observable<SessionStateInfo>
 
     val currentState: SessionStateInfo
-
-    val sessionClosed: Observable<ITrackRecordingSession>
-
-    val mapActivityStream: Observable<MapActivityStreamItem>
 
     val trackingStartedAt: DateTime
 

@@ -1,1 +1,1 @@
-include ':app', ':app.conversion', ':app.common', ':app.export',':app.services.couchdb', ':app.settings', ':app.services', ':app.distancecalculation', ':app.burnedenergy', ':app.map', ':app.map.google', ':app.map.openstreetmap', ':app.livelocation'
+include ':app', ':app.conversion', ':app.common', ':app.export',':app.services.couchdb', ':app.settings', ':app.services', ':app.map', ':app.map.google', ':app.map.openstreetmap', ':app.livelocation'

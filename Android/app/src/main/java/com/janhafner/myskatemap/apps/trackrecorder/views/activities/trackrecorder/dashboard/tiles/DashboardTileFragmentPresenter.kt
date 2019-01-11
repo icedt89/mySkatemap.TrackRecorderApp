@@ -14,8 +14,6 @@ internal abstract class DashboardTileFragmentPresenter(
         protected val trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>) {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
-    private val clientSubscriptions: CompositeDisposable = CompositeDisposable()
-
     private val sessionSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private var trackRecorderSession: ITrackRecordingSession? = null
@@ -49,8 +47,6 @@ internal abstract class DashboardTileFragmentPresenter(
         this.sessionSubscriptions.clear()
 
         this.trackRecorderSession = null
-
-        this.reset()
     }
 
     protected abstract fun getResetObservable(): Observable<FormattedDisplayValue>
@@ -74,7 +70,6 @@ internal abstract class DashboardTileFragmentPresenter(
     public fun onPause() {
         this.uninitializeSession()
 
-        this.clientSubscriptions.clear()
         this.subscriptions.clear()
     }
 
@@ -85,36 +80,34 @@ internal abstract class DashboardTileFragmentPresenter(
 
         dashboardTileFragment.fragment_dashboard_tile_title.text = this.title
 
-        this.reset()
-
         this.subscriptions.addAll(
                 this.trackRecorderServiceController.isClientBoundChanged
-                        .subscribeOn(Schedulers.computation())
-                        .subscribe {
-                            if (it) {
-                                this.clientSubscriptions.addAll(
-                                        this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
-                                                .subscribeOn(Schedulers.computation())
-                                                .subscribe {
-                                                    if (it && this.dashboardTileFragment != null) {
-                                                        this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
-                                                    } else {
-                                                        this.uninitializeSession()
-                                                    }
-                                                })
+                        .flatMap {
+                            if(it) {
+                                this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
+                            } else {
+                                Observable.just(false)
+                            }
+                        }
+                        .subscribe{
+                            if(it){
+                                if(this.dashboardTileFragment != null) {
+                                    this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
+                                }
                             } else {
                                 this.uninitializeSession()
 
-                                this.clientSubscriptions.clear()
+                                this.reset()
                             }
-                        })
+                        }
+                    )
     }
 
     public fun destroy() {
         this.uninitializeSession()
+        this.reset()
 
         this.sessionSubscriptions.dispose()
-        this.clientSubscriptions.dispose()
         this.subscriptions.dispose()
     }
 }

@@ -11,7 +11,5 @@ internal interface ILocationProvider : IDestroyable {
 
     val isActive: Boolean
 
-    val activityChanged: Observable<Boolean>
-
     val locationsReceived: Observable<Location>
 }

@@ -103,6 +103,20 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/navigation_drawer_trackrecorder_activity_info_show_my_location" />
             </androidx.appcompat.widget.LinearLayoutCompat>
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/MySkatemap.TrackRecorder.ActivityInfo.Container">
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:theme="@style/MySkatemap.TrackRecorder.ActivityInfo.Container.Label"
+                    android:text="@string/trackrecorderactivity_navigation_drawer_info_show_positions_on_map_label"/>
+                <Switch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/navigation_drawer_trackrecorder_activity_info_show_positions_on_map" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.appcompat.widget.LinearLayoutCompat>
 </com.google.android.material.navigation.NavigationView>

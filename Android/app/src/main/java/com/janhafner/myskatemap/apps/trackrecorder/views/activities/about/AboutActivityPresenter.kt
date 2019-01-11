@@ -11,6 +11,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.common.getClipboardManager
 import com.janhafner.myskatemap.apps.trackrecorder.getManifestVersionName
+import com.janhafner.myskatemap.apps.trackrecorder.common.ToastManager
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_about.*
 
@@ -32,7 +33,7 @@ internal final class AboutActivityPresenter(private val view: AboutActivity) {
                     this.view.activity_about_app_pid.longClicks().subscribe {
                         this.view.getClipboardManager().primaryClip = ClipData.newPlainText("PID", processId)
 
-                        Toast.makeText(this.view, this.view.getString(R.string.aboutactivity_app_pid_copied_toast), Toast.LENGTH_SHORT).show()
+                        ToastManager.showToast(this.view, this.view.getString(R.string.aboutactivity_app_pid_copied_toast), Toast.LENGTH_SHORT)
                     })
 
             this.view.activity_about_app_pid.visibility = View.VISIBLE

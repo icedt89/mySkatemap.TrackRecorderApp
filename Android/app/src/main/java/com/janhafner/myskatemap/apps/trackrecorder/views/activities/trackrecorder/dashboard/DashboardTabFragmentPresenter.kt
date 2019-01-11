@@ -3,6 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.longClicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.common.ToastManager
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.findChildFragmentById
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.IDashboardService
@@ -140,7 +141,7 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
                         dashboardTileFragment.presenter = newDashboardTileFragmentPresenter
 
                         val toastText = this.view.getString(R.string.dashboard_tile_changed_toast_text, newDashboardTileFragmentPresenter.title)
-                        Toast.makeText(this.view.context, toastText, Toast.LENGTH_SHORT).show()
+                        ToastManager.showToast(this.view.context!!, toastText, Toast.LENGTH_SHORT)
                     }
         }
     }

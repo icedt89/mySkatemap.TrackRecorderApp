@@ -14,6 +14,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provid
 import com.janhafner.myskatemap.apps.trackrecorder.settings.*
 import dagger.Module
 import dagger.Provides
+import org.joda.time.DateTime
 import javax.inject.Singleton
 
 @Module(includes = [
@@ -21,8 +22,6 @@ import javax.inject.Singleton
     ExportModule::class,
     TrackModule::class,
     DashboardModule::class,
-    DistanceCalculationModule::class,
-    BurnedEnergyModule::class,
     LiveLocationModule::class,
     EventingModule::class,
     MapModule::class])
@@ -32,11 +31,9 @@ internal final class ApplicationModule(private val applicationContext: Context) 
         if (BuildConfig.LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER) {
             Log.v("ApplicationModule", "Using SimulatedLocationProvider as location provider")
 
-            val initialLocation = Location()
+            val initialLocation = Location("simulated", DateTime.now(), BuildConfig.MAP_INITIAL_LATITUDE, BuildConfig.MAP_INITIAL_LONGITUDE)
 
             initialLocation.bearing = BuildConfig.SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING
-            initialLocation.latitude = BuildConfig.MAP_INITIAL_LATITUDE
-            initialLocation.longitude = BuildConfig.MAP_INITIAL_LONGITUDE
             initialLocation.altitude = BuildConfig.MAP_INITIAL_ALTITUDE
 
             return SimulatedLocationProvider(context, initialLocation,
@@ -44,8 +41,7 @@ internal final class ApplicationModule(private val applicationContext: Context) 
                     BuildConfig.SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING,
                     BuildConfig.SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING,
                     BuildConfig.SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS,
-                    BuildConfig.SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS,
-                    BuildConfig.SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES)
+                    BuildConfig.SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS)
         }
 
         Log.v("ApplicationModule", "Using FusedLocationProvider as location provider")

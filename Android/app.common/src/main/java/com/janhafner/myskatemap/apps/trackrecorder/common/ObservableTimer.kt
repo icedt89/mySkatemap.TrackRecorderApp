@@ -2,8 +2,6 @@ package com.janhafner.myskatemap.apps.trackrecorder.common
 
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
-import io.reactivex.subjects.Subject
 import org.joda.time.MutablePeriod
 import org.joda.time.Period
 import org.joda.time.PeriodType
@@ -22,14 +20,7 @@ public final class ObservableTimer : IObservableTimer {
     public override val secondsElapsed: Period
         get() = this.secondElapsedSubject.value!!
 
-    private val isRunningChangedSubject: BehaviorSubject<Boolean> = BehaviorSubject.createDefault<Boolean>(false)
-    public override val isRunningChanged: Observable<Boolean> = this.isRunningChangedSubject
-
-    public override val isRunning: Boolean
-        get() = this.isRunningChangedSubject.value!!
-
-    private val timerResetSubject: Subject<Unit> = PublishSubject.create<Unit>()
-    public override val timerReset: Observable<Unit> = this.timerResetSubject
+    private var isRunning: Boolean = false
 
     private fun createTimerTask(): TimerTask {
         return object: TimerTask() {
@@ -58,8 +49,6 @@ public final class ObservableTimer : IObservableTimer {
         if (!this.isRunning) {
             this.secondElapsedSubject.onNext(this.elapsedSeconds.toPeriod())
         }
-
-        this.timerResetSubject.onNext(Unit)
     }
 
     public override fun reset() {
@@ -79,7 +68,7 @@ public final class ObservableTimer : IObservableTimer {
             this.timerTask = this.createTimerTask()
         }
 
-        this.isRunningChangedSubject.onNext(true)
+        this.isRunning = true
 
         this.timer.scheduleAtFixedRate(this.timerTask, 0, 1000)
     }
@@ -96,7 +85,7 @@ public final class ObservableTimer : IObservableTimer {
         this.timerTask!!.cancel()
         this.timerTask = null
 
-        this.isRunningChangedSubject.onNext(false)
+        this.isRunning = false
     }
 
     private var isDestroyed: Boolean = false
@@ -113,9 +102,7 @@ public final class ObservableTimer : IObservableTimer {
         this.timerTask?.cancel()
         this.timer.cancel()
 
-        this.isRunningChangedSubject.onComplete()
         this.secondElapsedSubject.onComplete()
-        this.timerResetSubject.onComplete()
 
         this.isDestroyed = true
     }

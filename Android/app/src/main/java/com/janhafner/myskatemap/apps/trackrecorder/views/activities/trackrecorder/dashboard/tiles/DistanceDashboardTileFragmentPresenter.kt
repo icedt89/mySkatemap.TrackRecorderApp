@@ -20,10 +20,9 @@ internal final class DistanceDashboardTileFragmentPresenter(private val context:
                                                             trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                             private val distanceConverterFactory: IDistanceConverterFactory)
     : DashboardTileFragmentPresenter(trackRecorderServiceController) {
-    private var distanceConverter: IDistanceConverter
+    private var distanceConverter: IDistanceConverter = distanceConverterFactory.createConverter()
 
     init {
-        this.distanceConverter = distanceConverterFactory.createConverter()
 
         this.title = this.context.getString(R.string.dashboard_tile_distancedashboardtilefragmentpresenter_tile)
     }

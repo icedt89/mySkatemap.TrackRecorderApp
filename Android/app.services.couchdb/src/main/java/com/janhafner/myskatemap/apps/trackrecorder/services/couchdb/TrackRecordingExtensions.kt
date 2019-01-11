@@ -106,12 +106,13 @@ internal class TrackRecordingConverter {
         }
 
         private fun locationFromCouchDbDictionary(dictionary: Dictionary) : Location {
-            val result = Location()
+            val provider = dictionary.getString("provider")
+            val latitude = dictionary.getDouble("latitude")
+            val longitude = dictionary.getDouble("longitude")
+            val time = DateTime(dictionary.getDate("time"))
 
-            result.provider = dictionary.getString("provider")
-            result.latitude = dictionary.getDouble("latitude")
-            result.longitude = dictionary.getDouble("longitude")
-            result.capturedAt = DateTime(dictionary.getDate("capturedAt"))
+            val result = Location(provider, time, latitude, longitude)
+
             result.accuracy = dictionary.getFloat("accuracy")
             result.altitude = dictionary.getDouble("altitude")
             result.bearing = dictionary.getFloat("bearing")
@@ -119,6 +120,7 @@ internal class TrackRecordingConverter {
             result.speed = dictionary.getFloat("speed")
             result.speedAccuracyMetersPerSecond = dictionary.getFloat("speedAccuracyMetersPerSecond")
             result.verticalAccuracyMeters = dictionary.getFloat("verticalAccuracyMeters")
+            result.segmentNumber = dictionary.getInt("segmentNumber")
 
             return result
         }
@@ -171,7 +173,7 @@ internal fun TrackRecording.toCouchDbDocument(): MutableDocument {
 
     val locationsArray = MutableArray()
     for (location in this.locations.sortedBy {
-        it.capturedAt
+        it.time
     }) {
         val locationDictionary = location.toCouchDbDictionary()
 
@@ -190,7 +192,8 @@ private fun Location.toCouchDbDictionary() : Dictionary {
     result.setString("provider", this.provider)
     result.setDouble("latitude", this.latitude)
     result.setDouble("longitude", this.longitude)
-    result.setDate("capturedAt", this.capturedAt.toDate())
+    result.setDate("time", this.time.toDate())
+    result.setInt("segmentNumber", this.segmentNumber)
 
     if(this.accuracy != null) {
         result.setFloat("accuracy", this.accuracy!!)

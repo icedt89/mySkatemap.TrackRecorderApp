@@ -17,5 +17,6 @@
     <string name="appsettings_preference_enable_auto_pause_on_still_key">appsettings_preference_enable_auto_pause_on_still</string>
     <string name="appsettings_preference_enable_live_location_key">appsettings_preference_enable_live_location_still</string>
     <string name="appsettings_preference_keep_screen_on_key">appsettings_preference_keep_screen_on</string>
+    <string name="appsettings_preference_show_positions_on_map_key">appsettings_preference_show_positions_on_map</string>
     <string name="appsettings_preference_show_my_location_key">appsettings_preference_show_my_location</string>
 </resources>

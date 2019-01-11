@@ -11,7 +11,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
-        versionName "0.8"
+        versionName "0.85"
         resConfigs "en", "de"
     }
     buildTypes {
@@ -24,13 +24,12 @@ android {
             buildConfigField 'String', 'APP_BACKEND_OAUTH2_CLIENTID', '"643337282862-qhd7j93t6nbj3agaih035f8nl44al7ak.apps.googleusercontent.com"'
 
             buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
-            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE_PAUSERESUME', 'true'
             buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '6500'
             buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
 
             buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
-            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:/api"' //10.0.2.2 is the ip of the host if executed in the emulator
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"' //10.0.2.2 is the ip of the host if executed in the emulator
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
@@ -38,20 +37,19 @@ android {
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
             buildConfigField 'double', 'MAP_INITIAL_ALTITUDE', '250.0'
 
-            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'true'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
-            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '125'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '1000'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
-            buildConfigField 'boolean', 'SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES', 'true'
 
-            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '3000'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '4000'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '5000'
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1500'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '3500'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '4500'
         }
         release {
             minifyEnabled true
@@ -62,13 +60,12 @@ android {
             buildConfigField 'String', 'APP_BACKEND_OAUTH2_CLIENTID', '"643337282862-qhd7j93t6nbj3agaih035f8nl44al7ak.apps.googleusercontent.com"'
 
             buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
-            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE_PAUSERESUME', 'true'
             buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '6500'
             buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
 
             buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
-            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:/api"' //10.0.2.2 is the ip of the host if executed in the emulator
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"' //10.0.2.2 is the ip of the host if executed in the emulator
 
             buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
@@ -79,17 +76,16 @@ android {
             buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
-            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '500'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '1000'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
-            buildConfigField 'boolean', 'SIMULATED_LOCATION_PROVIDER_FORCE_NEED_OF_LOCATION_SERVICES', 'true'
 
-            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '3000'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '4000'
-            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '5000'
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1500'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '3500'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '4500'
         }
     }
     buildToolsVersion '28.0.3'
@@ -139,8 +135,6 @@ dependencies {
     implementation project(':app.settings')
     implementation project(':app.services.couchdb')
     implementation project(':app.services')
-    implementation project(':app.distancecalculation')
-    implementation project(':app.burnedenergy')
     implementation project(':app.map')
     implementation project(':app.map.google')
     implementation project(':app.map.openstreetmap')

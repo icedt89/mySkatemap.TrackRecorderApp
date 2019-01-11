@@ -2,8 +2,8 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provi
 
 import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
-import com.janhafner.myskatemap.apps.trackrecorder.common.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
 import com.janhafner.myskatemap.apps.trackrecorder.map.MapLocation
 import org.joda.time.DateTime
 import java.util.*
@@ -15,8 +15,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
                                                private val latitudeStepping: Double = 0.001,
                                                private val longitudeStepping: Double = 0.001,
                                                private val delay: Int = 0,
-                                               private val interval: Int = 5000,
-                                               private val simulateDependencyToAndroidLocationServices: Boolean = true): LocationProvider() {
+                                               private val interval: Int = 5000): LocationProvider() {
     private val timer: Timer = Timer()
 
     private val genericCoordinates: MutableList<PointD> = ArrayList()
@@ -32,13 +31,14 @@ internal final class SimulatedLocationProvider(private val context: Context,
             override fun run() {
                 val self = this@SimulatedLocationProvider
 
-                if (self.simulateDependencyToAndroidLocationServices && !self.context.isLocationServicesEnabled()) {
-                    return
-                }
+                self.context.isLocationServicesEnabled()
+                        .onErrorReturn { false }
+                        .filter { it }
+                        .subscribe {
+                            val computedLocation = self.computeLocation()
 
-                val computedLocation = self.computeLocation()
-
-                self.publishLocationUpdate(computedLocation)
+                            self.publishLocationUpdate(computedLocation)
+                        }
             }
         }
     }
@@ -72,15 +72,11 @@ internal final class SimulatedLocationProvider(private val context: Context,
         val sequenceNumber = ++this.sequenceNumber
 
         if (this.lastComputedLocation == null) {
-            val location = Location()
+            val location = Location("fake-gps", DateTime.now(), initialLocation.latitude, initialLocation.longitude)
 
-            location.provider = "fake-gps"
             location.bearing = initialLocation.bearing
             location.accuracy = initialLocation.accuracy
             location.altitude = initialLocation.altitude
-            location.capturedAt = DateTime.now()
-            location.latitude = initialLocation.latitude
-            location.longitude = initialLocation.longitude
             location.speed = initialLocation.speed
 
             this.lastComputedLocation = location
@@ -106,11 +102,8 @@ internal final class SimulatedLocationProvider(private val context: Context,
     }
 
     private fun cloneLocation(location: Location): Location {
-        val result = Location()
+        val result = Location(location.provider, location.time, location.latitude, location.longitude)
 
-        result.latitude = location.latitude
-        result.longitude = location.longitude
-        result.provider = location.provider
         result.bearing = location.bearing
         result.speed = location.speed
         result.accuracy = location.accuracy
@@ -118,6 +111,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
         result.speedAccuracyMetersPerSecond = location.speedAccuracyMetersPerSecond
         result.verticalAccuracyMeters = location.verticalAccuracyMeters
         result.altitude = location.altitude
+        result.segmentNumber = location.segmentNumber
 
         return result
     }
@@ -160,17 +154,22 @@ internal final class SimulatedLocationProvider(private val context: Context,
             throw IllegalStateException("LocationProvider must be stopped first!")
         }
 
-        if (this.simulateDependencyToAndroidLocationServices && !this.context.isLocationServicesEnabled()) {
-            throw IllegalStateException("Location Services are disabled!")
-        }
+        this.context.isLocationServicesEnabled()
+                .onErrorReturn { false }
+                .subscribe {
+                    result ->
+                    if(result) {
+                        if (this.postLocationTimerTask == null) {
+                            this.postLocationTimerTask = this.createTimerTask()
+                        }
 
-        if (this.postLocationTimerTask == null) {
-            this.postLocationTimerTask = this.createTimerTask()
-        }
+                        this.timer.schedule(this.postLocationTimerTask, this.delay.toLong(), this.interval.toLong())
 
-        this.timer.schedule(this.postLocationTimerTask, this.delay.toLong(), this.interval.toLong())
-
-        this.isActive = true
+                        this.isActive = true
+                    } else {
+                        throw IllegalStateException("Location Services are disabled!")
+                    }
+                }
     }
 
     protected final override fun destroyCore() {

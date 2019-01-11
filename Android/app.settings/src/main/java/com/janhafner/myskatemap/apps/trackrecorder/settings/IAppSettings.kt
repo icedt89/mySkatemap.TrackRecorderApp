@@ -28,4 +28,6 @@ public interface IAppSettings : IDestroyable {
     var defaultMetActivityCode: String
 
     var keepScreenOn: Boolean
+
+    var showPositionsOnMap: Boolean
 }

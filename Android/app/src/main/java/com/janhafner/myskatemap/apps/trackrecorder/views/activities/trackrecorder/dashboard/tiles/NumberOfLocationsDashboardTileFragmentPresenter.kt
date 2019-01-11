@@ -2,11 +2,13 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.R
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 import com.janhafner.myskatemap.apps.trackrecorder.common.withCount
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import io.reactivex.Observable
+import org.joda.time.DateTime
 
 internal final class NumberOfLocationsDashboardTileFragmentPresenter(private val context: Context,
                                                                      trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>)
@@ -21,7 +23,7 @@ internal final class NumberOfLocationsDashboardTileFragmentPresenter(private val
 
     protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
         return trackRecorderSession.locationsChanged
-                .startWith(com.janhafner.myskatemap.apps.trackrecorder.common.types.Location())
+                .startWith(Location("", DateTime.now(), 0.0, 0.0))
                 .withCount()
                 .map {
                     FormattedDisplayValue(it.count.toString(), "#")

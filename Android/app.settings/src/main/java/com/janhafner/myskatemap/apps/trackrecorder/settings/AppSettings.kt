@@ -14,6 +14,15 @@ public final class AppSettings: IAppSettings {
     private val propertyChangedSubject: PublishSubject<PropertyChangedData> = PublishSubject.create()
     public override val propertyChanged: Observable<PropertyChangedData> = this.propertyChangedSubject
 
+    public override var showPositionsOnMap: Boolean = DEFAULT_SHOW_POSITIONS_ON_MAP
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            this.propertyChangedSubject.onNext(PropertyChangedData(IAppSettings::showPositionsOnMap.name, oldValue, value))
+        }
+
     public override var vibrateOnLocationAvailabilityLoss: Boolean = DEFAULT_VIBRATE_ON_LOCATION_AVAILABILITY_LOSS
         set(value) {
             val oldValue = field
@@ -151,6 +160,12 @@ public final class AppSettings: IAppSettings {
                 this.appSettings.enableLiveLocation = value
             }
 
+        public override var showPositionsOnMap: Boolean
+            get() = this.appSettings.showPositionsOnMap
+            set(value) {
+                this.appSettings.showPositionsOnMap = value
+            }
+
         public override var showMyLocation: Boolean
             get() = this.appSettings.showMyLocation
             set(value) {
@@ -226,12 +241,17 @@ public final class AppSettings: IAppSettings {
             val vibrateOnLocationAvailabilityLossKey = context.getString(R.string.appsettings_preference_notifications_vibrate_on_background_stop_key)
             val showMyLocationKey = context.getString(R.string.appsettings_preference_show_my_location_key)
             val keepScreenOnKey = context.getString(R.string.appsettings_preference_keep_screen_on_key)
+            val showPositionsOnMapKey = context.getString(R.string.appsettings_preference_show_positions_on_map_key)
 
             this.sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                 when (key) {
                     distanceConverterTypeNameKey -> {
                         val currentValue = boundSharedPreferences.getString(key, AppSettings.DEFAULT_DISTANCE_CONVERTER_TYPENAME)!!
                         this.appSettings.distanceConverterTypeName = currentValue
+                    }
+                    showPositionsOnMapKey -> {
+                        val currentValue = boundSharedPreferences.getBoolean(key, AppSettings.DEFAULT_SHOW_POSITIONS_ON_MAP)
+                        this.appSettings.showPositionsOnMap = currentValue
                     }
                     showMyLocationKey -> {
                         val currentValue = boundSharedPreferences.getBoolean(key, AppSettings.DEFAULT_SHOW_MY_LOCATION)
@@ -284,6 +304,7 @@ public final class AppSettings: IAppSettings {
             this.appSettings.enableLiveLocation = boundSharedPreferences.getBoolean(enableLiveLocationKey, AppSettings.DEFAULT_ENABLE_LIVE_LOCATION)
             this.appSettings.showMyLocation = boundSharedPreferences.getBoolean(showMyLocationKey, AppSettings.DEFAULT_SHOW_MY_LOCATION)
             this.appSettings.keepScreenOn = boundSharedPreferences.getBoolean(keepScreenOnKey, AppSettings.DEFAULT_KEEP_SCREEN_ON)
+            this.appSettings.showPositionsOnMap = boundSharedPreferences.getBoolean(showPositionsOnMapKey, AppSettings.DEFAULT_SHOW_POSITIONS_ON_MAP)
             this.appSettings.vibrateOnLocationAvailabilityLoss = boundSharedPreferences.getBoolean(vibrateOnLocationAvailabilityLossKey, AppSettings.DEFAULT_VIBRATE_ON_LOCATION_AVAILABILITY_LOSS)
 
             this.subscriptions.add(
@@ -303,6 +324,9 @@ public final class AppSettings: IAppSettings {
                                 }
                                 this::keepScreenOn.name -> {
                                     this.boundSharedPreferences.edit().putBoolean(keepScreenOnKey, it.newValue as Boolean).apply()
+                                }
+                                this::showPositionsOnMap.name -> {
+                                    this.boundSharedPreferences.edit().putBoolean(showPositionsOnMapKey, it.newValue as Boolean).apply()
                                 }
                             }
                         }
@@ -332,5 +356,7 @@ public final class AppSettings: IAppSettings {
         public const val DEFAULT_SHOW_MY_LOCATION: Boolean = false
 
         public const val DEFAULT_KEEP_SCREEN_ON: Boolean = false
+
+        public const val DEFAULT_SHOW_POSITIONS_ON_MAP: Boolean  = false
     }
 }

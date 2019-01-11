@@ -6,4 +6,6 @@ public interface ITrackSegment {
     var polylineColor: Int
 
     fun remove()
+
+    val hasLocations: Boolean
 }

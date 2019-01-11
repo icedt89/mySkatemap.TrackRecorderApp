@@ -12,6 +12,9 @@ public final class TrackSegmentCollection(private val latitudeLongitudeBoundsBui
     public val hasSegments: Boolean
         get() = this.segments.any()
 
+    public val hasLocations: Boolean
+        get() = this.segments.any { it.hasLocations }
+
     public fun appendSegment(trackSegment: ITrackSegment) {
         this.segments.add(trackSegment)
 

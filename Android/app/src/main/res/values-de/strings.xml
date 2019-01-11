@@ -29,7 +29,6 @@
     <string name="trackrecorderactivity_finish_confirmation_message">Alle Daten der derzeitigen Aufnahme werden zur späteren Verarbeitung gespeichert! Möchtest du fortfahren?</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_message">Bitte aktiviere die Standortdienste um mit der Aufzeichnung fortzufahren.</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_title">Standort nicht verfügbar</string>
-    <string name="trackrecorderactivity_show_location_services_confirmation_open_label">Standort öffnen</string>
 
     <string name="aboutactivity_copyright">© Jan Hafner</string>
     <string name="aboutactivity_version">Version %s</string>
@@ -38,7 +37,9 @@
     <string name="trackrecorderactivity_map_mycurrentlocation_marker_title">hier bist du</string>
 
     <string name="appsettings_preference_units_title">Einheiten</string>
-    <string name="appsettings_preference_show_my_location_label">Mein Standort</string>
+    <string name="appsettings_preference_show_positions_on_map_label">Positionen auf Karte zeigen</string>
+    <string name="appsettings_preference_show_positions_on_map_summary">Zeigt alle Positionen der aufgenommenen Strecke auf der Karte. Achtung, dies kann einen Einfluss auf die Leistung haben!</string>
+    <string name="appsettings_preference_show_my_location_label">Zeige Meinen Standort</string>
     <string name="appsettings_preference_show_my_location_summary">Zeigt deinen Standort auf der Karte, unabhängig von einer Aufnahme</string>
     <string name="appsettings_preference_keep_screen_on_label">Bildschirm anlassen</string>
     <string name="appsettings_preference_keep_screen_on_summary">Lässt den Bildschirm im Hauptfester permanent aktiv</string>
@@ -108,7 +109,8 @@
     <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Automatisch pausieren [Exp.]</string>
     <string name="trackrecorderactivity_navigation_drawer_info_live_location_label">Live-Standort [Exp.]</string>
     <string name="trackrecorderactivity_navigation_drawer_info_keep_screen_on_label">Bildschirm anlassen</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_show_my_location_label">Mein Standort</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_show_positions_on_map_label">Positionen auf Karte zeigen</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_show_my_location_label">Zeige Meinen Standort</string>
 
     <string-array name="appsettings_preference_units_distance_names">
         <item>Kilometer</item>

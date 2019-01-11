@@ -15,6 +15,9 @@ internal final class TrackSegment(private val polyline: Polyline) : ITrackSegmen
         this.polyline.points = this.locations.map { LatLng(it.latitude, it.longitude) }
     }
 
+    public override val hasLocations: Boolean
+        get() = this.polyline.points.any()
+
     public override var polylineColor: Int = Color.RED
         set(value) {
             this.polyline.color = value

@@ -9,14 +9,8 @@ internal abstract class LocationProvider: ILocationProvider {
     private val locationReceivedSubject: Subject<Location> = PublishSubject.create<Location>()
     public final override val locationsReceived: io.reactivex.Observable<Location> = this.locationReceivedSubject
 
-    private val activityChangedSubject: Subject<Boolean> = BehaviorSubject.createDefault(false)
-    public final override val activityChanged: io.reactivex.Observable<Boolean> = this.activityChangedSubject
-
     public override var isActive: Boolean = false
-        protected set(value) {
-            field = value
-            this.activityChangedSubject.onNext(value)
-        }
+        protected set
 
     protected fun publishLocationUpdate(location: Location) {
         this.locationReceivedSubject.onNext(location)
@@ -30,7 +24,6 @@ internal abstract class LocationProvider: ILocationProvider {
 
         this.destroyCore()
 
-        this.activityChangedSubject.onComplete()
         this.locationReceivedSubject.onComplete()
 
         this.isDestroyed = true

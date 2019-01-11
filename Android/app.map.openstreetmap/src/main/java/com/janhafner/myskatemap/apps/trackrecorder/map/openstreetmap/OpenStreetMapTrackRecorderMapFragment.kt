@@ -98,7 +98,7 @@ public final class OpenStreetMapTrackRecorderMapFragment : TrackRecorderMapFragm
     }
 
     public override fun focusTrack() {
-        if (!this.trackSegmentCollection.hasSegments) {
+        if (!this.trackSegmentCollection.hasLocations) {
             return
         }
 

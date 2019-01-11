@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.janhafner.myskatemap.apps.trackrecorder.common.ToastManager
 import com.janhafner.myskatemap.apps.trackrecorder.map.*
 
 public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
@@ -59,7 +61,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
 
     public override var showPositions: Boolean = false
         set(value) {
-            for (positionCircle in this.positionCircles) {
+            for (positionCircle in this.positionCircles.filter { it.isVisible != value}) {
                 positionCircle.isVisible = value
             }
 
@@ -126,7 +128,6 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         }
 
         this.trackSegmentCollection.addLocations(locations)
-
         val positionCircles = locations.map {
             this.addPositionCircle(it)
         }
@@ -141,8 +142,12 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         circleOptions.strokeColor(Color.RED)
         circleOptions.strokeWidth(2.0f)
         circleOptions.visible(this.showPositions)
+        circleOptions.clickable(true)
 
-        return this.map.addCircle(circleOptions)
+        val result = this.map.addCircle(circleOptions)
+        result.tag = mapLocation.debugInfo
+
+        return result
     }
 
     public override fun beginNewTrackSegment() {
@@ -160,7 +165,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
     }
 
     public override fun focusTrack() {
-        if (!this.trackSegmentCollection.hasSegments) {
+        if (!this.trackSegmentCollection.hasLocations) {
             return
         }
 
@@ -186,6 +191,22 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         uiSettings.isMapToolbarEnabled = false
 
         this.map.mapType = GoogleMap.MAP_TYPE_NORMAL
+
+        this.map.setOnCircleClickListener {
+            if(it.tag != null && !it.tag!!.toString().isBlank()) {
+                ToastManager.showToast(this.context!!, it.tag.toString(), Toast.LENGTH_LONG)
+            }
+        }
+        /*
+        this.map.setOnPolylineClickListener {
+            it.points.map {
+                val location = Location("fused")
+                location.latitude = it.latitude
+                location.longitude = it.longitude
+
+                location
+            }.
+        }*/
 
         this.setMyLocation(this.myLocationActivated)
     }

@@ -35,6 +35,7 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$support_test_runnter"
     androidTestImplementation "androidx.test.espresso:espresso-core:$test_espresso_core_version"
 
+    implementation "net.danlew:android.joda:$joda_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation "androidx.fragment:fragment:$androidx_fragment_version"

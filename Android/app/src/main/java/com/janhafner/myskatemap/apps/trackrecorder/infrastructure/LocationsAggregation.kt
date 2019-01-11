@@ -9,7 +9,7 @@ internal final class LocationsAggregation(values: Observable<Location>) : ILocat
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     public override val speed = Aggregation(values.map {
-        if(it.speed == null) {
+        if (it.speed == null) {
             0.0
         } else {
             it.speed!!.toDouble()
@@ -17,7 +17,7 @@ internal final class LocationsAggregation(values: Observable<Location>) : ILocat
     })
 
     public override val altitude = Aggregation(values.map {
-        if(it.altitude == null) {
+        if (it.altitude == null) {
             0.0
         } else {
             it.altitude!!
@@ -25,22 +25,23 @@ internal final class LocationsAggregation(values: Observable<Location>) : ILocat
     })
 
     init {
-        this.altitude.minimumValueChanged.subscribe()
-        this.altitude.maximumValueChanged.subscribe()
-        this.altitude.averageValueChanged.subscribe()
-        this.altitude.firstValueChanged.subscribe()
-        this.altitude.latestValueChanged.subscribe()
-
-        this.speed.minimumValueChanged.subscribe()
-        this.speed.maximumValueChanged.subscribe()
-        this.speed.averageValueChanged.subscribe()
-        this.speed.firstValueChanged.subscribe()
-        this.speed.latestValueChanged.subscribe()
+        this.subscriptions.addAll(
+                this.altitude.minimumValueChanged.subscribe(),
+                this.altitude.maximumValueChanged.subscribe(),
+                this.altitude.averageValueChanged.subscribe(),
+                this.altitude.firstValueChanged.subscribe(),
+                this.altitude.latestValueChanged.subscribe(),
+                this.speed.minimumValueChanged.subscribe(),
+                this.speed.maximumValueChanged.subscribe(),
+                this.speed.averageValueChanged.subscribe(),
+                this.speed.firstValueChanged.subscribe(),
+                this.speed.latestValueChanged.subscribe()
+        )
     }
 
     private var isDestroyed = false
     public override fun destroy() {
-        if(isDestroyed) {
+        if (isDestroyed) {
             return
         }
 

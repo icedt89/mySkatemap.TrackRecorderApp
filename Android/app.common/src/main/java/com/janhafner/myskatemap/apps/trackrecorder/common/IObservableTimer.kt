@@ -8,12 +8,6 @@ public interface IObservableTimer : IDestroyable {
 
     val secondsElapsed: Period
 
-    val isRunningChanged: Observable<Boolean>
-
-    val isRunning: Boolean
-
-    val timerReset: Observable<Unit>
-
     fun start()
 
     fun reset()

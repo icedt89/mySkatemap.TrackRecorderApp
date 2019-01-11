@@ -9,8 +9,13 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.janhafner.myskatemap.apps.trackrecorder.common.formatTimeOnlyDefault
+import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimalsAndFormatWithUnit
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.SYMBOL_DISTANCE_METERS
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.SYMBOL_SPEED_METERS_PER_SECOND
 import com.janhafner.myskatemap.apps.trackrecorder.map.MapLocation
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfileSettings
 import com.karumi.dexter.Dexter
@@ -26,7 +31,19 @@ internal fun Context.isGooglePlayServicesAvailable() : Boolean {
 }
 
 public fun Location.toMapLocation(): MapLocation {
-    return MapLocation(this.latitude, this.longitude)
+    val debugInfo = "[${this.segmentNumber}] ${this.time.formatTimeOnlyDefault()}; S:${this.speed?.roundWithTwoDecimalsAndFormatWithUnit(SYMBOL_SPEED_METERS_PER_SECOND)}; A:${this.altitude?.roundWithTwoDecimalsAndFormatWithUnit(SYMBOL_DISTANCE_METERS)}; Ac:${this.accuracy}; P:${this.provider}"
+
+    return MapLocation(this.latitude, this.longitude, debugInfo)
+}
+
+internal fun LocationRequest.withDefaultBuildConfig(): LocationRequest {
+    this.fastestInterval = BuildConfig.FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS.toLong()
+    this.interval = BuildConfig.FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS.toLong()
+    this.maxWaitTime = BuildConfig.FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS.toLong()
+    this.smallestDisplacement = BuildConfig.FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS
+    this.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+    return this
 }
 
 public fun Context.getFusedLocationProviderClient(): FusedLocationProviderClient {
@@ -62,7 +79,7 @@ internal fun Context.getApplicationInjector(): ApplicationComponent {
 }
 
 internal fun Context.getManifestVersionName(): String {
-    return this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+    return this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName
 }
 
 internal fun AppCompatActivity.checkAllAppPermissions() : Single<Boolean> {

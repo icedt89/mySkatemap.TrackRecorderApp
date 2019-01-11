@@ -19,7 +19,6 @@
     <string name="trackrecorderactivity_finish_confirmation_button_no_label">Cancel</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_message">Please activate location services to proceed with tracking.</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_title">Location services unavailable</string>
-    <string name="trackrecorderactivity_show_location_services_confirmation_open_label">Open location</string>
 
     <string name="aboutactivity_copyright">© Jan Hafner</string>
     <string name="aboutactivity_version">Version %s</string>
@@ -38,7 +37,9 @@
     <string name="trackrecorderservice_notification_contenttext_template">%s in %s</string>
 
     <string name="appsettings_preference_units_title">Units</string>
-    <string name="appsettings_preference_show_my_location_label">My location</string>
+    <string name="appsettings_preference_show_positions_on_map_label">Show positions on map</string>
+    <string name="appsettings_preference_show_positions_on_map_summary">Shows all positions of the track on the map. Use with caution, this can have an impact on peformance!</string>
+    <string name="appsettings_preference_show_my_location_label">Show My location</string>
     <string name="appsettings_preference_show_my_location_summary">Shows your current location on the map, independent of a recording</string>
     <string name="appsettings_preference_keep_screen_on_label">Keep screen on</string>
     <string name="appsettings_preference_keep_screen_on_summary">Keep the screen active on the main window</string>
@@ -92,6 +93,7 @@
     <string name="appsettings_preference_enable_live_location_default_value">false</string>
     <string name="appsettings_preference_keep_screen_on_default_value">false</string>
     <string name="appsettings_preference_show_my_location_default_value">false</string>
+    <string name="appsettings_preference_show_positions_on_map_default_value">false</string>
 
     <string name="tracklistactivity_title">My tracks</string>
     <string name="userprofilesettingsactivity_title">My Profile</string>
@@ -126,7 +128,8 @@
     <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Auto pause [exp.]</string>
     <string name="trackrecorderactivity_navigation_drawer_info_live_location_label">Live-Location [exp.]</string>
     <string name="trackrecorderactivity_navigation_drawer_info_keep_screen_on_label">Keep screen on</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_show_my_location_label">My location</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_show_positions_on_map_label">Show positions on map</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_show_my_location_label">Show My location</string>
 
     <string-array name="appsettings_preference_units_distance_names">
         <item>Kilometers</item>
