@@ -15,6 +15,12 @@ internal final class TrackSegment(private val polyline: Polyline) : ITrackSegmen
         this.polyline.points = this.locations.map { LatLng(it.latitude, it.longitude) }
     }
 
+    public override var show: Boolean
+        get() = this.polyline.isVisible
+        set(value) {
+            this.polyline.isVisible = value
+        }
+
     public override val hasLocations: Boolean
         get() = this.polyline.points.any()
 

@@ -8,6 +8,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.getNotificationManager
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
+import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotificationChannel
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
@@ -31,6 +32,9 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
 
     @Inject
     public lateinit var liveSessionController: ILiveSessionController
+
+    @Inject
+    public lateinit var trackService: ITrackService
 
     private lateinit var trackRecorderServiceNotificationChannel: TrackRecorderServiceNotificationChannel
 
@@ -66,6 +70,7 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                 trackRecording,
                 this.locationProvider,
                 this,
+                this.trackService,
                 this.liveSessionController)
 
         return this.currentSession!!

@@ -12,6 +12,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 
@@ -20,18 +21,20 @@ internal final class BurnedEnergyDashboardTileFragmentPresenter(private val cont
                                                                 trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                                 private val energyConverterFactory: IEnergyConverterFactory)
     : DashboardTileFragmentPresenter(trackRecorderServiceController) {
-    private var energyConverter: IEnergyConverter
-
     init {
-        this.energyConverter = energyConverterFactory.createConverter()
-
         this.title = this.context.getString(R.string.dashboard_tile_burnedenergydashboardtilefragmentpresenter_tile)
     }
 
     protected override fun getResetObservable(): Observable<FormattedDisplayValue> {
-        val result = this.energyConverter.convert(0.0f)
+        if (this.displayType == DashboardTileDisplayType.LineChart) {
+            return Observable.empty()
+        }
 
-        return Observable.just(FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol()))
+        val value = 0.0f
+
+        val result = this.energyConverterFactory.createConverter().convert(value)
+
+        return Observable.just(FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol(), value))
     }
 
     protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
@@ -48,7 +51,7 @@ internal final class BurnedEnergyDashboardTileFragmentPresenter(private val cont
                             value, converter ->
                             val result = converter.convert(value)
 
-                            FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol())
+                            FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol(), value)
                         })
                 .replay(1)
                 .autoConnect()

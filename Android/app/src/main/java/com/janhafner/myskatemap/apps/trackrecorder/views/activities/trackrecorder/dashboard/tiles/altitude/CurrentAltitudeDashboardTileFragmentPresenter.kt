@@ -7,6 +7,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
 import io.reactivex.Observable
 
 internal final class CurrentAltitudeDashboardTileFragmentPresenter(private val context: Context,
@@ -17,6 +18,8 @@ internal final class CurrentAltitudeDashboardTileFragmentPresenter(private val c
     init {
         this.title = this.context.getString(R.string.dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile)
     }
+
+    public override val supportedPresenterConnectorTypes: List<DashboardTileDisplayType> = listOf(DashboardTileDisplayType.TextOnly, DashboardTileDisplayType.LineChart)
 
     protected override fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float> {
         return trackRecorderSession.locationsAggregation.altitude.latestValueChanged.map {

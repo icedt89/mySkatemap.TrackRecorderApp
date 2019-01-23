@@ -18,7 +18,7 @@ internal final class NumberOfLocationsDashboardTileFragmentPresenter(private val
     }
 
     protected override fun getResetObservable(): Observable<FormattedDisplayValue> {
-        return Observable.just(FormattedDisplayValue("0", "#"))
+        return Observable.just(FormattedDisplayValue("0", "#", 0))
     }
 
     protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
@@ -26,7 +26,7 @@ internal final class NumberOfLocationsDashboardTileFragmentPresenter(private val
                 .startWith(Location("", DateTime.now(), 0.0, 0.0))
                 .withCount()
                 .map {
-                    FormattedDisplayValue(it.count.toString(), "#")
+                    FormattedDisplayValue(it.count.toString(), "#", it.count)
                 }
                 .replay(1)
                 .autoConnect()

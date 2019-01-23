@@ -1,10 +1,10 @@
-package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
+package com.janhafner.myskatemap.apps.trackrecorder.views
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 
-internal final class TrackRecorderTabsAdapter(tabDefinitions: List<TabDefinition>, fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
+internal final class TabDefinitionTabsAdapter(tabDefinitions: List<TabDefinition>, fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
     private var availableTabCount: Int = 0
 
     private val availableTabDefinitions: Map<Int, TabDefinition>
@@ -21,7 +21,7 @@ internal final class TrackRecorderTabsAdapter(tabDefinitions: List<TabDefinition
     }
 
     public override fun getPageTitle(position: Int): CharSequence {
-        val result = this.availableTabDefinitions.get(position)
+        val result = this.availableTabDefinitions[position]
         if(result != null) {
             return result.pageTitle
         }
@@ -30,7 +30,7 @@ internal final class TrackRecorderTabsAdapter(tabDefinitions: List<TabDefinition
     }
 
     public override fun getItem(position: Int): Fragment {
-        val result = this.availableTabDefinitions.get(position)
+        val result = this.availableTabDefinitions[position]
         if(result != null) {
             return result.tabFragmentFactory()
         }

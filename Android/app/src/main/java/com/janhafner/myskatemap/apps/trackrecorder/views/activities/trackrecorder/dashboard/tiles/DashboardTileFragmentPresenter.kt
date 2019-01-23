@@ -1,13 +1,14 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
-import com.jakewharton.rxbinding2.widget.text
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.IDashboardTileFragmentPresenterConnector
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.LineChartDashboardTileFragmentPresenterConnector
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.TextOnlyDashboardTileFragmentPresenterConnector
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.*
 
 internal abstract class DashboardTileFragmentPresenter(
@@ -18,29 +19,45 @@ internal abstract class DashboardTileFragmentPresenter(
 
     private var trackRecorderSession: ITrackRecordingSession? = null
 
-    protected var dashboardTileFragment: DashboardTileFragment? = null
+    protected var presenterConnector: IDashboardTileFragmentPresenterConnector = TextOnlyDashboardTileFragmentPresenterConnector()
+        private set
+
+    private var dashboardTileFragment: DashboardTileFragment? = null
+
+    public open val supportedPresenterConnectorTypes: List<DashboardTileDisplayType> = listOf(DashboardTileDisplayType.TextOnly)
+
+    public var displayType: DashboardTileDisplayType = DashboardTileDisplayType.TextOnly
+        set(value) {
+            if(!this.supportedPresenterConnectorTypes.contains(value)) {
+                throw IllegalArgumentException("Unsupported presenter connector type: ${value}")
+            }
+
+            if (value == field) {
+                return
+            }
+
+            if (value == DashboardTileDisplayType.TextOnly) {
+                this.presenterConnector = TextOnlyDashboardTileFragmentPresenterConnector()
+            } else if (value == DashboardTileDisplayType.LineChart) {
+                this.presenterConnector = LineChartDashboardTileFragmentPresenterConnector()
+            }
+
+            field = value
+
+            this.onResume(this.dashboardTileFragment!!)
+        }
 
     public var title: String = ""
         protected set
 
-    public var formattedValueChanged: Observable<FormattedDisplayValue> = Observable.empty()
-        protected set
+    protected fun subscribe(dashboardTileFragment: DashboardTileFragment, source: Observable<FormattedDisplayValue>) {
+        val subscriptions = this.presenterConnector.connect(dashboardTileFragment, source)
 
-    private fun subscribe(dashboardTileFragment: DashboardTileFragment, source: Observable<FormattedDisplayValue>) {
-        this.sessionSubscriptions.addAll(
-                source.map {
-                    it.value
-                }
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(dashboardTileFragment.fragment_dashboard_tile_value.text()),
-                source.map {
-                    it.unit
-                }
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(dashboardTileFragment.fragment_dashboard_tile_unit.text())
-        )
+        this.sessionSubscriptions.clear()
+
+        for (subscription in subscriptions) {
+            this.sessionSubscriptions.add(subscription)
+        }
     }
 
     private fun uninitializeSession() {
@@ -111,3 +128,5 @@ internal abstract class DashboardTileFragmentPresenter(
         this.subscriptions.dispose()
     }
 }
+
+

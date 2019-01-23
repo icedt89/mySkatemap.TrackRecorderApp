@@ -8,6 +8,16 @@ import io.reactivex.Single
 import java.util.*
 
 public final class CouchDbTrackQueryServiceDataSource(private val couchDbFactory: ICouchDbFactory) : ITrackQueryServiceDataSource {
+    public override fun deleteTrackInfo(trackInfoId: String): Single<Unit> {
+        return Single.fromCallable {
+            this.couchDbFactory.executeUnitOfWork {
+                val trackInfo = it.getDocument(trackInfoId)
+
+                it.delete(trackInfo)
+            }
+        }
+    }
+
     public override fun queryTrackRecordings(query: GetTracksQuery): Single<List<TrackInfo>> {
         return Single.fromCallable {
             val trackRecordings = ArrayList<TrackInfo>()

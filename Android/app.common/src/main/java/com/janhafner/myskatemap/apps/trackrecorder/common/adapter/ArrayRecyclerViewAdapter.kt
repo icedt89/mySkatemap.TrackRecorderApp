@@ -53,6 +53,10 @@ public open class ArrayRecyclerViewAdapter<T>(@LayoutRes private val itemLayoutI
         })
     }
 
+    public fun findItems(predicate: (item: T) -> Boolean): List<T> {
+        return this.items.filter(predicate)
+    }
+
     public override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if(this.layoutInflater == null) {
             this.layoutInflater = LayoutInflater.from(parent.context)

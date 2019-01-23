@@ -8,4 +8,6 @@ public interface ITrackSegment {
     fun remove()
 
     val hasLocations: Boolean
+
+    var show: Boolean
 }

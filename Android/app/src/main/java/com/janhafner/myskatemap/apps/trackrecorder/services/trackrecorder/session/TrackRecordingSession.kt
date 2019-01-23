@@ -11,6 +11,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggr
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.LocationsAggregation
 import com.janhafner.myskatemap.apps.trackrecorder.live.LiveLocation
 import com.janhafner.myskatemap.apps.trackrecorder.locationServicesAvailabilityChanged
+import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ILiveSessionController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifications.TrackRecorderServiceNotification
@@ -31,6 +32,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                                            private val trackRecording: TrackRecording,
                                            private val locationProvider: ILocationProvider,
                                            private val service: TrackRecorderService,
+                                           private val trackService: ITrackService,
                                            private val liveSessionController: ILiveSessionController) : ITrackRecordingSession {
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
@@ -290,12 +292,10 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
             throw IllegalStateException("Only possible in state \"${TrackRecordingSessionState.Paused}\"!")
         }
 
-        this.recordingTimeTimer.reset()
-
         this.destroy()
     }
 
-    public override fun finishTracking(): TrackRecording {
+    public override fun finishTracking() {
         if (this.isDestroyed) {
             throw ObjectDestroyedException()
         }
@@ -308,11 +308,11 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
         finishedTrackRecording.finish()
 
-        this.recordingTimeTimer.reset()
+        this.trackService.saveTrackRecording(trackRecording)
+                .subscribeOn(Schedulers.io())
+                .subscribe()
 
         this.destroy()
-
-        return finishedTrackRecording
     }
 
     private var isDestroyed: Boolean = false

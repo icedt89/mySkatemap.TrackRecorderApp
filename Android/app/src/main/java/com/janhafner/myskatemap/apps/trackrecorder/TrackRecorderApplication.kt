@@ -2,7 +2,9 @@ package com.janhafner.myskatemap.apps.trackrecorder
 
 import android.app.Application
 import android.os.StrictMode
+import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.eventing.TrackRecordingEventsSubscriber
 import com.janhafner.myskatemap.apps.trackrecorder.modules.ApplicationModule
+import javax.inject.Inject
 
 
 internal final class TrackRecorderApplication: Application() {
@@ -10,18 +12,23 @@ internal final class TrackRecorderApplication: Application() {
             .applicationModule(ApplicationModule(this))
             .build()
 
+    @Inject
+    public lateinit var trackRecordingEventsSubscriber: TrackRecordingEventsSubscriber
+
     public override fun onCreate() {
-        if (BuildConfig.DEBUG) {
+        val forcePreventStrictMode = true
+        if (!forcePreventStrictMode && BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder()
                     .detectAll()
                     .penaltyLog()
-                    .penaltyDialog()
                     .build())
             StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder()
                     .detectAll()
                     .penaltyLog()
                     .build())
         }
+
+        this.injector.inject(this)
 
         super.onCreate()
     }

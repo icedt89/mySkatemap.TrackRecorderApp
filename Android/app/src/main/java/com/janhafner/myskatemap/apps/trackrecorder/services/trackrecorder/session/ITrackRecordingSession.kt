@@ -2,7 +2,6 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.sessi
 
 import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggregation
 import io.reactivex.Observable
 import org.joda.time.DateTime
@@ -33,5 +32,5 @@ internal interface ITrackRecordingSession : IDestroyable {
 
     fun discardTracking()
 
-    fun finishTracking(): TrackRecording
+    fun finishTracking()
 }

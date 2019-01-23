@@ -4,9 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -33,6 +35,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.sessio
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.TrackRecordingSessionState
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IUserProfileSettings
+import com.janhafner.myskatemap.apps.trackrecorder.views.TabDefinition
+import com.janhafner.myskatemap.apps.trackrecorder.views.TabDefinitionTabsAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.about.AboutActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.appsettings.AppSettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.playground.PlaygroundActivity
@@ -77,6 +81,8 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
 
     private var identity: Identity = Identity.anonymous()
 
+    private var navigationDrawersOpened = false
+
     init {
         this.view.setContentView(R.layout.activity_track_recorder)
 
@@ -91,17 +97,13 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         val tabDefinitions = listOf(
                 TabDefinition(this.view.getString(R.string.trackrecorderactivity_tab_dashboard_title), {
                     DashboardTabFragment()
-                }, 0,
-                        null),
-                // R.drawable.ic_dashboard_bright_24dp),
+                }, 0, null),
                 TabDefinition(this.view.getString(R.string.trackrecorderactivity_tab_map_title), {
-                    //MapTabFragment()
+                    //OverviewTabFragment()
                     MapTabFragment()
-                }, 1,
-                        // R.drawable.ic_map_bright_24dp)
-                        null)
+                }, 1, null)
         )
-        viewPager.adapter = TrackRecorderTabsAdapter(tabDefinitions, this.view.supportFragmentManager)
+        viewPager.adapter = TabDefinitionTabsAdapter(tabDefinitions, this.view.supportFragmentManager)
         viewPager.offscreenPageLimit = viewPager.adapter!!.count
 
         val tabLayout = this.view.findViewById<TabLayout>(R.id.trackrecorderactivity_toolbar_tablayout)
@@ -122,27 +124,25 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
             }
         }
 
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-            }
-
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-                val self = this@TrackRecorderActivityPresenter.view
-
-                if (self.currentFocus == null) {
-                    return
-                }
-
-                view.getInputMethodManager().hideSoftInputFromWindow(self.currentFocus?.windowToken, 0)
-            }
-        })
-
         this.setupMainFloatingActionButton()
         this.setupLeftNavigationView()
         this.setupRightNavigationView()
+
+        this.view.trackrecorderactivity_navigationdrawer.addDrawerListener(object : DrawerLayout.DrawerListener{
+            public override fun onDrawerStateChanged(newState: Int) {
+            }
+
+            public override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+            }
+
+            public override fun onDrawerClosed(drawerView: View) {
+                this@TrackRecorderActivityPresenter.navigationDrawersOpened = false
+            }
+
+            public override fun onDrawerOpened(drawerView: View) {
+                this@TrackRecorderActivityPresenter.navigationDrawersOpened = true
+            }
+        })
     }
 
     private fun getCurrentActivityTextForInfo(trackRecorderSession: ITrackRecordingSession?): String {
@@ -329,10 +329,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                     .subscribe {
                         val finishRecordingAlertDialogBuilder = FinishRecordingAlertDialogBuilder(this.view)
                         finishRecordingAlertDialogBuilder.setPositiveButton(R.string.trackrecorderactivity_finish_confirmation_button_yes_label) { _, _ ->
-                            val trackRecording = this.trackRecorderSession!!.finishTracking()
-                            this.trackService.saveTrackRecording(trackRecording)
-                                    .subscribeOn(Schedulers.io())
-                                    .subscribe()
+                            this.trackRecorderSession!!.finishTracking()
                         }
 
                         finishRecordingAlertDialogBuilder.show()
@@ -424,6 +421,18 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.subscriptions.dispose()
 
         this@TrackRecorderActivityPresenter.view.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    public fun onBackPressed(): Boolean {
+        val cancelBack = !this.navigationDrawersOpened
+
+        if(this.navigationDrawersOpened) {
+            this@TrackRecorderActivityPresenter.view.trackrecorderactivity_navigationdrawer.closeDrawers()
+
+            this.navigationDrawersOpened = false
+        }
+
+        return cancelBack
     }
 
     private fun setupLeftNavigationView() {

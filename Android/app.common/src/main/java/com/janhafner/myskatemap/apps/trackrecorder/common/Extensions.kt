@@ -16,7 +16,7 @@ public fun Context.getNotificationManager(): NotificationManager {
     return this.getSystemService(NotificationManager::class.java)
 }
 
-public fun Observable<PropertyChangedData>.hasChanged(name: String? = null): Observable<PropertyChangedData> {
+public fun Observable<PropertyChangedData>.hasChanged(): Observable<PropertyChangedData> {
     return this.filter {
         it.hasChanged
     }
@@ -37,7 +37,7 @@ fun Location.toLiteAndroidLocation(): android.location.Location {
     return result
 }
 
-public fun List<android.location.Location>.calculateDistance2(): Float {
+public fun List<android.location.Location>.calculateDistance(): Float {
     var result = 0.0f
 
     if(this.count() < 2) {
@@ -52,22 +52,6 @@ public fun List<android.location.Location>.calculateDistance2(): Float {
     }
 
     return result
-}
-
-private const val R = 6372.8 // in kilometers
-public fun haversine(lat1: Double, lat2: Double, lon1: Double, lon2: Double): Double {
-    val λ1 = Math.toRadians(lat1)
-    val λ2 = Math.toRadians(lat2)
-    val Δλ = Math.toRadians(lat2 - lat1)
-    val Δφ = Math.toRadians(lon2 - lon1)
-
-    val result = 2 * R * Math.asin(Math.sqrt(Math.pow(Math.sin(Δλ / 2), 2.0) + Math.pow(Math.sin(Δφ / 2), 2.0) * Math.cos(λ1) * Math.cos(λ2)))
-
-    return result * 1000
-}
-
-public fun Location.distanceTo(location: Location): Double {
-    return haversine( this.latitude, location.latitude, this.longitude, location.longitude)
 }
 
 public fun android.location.Location.isInDistance(location: android.location.Location, maximumDistanceInMeter: Float, includeEdge: Boolean = true): Boolean {

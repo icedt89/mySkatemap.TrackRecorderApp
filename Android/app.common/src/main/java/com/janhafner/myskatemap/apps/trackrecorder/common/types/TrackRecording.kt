@@ -9,7 +9,7 @@ public final class TrackRecording (id: UUID = UUID.randomUUID()) {
     public var id: UUID = id
         private set
 
-    private val locationEntries: MutableList<Location> = ArrayList<Location>()
+    private val locationEntries: MutableList<Location> = ArrayList()
     public val locations: List<Location>
         get() = this.locationEntries
 

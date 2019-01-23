@@ -8,6 +8,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.map.MapLocation
 import org.joda.time.DateTime
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.random.Random
 
 internal final class SimulatedLocationProvider(private val context: Context,
                                                private val initialLocation: Location,
@@ -102,7 +103,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
     }
 
     private fun cloneLocation(location: Location): Location {
-        val result = Location(location.provider, location.time, location.latitude, location.longitude)
+        val result = Location(location.provider, DateTime.now(), location.latitude, location.longitude)
 
         result.bearing = location.bearing
         result.speed = location.speed
@@ -120,14 +121,28 @@ internal final class SimulatedLocationProvider(private val context: Context,
         val period = 24
         val maximum = 50
 
-        return ((1 - Math.sin(sequenceNumber * 2 * Math.PI / period)) * (maximum / 2) + (maximum / 2)) * maximum
+        val result = ((1 - Math.sin(sequenceNumber * 2 * Math.PI / period)) * (maximum / 2) + (maximum / 2)) * maximum
+
+        var offset = Random.nextDouble()
+        if((android.os.SystemClock.uptimeMillis() % 2) == 0.toLong()) {
+            offset = -offset
+        }
+
+        return result + offset
     }
 
     private fun computeAltitude(sequenceNumber: Int): Double {
         val period = 24
         val maximum = 100
 
-        return (Math.sin(sequenceNumber * 2 * Math.PI / period) * (maximum / 2) + (maximum / 2)) * maximum
+        val result =  (Math.sin(sequenceNumber * 2 * Math.PI / period) * (maximum / 2) + (maximum / 2)) * maximum
+
+        var offset = Random.nextDouble()
+        if((android.os.SystemClock.uptimeMillis() % 2) == 0.toLong()) {
+            offset = -offset
+        }
+
+        return result + offset
     }
 
     public override fun stopLocationUpdates() {

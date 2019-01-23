@@ -29,7 +29,7 @@ internal final class MapTabFragment: Fragment() {
     public lateinit var appSettings: IAppSettings
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_map_tab, container, false)
+        return inflater.inflate(R.layout.fragment_trackrecorderactivity_map_tab, container, false)
     }
 
     public override fun setUserVisibleHint(isVisibleToUser: Boolean) {

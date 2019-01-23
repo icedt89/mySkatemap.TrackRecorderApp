@@ -17,6 +17,12 @@ internal final class TrackSegment(private val polyline: Polyline, private val ov
         this.polyline.setPoints(points)
     }
 
+    public override var show: Boolean
+        get() = this.polyline.isVisible
+        set(value) {
+            this.polyline.isVisible = value
+        }
+
     public override val hasLocations: Boolean
         get() = this.polyline.points.any()
 

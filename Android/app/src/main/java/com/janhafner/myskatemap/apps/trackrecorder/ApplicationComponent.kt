@@ -10,6 +10,8 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.DashboardTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings.UserProfileSettingsFragment
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.ViewFinishedTrackActivity
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.overview.OverviewTabFragment
 import dagger.Component
 import javax.inject.Singleton
 
@@ -24,7 +26,13 @@ internal interface ApplicationComponent : DashboardTileFragmentPresenterComponen
 
     fun inject(trackRecorderActivity: TrackRecorderActivity)
 
+    fun inject(viewFinishedTrackActivity: ViewFinishedTrackActivity)
+
+    fun inject(mapTabFragment: com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.map.MapTabFragment)
+
     fun inject(trackListActivity: TrackListActivity)
+
+    fun inject(overviewTabFragment: OverviewTabFragment)
 
     fun inject(dashboardTabFragment: DashboardTabFragment)
 

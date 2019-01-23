@@ -17,7 +17,9 @@ internal final class RecordingTimeDashboardTileFragmentPresenter(private val con
     }
 
     protected override fun getResetObservable(): Observable<FormattedDisplayValue> {
-        return Observable.just(FormattedDisplayValue(Period.ZERO.formatRecordingTime(), ""))
+        val value = Period.ZERO
+
+        return Observable.just(FormattedDisplayValue(value.formatRecordingTime(), "", value))
     }
 
     protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
@@ -26,7 +28,7 @@ internal final class RecordingTimeDashboardTileFragmentPresenter(private val con
                 .map {
                     val formattedValue = it.formatRecordingTime()
 
-                    FormattedDisplayValue(formattedValue, "")
+                    FormattedDisplayValue(formattedValue, "", it)
                 }
                 .replay(1)
                 .autoConnect()

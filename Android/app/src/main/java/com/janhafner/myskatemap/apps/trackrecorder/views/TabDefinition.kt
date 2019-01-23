@@ -1,4 +1,4 @@
-package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder
+package com.janhafner.myskatemap.apps.trackrecorder.views
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes

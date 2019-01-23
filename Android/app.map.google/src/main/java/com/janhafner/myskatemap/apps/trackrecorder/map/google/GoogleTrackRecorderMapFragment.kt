@@ -191,6 +191,190 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         uiSettings.isMapToolbarEnabled = false
 
         this.map.mapType = GoogleMap.MAP_TYPE_NORMAL
+        this.map.setMapStyle(MapStyleOptions("[\n" +
+                "    {\n" +
+                "        \"featureType\": \"water\",\n" +
+                "        \"elementType\": \"geometry.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#d3d3d3\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"transit\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#808080\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"visibility\": \"off\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road.highway\",\n" +
+                "        \"elementType\": \"geometry.stroke\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"visibility\": \"on\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"color\": \"#b3b3b3\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road.highway\",\n" +
+                "        \"elementType\": \"geometry.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#ffffff\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road.local\",\n" +
+                "        \"elementType\": \"geometry.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"visibility\": \"on\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"color\": \"#ffffff\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"weight\": 1.8\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road.local\",\n" +
+                "        \"elementType\": \"geometry.stroke\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#d7d7d7\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"poi\",\n" +
+                "        \"elementType\": \"geometry.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"visibility\": \"on\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"color\": \"#ebebeb\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"administrative\",\n" +
+                "        \"elementType\": \"geometry\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#a7a7a7\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road.arterial\",\n" +
+                "        \"elementType\": \"geometry.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#ffffff\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road.arterial\",\n" +
+                "        \"elementType\": \"geometry.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#ffffff\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"landscape\",\n" +
+                "        \"elementType\": \"geometry.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"visibility\": \"on\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"color\": \"#efefef\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road\",\n" +
+                "        \"elementType\": \"labels.text.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#696969\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"administrative\",\n" +
+                "        \"elementType\": \"labels.text.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"visibility\": \"on\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"color\": \"#737373\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"poi\",\n" +
+                "        \"elementType\": \"labels.icon\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"visibility\": \"off\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"poi\",\n" +
+                "        \"elementType\": \"labels\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"visibility\": \"off\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road.arterial\",\n" +
+                "        \"elementType\": \"geometry.stroke\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#d6d6d6\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"road\",\n" +
+                "        \"elementType\": \"labels.icon\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"visibility\": \"off\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"featureType\": \"poi\",\n" +
+                "        \"elementType\": \"geometry.fill\",\n" +
+                "        \"stylers\": [\n" +
+                "            {\n" +
+                "                \"color\": \"#dadada\"\n" +
+                "            }\n" +
+                "        ]\n" +
+                "    }\n" +
+                "]"))
 
         this.map.setOnCircleClickListener {
             if(it.tag != null && !it.tag!!.toString().isBlank()) {

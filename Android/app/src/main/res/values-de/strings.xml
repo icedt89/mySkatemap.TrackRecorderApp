@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">mySkatemap</string>
     <string name="trackrecorderactivity_title">Aktivität</string>
+    <string name="viewfinishedtrackactivity_title">Aktivität vom...</string>
     <string name="trackrecorderactivity_toolbar_finish_currenttracking">Abschließen</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttracking">Verwerfen</string>
     <string name="trackrecorderactivity_toast_recording_running">Aufnahme aktiv</string>

@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
     <application
@@ -21,6 +21,7 @@
         android:roundIcon="@drawable/ic_home_screen_icon"
         android:icon="@drawable/ic_home_screen_icon"
         android:theme="@style/MySkatemap.TrackRecorder.AppTheme.AppCompat">
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <activity
             android:name=".views.activities.SplashscreenActivity"
             android:theme="@style/MySkatemap.TrackRecorder.SplashscreenActivityTheme">
@@ -39,6 +40,9 @@
             android:launchMode="singleTask"
             android:label="@string/trackrecorderactivity_title"
             android:windowSoftInputMode="adjustPan|stateHidden" />
+        <activity
+            android:name=".views.activities.viewfinishedtrack.ViewFinishedTrackActivity"
+            android:label="@string/viewfinishedtrackactivity_title" />
         <activity
             android:name=".views.activities.tracklist.TrackListActivity"
             android:label="@string/tracklistactivity_title" />

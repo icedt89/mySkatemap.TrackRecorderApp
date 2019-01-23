@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.eventing.TrackRecordingEventsSubscriber
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
@@ -28,9 +27,6 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
     @Inject
     public lateinit var userProfileSettings: IUserProfileSettings
 
-    @Inject
-    public lateinit var trackRecordingEventsSubscriber: TrackRecordingEventsSubscriber
-
     private var presenter: TrackRecorderActivityPresenter? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +43,12 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return this.presenter!!.onOptionsItemSelected(item)
+    }
+
+    public override fun onBackPressed() {
+        if(this.presenter!!.onBackPressed()) {
+            super.onBackPressed()
+        }
     }
 
     public override fun onDestroy() {

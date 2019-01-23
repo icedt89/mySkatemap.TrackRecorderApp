@@ -1,7 +1,5 @@
 package com.janhafner.myskatemap.apps.trackrecorder.common
 
-import android.util.Log
-import android.util.TimingLogger
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.Sex
 import io.reactivex.Observable
@@ -143,25 +141,12 @@ public fun Observable<List<android.location.Location>>.distance(): Observable<Fl
             var result = distance
 
             if(lastAccessedLocation != null) {
-                val timings = TimingLogger("distance_measure", "A")
-
-                val distance1 = lastAccessedLocation!!.distanceTo(it.first())
-
-                timings.addSplit("B")
-
-                val distance2 = haversine(lastAccessedLocation!!.latitude, it.first().latitude, lastAccessedLocation!!.longitude, it.first().longitude)
-
-                timings.dumpToLog()
-
                 // Compute distance between last point of last path and first point of the new path
                 result += lastAccessedLocation!!.distanceTo(it.first())
-
-                Log.i("distance1", distance1.toString())
-                Log.i("distance2", distance2.toString())
             }
 
             // Calculate distance of new path
-            result += it.calculateDistance2()
+            result += it.calculateDistance()
 
             lastAccessedLocation = it.last()
 

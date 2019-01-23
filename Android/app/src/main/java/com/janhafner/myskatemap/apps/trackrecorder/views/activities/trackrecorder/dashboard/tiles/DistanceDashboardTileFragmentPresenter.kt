@@ -20,17 +20,15 @@ internal final class DistanceDashboardTileFragmentPresenter(private val context:
                                                             trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                             private val distanceConverterFactory: IDistanceConverterFactory)
     : DashboardTileFragmentPresenter(trackRecorderServiceController) {
-    private var distanceConverter: IDistanceConverter = distanceConverterFactory.createConverter()
-
     init {
-
         this.title = this.context.getString(R.string.dashboard_tile_distancedashboardtilefragmentpresenter_tile)
     }
 
     protected override fun getResetObservable(): Observable<FormattedDisplayValue> {
-        val result = this.distanceConverter.convert(0.0f)
+        val value = 0.0f
+        val result = this.distanceConverterFactory.createConverter().convert(value)
 
-        return Observable.just(FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol()))
+        return Observable.just(FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol(), value))
     }
 
     protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
@@ -47,7 +45,7 @@ internal final class DistanceDashboardTileFragmentPresenter(private val context:
                             value, converter ->
                             val result = converter.convert(value)
 
-                            FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol())
+                            FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol(), value)
                         })
                 .replay(1)
                 .autoConnect()

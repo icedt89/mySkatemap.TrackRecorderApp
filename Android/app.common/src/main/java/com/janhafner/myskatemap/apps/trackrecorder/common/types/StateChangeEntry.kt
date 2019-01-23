@@ -1,5 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.common.types
 
+import android.os.Parcel
+import android.os.Parcelable
 import org.joda.time.DateTime
 
 public final class StateChangeEntry(public val at: DateTime,

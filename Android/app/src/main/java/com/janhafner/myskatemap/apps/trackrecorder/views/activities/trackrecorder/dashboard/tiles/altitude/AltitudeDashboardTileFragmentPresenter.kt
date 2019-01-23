@@ -10,6 +10,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.LineChartDashboardTileFragmentPresenterConnector
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.FormattedDisplayValue
 import io.reactivex.Observable
@@ -19,19 +20,18 @@ internal abstract class AltitudeDashboardTileFragmentPresenter(private val appSe
                                                                trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>,
                                                                private val distanceConverterFactory: IDistanceConverterFactory)
     : DashboardTileFragmentPresenter(trackRecorderServiceController) {
-
-    private var distanceConverter: IDistanceConverter
-
-    init {
-        this.distanceConverter = this.distanceConverterFactory.createConverter()
-    }
-
     protected abstract fun getValueSourceObservable(trackRecorderSession: ITrackRecordingSession): Observable<Float>
 
     protected override fun getResetObservable(): Observable<FormattedDisplayValue> {
-        val result = this.distanceConverter.convert(0.0f)
+        if (this.presenterConnector is LineChartDashboardTileFragmentPresenterConnector) {
+            return Observable.empty()
+        }
 
-        return Observable.just(FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol()))
+        val value = 0.0f
+
+        val result = this.distanceConverterFactory.createConverter().convert(value)
+
+        return Observable.just(FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol(), value))
     }
 
     protected override fun getSessionBoundObservable(trackRecorderSession: ITrackRecordingSession): Observable<FormattedDisplayValue> {
@@ -48,7 +48,7 @@ internal abstract class AltitudeDashboardTileFragmentPresenter(private val appSe
                             value, converter ->
                             val result = converter.convert(value)
 
-                            FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol())
+                            FormattedDisplayValue(result.value.roundWithTwoDecimals(), result.unit.getUnitSymbol(), value)
                         })
                 .replay(1)
                 .autoConnect()

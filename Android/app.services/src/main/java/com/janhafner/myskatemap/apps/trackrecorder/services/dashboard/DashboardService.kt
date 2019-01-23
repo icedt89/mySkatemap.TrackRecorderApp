@@ -14,11 +14,11 @@ public final class DashboardService(private val localDashboardServiceDataSource:
                     if (it.value == null) {
                         val defaultDashboard = Dashboard(currentDashboardId)
 
-                        defaultDashboard.topLeftTileImplementationTypeName = "DistanceDashboardTileFragmentPresenter"
-                        defaultDashboard.topRightTileImplementationTypeName = "BurnedEnergyDashboardTileFragmentPresenter"
-                        defaultDashboard.middleCenterTileImplementationTypeName = "RecordingTimeDashboardTileFragmentPresenter"
-                        defaultDashboard.bottomLeftTileImplementationTypeName = "AverageSpeedDashboardTileFragmentPresenter"
-                        defaultDashboard.bottomRightTileImplementationTypeName = "CurrentAltitudeDashboardTileFragmentPresenter"
+                        defaultDashboard.topLeftTile.implementationTypeName = "DistanceDashboardTileFragmentPresenter"
+                        defaultDashboard.topRightTile.implementationTypeName = "BurnedEnergyDashboardTileFragmentPresenter"
+                        defaultDashboard.middleCenterTile.implementationTypeName = "RecordingTimeDashboardTileFragmentPresenter"
+                        defaultDashboard.bottomLeftTile.implementationTypeName = "CurrentSpeedDashboardTileFragmentPresenter"
+                        defaultDashboard.bottomRightTile.implementationTypeName = "CurrentAltitudeDashboardTileFragmentPresenter"
 
                         defaultDashboard
                     } else {

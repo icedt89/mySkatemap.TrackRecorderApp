@@ -23,6 +23,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.joda.time.Period
+import java.util.concurrent.TimeUnit
 
 
 internal final class TrackRecorderServiceNotification(private val service: Service,
@@ -85,24 +86,28 @@ internal final class TrackRecorderServiceNotification(private val service: Servi
     private fun subscribeToSession(trackRecorderSession: ITrackRecordingSession) {
         this.subscriptions.addAll(
                 trackRecorderSession.recordingTimeChanged
-                        .subscribeOn(Schedulers.computation())
-                        .subscribe {
+                        .doOnNext {
                             this.recordingTime = it
-
-                            this.update()
-                        },
-                trackRecorderSession.stateChanged
+                        }
+                        .map {
+                            Unit
+                        }
+                        .mergeWith(trackRecorderSession.stateChanged
+                                .doOnNext{
+                                    this.state = it
+                                }
+                                .map {
+                                    Unit
+                                })
+                        .mergeWith(trackRecorderSession.distanceChanged
+                                .doOnNext {
+                                    this.distance = it
+                                }
+                                .map {
+                                    Unit
+                                })
                         .subscribeOn(Schedulers.computation())
                         .subscribe {
-                            this.state = it
-
-                            this.update()
-                        },
-                trackRecorderSession.distanceChanged
-                        .subscribeOn(Schedulers.computation())
-                        .subscribe {
-                            this.distance = it
-
                             this.update()
                         }
         )
