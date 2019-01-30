@@ -3,4 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primaryColor">
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/playground_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ICH BIN EINE ACTIVITY"
+        android:layout_gravity="fill"
+        android:gravity="fill"
+        android:textAlignment="center"
+        android:textSize="50sp"
+        />
+    <fragment
+        android:id="@+id/playground_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        class="com.janhafner.myskatemap.apps.trackrecorder.views.activities.playground.PlaygroundFragment"/>
 </androidx.appcompat.widget.LinearLayoutCompat>

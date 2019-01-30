@@ -9,7 +9,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTile
 import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
 import com.janhafner.myskatemap.apps.trackrecorder.findChildFragmentById
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.IDashboardService
-import com.janhafner.myskatemap.apps.trackrecorder.views.INeedFragmentVisibilityInfo
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.*
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.AverageAltitudeDashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.altitude.CurrentAltitudeDashboardTileFragmentPresenter
@@ -31,97 +30,7 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
     private val subscriptions: CompositeDisposable = CompositeDisposable()
 
     init {
-        this.dashboardService.getCurrentDashboardOrDefault()
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.computation())
-                .map {
-                    val topLeftFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(it.topLeftTile.implementationTypeName)
-                    val topLeftDashboardTileSetup = DashboardTileSetup()
-                    topLeftDashboardTileSetup.presenter = topLeftFragmentPresenter
-                    topLeftDashboardTileSetup.dashboardTile = it.topLeftTile
-
-                    val topRightFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(it.topRightTile.implementationTypeName)
-                    val topRightDashboardTileSetup = DashboardTileSetup()
-                    topRightDashboardTileSetup.presenter = topRightFragmentPresenter
-                    topRightDashboardTileSetup.dashboardTile = it.topRightTile
-
-                    val middleCenterFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(it.middleCenterTile.implementationTypeName)
-                    val middleCenterDashboardTileSetup = DashboardTileSetup()
-                    middleCenterDashboardTileSetup.presenter = middleCenterFragmentPresenter
-                    middleCenterDashboardTileSetup.dashboardTile = it.middleCenterTile
-
-                    val bottomLeftFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(it.bottomLeftTile.implementationTypeName)
-                    val bottomLeftDashboardTileSetup = DashboardTileSetup()
-                    bottomLeftDashboardTileSetup.presenter = bottomLeftFragmentPresenter
-                    bottomLeftDashboardTileSetup.dashboardTile = it.bottomLeftTile
-
-                    val bottomRightFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(it.bottomRightTile.implementationTypeName)
-                    val bottomRightDashboardTileSetup = DashboardTileSetup()
-                    bottomRightDashboardTileSetup.presenter = bottomRightFragmentPresenter
-                    bottomRightDashboardTileSetup.dashboardTile = it.bottomRightTile
-
-                    object : Any() {
-                        public val dashboard: Dashboard = it
-
-                        public val dashboardTileSetups = mapOf(Pair(DashboardTileFragmentPosition.TopLeft, topLeftDashboardTileSetup),
-                                Pair(DashboardTileFragmentPosition.TopRight, topRightDashboardTileSetup),
-                                Pair(DashboardTileFragmentPosition.MiddleCenter, middleCenterDashboardTileSetup),
-                                Pair(DashboardTileFragmentPosition.BottomLeft, bottomLeftDashboardTileSetup),
-                                Pair(DashboardTileFragmentPosition.BottomRight, bottomRightDashboardTileSetup))
-                    }
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .map {
-                    val topLeftSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.TopLeft]!!
-                    topLeftSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_top_left)
-
-                    val topRightSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.TopRight]!!
-                    topRightSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_top_right)
-
-                    val middleCenterSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.MiddleCenter]!!
-                    middleCenterSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_middle_center)
-
-                    val bottomLeftSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.BottomLeft]!!
-                    bottomLeftSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_left)
-
-                    val bottomRightSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.BottomRight]!!
-                    bottomRightSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_right)
-
-                    it
-                }
-                .subscribe {
-                    result ->
-                    for (dashboardTileSetup in result.dashboardTileSetups) {
-                        dashboardTileSetup.value.fragment.presenter = dashboardTileSetup.value.presenter
-                        dashboardTileSetup.value.presenter.displayType = dashboardTileSetup.value.dashboardTile.displayType
-
-                        this.subscriptions.addAll(
-                                dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_title.longClicks()
-                                        .flatMapSingle {
-                                            this.changeTileFragmentPresenter(result.dashboard, dashboardTileSetup.value, dashboardTileSetup.key)
-                                        }
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe {
-                                            dashboardTileSetup.value.fragment.presenter = it
-                                            dashboardTileSetup.value.fragment.presenter!!.displayType = dashboardTileSetup.value.fragment.presenter!!.displayType
-
-                                        val toastText = this.view.getString(R.string.dashboard_tile_changed_toast_text, it.title)
-                                        ToastManager.showToast(this.view.context!!, toastText, Toast.LENGTH_SHORT)
-                                },
-                                dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks()
-                                        .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks())
-                                        .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_line_chart.longClicks())
-                                        .flatMapSingle{
-                                            this.changeTileFragmentPresenterConnector(result.dashboard, dashboardTileSetup.value)
-                                        }
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe {
-                                            dashboardTileSetup.value.fragment.presenter!!.displayType = it
-                                            dashboardTileSetup.value.presenter.displayType = it
-                                        }
-                        )
-                    }
-                }
+        this.initialize()
     }
 
     private fun changeTileFragmentPresenter(dashboard: Dashboard, dashboardTileSetup: DashboardTileSetup, position: DashboardTileFragmentPosition): Single<DashboardTileFragmentPresenter> {
@@ -156,15 +65,13 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
 
         if (newDashboardTileFragmentPresenter != null) {
             dashboardTileSetup.dashboardTile.implementationTypeName = newDashboardTileFragmentPresenter::class.java.simpleName
+            dashboardTileSetup.dashboardTile.displayType = DashboardTileDisplayType.TextOnly
 
             return this.dashboardService.saveDashboard(dashboard)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.computation())
                     .doOnError {
-                        dashboardTileSetup.dashboardTile.implementationTypeName = dashboardTileSetup.presenter::class.java.simpleName
-                    }
-                    .doOnSuccess {
-                        dashboardTileSetup.presenter = newDashboardTileFragmentPresenter
+                        dashboardTileSetup.dashboardTile.implementationTypeName = currentDashbordTileFragmentPresenter::class.java.simpleName
                     }
                     .map {
                         newDashboardTileFragmentPresenter
@@ -175,42 +82,129 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
     }
 
     private fun changeTileFragmentPresenterConnector(dashboard: Dashboard, dashboardTileSetup: DashboardTileSetup): Single<DashboardTileDisplayType> {
-        val dashbordTileFragmentPresenter = dashboardTileSetup.fragment.presenter!!
+        val currentDashbordTileFragmentPresenter = dashboardTileSetup.fragment.presenter!!
 
-        var newDisplayType: DashboardTileDisplayType? = null
-        if (dashbordTileFragmentPresenter.displayType == DashboardTileDisplayType.TextOnly && dashbordTileFragmentPresenter.supportedPresenterConnectorTypes.contains(DashboardTileDisplayType.LineChart)) {
-            newDisplayType = DashboardTileDisplayType.LineChart
-        } else if (dashbordTileFragmentPresenter.displayType == DashboardTileDisplayType.LineChart && dashbordTileFragmentPresenter.supportedPresenterConnectorTypes.contains(DashboardTileDisplayType.TextOnly)) {
-            newDisplayType = DashboardTileDisplayType.TextOnly
+        var newDashbordTileFragmentPresenterDisplayType: DashboardTileDisplayType? = null
+        if (currentDashbordTileFragmentPresenter.displayType == DashboardTileDisplayType.TextOnly && currentDashbordTileFragmentPresenter.supportedPresenterConnectorTypes.contains(DashboardTileDisplayType.LineChart)) {
+            newDashbordTileFragmentPresenterDisplayType = DashboardTileDisplayType.LineChart
+        } else if (currentDashbordTileFragmentPresenter.displayType == DashboardTileDisplayType.LineChart && currentDashbordTileFragmentPresenter.supportedPresenterConnectorTypes.contains(DashboardTileDisplayType.TextOnly)) {
+            newDashbordTileFragmentPresenterDisplayType = DashboardTileDisplayType.TextOnly
         }
 
-        if(newDisplayType != null) {
-            dashboardTileSetup.dashboardTile.displayType = newDisplayType
+        if(newDashbordTileFragmentPresenterDisplayType != null) {
+            dashboardTileSetup.dashboardTile.displayType = newDashbordTileFragmentPresenterDisplayType
 
             return this.dashboardService.saveDashboard(dashboard)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.computation())
                     .doOnError {
-                        dashboardTileSetup.dashboardTile.displayType = dashbordTileFragmentPresenter.displayType
+                        dashboardTileSetup.dashboardTile.displayType = currentDashbordTileFragmentPresenter.displayType
                     }
                     .map {
-                        dashboardTileSetup.dashboardTile.displayType
+                        newDashbordTileFragmentPresenterDisplayType
                     }
         }
 
         return Single.never()
     }
 
-    public fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        if(this.view.activity is INeedFragmentVisibilityInfo) {
-            (this.view.activity as INeedFragmentVisibilityInfo).onFragmentVisibilityChange(this.view, isVisibleToUser)
-        }
+    private fun initialize() {
+        this.dashboardService.getDashboard()
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map {
+                    val topLeftDashboardTileSetup = DashboardTileSetup()
+                    topLeftDashboardTileSetup.dashboardTile = it.topLeftTile
+
+                    val topRightDashboardTileSetup = DashboardTileSetup()
+                    topRightDashboardTileSetup.dashboardTile = it.topRightTile
+
+                    val middleCenterDashboardTileSetup = DashboardTileSetup()
+                    middleCenterDashboardTileSetup.dashboardTile = it.middleCenterTile
+
+                    val bottomLeftDashboardTileSetup = DashboardTileSetup()
+                    bottomLeftDashboardTileSetup.dashboardTile = it.bottomLeftTile
+
+                    val bottomRightDashboardTileSetup = DashboardTileSetup()
+                    bottomRightDashboardTileSetup.dashboardTile = it.bottomRightTile
+
+                    object : Any() {
+                        public val dashboard: Dashboard = it
+
+                        public val dashboardTileSetups = mapOf(Pair(DashboardTileFragmentPosition.TopLeft, topLeftDashboardTileSetup),
+                                Pair(DashboardTileFragmentPosition.TopRight, topRightDashboardTileSetup),
+                                Pair(DashboardTileFragmentPosition.MiddleCenter, middleCenterDashboardTileSetup),
+                                Pair(DashboardTileFragmentPosition.BottomLeft, bottomLeftDashboardTileSetup),
+                                Pair(DashboardTileFragmentPosition.BottomRight, bottomRightDashboardTileSetup))
+                    }
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .map {
+                    val topLeftSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.TopLeft]!!
+                    val topLeftFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(topLeftSetup.dashboardTile.implementationTypeName)
+                    topLeftSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_top_left)
+                    topLeftSetup.fragment.presenter = topLeftFragmentPresenter
+
+                    val topRightSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.TopRight]!!
+                    val topRightFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(topRightSetup.dashboardTile.implementationTypeName)
+                    topRightSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_top_right)
+                    topRightSetup.fragment.presenter = topRightFragmentPresenter
+
+                    val middleCenterSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.MiddleCenter]!!
+                    val middleCenterFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(middleCenterSetup.dashboardTile.implementationTypeName)
+                    middleCenterSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_middle_center)
+                    middleCenterSetup.fragment.presenter = middleCenterFragmentPresenter
+
+                    val bottomLeftSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.BottomLeft]!!
+                    val bottomLeftFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(bottomLeftSetup.dashboardTile.implementationTypeName)
+                    bottomLeftSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_left)
+                    bottomLeftSetup.fragment.presenter = bottomLeftFragmentPresenter
+
+                    val bottomRightSetup = it.dashboardTileSetups[DashboardTileFragmentPosition.BottomRight]!!
+                    val bottomRightFragmentPresenter = this.dashboardTileFragmentPresenterFactory.createPresenterFromTypeName(bottomRightSetup.dashboardTile.implementationTypeName)
+                    bottomRightSetup.fragment = this.view.findChildFragmentById(R.id.trackrecorderactivity_tab_dashboard_tile_bottom_right)
+                    bottomRightSetup.fragment.presenter = bottomRightFragmentPresenter
+
+                    it
+                }
+                .subscribe {
+                    result ->
+                    for (dashboardTileSetup in result.dashboardTileSetups) {
+                        dashboardTileSetup.value.fragment.presenter!!.displayType = dashboardTileSetup.value.dashboardTile.displayType
+
+                        this.subscriptions.addAll(
+                                dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_title.longClicks()
+                                        .flatMapSingle {
+                                            this.changeTileFragmentPresenter(result.dashboard, dashboardTileSetup.value, dashboardTileSetup.key)
+                                        }
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe {
+                                            dashboardTileSetup.value.fragment.presenter = it
+
+                                            val toastText = this.view.getString(R.string.dashboard_tile_changed_toast_text, it.title)
+                                            ToastManager.showToast(this.view.context!!, toastText, Toast.LENGTH_SHORT)
+                                        },
+                                dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks()
+                                        .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks())
+                                        .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_line_chart.longClicks())
+                                        .flatMapSingle{
+                                            this.changeTileFragmentPresenterConnector(result.dashboard, dashboardTileSetup.value)
+                                        }
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe {
+                                            dashboardTileSetup.value.fragment.presenter!!.displayType = it
+                                        }
+                        )
+                    }
+                }
+    }
+
+    public fun destroy() {
+        this.subscriptions.dispose()
     }
 
     private final class DashboardTileSetup {
         public lateinit var fragment: DashboardTileFragment
-
-        public lateinit var presenter: DashboardTileFragmentPresenter
 
         public lateinit var dashboardTile: DashboardTile
     }

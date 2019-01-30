@@ -4,7 +4,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.common.types.Dashboard
 import io.reactivex.Single
 
 public interface IDashboardService {
-    fun getCurrentDashboardOrDefault() : Single<Dashboard>
+    fun getDashboard() : Single<Dashboard>
 
     fun saveDashboard(dashboard: Dashboard): Single<Unit>
 }

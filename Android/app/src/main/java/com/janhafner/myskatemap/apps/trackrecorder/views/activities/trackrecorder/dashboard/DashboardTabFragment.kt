@@ -36,12 +36,10 @@ internal final class DashboardTabFragment : Fragment() {
         this.presenter = DashboardTabFragmentPresenter(this, this.dashboardService, this.dashboardTileFragmentPresenterFactory)
     }
 
-    public override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        super.setUserVisibleHint(isVisibleToUser)
+    public override fun onDestroy() {
+        super.onDestroy()
 
-        if(this.presenter != null) {
-            this.presenter!!.setUserVisibleHint(isVisibleToUser)
-        }
+        this.presenter?.destroy()
     }
 }
 

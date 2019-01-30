@@ -5,8 +5,7 @@ import io.reactivex.Single
 import java.util.*
 
 public final class DashboardService(private val localDashboardServiceDataSource: IDashboardServiceDataSource) : IDashboardService {
-    public override fun getCurrentDashboardOrDefault() : Single<Dashboard> {
-        // TODO: get from app settings
+    public override fun getDashboard() : Single<Dashboard> {
         val currentDashboardId = UUID.fromString("00000000-0000-0000-0000-000000000000")
 
         return this.localDashboardServiceDataSource.getDashboardByIdOrNull(currentDashboardId.toString())

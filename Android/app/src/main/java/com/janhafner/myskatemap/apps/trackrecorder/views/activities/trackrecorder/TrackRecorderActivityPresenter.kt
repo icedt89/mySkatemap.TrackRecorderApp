@@ -9,7 +9,6 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -70,8 +69,6 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
     private val sessionMenuSubscriptions: CompositeDisposable = CompositeDisposable()
 
     private var trackRecorderSubscription: Disposable? = null
-
-    private var fragment: Fragment? = null
 
     private var trackRecorderSession: ITrackRecordingSession? = null
 
