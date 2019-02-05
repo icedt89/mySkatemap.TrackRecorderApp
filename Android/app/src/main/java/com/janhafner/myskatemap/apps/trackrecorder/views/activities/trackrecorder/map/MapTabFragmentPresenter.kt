@@ -172,7 +172,6 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                     this.view.fragment_track_recorder_map_add_poi.visibility = visibility
                 }
         this.trackRecorderServiceController.isClientBoundChanged
-                .bindUntilEvent(this.view, Lifecycle.Event.ON_DESTROY)
                 .subscribeOn(Schedulers.computation())
                 .flatMap {
                     if (it) {
@@ -181,6 +180,7 @@ internal final class MapTabFragmentPresenter(private val view: MapTabFragment,
                         Observable.just(false)
                     }
                 }
+                .bindUntilEvent(this.view, Lifecycle.Event.ON_DESTROY)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     if (it) {

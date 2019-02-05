@@ -123,12 +123,12 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
         val result = ((1 - Math.sin(sequenceNumber * 2 * Math.PI / period)) * (maximum / 2) + (maximum / 2)) * maximum
 
-        var offset = Random.nextDouble()
+        var offset = Random.nextDouble() * 1000
         if((android.os.SystemClock.uptimeMillis() % 2) == 0.toLong()) {
-            offset = -offset
+            offset = -offset / maximum + period
         }
 
-        return result + offset
+        return result + offset * (maximum / period)
     }
 
     private fun computeAltitude(sequenceNumber: Int): Double {
@@ -137,12 +137,12 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
         val result =  (Math.sin(sequenceNumber * 2 * Math.PI / period) * (maximum / 2) + (maximum / 2)) * maximum
 
-        var offset = Random.nextDouble()
+        var offset = Random.nextDouble() * 1000
         if((android.os.SystemClock.uptimeMillis() % 2) == 0.toLong()) {
-            offset = -offset
+            offset = -offset / maximum + period
         }
 
-        return result + offset
+        return result + offset  * (maximum / period)
     }
 
     public override fun stopLocationUpdates() {

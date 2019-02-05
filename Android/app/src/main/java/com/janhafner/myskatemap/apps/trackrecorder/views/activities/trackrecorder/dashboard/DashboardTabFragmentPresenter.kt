@@ -19,7 +19,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed.MaximumSpeedDashboardTileFragmentPresenter
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.view.*
 
@@ -27,8 +26,6 @@ import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.view.*
 internal final class DashboardTabFragmentPresenter(private val view: DashboardTabFragment,
                                                    private val dashboardService: IDashboardService,
                                                    private val dashboardTileFragmentPresenterFactory: IDashboardTileFragmentPresenterFactory) {
-    private val subscriptions: CompositeDisposable = CompositeDisposable()
-
     init {
         this.initialize()
     }
@@ -91,7 +88,7 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
             newDashbordTileFragmentPresenterDisplayType = DashboardTileDisplayType.TextOnly
         }
 
-        if(newDashbordTileFragmentPresenterDisplayType != null) {
+        if (newDashbordTileFragmentPresenterDisplayType != null) {
             dashboardTileSetup.dashboardTile.displayType = newDashbordTileFragmentPresenterDisplayType
 
             return this.dashboardService.saveDashboard(dashboard)
@@ -167,40 +164,33 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
 
                     it
                 }
-                .subscribe {
-                    result ->
+                .subscribe { result ->
                     for (dashboardTileSetup in result.dashboardTileSetups) {
                         dashboardTileSetup.value.fragment.presenter!!.displayType = dashboardTileSetup.value.dashboardTile.displayType
 
-                        this.subscriptions.addAll(
-                                dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_title.longClicks()
-                                        .flatMapSingle {
-                                            this.changeTileFragmentPresenter(result.dashboard, dashboardTileSetup.value, dashboardTileSetup.key)
-                                        }
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe {
-                                            dashboardTileSetup.value.fragment.presenter = it
+                        dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_title.longClicks()
+                                .flatMapSingle {
+                                    this.changeTileFragmentPresenter(result.dashboard, dashboardTileSetup.value, dashboardTileSetup.key)
+                                }
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    dashboardTileSetup.value.fragment.presenter = it
 
-                                            val toastText = this.view.getString(R.string.dashboard_tile_changed_toast_text, it.title)
-                                            ToastManager.showToast(this.view.context!!, toastText, Toast.LENGTH_SHORT)
-                                        },
-                                dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks()
-                                        .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks())
-                                        .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_line_chart.longClicks())
-                                        .flatMapSingle{
-                                            this.changeTileFragmentPresenterConnector(result.dashboard, dashboardTileSetup.value)
-                                        }
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe {
-                                            dashboardTileSetup.value.fragment.presenter!!.displayType = it
-                                        }
-                        )
+                                    val toastText = this.view.getString(R.string.dashboard_tile_changed_toast_text, it.title)
+                                    ToastManager.showToast(this.view.context!!, toastText, Toast.LENGTH_SHORT)
+                                }
+                        dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks()
+                                .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks())
+                                .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_line_chart.longClicks())
+                                .flatMapSingle {
+                                    this.changeTileFragmentPresenterConnector(result.dashboard, dashboardTileSetup.value)
+                                }
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    dashboardTileSetup.value.fragment.presenter!!.displayType = it
+                                }
                     }
                 }
-    }
-
-    public fun destroy() {
-        this.subscriptions.dispose()
     }
 
     private final class DashboardTileSetup {

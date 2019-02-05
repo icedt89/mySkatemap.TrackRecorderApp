@@ -35,7 +35,7 @@
     <string name="trackrecorderservice_notification_action_finish">Finish</string>
     <string name="trackrecorderservice_notification_action_discard">Discard</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
-    <string name="trackrecorderservice_notification_contenttext_template">%s in %s</string>
+    <string name="trackrecorderservice_notification_contenttext_template">%1$s in %%2$s</string>
 
     <string name="appsettings_preference_units_title">Units</string>
     <string name="appsettings_preference_show_positions_on_map_label">Show positions on map</string>

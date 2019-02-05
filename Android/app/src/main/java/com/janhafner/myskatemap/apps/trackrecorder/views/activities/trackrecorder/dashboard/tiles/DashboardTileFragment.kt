@@ -8,27 +8,15 @@ internal abstract class DashboardTileFragment : Fragment() {
             field?.destroy()
 
             if(value != null) {
-                value.onResume(this)
-
-                field = value
+                value.initialize(this)
             }
+
+            field = value
         }
 
-    public override fun onDestroyView() {
-        this.presenter?.destroy()
+    public override fun onDestroy() {
+        this.presenter = null
 
-        super.onDestroyView()
-    }
-
-    public override fun onResume() {
-        super.onResume()
-
-        this.presenter?.onResume(this)
-    }
-
-    public override fun onPause() {
-        super.onPause()
-
-        this.presenter?.onPause()
+        super.onDestroy()
     }
 }

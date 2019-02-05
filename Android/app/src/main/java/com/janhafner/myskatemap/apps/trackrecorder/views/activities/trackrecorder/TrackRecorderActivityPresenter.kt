@@ -9,6 +9,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager.widget.ViewPager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -46,6 +47,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dialogs.ShowLocationServicesAlertDialogBuilder
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.map.MapTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings.UserProfileSettingsActivity
+import com.trello.rxlifecycle3.android.lifecycle.kotlin.bindUntilEvent
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -188,9 +190,9 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                         }
                         .subscribe {
                             if (it) {
-                                this@TrackRecorderActivityPresenter.view.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                                this.view.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                             } else {
-                                this@TrackRecorderActivityPresenter.view.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                                this.view.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                             }
                         },
                 this.appSettings.propertyChanged
@@ -219,7 +221,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         )
 
         if (this.appSettings.keepScreenOn) {
-            this@TrackRecorderActivityPresenter.view.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            this.view.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
 
@@ -368,6 +370,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                                 Observable.just(false)
                             }
                         }
+                        .bindUntilEvent(this.view, Lifecycle.Event.ON_DESTROY)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             if (it) {
@@ -417,14 +420,14 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         this.sessionMenuSubscriptions.dispose()
         this.subscriptions.dispose()
 
-        this@TrackRecorderActivityPresenter.view.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        this.view.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     public fun onBackPressed(): Boolean {
         val cancelBack = !this.navigationDrawersOpened
 
         if(this.navigationDrawersOpened) {
-            this@TrackRecorderActivityPresenter.view.trackrecorderactivity_navigationdrawer.closeDrawers()
+            this.view.trackrecorderactivity_navigationdrawer.closeDrawers()
 
             this.navigationDrawersOpened = false
         }
@@ -436,22 +439,22 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
         val navigationView = this.view.findViewById<NavigationView>(R.id.trackrecorderactivity_navigation)
         navigationView.setNavigationItemSelectedListener { menuItem ->
             if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_user_profile) {
-                this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, UserProfileSettingsActivity::class.java))
+                this.view.startActivity(Intent(this.view, UserProfileSettingsActivity::class.java))
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_settings) {
-                this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, AppSettingsActivity::class.java))
+                this.view.startActivity(Intent(this.view, AppSettingsActivity::class.java))
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_about) {
-                this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, AboutActivity::class.java))
+                this.view.startActivity(Intent(this.view, AboutActivity::class.java))
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_tracklist) {
-                this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, TrackListActivity::class.java))
+                this.view.startActivity(Intent(this.view, TrackListActivity::class.java))
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_signin) {
-                val googleSignInClient = this@TrackRecorderActivityPresenter.getGoogleSignInClient()
+                val googleSignInClient = this.getGoogleSignInClient()
 
-                this@TrackRecorderActivityPresenter.view.startActivityForResult(googleSignInClient.signInIntent, GOOGLE_SIGNIN_REQUEST_CODE)
+                this.view.startActivityForResult(googleSignInClient.signInIntent, GOOGLE_SIGNIN_REQUEST_CODE)
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_playground) {
-                this@TrackRecorderActivityPresenter.view.startActivity(Intent(this@TrackRecorderActivityPresenter.view, PlaygroundActivity::class.java))
+                this.view.startActivity(Intent(this.view, PlaygroundActivity::class.java))
             }
 
-            this@TrackRecorderActivityPresenter.view.trackrecorderactivity_navigationdrawer.closeDrawers()
+            this.view.trackrecorderactivity_navigationdrawer.closeDrawers()
 
             true
         }
@@ -474,7 +477,7 @@ internal final class TrackRecorderActivityPresenter(private val view: TrackRecor
                             this.view.isLocationServicesEnabled()
                                     .onErrorReturn {
                                         if (it is ResolvableApiException && it.statusCode == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
-                                            it.startResolutionForResult(this@TrackRecorderActivityPresenter.view, ENABLE_LOCATION_SERVICES_REQUEST_CODE)
+                                            it.startResolutionForResult(this.view, ENABLE_LOCATION_SERVICES_REQUEST_CODE)
                                         }
 
                                         false

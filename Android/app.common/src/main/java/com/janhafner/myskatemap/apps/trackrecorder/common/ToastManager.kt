@@ -12,7 +12,7 @@ public final class ToastManager {
                 currentToast!!.cancel()
             }
 
-            currentToast = Toast.makeText(context, text, duration)
+            currentToast = Toast.makeText(context.applicationContext, text, duration)
 
             currentToast!!.show()
         }

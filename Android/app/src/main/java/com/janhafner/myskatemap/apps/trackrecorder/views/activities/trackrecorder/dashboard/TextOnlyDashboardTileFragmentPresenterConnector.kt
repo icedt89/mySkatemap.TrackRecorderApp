@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard
 
 import android.view.View
-import com.jakewharton.rxbinding2.widget.text
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.FormattedDisplayValue
 import io.reactivex.Observable
@@ -24,18 +23,16 @@ internal class TextOnlyDashboardTileFragmentPresenterConnector : IDashboardTileF
         }
 
         return listOf(
-                source.map {
-                    it.value
-                }
+                source
+                        .doOnTerminate {
+                            this.connectedDashboardTileFragment = null
+                        }
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(dashboardTileFragment.fragment_dashboard_tile_value.text()),
-                source.map {
-                    it.unit
-                }
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(dashboardTileFragment.fragment_dashboard_tile_unit.text())
+                        .subscribe {
+                            dashboardTileFragment.fragment_dashboard_tile_value.text = it.value
+                            dashboardTileFragment.fragment_dashboard_tile_unit.text = it.unit
+                        }
         )
     }
 }

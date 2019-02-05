@@ -55,12 +55,8 @@ internal final class ViewFinishedTrackActivity: AppCompatActivity() {
         return this.presenter!!.onOptionsItemSelected(item)
     }
 
-    override fun onAttachFragment(fragment: Fragment?) {
+    override fun onAttachFragment(fragment: Fragment) {
         super.onAttachFragment(fragment)
-
-        if (fragment == null) {
-            return
-        }
 
         this.fragments.add(fragment)
 

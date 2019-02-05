@@ -63,6 +63,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         set(value) {
             for (positionCircle in this.positionCircles.filter { it.isVisible != value}) {
                 positionCircle.isVisible = value
+                positionCircle.isClickable = value
             }
 
             field = value
@@ -142,7 +143,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         circleOptions.strokeColor(Color.RED)
         circleOptions.strokeWidth(2.0f)
         circleOptions.visible(this.showPositions)
-        circleOptions.clickable(true)
+        circleOptions.clickable(this.showPositions)
 
         val result = this.map.addCircle(circleOptions)
         result.tag = mapLocation.debugInfo

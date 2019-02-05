@@ -13,6 +13,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.LineChartDashboardTileFragmentPresenterConnector
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.FormattedDisplayValue
+import com.trello.rxlifecycle3.android.lifecycle.kotlin.bindUntilEvent
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 

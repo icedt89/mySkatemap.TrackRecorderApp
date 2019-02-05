@@ -50,38 +50,33 @@ internal class LineChartDashboardTileFragmentPresenterConnector : IDashboardTile
 
         return listOf(
                 source
+                    .doOnTerminate {
+                        this.connectedLineChart = null
+                    }
                     .subscribeOn(Schedulers.computation())
-                    .filter {
-                        this.connectedLineChart != null
-                    }
-                    .map {
-                        object : Any() {
-                            public val value = it
-
-                            public val lineChart = this@LineChartDashboardTileFragmentPresenterConnector.connectedLineChart!!
-                        }
-                    }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {
-                        if(it.lineChart.data == null) {
+                        val lineChar = this.connectedLineChart!!
+
+                        if(lineChar.data == null) {
                             val dataSet = FixedLineDataSet(mutableListOf(), "", 50)
                             dataSet.setDrawCircles(false)
-                            dataSet.color = it.lineChart.context!!.getColor(R.color.accentColor)
+                            dataSet.color = lineChar.context!!.getColor(R.color.accentColor)
 
                             val lineData = LineData(dataSet)
 
                             lineData.setDrawValues(false)
 
-                            it.lineChart.data = lineData
+                            lineChar.data = lineData
                         }
 
-                        val number = it.value.rawValue as Float
-                        it.lineChart.description.text = number.roundWithTwoDecimalsAndFormatWithUnit(it.value.unit)
+                        val number = it.rawValue as Float
+                        lineChar.description.text = number.roundWithTwoDecimalsAndFormatWithUnit(it.unit)
 
-                        it.lineChart.data.addEntry(Entry(0.0f, number, it.value.value), 0)
+                        lineChar.data.addEntry(Entry(0.0f, number, it.value), 0)
 
-                        it.lineChart.notifyDataSetChanged()
-                        it.lineChart.invalidate()
+                        lineChar.notifyDataSetChanged()
+                        lineChar.invalidate()
                     }
         )
     }

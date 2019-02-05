@@ -1,13 +1,16 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
+import androidx.lifecycle.Lifecycle
+import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.IDashboardTileFragmentPresenterConnector
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.LineChartDashboardTileFragmentPresenterConnector
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.TextOnlyDashboardTileFragmentPresenterConnector
+import com.trello.rxlifecycle3.android.lifecycle.kotlin.bindUntilEvent
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_dashboard_tile_default.*
 
@@ -28,7 +31,7 @@ internal abstract class DashboardTileFragmentPresenter(
 
     public var displayType: DashboardTileDisplayType = DashboardTileDisplayType.TextOnly
         set(value) {
-            if(!this.supportedPresenterConnectorTypes.contains(value)) {
+            if (!this.supportedPresenterConnectorTypes.contains(value)) {
                 throw IllegalArgumentException("Unsupported presenter connector type: ${value}")
             }
 
@@ -44,14 +47,17 @@ internal abstract class DashboardTileFragmentPresenter(
 
             field = value
 
-            this.onResume(this.dashboardTileFragment!!)
+            this.initialize(this.dashboardTileFragment!!)
         }
 
     public var title: String = ""
         protected set
 
     protected fun subscribe(dashboardTileFragment: DashboardTileFragment, source: Observable<FormattedDisplayValue>) {
-        val subscriptions = this.presenterConnector.connect(dashboardTileFragment, source)
+        val realSource = source
+                .bindUntilEvent(this.dashboardTileFragment!!, Lifecycle.Event.ON_DESTROY)
+
+        val subscriptions = this.presenterConnector.connect(dashboardTileFragment, realSource)
 
         this.sessionSubscriptions.clear()
 
@@ -84,31 +90,27 @@ internal abstract class DashboardTileFragmentPresenter(
         return trackRecorderSession
     }
 
-    public fun onPause() {
-        this.uninitializeSession()
-
-        this.subscriptions.clear()
-    }
-
-    public fun onResume(dashboardTileFragment: DashboardTileFragment) {
+    public fun initialize(dashboardTileFragment: DashboardTileFragment) {
         this.subscriptions.clear()
 
         this.dashboardTileFragment = dashboardTileFragment
 
         dashboardTileFragment.fragment_dashboard_tile_title.text = this.title
 
-        this.subscriptions.addAll(
+        this.subscriptions.add(
                 this.trackRecorderServiceController.isClientBoundChanged
                         .flatMap {
-                            if(it) {
+                            if (it) {
                                 this.trackRecorderServiceController.currentBinder!!.hasCurrentSessionChanged
                             } else {
                                 Observable.just(false)
                             }
                         }
-                        .subscribe{
-                            if(it){
-                                if(this.dashboardTileFragment != null) {
+                        .bindUntilEvent(this.dashboardTileFragment!!, Lifecycle.Event.ON_DESTROY)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            if (it) {
+                                if (this.dashboardTileFragment != null) {
                                     this.trackRecorderSession = this.getInitializedSession(this.trackRecorderServiceController.currentBinder!!.currentSession!!)
                                 }
                             } else {
@@ -117,16 +119,13 @@ internal abstract class DashboardTileFragmentPresenter(
                                 this.reset()
                             }
                         }
-                    )
+        )
     }
 
     public fun destroy() {
-        this.uninitializeSession()
-        this.reset()
-
         this.sessionSubscriptions.dispose()
         this.subscriptions.dispose()
+
+        this.dashboardTileFragment = null
     }
 }
-
-

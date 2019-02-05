@@ -30,8 +30,12 @@ internal fun Context.isGooglePlayServicesAvailable() : Boolean {
     return isGooglePlayServicesAvailable == ConnectionResult.SUCCESS
 }
 
+public fun Location.toDebugInfo(): String {
+    return "[${this.segmentNumber}] ${this.time.formatTimeOnlyDefault()}; S:${this.speed?.roundWithTwoDecimalsAndFormatWithUnit(SYMBOL_SPEED_METERS_PER_SECOND)}; A:${this.altitude?.roundWithTwoDecimalsAndFormatWithUnit(SYMBOL_DISTANCE_METERS)}; Ac:${this.accuracy}; P:${this.provider}"
+}
+
 public fun Location.toMapLocation(): MapLocation {
-    val debugInfo = "[${this.segmentNumber}] ${this.time.formatTimeOnlyDefault()}; S:${this.speed?.roundWithTwoDecimalsAndFormatWithUnit(SYMBOL_SPEED_METERS_PER_SECOND)}; A:${this.altitude?.roundWithTwoDecimalsAndFormatWithUnit(SYMBOL_DISTANCE_METERS)}; Ac:${this.accuracy}; P:${this.provider}"
+    val debugInfo = this.toDebugInfo()
 
     return MapLocation(this.latitude, this.longitude, debugInfo)
 }

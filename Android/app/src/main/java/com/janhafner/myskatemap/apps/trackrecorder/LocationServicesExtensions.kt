@@ -12,9 +12,11 @@ import io.reactivex.Observable
 import io.reactivex.Single
 
 public fun Context.isLocationServicesEnabled(): Single<Boolean> {
+    val context = this.applicationContext
+
     return Single.create {
         singleEmitter ->
-        val settingsClient = LocationServices.getSettingsClient(this)
+        val settingsClient = LocationServices.getSettingsClient(context)
 
         val locationRequest = LocationRequest.create().withDefaultBuildConfig()
 
@@ -42,14 +44,16 @@ public fun Context.isLocationServicesEnabled(): Single<Boolean> {
 }
 
 public fun Context.locationServicesAvailabilityChanged(): Observable<Boolean> {
-    return RxBroadcastReceivers.fromIntentFilter(this, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
+    val context = this.applicationContext
+
+    return RxBroadcastReceivers.fromIntentFilter(context, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
             .flatMapSingle {
-                this.isLocationServicesEnabled()
+                context.isLocationServicesEnabled()
                         .onErrorReturn {
                             false
                         }
             }
-            .startWith(this.isLocationServicesEnabled()
+            .startWith(context.isLocationServicesEnabled()
                     .onErrorReturn {
                         false
                     }.toObservable())
