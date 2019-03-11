@@ -3,11 +3,11 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.DashboardTileDisplayType
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
 import io.reactivex.Observable
 
 internal final class CurrentAltitudeDashboardTileFragmentPresenter(private val context: Context,

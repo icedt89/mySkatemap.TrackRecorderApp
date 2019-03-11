@@ -1,7 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import io.reactivex.subjects.BehaviorSubject
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 

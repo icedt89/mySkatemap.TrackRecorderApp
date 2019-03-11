@@ -1,0 +1,78 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 28
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            ext.enableCrashlytics = false
+            ext.alwaysUpdateBuildId = false
+        }
+        release {
+            minifyEnabled true
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    buildToolsVersion '28.0.3'
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    api "net.danlew:android.joda:$joda_version"
+
+    api "io.reactivex.rxjava2:rxjava:$rxjava_version"
+    api "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
+    api "com.github.karczews:rx2-broadcast-receiver:$rxbroadcastreceiver_version"
+    api "com.jakewharton.rxbinding2:rxbinding-kotlin:$rxbinding_version"
+    api "com.jakewharton.rxbinding2:rxbinding-support-v4-kotlin:$rxbinding_version"
+    api "com.jakewharton.rxbinding2:rxbinding-appcompat-v7-kotlin:$rxbinding_version"
+    api "com.uber.autodispose:autodispose-android-archcomponents-ktx:$autodisposable_version"
+
+    api "com.google.dagger:dagger:$dagger_version"
+    api "com.google.dagger:dagger-android:$dagger_android_version"
+    api "com.google.dagger:dagger-android-support:$dagger_android_version"
+
+    api "com.couchbase.lite:couchbase-lite-android:$couchbase_lite_version"
+
+    api "com.squareup.okhttp3:okhttp:$okhttp_version"
+
+    api "com.karumi:dexter:$dexter_version"
+
+    api "com.github.PhilJay:MPAndroidChart:$mpandroidchart_version"
+
+    api "com.squareup.moshi:moshi:$moshi_version"
+    api "com.squareup.moshi:moshi-kotlin:$moshikotlin_version"
+
+    api "androidx.core:core:$androidx_core_version"
+    api "androidx.fragment:fragment:$androidx_fragment_version"
+    api "androidx.constraintlayout:constraintlayout:$androidx_constraintlayout_version"
+    api "androidx.appcompat:appcompat:$androidx_appcompat_version"
+    api "androidx.cardview:cardview:$androidx_cardview_version"
+    api "androidx.gridlayout:gridlayout:$androidx_gridlayout_version"
+    api "androidx.recyclerview:recyclerview:$androidx_recyclerview_version"
+    api "androidx.preference:preference:$androidx_preference_version"
+    api "com.takisoft.preferencex:preferencex:$preferencex_version"
+    // api "com.google.android.gms:play-services-fitness:16.0.1"
+    api "com.google.android.gms:play-services-location:$playservices_version"
+    api "com.google.android.material:material:$android_material_version"
+    api "androidx.legacy:legacy-support-core-ui:$androidx_legacy_support_core_ui_version"
+
+    api "com.google.android.gms:play-services-auth:$googleauthentication_version"
+
+    debugApi "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
+    releaseApi "com.squareup.leakcanary:leakcanary-android-no-op:$leakcanary_version"
+    // Optional, if you use support library fragments:
+    api "com.squareup.leakcanary:leakcanary-support-fragment:$leakcanary_version"
+}

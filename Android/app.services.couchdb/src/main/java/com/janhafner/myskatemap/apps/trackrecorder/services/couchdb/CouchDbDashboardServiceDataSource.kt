@@ -1,27 +1,24 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.couchdb
 
-import com.couchbase.lite.Document
-import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Dashboard
+import com.janhafner.myskatemap.apps.trackrecorder.core.Optional
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Dashboard
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.IDashboardServiceDataSource
 import io.reactivex.Single
 
 public final class CouchDbDashboardServiceDataSource(private val couchDbFactory: ICouchDbFactory) : IDashboardServiceDataSource {
     public override fun getDashboardByIdOrNull(id: String): Single<Optional<Dashboard>> {
         return Single.fromCallable {
-            var result: Document? = null
+            var result: Dashboard? = null
 
             this.couchDbFactory.executeUnitOfWork {
-                result = it.getDocument(id)
+                val document = it.getDocument(id)
+
+                if(document != null) {
+                    result = DashboardConverter.dashboardFromCouchDbDocument(document)
+                }
             }
 
-            if (result == null) {
-                Optional<Dashboard>(null)
-            } else {
-                val trackRecording = DashboardConverter.dashboardFromCouchDbDocument(result!!)
-
-                Optional(trackRecording)
-            }
+            Optional(result)
         }
     }
 

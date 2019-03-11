@@ -4,13 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackInfo
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.core.Optional
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackInfo
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.Observable
 import javax.inject.Inject
 
 
@@ -20,51 +19,24 @@ internal final class ViewFinishedTrackActivity: AppCompatActivity() {
     @Inject
     public lateinit var trackService: ITrackService
 
-    private var trackRecording: TrackRecording? = null
-
-    private val fragments = mutableListOf<Fragment>()
+    public lateinit var trackRecordingLoader: Observable<Optional<TrackRecording>>
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         this.getApplicationInjector().inject(this)
 
         val trackInfo = this.intent.getParcelableExtra<TrackInfo>(ViewFinishedTrackActivityPresenter.EXTRA_TRACK_RECORDING_KEY)
-        this.trackService.getTrackRecordingByIdOrNull(trackInfo.id.toString())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    result ->
-                    if(result.value != null) {
-                        this.trackRecording = result.value
-
-                        for (fragment in this.fragments) {
-                            if(fragment is INeedInputTrackRecording){
-                                fragment.setTrackRecording(this.trackRecording!!)
-                            }
-                        }
-                    } else {
-                        // TODO: FEHLERBEHANDLUNG
-                    }
-                }
-
-        super.onCreate(savedInstanceState)
+        this.trackRecordingLoader = this.trackService.getTrackRecordingByIdOrNull(trackInfo.id.toString())
+                .toObservable()
+                .replay(1)
+                .autoConnect()
 
         this.presenter = ViewFinishedTrackActivityPresenter(this)
+
+        super.onCreate(savedInstanceState)
     }
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return this.presenter!!.onOptionsItemSelected(item)
-    }
-
-    override fun onAttachFragment(fragment: Fragment) {
-        super.onAttachFragment(fragment)
-
-        this.fragments.add(fragment)
-
-        if (this.trackRecording != null) {
-            if(fragment is INeedInputTrackRecording){
-                fragment.setTrackRecording(this.trackRecording!!)
-            }
-        }
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

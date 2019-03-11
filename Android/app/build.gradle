@@ -6,12 +6,17 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 28
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
         applicationId 'com.janhafner.myskatemap.apps.trackrecorder'
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
-        versionName "0.85"
+        versionName "0.89"
         resConfigs "en", "de"
     }
     buildTypes {
@@ -31,7 +36,6 @@ android {
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
             buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"' //10.0.2.2 is the ip of the host if executed in the emulator
 
-            buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
             buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
@@ -40,7 +44,7 @@ android {
             buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'true'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
-            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '500'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '100'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
             buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
@@ -67,7 +71,6 @@ android {
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
             buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"' //10.0.2.2 is the ip of the host if executed in the emulator
 
-            buildConfigField 'boolean', 'MAP_FORCE_OPENSTREETMAP_MAPCONTROL', 'false'
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
             buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
@@ -94,56 +97,18 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    implementation "androidx.core:core:$androidx_core_version"
-    implementation "androidx.fragment:fragment:$androidx_fragment_version"
-    implementation "androidx.constraintlayout:constraintlayout:$androidx_constraintlayout_version"
-    implementation "androidx.appcompat:appcompat:$androidx_appcompat_version"
-    implementation "androidx.cardview:cardview:$androidx_cardview_version"
-    implementation "androidx.gridlayout:gridlayout:$androidx_gridlayout_version"
-    implementation "androidx.recyclerview:recyclerview:$androidx_recyclerview_version"
-    implementation "androidx.preference:preference:$androidx_preference_version"
-    implementation 'com.takisoft.preferencex:preferencex:1.0.0'
-
-    // implementation "com.google.android.gms:play-services-fitness:16.0.1"
-    implementation "com.google.android.gms:play-services-location:$playservices_version"
-    implementation "com.google.android.gms:play-services-auth:16.0.1"
-    implementation "com.google.android.material:material:$android_material_version"
-    implementation "com.google.dagger:dagger:$dagger_version"
-    implementation "com.google.dagger:dagger-android:$dagger_android_version"
-    implementation "com.google.dagger:dagger-android-support:$dagger_android_version"
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
-    implementation "com.couchbase.lite:couchbase-lite-android:$couchbase_lite_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    implementation "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
-    implementation 'com.github.karczews:rx2-broadcast-receiver:1.0.5'
-    implementation "net.danlew:android.joda:$joda_version"
-    implementation "com.karumi:dexter:$dexter_version"
-    implementation "com.squareup.moshi:moshi:$moshi_version"
-    implementation "com.squareup.moshi:moshi-kotlin:$moshikotlin_version"
-    implementation "io.reactivex.rxjava2:rxjava:$rxjava_version"
-    implementation "com.jakewharton.rxbinding2:rxbinding-kotlin:$rxbinding_version"
-    implementation "com.jakewharton.rxbinding2:rxbinding-support-v4-kotlin:$rxbinding_version"
-    implementation "com.jakewharton.rxbinding2:rxbinding-appcompat-v7-kotlin:$rxbinding_version"
-    implementation 'com.trello.rxlifecycle3:rxlifecycle-android-lifecycle-kotlin:3.0.0'
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0-alpha'
-
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
-    // Optional, if you use support library fragments:
-    debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.3'
-
-    implementation project(':app.common')
+    implementation project(':app.core')
     implementation project(':app.conversion')
-    implementation project(':app.export')
     implementation project(':app.settings')
     implementation project(':app.services.couchdb')
     implementation project(':app.services')
     implementation project(':app.map')
     implementation project(':app.map.google')
-    implementation project(':app.map.openstreetmap')
     implementation project(':app.livelocation')
+}
+repositories {
+    mavenCentral()
 }

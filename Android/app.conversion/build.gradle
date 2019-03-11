@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
 android {
@@ -7,8 +8,6 @@ android {
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 28
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -30,12 +29,8 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    testImplementation "junit:junit:$junit_version"
-
-    androidTestImplementation "androidx.test:runner:$support_test_runnter"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$test_espresso_core_version"
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    implementation project(':app.common')
+    implementation project(':app.core')
+}
+repositories {
+    mavenCentral()
 }

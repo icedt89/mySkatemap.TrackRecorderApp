@@ -3,7 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.INotifier
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.INotifier
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackQueryService
@@ -40,11 +40,5 @@ internal final class TrackListActivity: AppCompatActivity(){
 
     public override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return this.presenter.onOptionsItemSelected(item)
-    }
-
-    public override fun onDestroy() {
-        this.presenter.destroy()
-
-        super.onDestroy()
     }
 }

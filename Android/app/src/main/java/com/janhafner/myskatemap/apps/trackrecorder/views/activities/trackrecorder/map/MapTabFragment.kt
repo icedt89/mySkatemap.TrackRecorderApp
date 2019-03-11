@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.janhafner.myskatemap.apps.trackrecorder.R
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -21,9 +20,6 @@ internal final class MapTabFragment: Fragment() {
     public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
 
     @Inject
-    public lateinit var trackRecorderMapFragment: TrackRecorderMapFragment
-
-    @Inject
     public lateinit var appSettings: IAppSettings
 
     public override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -35,6 +31,6 @@ internal final class MapTabFragment: Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.trackRecorderMapFragment, this.appSettings)
+        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderServiceController, this.appSettings, false)
     }
 }

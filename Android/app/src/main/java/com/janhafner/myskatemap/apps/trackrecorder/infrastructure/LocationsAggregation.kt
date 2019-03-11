@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.aggregations.Aggregation
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.core.aggregations.Aggregation
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 

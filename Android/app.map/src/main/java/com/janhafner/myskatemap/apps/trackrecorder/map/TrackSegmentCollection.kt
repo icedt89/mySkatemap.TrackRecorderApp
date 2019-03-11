@@ -1,6 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.map
 
 import android.graphics.Color
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
 
 public final class TrackSegmentCollection(private val latitudeLongitudeBoundsBuilderFactory: () -> ILatitudeLongitudeBoundsBuilder) {
     private val segments: MutableCollection<ITrackSegment> = mutableListOf()
@@ -21,7 +22,7 @@ public final class TrackSegmentCollection(private val latitudeLongitudeBoundsBui
         this.currentTrackSegment = trackSegment
     }
 
-    public fun addLocations(locations: List<MapLocation>) {
+    public fun addLocations(locations: List<Location>) {
         if(!this.hasSegments) {
             throw IllegalStateException("No current segment!")
         }
@@ -40,7 +41,7 @@ public final class TrackSegmentCollection(private val latitudeLongitudeBoundsBui
             field = value
         }
 
-    public fun getCameraBounds(): MapLocationBounds {
+    public fun getCameraBounds(): LocationBounds {
         if(!this.hasSegments) {
             throw IllegalStateException("No segments!")
         }

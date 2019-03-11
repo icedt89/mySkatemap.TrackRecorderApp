@@ -1,10 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.speed
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
-import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
-import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.core.hasChanged
+import com.janhafner.myskatemap.apps.trackrecorder.core.isNamed
+import com.janhafner.myskatemap.apps.trackrecorder.core.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed.getUnitSymbol
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
@@ -13,7 +13,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.LineChartDashboardTileFragmentPresenterConnector
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragmentPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.FormattedDisplayValue
-import com.trello.rxlifecycle3.android.lifecycle.kotlin.bindUntilEvent
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 

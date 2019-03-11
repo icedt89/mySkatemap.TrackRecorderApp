@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.janhafner.myskatemap.apps.trackrecorder" >
+    package="com.janhafner.myskatemap.apps.trackrecorder">
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -26,8 +26,8 @@
             android:name=".views.activities.SplashscreenActivity"
             android:theme="@style/MySkatemap.TrackRecorder.SplashscreenActivityTheme">
             <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -39,21 +39,26 @@
             android:name=".views.activities.trackrecorder.TrackRecorderActivity"
             android:launchMode="singleTask"
             android:label="@string/trackrecorderactivity_title"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
             android:name=".views.activities.viewfinishedtrack.ViewFinishedTrackActivity"
             android:label="@string/viewfinishedtrackactivity_title" />
         <activity
             android:name=".views.activities.tracklist.TrackListActivity"
+            android:launchMode="singleTask"
             android:label="@string/tracklistactivity_title" />
         <activity
             android:name=".views.activities.userprofilesettings.UserProfileSettingsActivity"
+            android:launchMode="singleTask"
             android:label="@string/userprofilesettingsactivity_title" />
         <activity
             android:name=".views.activities.appsettings.AppSettingsActivity"
+            android:launchMode="singleTask"
             android:label="@string/settingsactivity_title" />
         <activity
             android:name=".views.activities.about.AboutActivity"
+            android:launchMode="singleTask"
             android:label="@string/aboutactivity_title" />
 
         <meta-data

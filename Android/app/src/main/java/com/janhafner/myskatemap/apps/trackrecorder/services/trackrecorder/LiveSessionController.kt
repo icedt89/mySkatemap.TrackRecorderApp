@@ -28,16 +28,16 @@ internal final class LiveSessionController(private val liveSessionProvider: ILiv
                         Log.e("LiveSessionController", "Creating live session failed: ${it}")
                     }
                     .map { }
-        } else {
-            return this.liveSessionProvider.createSession()
-                    .doOnSuccess {
-                        this.currentLiveSession = it
-                    }
-                    .doOnError {
-                        Log.e("LiveSessionController", "Creating live session failed: ${it}")
-                    }
-                    .map {}
         }
+
+        return this.liveSessionProvider.createSession()
+                .doOnSuccess {
+                    this.currentLiveSession = it
+                }
+                .doOnError {
+                    Log.e("LiveSessionController", "Creating live session failed: ${it}")
+                }
+                .map {}
     }
 
     public override fun sendLocations(locations: List<LiveLocation>): Single<Unit> {

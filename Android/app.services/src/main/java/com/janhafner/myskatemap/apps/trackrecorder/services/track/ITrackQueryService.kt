@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.track
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackInfo
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackInfo
 import io.reactivex.Single
 
 public interface ITrackQueryService {

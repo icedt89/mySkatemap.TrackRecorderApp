@@ -1,12 +1,12 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session
 
 import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
-import com.janhafner.myskatemap.apps.trackrecorder.common.*
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackingPausedReason
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackingResumedReason
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.core.*
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackingPausedReason
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackingResumedReason
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.ILocationsAggregation
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.LocationsAggregation
 import com.janhafner.myskatemap.apps.trackrecorder.live.LiveLocation
@@ -18,6 +18,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.notifi
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider.ILocationProvider
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -106,6 +107,29 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
     }
 
     private fun initializeSession() {
+        // TODO: Test speedBasedAutopauseStrategy
+        val distanceBasedAutopauseStrategy = this.locationsChanged
+                .map {
+                    it.toLiteAndroidLocation()
+                }
+                .inDistance(BuildConfig.STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS)
+                .debounce(BuildConfig.STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS.toLong(), TimeUnit.MILLISECONDS)
+                .filter {
+                    this.currentState.state == TrackRecordingSessionState.Running
+                }
+                .map {
+                    true
+                }
+        val speedBasedAutopauseStrategy = this.locationsChanged
+                .fasterThan(BuildConfig.STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS)
+                .debounce(BuildConfig.STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS.toLong(), TimeUnit.MILLISECONDS)
+                .filter {
+                    this.currentState.state == TrackRecordingSessionState.Running
+                }
+                .map {
+                    true
+                }
+
         this.subscriptions.addAll(
                 this.locationsChanged
                         .subscribeOn(Schedulers.computation())
@@ -115,18 +139,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
                         .map {
                             false
                         }
-                        .mergeWith(this.locationsChanged
-                                .map {
-                                    it.toLiteAndroidLocation()
-                                }
-                                .inDistance(BuildConfig.STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS)
-                                .debounce(BuildConfig.STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS.toLong(), TimeUnit.MILLISECONDS)
-                                .filter {
-                                    this.currentState.state == TrackRecordingSessionState.Running
-                                }
-                                .map {
-                                    true
-                                })
+                        .mergeWith(distanceBasedAutopauseStrategy)
                         .subscribe {
                             if (it) {
                                 if (this.currentState.state == TrackRecordingSessionState.Running) {
@@ -295,7 +308,7 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
         this.destroy()
     }
 
-    public override fun finishTracking() {
+    public override fun finishTracking(): Single<TrackRecording> {
         if (this.isDestroyed) {
             throw ObjectDestroyedException()
         }
@@ -306,13 +319,22 @@ internal final class TrackRecordingSession(private val appSettings: IAppSettings
 
         val finishedTrackRecording = this.trackRecording
 
-        finishedTrackRecording.finish()
+        return Single.create<TrackRecording> {
+            finishedTrackRecording.finish()
 
-        this.trackService.saveTrackRecording(trackRecording)
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+            it.onSuccess(finishedTrackRecording)
+        }
+        .flatMap {
+            val trackRecording = it
 
-        this.destroy()
+    this.trackService.saveTrackRecording(trackRecording)
+            .flatMap {
+                Single.just(trackRecording)
+            }
+        }
+        .doOnSuccess {
+            this.destroy()
+        }
     }
 
     private var isDestroyed: Boolean = false

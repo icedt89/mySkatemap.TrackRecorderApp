@@ -5,13 +5,6 @@
     <PreferenceCategory
         android:title="@string/appsettings_preference_tracking_title"
         android:key="appsettings_preference_tracking">
-        <ListPreference
-            android:key="@string/appsettings_preference_map_control_key"
-            android:title="@string/appsettings_preference_tracking_map_control_label"
-            android:summary="@string/appsettings_preference_tracking_map_control_summary"
-            android:entries="@array/appsettings_preference_tracking_map_control_names"
-            android:entryValues="@array/appsettings_preference_tracking_map_control_values"
-            android:defaultValue="@string/appsettings_preference_map_control_default_value"/>
         <SwitchPreference
             android:key="@string/appsettings_preference_enable_auto_pause_on_still_key"
             android:title="@string/appsettings_preference_enable_auto_pause_on_still_label"

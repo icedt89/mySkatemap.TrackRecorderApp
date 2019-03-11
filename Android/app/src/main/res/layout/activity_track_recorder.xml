@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/trackrecorderactivity_navigationdrawer">
+    android:id="@+id/app_navigationdrawer">
     <com.google.android.material.appbar.AppBarLayout
             android:fitsSystemWindows="true"
             android:layout_width="match_parent"
@@ -37,13 +37,6 @@
                     android:src="@drawable/ic_play_arrow_bright_24dp" />
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
         </com.google.android.material.appbar.AppBarLayout>
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/trackrecorderactivity_navigation"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:itemTextColor="@color/textColor"
-        app:menu="@menu/app_navigation_drawer_menu"
-        app:headerLayout="@layout/navigation_drawer_header"/>
+    <include layout="@layout/app_navigation" />
     <include layout="@layout/navigation_drawer_trackrecorder_activity_info" />
 </androidx.drawerlayout.widget.DrawerLayout>

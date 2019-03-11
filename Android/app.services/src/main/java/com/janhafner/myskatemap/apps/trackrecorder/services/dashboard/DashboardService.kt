@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.dashboard
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Dashboard
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Dashboard
 import io.reactivex.Single
 import java.util.*
 

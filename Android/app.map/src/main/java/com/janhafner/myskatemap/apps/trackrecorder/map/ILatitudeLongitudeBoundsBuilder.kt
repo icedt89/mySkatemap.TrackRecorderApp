@@ -1,7 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.map
 
-public interface ILatitudeLongitudeBoundsBuilder {
-    fun include(location: MapLocation)
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
 
-    fun build(): MapLocationBounds
+public interface ILatitudeLongitudeBoundsBuilder {
+    fun include(location: Location)
+
+    fun build(): LocationBounds
 }

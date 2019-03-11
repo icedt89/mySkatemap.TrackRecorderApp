@@ -5,7 +5,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.checkAllAppPermissions
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.TrackRecorderActivity
 import net.danlew.android.joda.JodaTimeAndroid
 
-internal final class SplashscreenActivityPresenter(private val view: SplashscreenActivity) {
+internal final class SplashscreenActivityPresenter(val view: SplashscreenActivity) {
     init {
         JodaTimeAndroid.init(this.view)
 

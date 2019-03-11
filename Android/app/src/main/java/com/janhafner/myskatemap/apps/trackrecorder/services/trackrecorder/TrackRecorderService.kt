@@ -4,8 +4,8 @@ import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import com.janhafner.myskatemap.apps.trackrecorder.common.getNotificationManager
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.core.getNotificationManager
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
@@ -93,10 +93,6 @@ internal final class TrackRecorderService : Service(), ITrackRecorderService {
                     this.currentSession!!.resumeTracking()
                 TrackRecorderServiceNotification.ACTION_PAUSE ->
                     this.currentSession!!.pauseTracking()
-                TrackRecorderServiceNotification.ACTION_FINISH ->
-                    this.currentSession!!.finishTracking()
-                TrackRecorderServiceNotification.ACTION_DISCARD ->
-                    this.currentSession!!.discardTracking()
             }
         }
 

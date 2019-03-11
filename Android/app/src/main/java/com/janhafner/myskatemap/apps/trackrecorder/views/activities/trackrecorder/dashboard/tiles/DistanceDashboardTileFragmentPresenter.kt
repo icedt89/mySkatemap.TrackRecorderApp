@@ -2,9 +2,9 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import android.content.Context
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
-import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
-import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimals
+import com.janhafner.myskatemap.apps.trackrecorder.core.hasChanged
+import com.janhafner.myskatemap.apps.trackrecorder.core.isNamed
+import com.janhafner.myskatemap.apps.trackrecorder.core.roundWithTwoDecimals
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.getUnitSymbol

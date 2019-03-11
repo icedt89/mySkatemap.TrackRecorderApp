@@ -1,140 +1,138 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist
 
 import android.content.Intent
-import android.view.MenuItem
 import android.view.View
-import androidx.drawerlayout.widget.DrawerLayout
+import android.view.View.GONE
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.view.clicks
+import com.jakewharton.rxbinding2.view.visibility
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.INotifier
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.TrackRecordingDeletedEvent
-import com.janhafner.myskatemap.apps.trackrecorder.common.formatRecordingTime
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.INotifier
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.TrackRecordingDeletedEvent
+import com.janhafner.myskatemap.apps.trackrecorder.core.formatRecordingTime
+import com.janhafner.myskatemap.apps.trackrecorder.getActivityDrawableResourceId
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.format
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackQueryService
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
+import com.janhafner.myskatemap.apps.trackrecorder.views.ActivityWithAppNavigationPresenter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.ViewFinishedTrackActivity
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.ViewFinishedTrackActivityPresenter
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.ViewFinishedTrackActivityPresenter.Companion.EXTRA_TRACK_RECORDING_KEY
+import com.uber.autodispose.AutoDispose.autoDisposable
+import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_track_list.*
 import kotlinx.android.synthetic.main.activity_track_list_item.view.*
 import kotlinx.android.synthetic.main.app_toolbar.*
 
 
-internal final class TrackListActivityPresenter(private val view: TrackListActivity,
+internal final class TrackListActivityPresenter(view: TrackListActivity,
                                                 private val trackQueryService: ITrackQueryService,
                                                 private val distanceConverterFactory: IDistanceConverterFactory,
                                                 private val appSettings: IAppSettings,
                                                 private val trackService: ITrackService,
-                                                private val notifier: INotifier) {
-    private val subscriptions: CompositeDisposable = CompositeDisposable()
-
-    private var navigationDrawersOpened: Boolean = false
+                                                private val notifier: INotifier): ActivityWithAppNavigationPresenter<TrackListActivity>(view, R.layout.activity_track_list) {
+    private val adapter: TrackListItemsAdapter
 
     init {
-        this.view.setContentView(R.layout.activity_track_list)
-
         this.view.setSupportActionBar(this.view.app_toolbar)
 
         val actionBar = this.view.supportActionBar
         actionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_bright_24dp)
 
-        val adapter = TrackListItemsAdapter()
+        this.adapter = TrackListItemsAdapter()
         this.view.tracklistactivity_recorded_tracks_list.layoutManager = LinearLayoutManager(this.view)
-        this.view.tracklistactivity_recorded_tracks_list.adapter = adapter
+        this.view.tracklistactivity_recorded_tracks_list.adapter = this.adapter
 
-        this.subscriptions.addAll(
-                adapter.itemViewCreated.subscribe {
+        adapter.arrayChanged
+                .observeOn(AndroidSchedulers.mainThread())
+                .map {
+                    this.adapter.itemCount == 0
+                }
+                .`as`(autoDisposable(AndroidLifecycleScopeProvider.from(this.view, Lifecycle.Event.ON_DESTROY)))
+                .subscribe(this.view.tracklistactivity_no_activities_recorded.visibility())
+        adapter.itemViewCreated
+                .`as`(autoDisposable(AndroidLifecycleScopeProvider.from(this.view, Lifecycle.Event.ON_DESTROY)))
+                .subscribe {
                     val item = it
 
                     item.view.activity_track_list_item_displayname.text = item.item.displayName
                     item.view.activity_track_list_item_recordingtime.text = item.item.recordingTime.formatRecordingTime()
 
-                    if(item.item.distance != null) {
-                        val result = this.distanceConverterFactory.createConverter().format(it.item.distance!!)
+                    val result = this.distanceConverterFactory.createConverter().format(it.item.distance)
+                    item.view.activity_track_list_item_distance.text = result
 
-                        item.view.activity_track_list_item_distance.text = result
+                    var activityDrawableResId = item.view.context.getActivityDrawableResourceId(item.item.activityCode)
+                    if(activityDrawableResId == null) {
+                        activityDrawableResId = R.drawable.ic_directions_run_bright_24dp
                     }
 
-                    if(item.item.isDeletable) {
-                        item.view.delete_RENAMEME.clicks()
-                                .flatMapSingle {
-                                    this.trackService.deleteTrackRecordingById(item.item.trackInfo.id.toString())
-                                            .subscribeOn(Schedulers.io())
-                                }
-                                .subscribe()
-                    }
+                    item.view.activity_track_list_item_activity_icon.setImageResource(activityDrawableResId)
+
+                    item.view.activity_track_list_item_action_delete.clicks()
+                            .flatMapSingle {
+                                this.trackService.deleteTrackRecordingById(item.item.trackInfo.id.toString())
+                                        .subscribeOn(Schedulers.io())
+                            }
+                            .subscribe()
 
                     item.view.clicks()
                             .subscribe { result ->
                                 val startViewFinishedTrackActivityIntent = Intent(this.view, ViewFinishedTrackActivity::class.java)
 
-                                startViewFinishedTrackActivityIntent.putExtra(ViewFinishedTrackActivityPresenter.EXTRA_TRACK_RECORDING_KEY, item.item.trackInfo)
+                                startViewFinishedTrackActivityIntent.putExtra(EXTRA_TRACK_RECORDING_KEY, item.item.trackInfo)
 
                                 this.view.startActivity(startViewFinishedTrackActivityIntent)
                             }
-                },
-                this.notifier.notifications
-                        .subscribeOn(Schedulers.computation())
-                        .ofType(TrackRecordingDeletedEvent::class.java)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            val event = it
+                }
+        this.notifier.notifications
+                .subscribeOn(Schedulers.computation())
+                .ofType(TrackRecordingDeletedEvent::class.java)
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnDispose {
+                    this.app_navigationdrawer.removeDrawerListener(this)
+                }
+                .`as`(autoDisposable(AndroidLifecycleScopeProvider.from(this.view, Lifecycle.Event.ON_DESTROY)))
+                .subscribe {
+                    val event = it
 
-                            val items = adapter.findItems {
-                                it.trackInfo.id.toString() == event.trackRecordingId
-                            }
+                    val items = adapter.findItems {
+                        it.trackInfo.id.toString() == event.trackRecordingId
+                    }
 
-                            if(items.any()){
-                                for (item in items) {
-                                    adapter.remove(item)
-                                }
-                            }
+                    if (items.any()) {
+                        for (item in items) {
+                            adapter.remove(item)
                         }
-        )
+                    }
+                }
 
+        this.loadActivities()
+    }
+
+    private fun loadActivities() {
+        this.view.tracklistactivity_no_activities_recorded.visibility = GONE
+        this.view.tracklistactivity_loading_activities.show()
 
         this.trackQueryService.getTrackRecordings()
                 .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { items ->
-                    val items = items.map {
-                        TrackListItem(it)
+                    if(items.any()) {
+                        val items = items.map {
+                            TrackListItem(it)
+                        }
+
+                        this.adapter.addAll(items)
+                    } else {
+                        this.view.tracklistactivity_no_activities_recorded.visibility = View.VISIBLE
                     }
 
-                    adapter.addAll(items)
+                    this.view.tracklistactivity_loading_activities.hide()
                 }
-
-        this.view.tracklistactivity_navigationdrawer.addDrawerListener(object : DrawerLayout.DrawerListener {
-            public override fun onDrawerStateChanged(newState: Int) {
-            }
-
-            public override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
-            }
-
-            public override fun onDrawerClosed(drawerView: View) {
-                this@TrackListActivityPresenter.navigationDrawersOpened = false
-            }
-
-            public override fun onDrawerOpened(drawerView: View) {
-                this@TrackListActivityPresenter.navigationDrawersOpened = true
-            }
-        })
-    }
-
-    public fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            this.view.onBackPressed()
-        }
-
-        return true
-    }
-
-    public fun destroy() {
-        this.subscriptions.dispose()
     }
 }

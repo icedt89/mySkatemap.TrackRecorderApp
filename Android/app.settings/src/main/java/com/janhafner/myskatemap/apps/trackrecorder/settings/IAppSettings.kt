@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.settings
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
-import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
+import com.janhafner.myskatemap.apps.trackrecorder.core.IDestroyable
+import com.janhafner.myskatemap.apps.trackrecorder.core.PropertyChangedData
 import io.reactivex.Observable
 
 public interface IAppSettings : IDestroyable {

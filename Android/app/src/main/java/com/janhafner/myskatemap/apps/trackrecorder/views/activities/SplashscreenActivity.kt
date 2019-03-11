@@ -12,3 +12,4 @@ internal final class SplashscreenActivity: AppCompatActivity() {
         this.presenter = SplashscreenActivityPresenter(this)
     }
 }
+

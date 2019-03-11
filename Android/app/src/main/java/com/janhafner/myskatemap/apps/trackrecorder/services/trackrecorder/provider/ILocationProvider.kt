@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.core.IDestroyable
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
 import io.reactivex.Observable
 
 internal interface ILocationProvider : IDestroyable {

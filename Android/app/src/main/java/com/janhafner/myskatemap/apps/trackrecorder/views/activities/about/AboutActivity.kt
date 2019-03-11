@@ -14,10 +14,4 @@ internal final class AboutActivity : AppCompatActivity() {
 
         this.presenter = AboutActivityPresenter(this)
     }
-
-    public override fun onDestroy() {
-        super.onDestroy()
-
-        this.presenter.destroy()
-    }
 }

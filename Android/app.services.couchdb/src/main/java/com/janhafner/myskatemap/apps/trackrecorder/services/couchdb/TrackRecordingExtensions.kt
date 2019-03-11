@@ -2,7 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.services.couchdb
 
 import com.couchbase.lite.*
 import com.couchbase.lite.Dictionary
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.*
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.*
 import org.joda.time.DateTime
 import org.joda.time.Period
 import java.util.*
@@ -16,6 +16,8 @@ internal class TrackInfoConverter {
             result.recordingTime = Period.seconds(dictionary.getInt("recordingTime"))
             result.distance = dictionary.getFloat("distance")
             result.displayName = dictionary.getString("displayName")
+            result.startedAt = DateTime(dictionary.getDate("startedAt"))
+            result.activityCode = dictionary.getString("activityCode")
 
             return result
         }
@@ -75,36 +77,6 @@ internal class TrackRecordingConverter {
             return StateChangeEntry(at, stateChangeReason, pausedReason, resumedReason)
         }
 
-        internal fun trackRecordingFromCouchDbDictionary(dictionary: Dictionary, id: UUID) : TrackRecording {
-            val result = TrackRecording(id)
-
-            result.finishedAt = DateTime(dictionary.getDate("finishedAt"))
-            result.startedAt = DateTime(dictionary.getDate("startedAt"))
-            result.recordingTime = Period.seconds(dictionary.getInt("recordingTime"))
-            result.activityCode = dictionary.getString("activityCode")
-
-            val fitnessActivityDictionary = dictionary.getDictionary("fitnessActivity")
-            if(fitnessActivityDictionary != null) {
-                result.userProfile = userProfileFromCouchDbDictionary(fitnessActivityDictionary)
-            }
-
-            val stateChangeEntriesArray = dictionary.getArray("stateChangeEntries")
-            for (stateChangeEntryDictionary in stateChangeEntriesArray.map { it as Dictionary }) {
-                val stateChangeEntry = stateChangeEntryFromCouchDbDictionary(stateChangeEntryDictionary)
-
-                result.addStateChangeEntry(stateChangeEntry)
-            }
-
-            val locationsArray = dictionary.getArray("locations")
-            for (locationDictionary in locationsArray.map { it as Dictionary }) {
-                val location = locationFromCouchDbDictionary(locationDictionary)
-
-                result.addLocations(listOf(location))
-            }
-
-            return result
-        }
-
         private fun locationFromCouchDbDictionary(dictionary: Dictionary) : Location {
             val provider = dictionary.getString("provider")
             val latitude = dictionary.getDouble("latitude")
@@ -143,6 +115,8 @@ internal fun TrackInfo.toCouchDbDocument(): MutableDocument {
     result.setString("displayName", this.displayName)
     result.setFloat("distance", this.distance!!)
     result.setInt("recordingTime", this.recordingTime.seconds)
+    result.setDate("startedAt", this.startedAt!!.toDate())
+    result.setString("activityCode", this.activityCode)
 
     return result
 }

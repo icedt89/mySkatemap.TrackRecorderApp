@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.energy
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimalsAndFormatWithUnit
+import com.janhafner.myskatemap.apps.trackrecorder.core.roundWithTwoDecimalsAndFormatWithUnit
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.EnergyUnit
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.energy.IEnergyConverter
 

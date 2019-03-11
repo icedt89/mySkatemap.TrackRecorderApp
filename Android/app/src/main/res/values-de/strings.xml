@@ -2,13 +2,9 @@
 <resources>
     <string name="app_name">mySkatemap</string>
     <string name="trackrecorderactivity_title">Aktivität</string>
-    <string name="viewfinishedtrackactivity_title">Aktivität vom...</string>
+    <string name="viewfinishedtrackactivity_title">Aktivität %s</string>
     <string name="trackrecorderactivity_toolbar_finish_currenttracking">Abschließen</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttracking">Verwerfen</string>
-    <string name="trackrecorderactivity_toast_recording_running">Aufnahme aktiv</string>
-    <string name="trackrecorderactivity_toast_recording_paused">Aufnahme pausiert</string>
-    <string name="trackrecorderactivity_toast_recording_stillstand_paused">Aufnahme automatisch pausiert</string>
-    <string name="trackrecorderactivity_toast_recording_locationservicesunavailable_paused">Standort nicht verfügbar</string>
     <string name="trackrecorderactivity_tab_dashboard_title">Dashboard</string>
     <string name="trackrecorderactivity_tab_map_title">Karte</string>
     <string name="trackrecorderactivity_discard_confirmation_title">Verwerfen</string>
@@ -25,7 +21,7 @@
     <string name="trackrecorderservice_notification_action_discard">Verwerfen</string>
     <string name="trackrecorderservice_notification_action_finish">Abschließen</string>
     <string name="trackrecorderservice_notification_action_pause">Pausieren</string>
-    <string name="trackrecorderservice_notification_contenttext_template">%s in %s</string>
+    <string name="trackrecorderservice_notification_contenttext_template">%1$s in %2$s</string>
     <string name="trackrecorderactivity_discard_confirmation_message">Alle Daten der derzeitigen Aufnahme gehen unwiderruflich verloren! Möchtest du fortfahren?</string>
     <string name="trackrecorderactivity_finish_confirmation_message">Alle Daten der derzeitigen Aufnahme werden zur späteren Verarbeitung gespeichert! Möchtest du fortfahren?</string>
     <string name="trackrecorderactivity_show_location_services_confirmation_message">Bitte aktiviere die Standortdienste um mit der Aufzeichnung fortzufahren.</string>
@@ -34,8 +30,6 @@
     <string name="aboutactivity_copyright">© Jan Hafner</string>
     <string name="aboutactivity_version">Version %s</string>
     <string name="aboutactivity_app_pid_copied_toast">PID in Zwischenablage kopiert</string>
-
-    <string name="trackrecorderactivity_map_mycurrentlocation_marker_title">hier bist du</string>
 
     <string name="appsettings_preference_units_title">Einheiten</string>
     <string name="appsettings_preference_show_positions_on_map_label">Positionen auf Karte zeigen</string>
@@ -55,15 +49,13 @@
     <string name="appsettings_preference_notifications_title">Benachrichtigungen</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_label">Vibrieren bei Stopp</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_summary">Vibrieren wenn die Standortsermittlung/Tracking im Hintergrund deaktiviert wurde, beispielsweise durch verlust der Standortdienste</string>
-    <string name="appsettings_preference_tracking_map_control_label">Karte</string>
-    <string name="appsettings_preference_tracking_map_control_summary">Verwendet %s zum anzeigen der Karte. Wird erst nach einem Neustart der App angewendet!</string>
     <string name="userprofilesettings_preference_age_label">Dein Alter</string>
     <string name="userprofilesettings_preference_age_summary">Du bist %s Jahr(e) alt</string>
     <string name="userprofilesettings_preference_age_summary_empty">In Jahren</string>
     <string name="userprofilesettings_preference_weight_label">Dein Gewicht</string>
     <string name="userprofilesettings_preference_weight_summary_empty">In Kilogramm</string>
     <string name="userprofilesettings_preference_weight_summary">Du wiegst %s Kilogramm</string>
-    <string name="appsettings_preference_enable_auto_pause_on_still_label">Automatisch pausieren [Exp.]</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_label">Automatisch pausieren</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_summary">Pausiert die Aufnahme automatisch bei Stillstand</string>
     <string name="userprofilesettings_preference_height_label">Deine Größe</string>
     <string name="userprofilesettings_preference_height_summary_empty">In Zentimetern</string>
@@ -79,6 +71,7 @@
     <string name="appsettings_preference_enable_live_location_summary">Veröffentlicht deine aufgenommene Strecke Online während du sie aufnimmst</string>
 
     <string name="tracklistactivity_title">Meine Strecken</string>
+    <string name="tracklistactivity_no_activities_recorded_message">Bisher hast du noch keine Aktivitäten durchgeführt</string>
     <string name="userprofilesettingsactivity_title">Mein Profil</string>
     <string name="settingsactivity_title">Einstellungen</string>
     <string name="aboutactivity_title">Über</string>
@@ -97,21 +90,19 @@
     <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Dauer</string>
     <string name="dashboard_tile_numberoflocationsdashboardtilefragmentpresenter_tile">Positionen</string>
 
-    <string name="trackrecorderactivity_navigation_drawer_action_signin_label">Anmelden</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Einstellungen</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">Mein Profil</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_tracklist_label">Meine Strecken</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_about_label">Über</string>
+    <string name="app_navigation_action_signin_label">Anmelden</string>
+    <string name="app_navigation_action_settings_label">Einstellungen</string>
+    <string name="app_navigation_action_user_profile_label">Mein Profil</string>
+    <string name="app_navigation_action_tracklist_label">Meine Strecken</string>
+    <string name="app_navigation_action_about_label">Über</string>
 
     <string name="trackrecorderactivity_navigation_drawer_info_title">Info</string>
     <string name="trackrecorderactivity_navigation_drawer_info_activity_label">Aktivität</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_nosession">Keine aktive Aufnahme</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_nosession">-</string>
     <string name="trackrecorderactivity_navigation_drawer_info_activity_content_unknownactivity">Unbekannte Aktivität: %s</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Automatisch pausieren [Exp.]</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Automatisch pausieren</string>
     <string name="trackrecorderactivity_navigation_drawer_info_live_location_label">Live-Standort [Exp.]</string>
     <string name="trackrecorderactivity_navigation_drawer_info_keep_screen_on_label">Bildschirm anlassen</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_show_positions_on_map_label">Positionen auf Karte zeigen</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_show_my_location_label">Zeige Meinen Standort</string>
 
     <string-array name="appsettings_preference_units_distance_names">
         <item>Kilometer</item>
@@ -139,10 +130,5 @@
         <item>Radfahren</item>
         <item>Inline Skaten</item>
         <item>Wandern</item>
-    </string-array>
-
-    <string-array name="appsettings_preference_tracking_map_control_names">
-        <item>Google Maps</item>
-        <item>OpenStreetMap</item>
     </string-array>
 </resources>

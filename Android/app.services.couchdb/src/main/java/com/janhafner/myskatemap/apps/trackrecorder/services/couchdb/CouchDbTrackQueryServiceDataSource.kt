@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.couchdb
 
 import com.couchbase.lite.*
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackInfo
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackInfo
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.GetTracksQuery
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackQueryServiceDataSource
 import io.reactivex.Single
@@ -26,6 +26,7 @@ public final class CouchDbTrackQueryServiceDataSource(private val couchDbFactory
                 val queryBuilder = QueryBuilder.select(SelectResult.all(), SelectResult.expression(Meta.id))
                         .from(DataSource.database(it))
                         .where(Expression.property("documentType").`is`(Expression.string(TrackInfo::class.java.simpleName)))
+                        .orderBy(Ordering.property("startedAt").descending())
 
                 val results = queryBuilder.execute()
 

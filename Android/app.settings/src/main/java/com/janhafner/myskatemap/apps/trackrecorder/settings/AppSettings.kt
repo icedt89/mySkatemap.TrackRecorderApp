@@ -2,8 +2,8 @@ package com.janhafner.myskatemap.apps.trackrecorder.settings
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
-import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
+import com.janhafner.myskatemap.apps.trackrecorder.core.PropertyChangedData
+import com.janhafner.myskatemap.apps.trackrecorder.core.hasChanged
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers

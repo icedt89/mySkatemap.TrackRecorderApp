@@ -1,13 +1,9 @@
 <resources>
     <string name="app_name">mySkatemap</string>
     <string name="trackrecorderactivity_title">Activity</string>
-    <string name="viewfinishedtrackactivity_title">Activity of...</string>
+    <string name="viewfinishedtrackactivity_title">Activity %s</string>
     <string name="trackrecorderactivity_toolbar_finish_currenttracking">Finish</string>
     <string name="trackrecorderactivity_toolbar_discard_currenttracking">Discard</string>
-    <string name="trackrecorderactivity_toast_recording_running">Recording active</string>
-    <string name="trackrecorderactivity_toast_recording_paused">Recording paused</string>
-    <string name="trackrecorderactivity_toast_recording_stillstand_paused">Recording automatically paused</string>
-    <string name="trackrecorderactivity_toast_recording_locationservicesunavailable_paused">Location services unavailable</string>
     <string name="trackrecorderactivity_tab_dashboard_title">Dashboard</string>
     <string name="trackrecorderactivity_tab_map_title">Map</string>
     <string name="trackrecorderactivity_discard_confirmation_title">Discard</string>
@@ -35,7 +31,7 @@
     <string name="trackrecorderservice_notification_action_finish">Finish</string>
     <string name="trackrecorderservice_notification_action_discard">Discard</string>
     <string name="trackrecorderservice_notification_action_pause">Pause</string>
-    <string name="trackrecorderservice_notification_contenttext_template">%1$s in %%2$s</string>
+    <string name="trackrecorderservice_notification_contenttext_template">%1$s in %2$s</string>
 
     <string name="appsettings_preference_units_title">Units</string>
     <string name="appsettings_preference_show_positions_on_map_label">Show positions on map</string>
@@ -52,12 +48,10 @@
     <string name="appsettings_preference_units_energy_summary">Energy will be display and formatted as %s</string>
     <string name="appsettings_preference_tracking_title">Recording</string>
     <string name="appsettings_preference_common_title">Common</string>
-    <string name="appsettings_preference_tracking_map_control_label">Map</string>
-    <string name="appsettings_preference_tracking_map_control_summary">Uses %s to display the map. The app must be restarted to take effect!</string>
     <string name="appsettings_preference_notifications_title">Notifications</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_label">Vibrate on background stop</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_summary">Let your phone vibrate if receiving locations was disabled e.g. due to connectivity issues</string>
-    <string name="appsettings_preference_enable_auto_pause_on_still_label">Auto pause [exp.]</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_label">Auto pause</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_summary">Automatically pauses recording if still stand is detected</string>
     <string name="userprofilesettings_preference_age_label">Your age</string>
     <string name="userprofilesettings_preference_age_summary">You are %s years old</string>
@@ -78,8 +72,6 @@
     <string name="appsettings_preference_enable_live_location_label">Live-Location [exp.]</string>
     <string name="appsettings_preference_enable_live_location_summary">Enable publishing your recorded track as it gets recorded by you</string>
 
-    <string name="trackrecorderactivity_map_mycurrentlocation_marker_title">Here are you</string>
-
     <string name="userprofilesettings_preference_name_default_value">Anonymous</string>
     <string name="userprofilesettings_preference_sex_default_value">Male</string>
 
@@ -88,7 +80,6 @@
     <string name="appsettings_preference_units_energy_default_value">KilocalorieEnergyConverter</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_default_value">true</string>
     <string name="appsettings_preference_default_met_activity_code_default_value">01015</string>
-    <string name="appsettings_preference_map_control_default_value">GoogleTrackRecorderMapFragment</string>
     <string name="appsettings_preference_app_ui_locale_default_value">de</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_default_value">true</string>
     <string name="appsettings_preference_enable_live_location_default_value">false</string>
@@ -97,6 +88,7 @@
     <string name="appsettings_preference_show_positions_on_map_default_value">false</string>
 
     <string name="tracklistactivity_title">My tracks</string>
+    <string name="tracklistactivity_no_activities_recorded_message">You have not recorded any activites</string>
     <string name="userprofilesettingsactivity_title">My Profile</string>
     <string name="settingsactivity_title">Settings</string>
     <string name="aboutactivity_title">About</string>
@@ -115,22 +107,20 @@
     <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Duration</string>
     <string name="dashboard_tile_numberoflocationsdashboardtilefragmentpresenter_tile">Locations</string>
 
-    <string name="trackrecorderactivity_navigation_drawer_action_signin_label">Sign in</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_settings_label">Settings</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_user_profile_label">My profile</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_tracklist_label">My tracks</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_playground_label">Playground</string>
-    <string name="trackrecorderactivity_navigation_drawer_action_about_label">About</string>
+    <string name="app_navigation_action_signin_label">Sign in</string>
+    <string name="app_navigation_action_settings_label">Settings</string>
+    <string name="app_navigation_action_user_profile_label">My profile</string>
+    <string name="app_navigation_action_tracklist_label">My tracks</string>
+    <string name="app_navigation_action_playground_label">Playground</string>
+    <string name="app_navigation_action_about_label">About</string>
 
     <string name="trackrecorderactivity_navigation_drawer_info_title">Info</string>
     <string name="trackrecorderactivity_navigation_drawer_info_activity_label">Activity</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_nosession">No active session</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_nosession">-</string>
     <string name="trackrecorderactivity_navigation_drawer_info_activity_content_unknownactivity">Unknown activity: %s</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Auto pause [exp.]</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Auto pause</string>
     <string name="trackrecorderactivity_navigation_drawer_info_live_location_label">Live-Location [exp.]</string>
     <string name="trackrecorderactivity_navigation_drawer_info_keep_screen_on_label">Keep screen on</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_show_positions_on_map_label">Show positions on map</string>
-    <string name="trackrecorderactivity_navigation_drawer_info_show_my_location_label">Show My location</string>
 
     <string-array name="appsettings_preference_units_distance_names">
         <item>Kilometers</item>
@@ -182,13 +172,9 @@
         <item>15591</item>
         <item>17160</item>
     </string-array>
-
-    <string-array name="appsettings_preference_tracking_map_control_names">
-        <item>Google Maps</item>
-        <item>OpenStreetMap</item>
-    </string-array>
-    <string-array name="appsettings_preference_tracking_map_control_values">
-        <item>GoogleTrackRecorderMapFragment</item>
-        <item>OpenStreetMapTrackRecorderMapFragment</item>
-    </string-array>
+    <integer-array name="met_activity_code_drawables">
+        <item>@drawable/ic_directions_bike_bright_24dp</item>
+        <item>@drawable/ic_directions_run_bright_24dp</item>
+        <item>@drawable/ic_directions_run_bright_24dp</item>
+    </integer-array>
 </resources>

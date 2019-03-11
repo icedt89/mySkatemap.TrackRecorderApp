@@ -1,10 +1,10 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.track
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.INotifier
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.TrackRecordingDeletedEvent
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.TrackRecordingSavedEvent
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.core.Optional
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.INotifier
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.TrackRecordingDeletedEvent
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.TrackRecordingSavedEvent
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackRecording
 import io.reactivex.Single
 
 public final class TrackService(private val localTrackServiceDataSource: ITrackServiceDataSource, private val notifier: INotifier) : ITrackService {

@@ -1,27 +1,24 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.couchdb
 
-import com.couchbase.lite.Document
-import com.janhafner.myskatemap.apps.trackrecorder.common.Optional
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.core.Optional
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackServiceDataSource
 import io.reactivex.Single
 
 public final class CouchDbTrackServiceDataSource(private val couchDbFactory: ICouchDbFactory) : ITrackServiceDataSource {
     public override fun getTrackRecordingByIdOrNull(id: String): io.reactivex.Single<Optional<TrackRecording>> {
         return Single.fromCallable {
-            var result: Document? = null
+            var result: TrackRecording? = null
 
             this.couchDbFactory.executeUnitOfWork {
-                result = it.getDocument(id)
+                val document = it.getDocument(id)
+
+                if(document != null) {
+                    result = TrackRecordingConverter.trackRecordingFromCouchDbDocument(document)
+                }
             }
 
-            if (result == null) {
-                Optional<TrackRecording>(null)
-            } else {
-                val trackRecording = TrackRecordingConverter.trackRecordingFromCouchDbDocument(result!!)
-
-                Optional(trackRecording)
-            }
+            Optional(result)
         }
     }
 

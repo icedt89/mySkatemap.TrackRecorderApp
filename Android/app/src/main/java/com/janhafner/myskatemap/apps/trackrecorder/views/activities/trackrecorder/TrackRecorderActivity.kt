@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackService
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
@@ -17,9 +16,6 @@ import javax.inject.Inject
 internal final class TrackRecorderActivity: AppCompatActivity() {
     @Inject
     public lateinit var trackRecorderServiceController: IServiceController<TrackRecorderServiceBinder>
-
-    @Inject
-    public lateinit var trackService: ITrackService
 
     @Inject
     public lateinit var appSettings: IAppSettings
@@ -34,7 +30,8 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        this.presenter = TrackRecorderActivityPresenter(this, this.trackService, this.trackRecorderServiceController, this.appSettings, this.userProfileSettings)
+        this.presenter = TrackRecorderActivityPresenter(this, this.trackRecorderServiceController, this.appSettings, this.userProfileSettings)
+        this.presenter!!.handleIntent(this.intent)
     }
 
     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -61,5 +58,11 @@ internal final class TrackRecorderActivity: AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         this.presenter!!.onActivityResult(requestCode, resultCode, data)
+    }
+
+    public override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        this.presenter!!.handleIntent(intent)
     }
 }

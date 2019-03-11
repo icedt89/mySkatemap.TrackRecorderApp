@@ -1,7 +1,7 @@
 package com.janhafner.myskatemap.apps.trackrecorder.modules
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.INotifier
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.ReactiveNotifier
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.INotifier
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.ReactiveNotifier
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.eventing.TrackRecordingEventsSubscriber
 import com.janhafner.myskatemap.apps.trackrecorder.services.track.ITrackQueryService
 import dagger.Module

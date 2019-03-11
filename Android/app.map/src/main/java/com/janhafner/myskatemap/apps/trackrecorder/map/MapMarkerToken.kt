@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.map
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
+import com.janhafner.myskatemap.apps.trackrecorder.core.IDestroyable
 
 public final class MapMarkerToken(private val removeMarkerFunc: () -> Unit) : IDestroyable {
     private var isDestroyed = false

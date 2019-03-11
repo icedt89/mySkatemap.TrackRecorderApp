@@ -2,15 +2,18 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.lifecycle.Lifecycle
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimalsAndFormatWithUnit
+import com.janhafner.myskatemap.apps.trackrecorder.core.roundWithTwoDecimalsAndFormatWithUnit
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.FormattedDisplayValue
+import com.uber.autodispose.AutoDispose
+import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -41,8 +44,10 @@ internal class LineChartDashboardTileFragmentPresenterConnector : IDashboardTile
             newLineChart.axisRight.isEnabled = false
             newLineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
             newLineChart.xAxis.setDrawLabels(false)
+            newLineChart.xAxis.setDrawGridLines(false)
             newLineChart.axisLeft.textColor = newLineChart.description.textColor
             newLineChart.axisLeft.setDrawLabels(false)
+            newLineChart.axisLeft.setDrawGridLines(false)
             newLineChart.visibility = VISIBLE
 
             this.connectedLineChart = newLineChart
@@ -50,34 +55,33 @@ internal class LineChartDashboardTileFragmentPresenterConnector : IDashboardTile
 
         return listOf(
                 source
-                    .doOnTerminate {
-                        this.connectedLineChart = null
-                    }
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        val lineChar = this.connectedLineChart!!
-
-                        if(lineChar.data == null) {
-                            val dataSet = FixedLineDataSet(mutableListOf(), "", 50)
-                            dataSet.setDrawCircles(false)
-                            dataSet.color = lineChar.context!!.getColor(R.color.accentColor)
-
-                            val lineData = LineData(dataSet)
-
-                            lineData.setDrawValues(false)
-
-                            lineChar.data = lineData
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnDispose {
+                            this.connectedLineChart = null
                         }
+                        .`as`(AutoDispose.autoDisposable(AndroidLifecycleScopeProvider.from(dashboardTileFragment, Lifecycle.Event.ON_DESTROY)))
+                        .subscribe {
+                            if (newLineChart.data == null) {
+                                val dataSet = FixedLineDataSet(mutableListOf(), "", 50)
+                                dataSet.setDrawCircles(false)
+                                dataSet.color = newLineChart.context!!.getColor(R.color.accentColor)
 
-                        val number = it.rawValue as Float
-                        lineChar.description.text = number.roundWithTwoDecimalsAndFormatWithUnit(it.unit)
+                                val lineData = LineData(dataSet)
 
-                        lineChar.data.addEntry(Entry(0.0f, number, it.value), 0)
+                                lineData.setDrawValues(false)
 
-                        lineChar.notifyDataSetChanged()
-                        lineChar.invalidate()
-                    }
+                                newLineChart.data = lineData
+                            }
+
+                            val number = it.rawValue as Float
+                            newLineChart.description.text = number.roundWithTwoDecimalsAndFormatWithUnit(it.unit)
+
+                            newLineChart.data.addEntry(Entry(0.0f, number, it.value), 0)
+
+                            newLineChart.notifyDataSetChanged()
+                            newLineChart.invalidate()
+                        }
         )
     }
 

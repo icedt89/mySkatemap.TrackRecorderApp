@@ -7,7 +7,7 @@ import com.janhafner.myskatemap.apps.trackrecorder.settings.FixedEditTextPrefere
 internal final class UserProfileSettingsFragmentPresenter(private val view: UserProfileSettingsFragment)
         : SharedPreferences.OnSharedPreferenceChangeListener {
     init {
-        this.view.preferenceManager.setSharedPreferencesName("userprofilesettings")
+        this.view.preferenceManager.sharedPreferencesName = "userprofilesettings"
 
         this.view.addPreferencesFromResource(R.xml.userprofile_settings)
 

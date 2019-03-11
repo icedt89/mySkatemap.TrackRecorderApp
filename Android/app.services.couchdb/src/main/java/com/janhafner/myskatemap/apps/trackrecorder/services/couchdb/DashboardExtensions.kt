@@ -4,9 +4,9 @@ import com.couchbase.lite.Dictionary
 import com.couchbase.lite.Document
 import com.couchbase.lite.MutableDictionary
 import com.couchbase.lite.MutableDocument
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Dashboard
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTile
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Dashboard
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.DashboardTile
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.DashboardTileDisplayType
 import java.util.*
 
 internal class DashboardConverter {

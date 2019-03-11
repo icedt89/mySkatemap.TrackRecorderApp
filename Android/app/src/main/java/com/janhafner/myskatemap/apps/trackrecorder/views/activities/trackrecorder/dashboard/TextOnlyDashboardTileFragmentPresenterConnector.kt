@@ -1,8 +1,11 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard
 
 import android.view.View
+import androidx.lifecycle.Lifecycle
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.DashboardTileFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.FormattedDisplayValue
+import com.uber.autodispose.AutoDispose
+import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -24,11 +27,12 @@ internal class TextOnlyDashboardTileFragmentPresenterConnector : IDashboardTileF
 
         return listOf(
                 source
-                        .doOnTerminate {
-                            this.connectedDashboardTileFragment = null
-                        }
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
+                        .doOnDispose {
+                            this.connectedDashboardTileFragment = null
+                        }
+                        .`as`(AutoDispose.autoDisposable(AndroidLifecycleScopeProvider.from(dashboardTileFragment, Lifecycle.Event.ON_DESTROY)))
                         .subscribe {
                             dashboardTileFragment.fragment_dashboard_tile_value.text = it.value
                             dashboardTileFragment.fragment_dashboard_tile_unit.text = it.unit

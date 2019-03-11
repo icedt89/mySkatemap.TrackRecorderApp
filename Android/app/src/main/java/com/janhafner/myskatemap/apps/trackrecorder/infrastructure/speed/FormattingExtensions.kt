@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.speed
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimalsAndFormatWithUnit
+import com.janhafner.myskatemap.apps.trackrecorder.core.roundWithTwoDecimalsAndFormatWithUnit
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.ISpeedConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.speed.SpeedUnit
 

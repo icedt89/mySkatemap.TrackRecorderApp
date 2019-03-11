@@ -5,20 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
 import com.janhafner.myskatemap.apps.trackrecorder.getApplicationInjector
-import com.janhafner.myskatemap.apps.trackrecorder.map.TrackRecorderMapFragment
 import com.janhafner.myskatemap.apps.trackrecorder.settings.IAppSettings
-import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.INeedInputTrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.ViewFinishedTrackActivity
+import com.uber.autodispose.AutoDispose
+import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 
-internal final class MapTabFragment: Fragment(), INeedInputTrackRecording {
+internal final class MapTabFragment: Fragment() {
     private lateinit var presenter: MapTabFragmentPresenter
-
-    @Inject
-    public lateinit var trackRecorderMapFragment: TrackRecorderMapFragment
 
     @Inject
     public lateinit var appSettings: IAppSettings
@@ -32,10 +32,19 @@ internal final class MapTabFragment: Fragment(), INeedInputTrackRecording {
 
         super.onViewCreated(view, savedInstanceState)
 
-        this.presenter = MapTabFragmentPresenter(this, this.trackRecorderMapFragment, this.appSettings)
-    }
+        this.presenter = MapTabFragmentPresenter(this, this.appSettings, false)
 
-    public override fun setTrackRecording(trackRecording: TrackRecording) {
-        this.presenter.setTrackRecording(trackRecording)
+        val viewFinishedTrackActivity = this.activity as ViewFinishedTrackActivity
+        viewFinishedTrackActivity.trackRecordingLoader
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .`as`(AutoDispose.autoDisposable(AndroidLifecycleScopeProvider.from(this, Lifecycle.Event.ON_DESTROY)))
+                .subscribe {
+                    if(it.value != null) {
+                        this.presenter.setTrackRecording(it.value!!)
+                    } else {
+                        // TODO: FEHLERBEHANDLUNG
+                    }
+                }
     }
 }

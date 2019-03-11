@@ -2,7 +2,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.modules
 
 import android.content.Context
 import com.couchbase.lite.DatabaseConfiguration
-import com.janhafner.myskatemap.apps.trackrecorder.common.eventing.INotifier
+import com.janhafner.myskatemap.apps.trackrecorder.core.eventing.INotifier
 import com.janhafner.myskatemap.apps.trackrecorder.services.couchdb.CouchDbFactory
 import com.janhafner.myskatemap.apps.trackrecorder.services.couchdb.CouchDbTrackQueryServiceDataSource
 import com.janhafner.myskatemap.apps.trackrecorder.services.couchdb.CouchDbTrackServiceDataSource

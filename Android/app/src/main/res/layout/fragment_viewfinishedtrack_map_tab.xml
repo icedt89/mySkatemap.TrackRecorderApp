@@ -2,8 +2,9 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
-    <FrameLayout
+    <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/fragment_track_recorder_map_map_placeholder"/>
+        android:id="@+id/fragment_view_finished_track_map"
+        class="com.janhafner.myskatemap.apps.trackrecorder.map.google.GoogleTrackRecorderMapFragment" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

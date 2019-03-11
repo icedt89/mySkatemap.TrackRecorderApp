@@ -3,7 +3,7 @@ package com.janhafner.myskatemap.apps.trackrecorder.modules
 import android.content.Context
 import android.util.Log
 import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.ServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderService
@@ -19,7 +19,6 @@ import javax.inject.Singleton
 
 @Module(includes = [
     ConversionModule::class,
-    ExportModule::class,
     TrackModule::class,
     DashboardModule::class,
     LiveLocationModule::class,

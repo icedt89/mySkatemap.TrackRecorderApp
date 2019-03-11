@@ -6,12 +6,8 @@
     <include layout="@layout/app_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/settingsfragment_host"/>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:layout_height="match_parent"
+        android:id="@+id/settingsfragment_host"/>
 </com.google.android.material.appbar.AppBarLayout>

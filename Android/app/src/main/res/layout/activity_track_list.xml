@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/tracklistactivity_navigationdrawer">
+    android:id="@+id/app_navigationdrawer">
     <com.google.android.material.appbar.AppBarLayout
         android:fitsSystemWindows="true"
         android:layout_width="match_parent"
@@ -20,13 +19,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             </androidx.recyclerview.widget.RecyclerView>
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/tracklistactivity_no_activities_recorded_message"
+                android:id="@+id/tracklistactivity_no_activities_recorded"
+                android:textColor="@color/textColor"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textSize="20sp"
+                android:visibility="gone" />
+            <androidx.core.widget.ContentLoadingProgressBar
+                android:id="@+id/tracklistactivity_loading_activities"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.ProgressBar.Large"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:indeterminate="true" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </com.google.android.material.appbar.AppBarLayout>
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/trackrecorderactivity_navigation"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:menu="@menu/app_navigation_drawer_menu"
-        app:headerLayout="@layout/navigation_drawer_header"/>
+    <include layout="@layout/app_navigation" />
 </androidx.drawerlayout.widget.DrawerLayout>

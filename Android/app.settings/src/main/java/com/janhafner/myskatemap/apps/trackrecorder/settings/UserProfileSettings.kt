@@ -2,8 +2,8 @@ package com.janhafner.myskatemap.apps.trackrecorder.settings
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.janhafner.myskatemap.apps.trackrecorder.common.PropertyChangedData
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Sex
+import com.janhafner.myskatemap.apps.trackrecorder.core.PropertyChangedData
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Sex
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 

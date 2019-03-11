@@ -1,14 +1,15 @@
 package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles
 
 import androidx.lifecycle.Lifecycle
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.DashboardTileDisplayType
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.IServiceController
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.TrackRecorderServiceBinder
 import com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.session.ITrackRecordingSession
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.IDashboardTileFragmentPresenterConnector
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.LineChartDashboardTileFragmentPresenterConnector
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.TextOnlyDashboardTileFragmentPresenterConnector
-import com.trello.rxlifecycle3.android.lifecycle.kotlin.bindUntilEvent
+import com.uber.autodispose.AutoDispose
+import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -41,8 +42,10 @@ internal abstract class DashboardTileFragmentPresenter(
 
             if (value == DashboardTileDisplayType.TextOnly) {
                 this.presenterConnector = TextOnlyDashboardTileFragmentPresenterConnector()
-            } else if (value == DashboardTileDisplayType.LineChart) {
+            } else if(value == DashboardTileDisplayType.LineChart) {
                 this.presenterConnector = LineChartDashboardTileFragmentPresenterConnector()
+            } else {
+                throw java.lang.IllegalArgumentException("Unknown tile display type: ${value}")
             }
 
             field = value
@@ -54,10 +57,7 @@ internal abstract class DashboardTileFragmentPresenter(
         protected set
 
     protected fun subscribe(dashboardTileFragment: DashboardTileFragment, source: Observable<FormattedDisplayValue>) {
-        val realSource = source
-                .bindUntilEvent(this.dashboardTileFragment!!, Lifecycle.Event.ON_DESTROY)
-
-        val subscriptions = this.presenterConnector.connect(dashboardTileFragment, realSource)
+        val subscriptions = this.presenterConnector.connect(dashboardTileFragment, source)
 
         this.sessionSubscriptions.clear()
 
@@ -106,8 +106,8 @@ internal abstract class DashboardTileFragmentPresenter(
                                 Observable.just(false)
                             }
                         }
-                        .bindUntilEvent(this.dashboardTileFragment!!, Lifecycle.Event.ON_DESTROY)
                         .observeOn(AndroidSchedulers.mainThread())
+                        .`as`(AutoDispose.autoDisposable(AndroidLifecycleScopeProvider.from(this.dashboardTileFragment, Lifecycle.Event.ON_DESTROY)))
                         .subscribe {
                             if (it) {
                                 if (this.dashboardTileFragment != null) {

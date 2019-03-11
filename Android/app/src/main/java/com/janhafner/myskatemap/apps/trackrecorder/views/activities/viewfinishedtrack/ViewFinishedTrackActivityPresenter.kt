@@ -2,18 +2,18 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishe
 
 import android.content.Intent
 import android.view.MenuItem
+import android.view.View
 import androidx.core.view.GravityCompat
-import androidx.viewpager.widget.ViewPager
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Lifecycle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.material.navigation.NavigationView
-import com.google.android.material.tabs.TabLayout
 import com.janhafner.myskatemap.apps.trackrecorder.BuildConfig
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.Identity
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackRecording
+import com.janhafner.myskatemap.apps.trackrecorder.core.Identity
+import com.janhafner.myskatemap.apps.trackrecorder.core.formatDefault
 import com.janhafner.myskatemap.apps.trackrecorder.views.TabDefinition
 import com.janhafner.myskatemap.apps.trackrecorder.views.TabDefinitionTabsAdapter
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.about.AboutActivity
@@ -23,23 +23,38 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.tracklist.Tr
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.userprofilesettings.UserProfileSettingsActivity
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.map.MapTabFragment
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.viewfinishedtrack.overview.OverviewTabFragment
-import kotlinx.android.synthetic.main.activity_track_recorder.*
+import com.uber.autodispose.AutoDispose
+import com.uber.autodispose.android.lifecycle.AndroidLifecycleScopeProvider
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_view_finished_track.*
 import kotlinx.android.synthetic.main.app_toolbar.*
 
 
-internal final class ViewFinishedTrackActivityPresenter(private val view: ViewFinishedTrackActivity) {
-    private var trackRecording: TrackRecording? = null
+internal final class ViewFinishedTrackActivityPresenter(private val view: ViewFinishedTrackActivity): DrawerLayout.DrawerListener {
+    private var navigationDrawersOpened: Boolean = false
 
     init {
         this.view.setContentView(R.layout.activity_view_finished_track)
 
+        this.view.trackRecordingLoader
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .`as`(AutoDispose.autoDisposable(AndroidLifecycleScopeProvider.from(this.view, Lifecycle.Event.ON_DESTROY)))
+                .subscribe {
+                    if(it.value != null) {
+                        this.view.title = this.view.getString(R.string.viewfinishedtrackactivity_title, it.value!!.finishedAt!!.formatDefault())
+                    } else {
+                        // TODO: FEHLERBEHANDLUNG
+                    }
+                }
         this.view.setSupportActionBar(this.view.app_toolbar)
 
         val actionBar = this.view.supportActionBar
         actionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_bright_24dp)
 
-        val viewPager = this.view.findViewById<ViewPager>(R.id.viewfinishedtrackactivity_toolbar_viewpager)
+        val viewPager = this.view.viewfinishedtrackactivity_toolbar_viewpager
 
         val tabDefinitions = listOf(
                 TabDefinition("OVERVIEW", {
@@ -52,7 +67,7 @@ internal final class ViewFinishedTrackActivityPresenter(private val view: ViewFi
         viewPager.adapter = TabDefinitionTabsAdapter(tabDefinitions, this.view.supportFragmentManager)
         viewPager.offscreenPageLimit = viewPager.adapter!!.count
 
-        val tabLayout = this.view.findViewById<TabLayout>(R.id.viewfinishedtrackactivity_toolbar_tablayout)
+        val tabLayout = this.view.viewfinishedtrackactivity_toolbar_tablayout
         tabLayout.setupWithViewPager(viewPager)
 
         for (tabDefinition in tabDefinitions
@@ -73,43 +88,52 @@ internal final class ViewFinishedTrackActivityPresenter(private val view: ViewFi
         this.setupLeftNavigationView()
     }
 
-    private fun initializeWithTrackRecording(trackRecording: TrackRecording): TrackRecording {
-
-
-        return trackRecording
-    }
-
     public fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            this.view.trackrecorderactivity_navigationdrawer.openDrawer(GravityCompat.START)
+            this.view.viewfinishedtrackactivity_navigationdrawer.openDrawer(GravityCompat.START)
         }
 
         return true
     }
 
     private fun setupLeftNavigationView() {
-        val navigationView = this.view.findViewById<NavigationView>(R.id.viewfinishedtrackactivity_navigation)
-        navigationView.setNavigationItemSelectedListener { menuItem ->
+        this.view.viewfinishedtrackactivity_navigation.setNavigationItemSelectedListener { menuItem ->
             if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_user_profile) {
-                this@ViewFinishedTrackActivityPresenter.view.startActivity(Intent(this@ViewFinishedTrackActivityPresenter.view, UserProfileSettingsActivity::class.java))
+                this.view.startActivity(Intent(this.view, UserProfileSettingsActivity::class.java))
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_settings) {
-                this@ViewFinishedTrackActivityPresenter.view.startActivity(Intent(this@ViewFinishedTrackActivityPresenter.view, AppSettingsActivity::class.java))
+                this.view.startActivity(Intent(this.view, AppSettingsActivity::class.java))
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_about) {
-                this@ViewFinishedTrackActivityPresenter.view.startActivity(Intent(this@ViewFinishedTrackActivityPresenter.view, AboutActivity::class.java))
+                this.view.startActivity(Intent(this.view, AboutActivity::class.java))
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_tracklist) {
-                this@ViewFinishedTrackActivityPresenter.view.startActivity(Intent(this@ViewFinishedTrackActivityPresenter.view, TrackListActivity::class.java))
+                this.view.startActivity(Intent(this.view, TrackListActivity::class.java))
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_signin) {
-                val googleSignInClient = this@ViewFinishedTrackActivityPresenter.getGoogleSignInClient()
+                val googleSignInClient = this.getGoogleSignInClient()
 
-                this@ViewFinishedTrackActivityPresenter.view.startActivityForResult(googleSignInClient.signInIntent, GOOGLE_SIGNIN_REQUEST_CODE)
+                this.view.startActivityForResult(googleSignInClient.signInIntent, GOOGLE_SIGNIN_REQUEST_CODE)
             } else if (menuItem.itemId == R.id.trackrecorderactivity_navigation_drawer_action_playground) {
-                this@ViewFinishedTrackActivityPresenter.view.startActivity(Intent(this@ViewFinishedTrackActivityPresenter.view, PlaygroundActivity::class.java))
+                this.view.startActivity(Intent(this.view, PlaygroundActivity::class.java))
             }
 
-            this@ViewFinishedTrackActivityPresenter.view.trackrecorderactivity_navigationdrawer.closeDrawers()
+            this.view.viewfinishedtrackactivity_navigationdrawer.closeDrawers()
 
             true
         }
+
+        this.view.viewfinishedtrackactivity_navigationdrawer.addDrawerListener(this)
+    }
+
+    public override fun onDrawerStateChanged(newState: Int) {
+    }
+
+    public override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+    }
+
+    public override fun onDrawerClosed(drawerView: View) {
+        this.navigationDrawersOpened = false
+    }
+
+    public override fun onDrawerOpened(drawerView: View) {
+        this.navigationDrawersOpened = true
     }
 
     public fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

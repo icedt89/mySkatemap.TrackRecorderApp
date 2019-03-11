@@ -19,6 +19,19 @@
         <item name="alertDialogTheme">@style/MySkatemap.TrackRecorder.AppTheme.AppCompat.PopUp</item>
     </style>
 
+    <style name="MySkatemap.Divider" parent="Base.Theme.AppCompat">
+        <item name="android:background">@color/textDarkColor</item>
+    </style>
+
+    <style name="MySkatemap.Divider.Horizontal" parent="MySkatemap.Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+    </style>
+
+    <style name="MySkatemap.AppNavigation.Button" parent="Base.Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:gravity">start</item>
+    </style>
+
     <style name="MySkatemap.TrackRecorder.AppTheme.AppCompat.PopUp" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:textColor">@color/accentColor</item>
     </style>

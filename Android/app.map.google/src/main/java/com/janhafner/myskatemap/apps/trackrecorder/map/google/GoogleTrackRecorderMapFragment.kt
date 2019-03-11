@@ -11,7 +11,9 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.janhafner.myskatemap.apps.trackrecorder.common.ToastManager
+import com.janhafner.myskatemap.apps.trackrecorder.core.ToastManager
+import com.janhafner.myskatemap.apps.trackrecorder.core.formatTimeOnlyDefault
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
 import com.janhafner.myskatemap.apps.trackrecorder.map.*
 
 public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
@@ -19,14 +21,14 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         object : ILatitudeLongitudeBoundsBuilder {
             private val builder = LatLngBounds.builder()
 
-            public override fun include(location: MapLocation) {
-                this.builder.include(LatLng(location.latitude, location.longitude))
+            public override fun include(location: Location) {
+                this.builder.include(locationToLatLng(location))
             }
 
-            public override fun build(): MapLocationBounds {
+            public override fun build(): LocationBounds {
                 val bounds = this.builder.build()
 
-                return MapLocationBounds(MapLocation(bounds.southwest.latitude, bounds.southwest.longitude), MapLocation(bounds.northeast.latitude, bounds.northeast.longitude))
+                return LocationBounds(Location.simple(bounds.southwest.latitude, bounds.southwest.longitude), Location.simple(bounds.northeast.latitude, bounds.northeast.longitude))
             }
         }
     }
@@ -39,8 +41,12 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         return inflater.inflate(R.layout.fragment_google_track_recorder_map, container, false)
     }
 
+    private fun getMapFragment(): SupportMapFragment {
+        return this.childFragmentManager.findFragmentById(R.id.trackrecordermapfragment_googlemap_mapfragment) as SupportMapFragment
+    }
+
     public override fun getMapAsync(callback: OnTrackRecorderMapReadyCallback) {
-        val mapFragment = this.childFragmentManager.findFragmentById(R.id.trackrecordermapfragment_googlemap_mapfragment) as SupportMapFragment
+        val mapFragment = this.getMapFragment()
 
         mapFragment.getMapAsync {
             this.map = it
@@ -61,7 +67,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
 
     public override var showPositions: Boolean = false
         set(value) {
-            for (positionCircle in this.positionCircles.filter { it.isVisible != value}) {
+            for (positionCircle in this.positionCircles.filter { it.isVisible != value }) {
                 positionCircle.isVisible = value
                 positionCircle.isClickable = value
             }
@@ -107,10 +113,10 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
             field = value
         }
 
-    public override fun addMarker(location: MapLocation, title: String, icon: Int?): MapMarkerToken {
+    public override fun addMarker(location: Location, title: String, icon: Int?): MapMarkerToken {
         val markerOptions = MarkerOptions()
         markerOptions.title(title)
-        markerOptions.position(LatLng(location.latitude, location.longitude))
+        markerOptions.position(locationToLatLng(location))
 
         if (icon != null) {
             markerOptions.icon(BitmapDescriptorFactory.fromResource(icon))
@@ -123,7 +129,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         }
     }
 
-    public override fun addLocations(locations: List<MapLocation>) {
+    public override fun addLocations(locations: List<Location>) {
         if (!this.trackSegmentCollection.hasSegments) {
             this.createAndAppendNewTrackSegment()
         }
@@ -135,18 +141,25 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
         this.positionCircles.addAll(positionCircles)
     }
 
-    private fun addPositionCircle(mapLocation: MapLocation): Circle {
+    private fun addPositionCircle(location: Location): Circle {
         val circleOptions = CircleOptions()
-        circleOptions.center(LatLng(mapLocation.latitude, mapLocation.longitude))
-        circleOptions.fillColor(this.trackColor)
-        circleOptions.radius(1.0)
-        circleOptions.strokeColor(Color.RED)
+        circleOptions.center(locationToLatLng(location))
+
+        circleOptions.strokeColor(this.trackColor)
         circleOptions.strokeWidth(2.0f)
+
+        circleOptions.fillColor(Color.argb(25, 0, 145, 234))
+        if (location.accuracy == null) {
+            circleOptions.radius(1.0)
+        } else {
+            circleOptions.radius(location.accuracy!!.toDouble())
+        }
+
         circleOptions.visible(this.showPositions)
         circleOptions.clickable(this.showPositions)
 
         val result = this.map.addCircle(circleOptions)
-        result.tag = mapLocation.debugInfo
+        result.tag = "${location.provider} [${location.segmentNumber}] ${location.time.formatTimeOnlyDefault()} A:${location.accuracy}m S:${location.speed}m/s Alt:${location.altitude}m"
 
         return result
     }
@@ -170,14 +183,20 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
             return
         }
 
-        val cameraBounds = this.trackSegmentCollection.getCameraBounds()
+        val trackLatLngBounds = this.getTrackLatLngBounds()
 
-        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(LatLngBounds(LatLng(cameraBounds.southWest.latitude, cameraBounds.southWest.longitude), LatLng(cameraBounds.northEast.latitude, cameraBounds.northEast.longitude)), 100)
+        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(trackLatLngBounds, 100)
 
         this.map.animateCamera(cameraUpdate)
     }
 
-    public override fun zoomToLocation(location: MapLocation, zoom: Float) {
+    private fun getTrackLatLngBounds(): LatLngBounds{
+        val cameraBounds = this.trackSegmentCollection.getCameraBounds()
+
+        return LatLngBounds(locationToLatLng(cameraBounds.southWest), locationToLatLng(cameraBounds.northEast))
+    }
+
+    public override fun zoomToLocation(location: Location, zoom: Float) {
         val latLng = GoogleTrackRecorderMapFragment.locationToLatLng(location)
 
         this.map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
@@ -378,7 +397,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
                 "]"))
 
         this.map.setOnCircleClickListener {
-            if(it.tag != null && !it.tag!!.toString().isBlank()) {
+            if (it.tag != null && !it.tag!!.toString().isBlank()) {
                 ToastManager.showToast(this.context!!, it.tag.toString(), Toast.LENGTH_LONG)
             }
         }
@@ -411,7 +430,7 @@ public final class GoogleTrackRecorderMapFragment : TrackRecorderMapFragment() {
     }
 
     companion object {
-        internal fun locationToLatLng(location: MapLocation): LatLng {
+        internal fun locationToLatLng(location: Location): LatLng {
             return LatLng(location.latitude, location.longitude)
         }
     }

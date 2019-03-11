@@ -3,10 +3,10 @@ package com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecord
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.longClicks
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.ToastManager
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Dashboard
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTile
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.DashboardTileDisplayType
+import com.janhafner.myskatemap.apps.trackrecorder.core.ToastManager
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Dashboard
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.DashboardTile
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.DashboardTileDisplayType
 import com.janhafner.myskatemap.apps.trackrecorder.findChildFragmentById
 import com.janhafner.myskatemap.apps.trackrecorder.services.dashboard.IDashboardService
 import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorder.dashboard.tiles.*
@@ -180,7 +180,6 @@ internal final class DashboardTabFragmentPresenter(private val view: DashboardTa
                                     ToastManager.showToast(this.view.context!!, toastText, Toast.LENGTH_SHORT)
                                 }
                         dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks()
-                                .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_value.longClicks())
                                 .mergeWith(dashboardTileSetup.value.fragment.view!!.fragment_dashboard_tile_line_chart.longClicks())
                                 .flatMapSingle {
                                     this.changeTileFragmentPresenterConnector(result.dashboard, dashboardTileSetup.value)

@@ -1,6 +1,6 @@
 package com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance
 
-import com.janhafner.myskatemap.apps.trackrecorder.common.roundWithTwoDecimalsAndFormatWithUnit
+import com.janhafner.myskatemap.apps.trackrecorder.core.roundWithTwoDecimalsAndFormatWithUnit
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.DistanceUnit
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
 

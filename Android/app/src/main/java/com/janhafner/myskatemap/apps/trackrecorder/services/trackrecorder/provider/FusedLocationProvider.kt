@@ -7,8 +7,8 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
-import com.janhafner.myskatemap.apps.trackrecorder.common.toLocation
+import com.janhafner.myskatemap.apps.trackrecorder.core.ObjectDestroyedException
+import com.janhafner.myskatemap.apps.trackrecorder.core.toLocation
 import com.janhafner.myskatemap.apps.trackrecorder.getFusedLocationProviderClient
 
 internal final class FusedLocationProvider(private val context: Context,

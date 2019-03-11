@@ -6,11 +6,11 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.janhafner.myskatemap.apps.trackrecorder.R
-import com.janhafner.myskatemap.apps.trackrecorder.common.IDestroyable
-import com.janhafner.myskatemap.apps.trackrecorder.common.formatRecordingTime
-import com.janhafner.myskatemap.apps.trackrecorder.common.hasChanged
-import com.janhafner.myskatemap.apps.trackrecorder.common.isNamed
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.TrackingPausedReason
+import com.janhafner.myskatemap.apps.trackrecorder.core.IDestroyable
+import com.janhafner.myskatemap.apps.trackrecorder.core.formatRecordingTime
+import com.janhafner.myskatemap.apps.trackrecorder.core.hasChanged
+import com.janhafner.myskatemap.apps.trackrecorder.core.isNamed
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.TrackingPausedReason
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverter
 import com.janhafner.myskatemap.apps.trackrecorder.conversion.distance.IDistanceConverterFactory
 import com.janhafner.myskatemap.apps.trackrecorder.infrastructure.distance.format
@@ -23,7 +23,6 @@ import com.janhafner.myskatemap.apps.trackrecorder.views.activities.trackrecorde
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.joda.time.Period
-import java.util.concurrent.TimeUnit
 
 
 internal final class TrackRecorderServiceNotification(private val service: Service,
@@ -145,8 +144,8 @@ internal final class TrackRecorderServiceNotification(private val service: Servi
                 notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_play_arrow_bright_24dp, this.service.getString(R.string.trackrecorderservice_notification_action_resume), PendingIntent.getService(this.service, 0, Intent(ACTION_RESUME, null, this.service, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
             }
 
-            notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_flag_bright_24dp, this.service.getString(R.string.trackrecorderservice_notification_action_finish), PendingIntent.getService(this.service, 0, Intent(ACTION_FINISH, null, this.service, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
-            notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_clear_bright_24dp, this.service.getString(R.string.trackrecorderservice_notification_action_discard), PendingIntent.getService(this.service, 0, Intent(ACTION_DISCARD, null, this.service, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
+            notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_flag_bright_24dp, this.service.getString(R.string.trackrecorderservice_notification_action_finish), PendingIntent.getActivity(this.service, 0, Intent(ACTION_FINISH, null, this.service, TrackRecorderActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
+            notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_clear_bright_24dp, this.service.getString(R.string.trackrecorderservice_notification_action_discard), PendingIntent.getActivity(this.service, 0, Intent(ACTION_DISCARD, null, this.service, TrackRecorderActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
         } else if (this.state.state == TrackRecordingSessionState.Running) {
             notificationCompatBuilder.addAction(NotificationCompat.Action.Builder(R.drawable.ic_pause_bright_24dp, this.service.getString(R.string.trackrecorderservice_notification_action_pause), PendingIntent.getService(this.service, 0, Intent(ACTION_PAUSE, null, this.service, TrackRecorderService::class.java), PendingIntent.FLAG_UPDATE_CURRENT)).build())
         }

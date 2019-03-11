@@ -1,10 +1,9 @@
 package com.janhafner.myskatemap.apps.trackrecorder.services.trackrecorder.provider
 
 import android.content.Context
-import com.janhafner.myskatemap.apps.trackrecorder.common.ObjectDestroyedException
-import com.janhafner.myskatemap.apps.trackrecorder.common.types.Location
+import com.janhafner.myskatemap.apps.trackrecorder.core.ObjectDestroyedException
+import com.janhafner.myskatemap.apps.trackrecorder.core.types.Location
 import com.janhafner.myskatemap.apps.trackrecorder.isLocationServicesEnabled
-import com.janhafner.myskatemap.apps.trackrecorder.map.MapLocation
 import org.joda.time.DateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -44,7 +43,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
         }
     }
 
-    private fun computeNextLocation(counter: Int, initialLocation: Location, offsetLatitude: Double, offsetLongitude: Double): MapLocation {
+    private fun computeNextLocation(counter: Int, initialLocation: Location, offsetLatitude: Double, offsetLongitude: Double): Location {
         val previousCoordinates = genericCoordinates[counter - 1]
 
         var x = previousCoordinates.x
@@ -66,7 +65,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
 
         genericCoordinates.add(PointD(x, y))
 
-        return MapLocation(x + initialLocation.latitude, y + initialLocation.longitude)
+        return Location.simple(x + initialLocation.latitude, y + initialLocation.longitude)
     }
 
     private fun computeLocation(): Location {
@@ -87,14 +86,18 @@ internal final class SimulatedLocationProvider(private val context: Context,
             val clonedLastComputedLocation = this.cloneLocation(this.lastComputedLocation!!)
 
             clonedLastComputedLocation.bearing = clonedLastComputedLocation.bearing?.plus(this.bearingStepping)
+            clonedLastComputedLocation.bearingAccuracyDegrees = Random.nextFloat() * 100
 
             val nextComputedLocation = this.computeNextLocation(sequenceNumber, this.initialLocation, this.latitudeStepping, this.longitudeStepping)
 
             clonedLastComputedLocation.latitude = nextComputedLocation.latitude
             clonedLastComputedLocation.longitude = nextComputedLocation.longitude
+            clonedLastComputedLocation.accuracy = Random.nextFloat() * 100
 
             clonedLastComputedLocation.speed = this.computeSpeed(sequenceNumber).toFloat()
+            clonedLastComputedLocation.speedAccuracyMetersPerSecond = Random.nextFloat() * 10
             clonedLastComputedLocation.altitude = this.computeAltitude(sequenceNumber)
+            clonedLastComputedLocation.verticalAccuracyMeters = Random.nextFloat() * 100
 
             this.lastComputedLocation = clonedLastComputedLocation
         }
@@ -128,7 +131,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
             offset = -offset / maximum + period
         }
 
-        return result + offset * (maximum / period)
+        return (result + offset * (maximum / period)) / 100
     }
 
     private fun computeAltitude(sequenceNumber: Int): Double {
@@ -142,7 +145,7 @@ internal final class SimulatedLocationProvider(private val context: Context,
             offset = -offset / maximum + period
         }
 
-        return result + offset  * (maximum / period)
+        return (result + offset  * (maximum / period)) / 10
     }
 
     public override fun stopLocationUpdates() {
