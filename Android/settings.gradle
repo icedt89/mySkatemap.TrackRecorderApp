@@ -1,0 +1,1 @@
+include ':app', ':app.conversion', ':app.core',':app.services.couchdb', ':app.settings', ':app.services', ':app.map', ':app.map.google', ':app.livelocation'

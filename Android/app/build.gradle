@@ -1,0 +1,116 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion 28
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    defaultConfig {
+        applicationId 'com.janhafner.myskatemap.apps.activityrecorder'
+        minSdkVersion 23
+        targetSdkVersion 28
+        versionCode 1
+        versionName "0.89"
+        resConfigs "en", "de"
+    }
+    buildTypes {
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            ext.enableCrashlytics = false
+            ext.alwaysUpdateBuildId = false
+
+            buildConfigField 'String', 'APP_BACKEND_OAUTH2_CLIENTID', '"643337282862-qhd7j93t6nbj3agaih035f8nl44al7ak.apps.googleusercontent.com"'
+
+            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '6500'
+            buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
+
+            buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'false'
+            buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"'
+            //10.0.2.2 is the ip of the host if executed in the emulator
+
+            buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
+            buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
+            buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
+            buildConfigField 'double', 'MAP_INITIAL_ALTITUDE', '250.0'
+
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
+
+            buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '100'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
+            buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
+            buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
+            buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
+
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1500'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '3500'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '4500'
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            buildConfigField 'String', 'APP_BACKEND_OAUTH2_CLIENTID', '"643337282862-qhd7j93t6nbj3agaih035f8nl44al7ak.apps.googleusercontent.com"'
+
+            buildConfigField 'boolean', 'STILL_DETECTION_ENABLE', 'true'
+            buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '6500'
+            buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
+
+            buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'false'
+            buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"'
+            //10.0.2.2 is the ip of the host if executed in the emulator
+
+            buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
+            buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
+            buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
+            buildConfigField 'double', 'MAP_INITIAL_ALTITUDE', '250.0'
+
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
+
+            buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '1000'
+            buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_DELAY_IN_MILLISECONDS', '0'
+            buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_BEARING_STEPPING', '0.0001f'
+            buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LONGITUDE_STEPPING', '0.001'
+            buildConfigField 'double', 'SIMULATED_LOCATION_PROVIDER_LATITUDE_STEPPING', '0.001'
+
+            buildConfigField 'float', 'FUSED_LOCATION_PROVIDER_SMALLEST_DISPLACEMENT_IN_METERS', '4.0f'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_FASTEST_INTERVAL_IN_MILLISECONDS', '1500'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '3500'
+            buildConfigField 'int', 'FUSED_LOCATION_PROVIDER_MAX_WAIT_TIME_IN_MILLISECONDS', '4500'
+        }
+    }
+    buildToolsVersion '28.0.3'
+    productFlavors {
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    kapt "com.google.dagger:dagger-android-processor:$dagger_version"
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    implementation project(':app.core')
+    implementation project(':app.conversion')
+    implementation project(':app.settings')
+    implementation project(':app.services.couchdb')
+    implementation project(':app.services')
+    implementation project(':app.map')
+    implementation project(':app.map.google')
+    implementation project(':app.livelocation')
+
+    implementation 'com.github.clans:fab:1.6.4'
+}
+repositories {
+    mavenCentral()
+}

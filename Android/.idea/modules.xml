@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Android.iml" filepath="$PROJECT_DIR$/.idea/Android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.conversion/app.conversion.iml" filepath="$PROJECT_DIR$/app.conversion/app.conversion.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.core/app.core.iml" filepath="$PROJECT_DIR$/app.core/app.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.livelocation/app.livelocation.iml" filepath="$PROJECT_DIR$/app.livelocation/app.livelocation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.map/app.map.iml" filepath="$PROJECT_DIR$/app.map/app.map.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.map.google/app.map.google.iml" filepath="$PROJECT_DIR$/app.map.google/app.map.google.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.services/app.services.iml" filepath="$PROJECT_DIR$/app.services/app.services.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.services.couchdb/app.services.couchdb.iml" filepath="$PROJECT_DIR$/app.services.couchdb/app.services.couchdb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app.settings/app.settings.iml" filepath="$PROJECT_DIR$/app.settings/app.settings.iml" />
+    </modules>
+  </component>
+</project>

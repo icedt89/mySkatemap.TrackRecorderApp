@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:tint="?android:attr/textColorSecondary"
+        android:id="@+id/activity_track_list_item_activity_icon"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="4dp"
+        />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/activity_track_list_item_activity_icon"
+        android:id="@+id/activity_track_list_item_displayname"
+        android:textSize="18sp"
+        />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/activity_track_list_item_distance"
+        android:layout_below="@id/activity_track_list_item_displayname"
+        android:layout_toEndOf="@id/activity_track_list_item_activity_icon"
+        />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/activity_track_list_item_recordingtime"
+        android:layout_toEndOf="@id/activity_track_list_item_activity_icon"
+        android:layout_below="@id/activity_track_list_item_distance"
+        />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/activity_track_list_item_action_delete"
+        android:src="@drawable/ic_delete_24dp"
+        android:tint="?android:attr/textColorTertiary"
+        android:layout_alignParentEnd="true"
+        />
+</RelativeLayout>

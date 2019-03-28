@@ -1,0 +1,177 @@
+<resources>
+    <string name="app_name">mySkatemap</string>
+    <string name="activityrecorderactivity_title">Activity</string>
+    <string name="viewfinishedactivityactivity_title">Activity %s</string>
+    <string name="activityrecorderactivity_toolbar_finish_currenttracking">Finish</string>
+    <string name="activityrecorderactivity_toolbar_discard_currenttracking">Discard</string>
+    <string name="activityrecorderactivity_tab_dashboard_title">Dashboard</string>
+    <string name="activityrecorderactivity_tab_map_title">Map</string>
+    <string name="activityrecorderactivity_discard_confirmation_title">Discard</string>
+    <string name="activityrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost! Do you want to proceed?</string>
+    <string name="activityrecorderactivity_discard_confirmation_button_yes_label">Discard</string>
+    <string name="activityrecorderactivity_discard_confirmation_button_no_label">Cancel</string>
+    <string name="activityrecorderactivity_finish_confirmation_title">Finish</string>
+    <string name="activityrecorderactivity_finish_confirmation_message">All data of the current recording will be saved for later processing by you.\n\nDo you want to proceed?</string>
+    <string name="activityrecorderactivity_finish_confirmation_button_yes_label">Finish</string>
+    <string name="activityrecorderactivity_finish_confirmation_button_no_label">Cancel</string>
+    <string name="activityrecorderactivity_show_location_services_confirmation_message">Please activate location services to proceed with tracking.</string>
+    <string name="activityrecorderactivity_show_location_services_confirmation_title">Location services unavailable</string>
+
+    <string name="aboutactivity_copyright">© Jan Hafner</string>
+    <string name="aboutactivity_version">Version %s</string>
+    <string name="aboutactivity_app_pid">PID: %s</string>
+    <string name="aboutactivity_app_pid_copied_toast">PID copied to clipboard</string>
+    <string name="aboutactivity_website">www.jan-hafner.de</string>
+
+    <string name="activityrecorderservice_notification_status_paused">Recording paused</string>
+    <string name="activityrecorderservice_notification_status_stillstand_paused">Recording automatically paused</string>
+    <string name="activityrecorderservice_notification_status_locationservicesunavailable_paused">Location services unavailable</string>
+    <string name="activityrecorderservice_notification_status_running">Running</string>
+    <string name="activityrecorderservice_notification_action_resume">Resume</string>
+    <string name="activityrecorderservice_notification_action_finish">Finish</string>
+    <string name="activityrecorderservice_notification_action_discard">Discard</string>
+    <string name="activityrecorderservice_notification_action_pause">Pause</string>
+    <string name="activityrecorderservice_notification_contenttext_template">%1$s in %2$s</string>
+
+    <string name="appsettings_preference_units_title">Units</string>
+    <string name="appsettings_preference_show_positions_on_map_label">Show positions on map</string>
+    <string name="appsettings_preference_show_positions_on_map_summary">Shows all positions of the track on the map. Use with caution, this can have an impact on peformance!</string>
+    <string name="appsettings_preference_show_my_location_label">Show My location</string>
+    <string name="appsettings_preference_show_my_location_summary">Shows your current location on the map, independent of a recording</string>
+    <string name="appsettings_preference_keep_screen_on_label">Keep screen on</string>
+    <string name="appsettings_preference_keep_screen_on_summary">Keep the screen active on the main window</string>
+    <string name="appsettings_preference_units_distance_label">Distance</string>
+    <string name="appsettings_preference_units_distance_summary">Distances will be display and formatted as %s</string>
+    <string name="appsettings_preference_units_speed_label">Speed</string>
+    <string name="appsettings_preference_units_speed_summary">Speed will be display and formatted as %s</string>
+    <string name="appsettings_preference_units_energy_label">Energy</string>
+    <string name="appsettings_preference_units_energy_summary">Energy will be display and formatted as %s</string>
+    <string name="appsettings_preference_tracking_title">Recording</string>
+    <string name="appsettings_preference_common_title">Common</string>
+    <string name="appsettings_preference_notifications_title">Notifications</string>
+    <string name="appsettings_preference_notifications_vibrate_on_background_stop_label">Vibrate on background stop</string>
+    <string name="appsettings_preference_notifications_vibrate_on_background_stop_summary">Let your phone vibrate if receiving locations was disabled e.g. due to connectivity issues</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_label">Auto pause</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_summary">Automatically pauses recording if still stand is detected</string>
+    <string name="userprofilesettings_preference_age_label">Your age</string>
+    <string name="userprofilesettings_preference_age_summary">You are %s years old</string>
+    <string name="userprofilesettings_preference_age_summary_empty">In years</string>
+    <string name="userprofilesettings_preference_weight_label">Your weight</string>
+    <string name="userprofilesettings_preference_weight_summary_empty">In kilograms</string>
+    <string name="userprofilesettings_preference_weight_summary">You weight %s kilograms</string>
+    <string name="userprofilesettings_preference_height_label">Your height</string>
+    <string name="userprofilesettings_preference_height_summary_empty">In centimeters</string>
+    <string name="userprofilesettings_preference_height_summary">You are %s centimeters tall</string>
+    <string name="userprofilesettings_preference_sex_label">Your sex</string>
+    <string name="userprofilesettings_preference_sex_summary">Your are %s</string>
+    <string name="userprofilesettings_preference_name_label">Your name</string>
+    <string name="userprofilesettings_preference_name_summary_empty">How you want it to get displayed in the app</string>
+    <string name="userprofilesettings_preference_name_summary">I will call you %s</string>
+    <string name="appsettings_preference_enable_live_location_label">Live-Location [exp.]</string>
+    <string name="appsettings_preference_enable_live_location_summary">Enable publishing your recorded track as it gets recorded by you</string>
+
+    <string name="userprofilesettings_preference_name_default_value">Anonymous</string>
+    <string name="userprofilesettings_preference_sex_default_value">Male</string>
+
+    <string name="appsettings_preference_units_distance_default_value">KilometersDistanceConverter</string>
+    <string name="appsettings_preference_units_speed_default_value">KilometersPerHourSpeedConverter</string>
+    <string name="appsettings_preference_units_energy_default_value">KilocalorieEnergyConverter</string>
+    <string name="appsettings_preference_notifications_vibrate_on_background_stop_default_value">true</string>
+    <string name="appsettings_preference_enable_auto_pause_on_still_default_value">true</string>
+    <string name="appsettings_preference_enable_live_location_default_value">false</string>
+    <string name="appsettings_preference_keep_screen_on_default_value">false</string>
+    <string name="appsettings_preference_show_my_location_default_value">false</string>
+    <string name="appsettings_preference_show_positions_on_map_default_value">false</string>
+
+    <string name="tracklistactivity_title">My tracks</string>
+    <string name="tracklistactivity_no_activities_recorded_message">You have not recorded any activites</string>
+    <string name="userprofilesettingsactivity_title">My Profile</string>
+    <string name="settingsactivity_title">Settings</string>
+    <string name="aboutactivity_title">About</string>
+
+    <string name="dashboard_tile_changed_toast_text">Changed to %s</string>
+
+    <string name="dashboard_tile_maximumspeeddashboardtilefragmentpresenter_title">max. Speed</string>
+    <string name="dashboard_tile_averagespeeddashboardtilefragmentpresenter_title">Ø Speed</string>
+    <string name="dashboard_tile_currentspeeddashboardtilefragmentpresenter_tile">Speed</string>
+    <string name="dashboard_tile_distancedashboardtilefragmentpresenter_tile">Distance</string>
+    <string name="dashboard_tile_burnedenergydashboardtilefragmentpresenter_tile">Energy</string>
+    <string name="dashboard_tile_maximumaltitudedashboardtilefragmentpresenter_title">max. Altitude</string>
+    <string name="dashboard_tile_averagealtitudedashboardtilefragmentpresenter_title">Ø Altitude</string>
+    <string name="dashboard_tile_minimumaltitudedashboardtilefragmentpresenter_tile">min. Altitude</string>
+    <string name="dashboard_tile_currentaltitudedashboardtilefragmentpresenter_tile">Altitude</string>
+    <string name="dashboard_tile_recordingtimedashboardtilefragmentpresenter_tile">Duration</string>
+    <string name="dashboard_tile_numberoflocationsdashboardtilefragmentpresenter_tile">Locations</string>
+
+    <string name="app_navigation_action_signin_label">Sign in</string>
+    <string name="app_navigation_action_settings_label">Settings</string>
+    <string name="app_navigation_action_user_profile_label">My profile</string>
+    <string name="app_navigation_action_activityhistory_label">History</string>
+    <string name="app_navigation_action_activity_label">Activity</string>
+    <string name="app_navigation_action_playground_label">Playground</string>
+    <string name="app_navigation_action_about_label">About</string>
+
+    <string name="trackrecorderactivity_navigation_drawer_info_title">Info</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_label">Activity</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_nosession">-</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_activity_content_unknownactivity">Unknown activity: %s</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_auto_pause_on_still_label">Auto pause</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_live_location_label">Live-Location [exp.]</string>
+    <string name="trackrecorderactivity_navigation_drawer_info_keep_screen_on_label">Keep screen on</string>
+
+    <string-array name="appsettings_preference_units_distance_names">
+        <item>Kilometers</item>
+        <item>Miles</item>
+    </string-array>
+    <string-array name="appsettings_preference_units_distance_values">
+        <item>KilometersDistanceConverter</item>
+        <item>MilesDistanceConverter</item>
+    </string-array>
+
+    <string-array name="appsettings_preference_units_speed_names">
+        <item>Kilometers per hour</item>
+        <item>Miles per hour</item>
+        <item>Meters per second</item>
+    </string-array>
+    <string-array name="appsettings_preference_units_speed_values">
+        <item>KilometersPerHourSpeedConverter</item>
+        <item>MilesPerHourSpeedConverter</item>
+        <item>MetersPerSecondSpeedConverter</item>
+    </string-array>
+
+    <string-array name="appsettings_preference_units_energy_names">
+        <item>Kilocalorie</item>
+        <item>Kilojoule</item>
+        <item>Watt Hour</item>
+    </string-array>
+    <string-array name="appsettings_preference_units_energy_values">
+        <item>KilocalorieEnergyConverter</item>
+        <item>KilojouleEnergyConverter</item>
+        <item>WattHourEnergyConverter</item>
+    </string-array>
+
+    <string-array name="userprofilesettings_preference_sex_names">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+    <string-array name="userprofilesettings_preference_sex_values">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+
+    <string-array name="appsettings_preference_default_met_activity_code_names">
+        <item>Biking</item>
+        <item>Inline Skating</item>
+        <item>Walking</item>
+    </string-array>
+    <string-array name="appsettings_preference_default_met_activity_code_values">
+        <item>01015</item>
+        <item>15591</item>
+        <item>17160</item>
+    </string-array>
+    <integer-array name="met_activity_code_drawables">
+        <item>@drawable/ic_directions_bike_24dp</item>
+        <item>@drawable/ic_directions_run_24dp</item>
+        <item>@drawable/ic_directions_run_24dp</item>
+    </integer-array>
+</resources>
