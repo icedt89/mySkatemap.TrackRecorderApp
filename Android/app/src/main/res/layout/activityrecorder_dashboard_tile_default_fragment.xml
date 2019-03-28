@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+    <androidx.appcompat.widget.AppCompatTextView
+        style="@style/App.Dashboard.Tile.Default.Title"
+        android:id="@+id/fragment_dashboard_tile_title" />
+    <androidx.appcompat.widget.AppCompatTextView
+        style="@style/App.Dashboard.Tile.Default.Value"
+        android:id="@+id/fragment_dashboard_tile_value" />
+    <androidx.appcompat.widget.AppCompatTextView
+        style="@style/App.Dashboard.Tile.Default.Unit"
+        android:id="@+id/fragment_dashboard_tile_unit" />
+    <com.github.mikephil.charting.charts.LineChart
+        android:visibility="gone"
+        android:id="@+id/fragment_dashboard_tile_line_chart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</androidx.appcompat.widget.LinearLayoutCompat>

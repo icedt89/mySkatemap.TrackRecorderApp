@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/app_navigationdrawer">
+    <com.google.android.material.appbar.AppBarLayout
+            android:fitsSystemWindows="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <include layout="@layout/app_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <androidx.viewpager.widget.ViewPager
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/trackrecorderactivity_toolbar_viewpager">
+                    <com.google.android.material.tabs.TabLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/App.TabLayout"
+                        android:id="@+id/trackrecorderactivity_toolbar_tablayout">
+                    </com.google.android.material.tabs.TabLayout>
+                </androidx.viewpager.widget.ViewPager>
+                <com.janhafner.myskatemap.apps.activityrecorder.views.activities.activityrecorder.mainfab.MainFab
+                    android:id="@+id/trackrecorderactivity_mainfab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="10dp" />
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+    <include layout="@layout/app_navigation" />
+    <include layout="@layout/activityrecorder_activityinfo_navigation" />
+</androidx.drawerlayout.widget.DrawerLayout>

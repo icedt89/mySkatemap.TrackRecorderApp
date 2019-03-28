@@ -5,14 +5,12 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 28
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     defaultConfig {
-        applicationId 'com.janhafner.myskatemap.apps.trackrecorder'
+        applicationId 'com.janhafner.myskatemap.apps.activityrecorder'
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
@@ -32,16 +30,17 @@ android {
             buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '6500'
             buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
 
-            buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
+            buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'false'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
-            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"' //10.0.2.2 is the ip of the host if executed in the emulator
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"'
+            //10.0.2.2 is the ip of the host if executed in the emulator
 
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
             buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
             buildConfigField 'double', 'MAP_INITIAL_LONGITUDE', '12.9167'
             buildConfigField 'double', 'MAP_INITIAL_ALTITUDE', '250.0'
 
-            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'true'
+            buildConfigField 'boolean', 'LOCATION_PROVIDER_USE_SIMULATED_LOCATION_PROVIDER', 'false'
 
             buildConfigField 'float', 'SIMULATED_LOCATION_PROVIDER_INITIAL_BEARING', '1.0f'
             buildConfigField 'int', 'SIMULATED_LOCATION_PROVIDER_INTERVAL_IN_MILLISECONDS', '100'
@@ -67,9 +66,10 @@ android {
             buildConfigField 'int', 'STILL_DETECTION_DETECTION_TIMEOUT_IN_MILLISECONDS', '6500'
             buildConfigField 'float', 'STILL_DETECTION_SMALLEST_DISPLACEMENT_IN_METERS', '5.0f'
 
-            buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'true'
+            buildConfigField 'boolean', 'LIVE_LOCATION_ENABLE', 'false'
             buildConfigField 'boolean', 'LIVE_LOCATION_USE_HTTP', 'false'
-            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"' //10.0.2.2 is the ip of the host if executed in the emulator
+            buildConfigField 'String', 'LIVE_LOCATION_HTTP_BASE_URL', '"http://10.0.2.2:57286/api"'
+            //10.0.2.2 is the ip of the host if executed in the emulator
 
             buildConfigField 'float', 'MAP_INITIAL_ZOOM', '8.0f'
             buildConfigField 'double', 'MAP_INITIAL_LATITUDE', '50.8333'
@@ -92,14 +92,14 @@ android {
         }
     }
     buildToolsVersion '28.0.3'
+    productFlavors {
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
-
     implementation project(':app.core')
     implementation project(':app.conversion')
     implementation project(':app.settings')
@@ -108,6 +108,8 @@ dependencies {
     implementation project(':app.map')
     implementation project(':app.map.google')
     implementation project(':app.livelocation')
+
+    implementation 'com.github.clans:fab:1.6.4'
 }
 repositories {
     mavenCentral()

@@ -15,13 +15,6 @@
             android:title="@string/appsettings_preference_enable_live_location_label"
             android:summary="@string/appsettings_preference_enable_live_location_summary"
             android:defaultValue="@string/appsettings_preference_enable_live_location_default_value" />
-        <ListPreference
-            android:key="@string/appsettings_preference_default_met_activity_code_key"
-            android:title="@string/appsettings_preference_tracking_default_met_activity_code_label"
-            android:summary="@string/appsettings_preference_tracking_default_met_activity_code_summary"
-            android:entries="@array/appsettings_preference_default_met_activity_code_names"
-            android:entryValues="@array/appsettings_preference_default_met_activity_code_values"
-            android:defaultValue="@string/appsettings_preference_default_met_activity_code_default_value"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/appsettings_preference_notifications_title"

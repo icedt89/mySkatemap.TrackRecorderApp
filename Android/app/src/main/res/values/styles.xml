@@ -1,94 +1,104 @@
 <resources>
-    <style name="MySkatemap.TrackRecorder.AppTheme.AppCompat" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="App.Theme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-        <item name="colorPrimary">@color/primaryLightColor</item>
-        <item name="colorAccent">@color/accentColor</item>
+        <item name="colorAccent">@color/appBlue</item>
 
-        <item name="android:textColor">@color/textColor</item>
-        <item name="android:textColorPrimary">@color/textColor</item>
-        <item name="android:textColorSecondary">@color/textDarkColor</item>
-
-        <item name="android:listDivider">@color/primaryColor</item>
-
-        <item name="android:windowBackground">@color/primaryLightColor</item>
-        <item name="android:statusBarColor">@color/primaryColor</item>
-        <item name="android:navigationBarColor">@color/primaryColor</item>
-
-        <item name="alertDialogTheme">@style/MySkatemap.TrackRecorder.AppTheme.AppCompat.PopUp</item>
+        <item name="alertDialogTheme">@style/App.PopUp</item>
     </style>
 
-    <style name="MySkatemap.Divider" parent="Base.Theme.AppCompat">
-        <item name="android:background">@color/textDarkColor</item>
+    <style name="App.TabLayout" parent="App.Theme">
+        <item name="tabRippleColor">?android:attr/colorAccent</item>
+        <item name="tabSelectedTextColor">@color/appBlue</item>
     </style>
 
-    <style name="MySkatemap.Divider.Horizontal" parent="MySkatemap.Divider">
+    <style name="App.Divider" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:background">@color/appLightGray</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+    </style>
+
+    <style name="App.Divider.Horizontal" parent="App.Divider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
     </style>
 
-    <style name="MySkatemap.AppNavigation.Button" parent="Base.Widget.AppCompat.Button.Borderless.Colored">
+    <style name="App.AppNavigation.Button" parent="Base.Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:gravity">start</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.AppTheme.AppCompat.PopUp" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:textColor">@color/accentColor</item>
+    <style name="App.PopUp" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/appBlue</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.AppTheme.AppCompat.SecondaryFab" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorAccent">@color/textDarkColor</item>
+    <style name="App.SecondaryFab" parent="App.Theme">
+        <item name="colorAccent">@android:color/darker_gray</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.SplashscreenActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="App.MainFab.Running" parent="App.Theme">
+        <item name="fab_colorNormal">@color/appRed</item>
+        <item name="android:src">@drawable/ic_pause_24dp</item>
+    </style>
+
+    <style name="App.MainFab.NoLocationServices" parent="App.Theme">
+        <item name="fab_colorNormal">@color/appOrange</item>
+        <item name="android:src">@drawable/ic_location_on_24dp</item>
+    </style>
+
+    <style name="App.MainFab.Default" parent="App.Theme">
+        <item name="menu_colorNormal">@color/appBlue</item>
+        <item name="menu_colorPressed">@color/appBlue</item>
+        <item name="menu_icon">@drawable/ic_add_24dp</item>
+    </style>
+
+    <style name="App.ExtendedFab" parent="App.Theme">
+        <item name="fab_colorNormal">@color/appBlue</item>
+    </style>
+
+    <style name="App.SplashscreenActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@drawable/splashscreen</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Content" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="App.Dashboard.Tile.Content" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.ActivityInfo.Container" parent="MySkatemap.TrackRecorder.AppTheme.AppCompat">
+    <style name="App.ActivityInfo.Container" parent="App.Theme">
         <item name="android:orientation">vertical</item>
         <item name="android:layout_marginBottom">10dp</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.ActivityInfo.Container.Label" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="App.ActivityInfo.Container.Label" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/textColor</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Title" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Content">
+    <style name="App.Dashboard.Tile.Default.Title" parent="App.Dashboard.Tile.Content">
         <item name="android:textSize">24sp</item>
-        <item name="android:textColor">@color/textColor</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Value" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Title">
+    <style name="App.Dashboard.Tile.Default.Value" parent="App.Dashboard.Tile.Default.Title">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">38sp</item>
-        <item name="android:textColor">@color/textColor</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Default.Unit" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Content">
+    <style name="App.Dashboard.Tile.Default.Unit" parent="App.Dashboard.Tile.Content">
         <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/textDarkColor</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Title" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Content">
+    <style name="App.Dashboard.Tile.Main.Title" parent="App.Dashboard.Tile.Content">
         <item name="android:textSize">32sp</item>
-        <item name="android:textColor">@color/textColor</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Value" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Title">
+    <style name="App.Dashboard.Tile.Main.Value" parent="App.Dashboard.Tile.Main.Title">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">58sp</item>
-        <item name="android:textColor">@color/textColor</item>
     </style>
 
-    <style name="MySkatemap.TrackRecorder.Dashboard.Tile.Main.Unit" parent="MySkatemap.TrackRecorder.Dashboard.Tile.Content">
+    <style name="App.Dashboard.Tile.Main.Unit" parent="App.Dashboard.Tile.Content">
         <item name="android:textSize">24sp</item>
-        <item name="android:textColor">@color/textDarkColor</item>
     </style>
 </resources>

@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">mySkatemap</string>
-    <string name="trackrecorderactivity_title">Aktivität</string>
-    <string name="viewfinishedtrackactivity_title">Aktivität %s</string>
-    <string name="trackrecorderactivity_toolbar_finish_currenttracking">Abschließen</string>
-    <string name="trackrecorderactivity_toolbar_discard_currenttracking">Verwerfen</string>
-    <string name="trackrecorderactivity_tab_dashboard_title">Dashboard</string>
-    <string name="trackrecorderactivity_tab_map_title">Karte</string>
-    <string name="trackrecorderactivity_discard_confirmation_title">Verwerfen</string>
-    <string name="trackrecorderactivity_discard_confirmation_button_yes_label">Verwerfen</string>
-    <string name="trackrecorderactivity_discard_confirmation_button_no_label">Abbrechen</string>
-    <string name="trackrecorderactivity_finish_confirmation_title">Abschließen</string>
-    <string name="trackrecorderactivity_finish_confirmation_button_yes_label">Abschließen</string>
-    <string name="trackrecorderactivity_finish_confirmation_button_no_label">Abbrechen</string>
-    <string name="trackrecorderservice_notification_status_paused">Aufnahme pausiert</string>
-    <string name="trackrecorderservice_notification_status_stillstand_paused">Aufnahme automatisch pausiert</string>
-    <string name="trackrecorderservice_notification_status_locationservicesunavailable_paused">Standort nicht verfügbar</string>
-    <string name="trackrecorderservice_notification_status_running">Läuft</string>
-    <string name="trackrecorderservice_notification_action_resume">Fortfahren</string>
-    <string name="trackrecorderservice_notification_action_discard">Verwerfen</string>
-    <string name="trackrecorderservice_notification_action_finish">Abschließen</string>
-    <string name="trackrecorderservice_notification_action_pause">Pausieren</string>
-    <string name="trackrecorderservice_notification_contenttext_template">%1$s in %2$s</string>
-    <string name="trackrecorderactivity_discard_confirmation_message">Alle Daten der derzeitigen Aufnahme gehen unwiderruflich verloren! Möchtest du fortfahren?</string>
-    <string name="trackrecorderactivity_finish_confirmation_message">Alle Daten der derzeitigen Aufnahme werden zur späteren Verarbeitung gespeichert! Möchtest du fortfahren?</string>
-    <string name="trackrecorderactivity_show_location_services_confirmation_message">Bitte aktiviere die Standortdienste um mit der Aufzeichnung fortzufahren.</string>
-    <string name="trackrecorderactivity_show_location_services_confirmation_title">Standort nicht verfügbar</string>
+    <string name="activityrecorderactivity_title">Aktivität</string>
+    <string name="activityrecorderactivity_toolbar_finish_currenttracking">Abschließen</string>
+    <string name="activityrecorderactivity_toolbar_discard_currenttracking">Verwerfen</string>
+    <string name="activityrecorderactivity_tab_dashboard_title">Dashboard</string>
+    <string name="activityrecorderactivity_tab_map_title">Karte</string>
+    <string name="activityrecorderactivity_discard_confirmation_title">Verwerfen</string>
+    <string name="activityrecorderactivity_discard_confirmation_button_yes_label">Verwerfen</string>
+    <string name="activityrecorderactivity_discard_confirmation_button_no_label">Abbrechen</string>
+    <string name="activityrecorderactivity_finish_confirmation_title">Abschließen</string>
+    <string name="activityrecorderactivity_finish_confirmation_button_yes_label">Abschließen</string>
+    <string name="activityrecorderactivity_finish_confirmation_button_no_label">Abbrechen</string>
+    <string name="activityrecorderactivity_discard_confirmation_message">Alle Daten der derzeitigen Aufnahme gehen unwiderruflich verloren! Möchtest du fortfahren?</string>
+    <string name="activityrecorderactivity_finish_confirmation_message">Alle Daten der derzeitigen Aufnahme werden zur späteren Verarbeitung gespeichert! Möchtest du fortfahren?</string>
+    <string name="activityrecorderactivity_show_location_services_confirmation_message">Bitte aktiviere die Standortdienste um mit der Aufzeichnung fortzufahren.</string>
+    <string name="activityrecorderactivity_show_location_services_confirmation_title">Standort nicht verfügbar</string>
+
+    <string name="activityrecorderservice_notification_status_paused">Aufnahme pausiert</string>
+    <string name="activityrecorderservice_notification_status_stillstand_paused">Aufnahme automatisch pausiert</string>
+    <string name="activityrecorderservice_notification_status_locationservicesunavailable_paused">Standort nicht verfügbar</string>
+    <string name="activityrecorderservice_notification_status_running">Läuft</string>
+    <string name="activityrecorderservice_notification_action_resume">Fortfahren</string>
+    <string name="activityrecorderservice_notification_action_discard">Verwerfen</string>
+    <string name="activityrecorderservice_notification_action_finish">Abschließen</string>
+    <string name="activityrecorderservice_notification_action_pause">Pausieren</string>
+    <string name="activityrecorderservice_notification_contenttext_template">%1$s in %2$s</string>
+
+    <string name="viewfinishedactivityactivity_title">Aktivität %s</string>
 
     <string name="aboutactivity_copyright">© Jan Hafner</string>
     <string name="aboutactivity_version">Version %s</string>
@@ -65,8 +67,6 @@
     <string name="userprofilesettings_preference_name_label">Dein Name</string>
     <string name="userprofilesettings_preference_name_summary_empty">Wie er in der App dargestellt werden soll</string>
     <string name="userprofilesettings_preference_name_summary">Ich werde dich %s nennen</string>
-    <string name="appsettings_preference_tracking_default_met_activity_code_label">Standard Aktivität</string>
-    <string name="appsettings_preference_tracking_default_met_activity_code_summary">Du bevorzugst %s als standard Aktivität für neue Aufnahmen. Die Aktivität wird zur Berechnung deines Energieverbrauchs benötigt.</string>
     <string name="appsettings_preference_enable_live_location_label">Live-Standort [Exp.]</string>
     <string name="appsettings_preference_enable_live_location_summary">Veröffentlicht deine aufgenommene Strecke Online während du sie aufnimmst</string>
 
@@ -93,7 +93,8 @@
     <string name="app_navigation_action_signin_label">Anmelden</string>
     <string name="app_navigation_action_settings_label">Einstellungen</string>
     <string name="app_navigation_action_user_profile_label">Mein Profil</string>
-    <string name="app_navigation_action_tracklist_label">Meine Strecken</string>
+    <string name="app_navigation_action_activityhistory_label">Historie</string>
+    <string name="app_navigation_action_activity_label">Aktivität</string>
     <string name="app_navigation_action_about_label">Über</string>
 
     <string name="trackrecorderactivity_navigation_drawer_info_title">Info</string>

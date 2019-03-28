@@ -1,2 +1,2 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.janhafner.myskatemap.apps.trackrecorder.services" />
+    package="com.janhafner.myskatemap.apps.activityrecorder.services" />

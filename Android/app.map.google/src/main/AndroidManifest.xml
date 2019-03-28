@@ -1,4 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.janhafner.myskatemap.apps.trackrecorder.map.google" >
+    package="com.janhafner.myskatemap.apps.activityrecorder.map.google" >
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 </manifest>

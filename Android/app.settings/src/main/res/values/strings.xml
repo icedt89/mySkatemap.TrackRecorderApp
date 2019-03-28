@@ -13,7 +13,6 @@
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_key">appsettings_preference_notifications_vibrate_on_background_stop</string>
     <string name="appsettings_preference_default_met_activity_code_key">appsettings_preference_default_met_activity_code</string>
     <string name="appsettings_preference_map_control_key">appsettings_preference_map_control</string>
-    <string name="appsettings_preference_app_ui_locale_key">appsettings_preference_app_ui_locale</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_key">appsettings_preference_enable_auto_pause_on_still</string>
     <string name="appsettings_preference_enable_live_location_key">appsettings_preference_enable_live_location_still</string>
     <string name="appsettings_preference_keep_screen_on_key">appsettings_preference_keep_screen_on</string>

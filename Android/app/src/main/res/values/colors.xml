@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryLightColor">#232323</color>
-    <color name="primaryColor">#121212</color>
-    <color name="primaryDarkColor">#090909</color>
-    <color name="accentColor">#0091EA</color>
-    <color name="textColor">#ffffff</color>
-    <color name="textDarkColor">#B0BEC5</color>
-    <color name="textDarkerColor">#78909C</color>
+    <color name="appBlue">#0091ff</color>
+    <color name="appLightBlue">#9dd5ff</color>
+    <color name="appRed">#ff1a40</color>
+    <color name="appGreen">#32cd59</color>
+    <color name="appLightGray">#ececec</color>
+    <color name="appDarkGray">#343434</color>
+    <color name="appOrange">#ffba00</color>
 </resources>

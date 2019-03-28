@@ -13,14 +13,12 @@
             android:layout_height="wrap_content"
             android:gravity="bottom|start"
             android:padding="6dp"
-            android:background="@color/primaryColor"
             android:orientation="horizontal">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                android:textColor="@color/textColor"
                 android:text="@string/app_name" />
         </androidx.appcompat.widget.LinearLayoutCompat>
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -30,40 +28,46 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/MySkatemap.AppNavigation.Button"
+                style="@style/App.AppNavigation.Button"
                 android:id="@+id/app_navigation_action_signin"
                 android:text="@string/app_navigation_action_signin_label" />
-            <View style="@style/MySkatemap.Divider.Horizontal" />
+            <View style="@style/App.Divider.Horizontal" />
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/MySkatemap.AppNavigation.Button"
-                android:id="@+id/app_navigation_action_tracklist"
-                android:text="@string/app_navigation_action_tracklist_label" />
+                style="@style/App.AppNavigation.Button"
+                android:id="@+id/app_navigation_action_activity"
+                android:text="@string/app_navigation_action_activity_label" />
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/App.AppNavigation.Button"
+                android:id="@+id/app_navigation_action_activityhistory"
+                android:text="@string/app_navigation_action_activityhistory_label" />
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/app_navigation_action_user_profile"
-                style="@style/MySkatemap.AppNavigation.Button"
+                style="@style/App.AppNavigation.Button"
                 android:text="@string/app_navigation_action_user_profile_label" />
-            <View style="@style/MySkatemap.Divider.Horizontal" />
+            <View style="@style/App.Divider.Horizontal" />
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/app_navigation_action_settings"
-                style="@style/MySkatemap.AppNavigation.Button"
+                style="@style/App.AppNavigation.Button"
                 android:text="@string/app_navigation_action_settings_label" />
             <androidx.appcompat.widget.AppCompatButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/app_navigation_action_playground"
-            style="@style/MySkatemap.AppNavigation.Button"
+            style="@style/App.AppNavigation.Button"
             android:text="@string/app_navigation_action_playground_label" />
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/app_navigation_action_about"
-                style="@style/MySkatemap.AppNavigation.Button"
+                style="@style/App.AppNavigation.Button"
                 android:text="@string/app_navigation_action_about_label" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.appcompat.widget.LinearLayoutCompat>

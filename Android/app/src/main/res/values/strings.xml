@@ -1,21 +1,21 @@
 <resources>
     <string name="app_name">mySkatemap</string>
-    <string name="trackrecorderactivity_title">Activity</string>
-    <string name="viewfinishedtrackactivity_title">Activity %s</string>
-    <string name="trackrecorderactivity_toolbar_finish_currenttracking">Finish</string>
-    <string name="trackrecorderactivity_toolbar_discard_currenttracking">Discard</string>
-    <string name="trackrecorderactivity_tab_dashboard_title">Dashboard</string>
-    <string name="trackrecorderactivity_tab_map_title">Map</string>
-    <string name="trackrecorderactivity_discard_confirmation_title">Discard</string>
-    <string name="trackrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost! Do you want to proceed?</string>
-    <string name="trackrecorderactivity_discard_confirmation_button_yes_label">Discard</string>
-    <string name="trackrecorderactivity_discard_confirmation_button_no_label">Cancel</string>
-    <string name="trackrecorderactivity_finish_confirmation_title">Finish</string>
-    <string name="trackrecorderactivity_finish_confirmation_message">All data of the current recording will be saved for later processing by you.\n\nDo you want to proceed?</string>
-    <string name="trackrecorderactivity_finish_confirmation_button_yes_label">Finish</string>
-    <string name="trackrecorderactivity_finish_confirmation_button_no_label">Cancel</string>
-    <string name="trackrecorderactivity_show_location_services_confirmation_message">Please activate location services to proceed with tracking.</string>
-    <string name="trackrecorderactivity_show_location_services_confirmation_title">Location services unavailable</string>
+    <string name="activityrecorderactivity_title">Activity</string>
+    <string name="viewfinishedactivityactivity_title">Activity %s</string>
+    <string name="activityrecorderactivity_toolbar_finish_currenttracking">Finish</string>
+    <string name="activityrecorderactivity_toolbar_discard_currenttracking">Discard</string>
+    <string name="activityrecorderactivity_tab_dashboard_title">Dashboard</string>
+    <string name="activityrecorderactivity_tab_map_title">Map</string>
+    <string name="activityrecorderactivity_discard_confirmation_title">Discard</string>
+    <string name="activityrecorderactivity_discard_confirmation_message">All data of the current recording will unrecoverable be lost! Do you want to proceed?</string>
+    <string name="activityrecorderactivity_discard_confirmation_button_yes_label">Discard</string>
+    <string name="activityrecorderactivity_discard_confirmation_button_no_label">Cancel</string>
+    <string name="activityrecorderactivity_finish_confirmation_title">Finish</string>
+    <string name="activityrecorderactivity_finish_confirmation_message">All data of the current recording will be saved for later processing by you.\n\nDo you want to proceed?</string>
+    <string name="activityrecorderactivity_finish_confirmation_button_yes_label">Finish</string>
+    <string name="activityrecorderactivity_finish_confirmation_button_no_label">Cancel</string>
+    <string name="activityrecorderactivity_show_location_services_confirmation_message">Please activate location services to proceed with tracking.</string>
+    <string name="activityrecorderactivity_show_location_services_confirmation_title">Location services unavailable</string>
 
     <string name="aboutactivity_copyright">© Jan Hafner</string>
     <string name="aboutactivity_version">Version %s</string>
@@ -23,15 +23,15 @@
     <string name="aboutactivity_app_pid_copied_toast">PID copied to clipboard</string>
     <string name="aboutactivity_website">www.jan-hafner.de</string>
 
-    <string name="trackrecorderservice_notification_status_paused">Recording paused</string>
-    <string name="trackrecorderservice_notification_status_stillstand_paused">Recording automatically paused</string>
-    <string name="trackrecorderservice_notification_status_locationservicesunavailable_paused">Location services unavailable</string>
-    <string name="trackrecorderservice_notification_status_running">Running</string>
-    <string name="trackrecorderservice_notification_action_resume">Resume</string>
-    <string name="trackrecorderservice_notification_action_finish">Finish</string>
-    <string name="trackrecorderservice_notification_action_discard">Discard</string>
-    <string name="trackrecorderservice_notification_action_pause">Pause</string>
-    <string name="trackrecorderservice_notification_contenttext_template">%1$s in %2$s</string>
+    <string name="activityrecorderservice_notification_status_paused">Recording paused</string>
+    <string name="activityrecorderservice_notification_status_stillstand_paused">Recording automatically paused</string>
+    <string name="activityrecorderservice_notification_status_locationservicesunavailable_paused">Location services unavailable</string>
+    <string name="activityrecorderservice_notification_status_running">Running</string>
+    <string name="activityrecorderservice_notification_action_resume">Resume</string>
+    <string name="activityrecorderservice_notification_action_finish">Finish</string>
+    <string name="activityrecorderservice_notification_action_discard">Discard</string>
+    <string name="activityrecorderservice_notification_action_pause">Pause</string>
+    <string name="activityrecorderservice_notification_contenttext_template">%1$s in %2$s</string>
 
     <string name="appsettings_preference_units_title">Units</string>
     <string name="appsettings_preference_show_positions_on_map_label">Show positions on map</string>
@@ -67,8 +67,6 @@
     <string name="userprofilesettings_preference_name_label">Your name</string>
     <string name="userprofilesettings_preference_name_summary_empty">How you want it to get displayed in the app</string>
     <string name="userprofilesettings_preference_name_summary">I will call you %s</string>
-    <string name="appsettings_preference_tracking_default_met_activity_code_label">Default activity</string>
-    <string name="appsettings_preference_tracking_default_met_activity_code_summary">You prefer %s as default activity for new recordings. The activity is used for calorie consumption calculation.</string>
     <string name="appsettings_preference_enable_live_location_label">Live-Location [exp.]</string>
     <string name="appsettings_preference_enable_live_location_summary">Enable publishing your recorded track as it gets recorded by you</string>
 
@@ -79,8 +77,6 @@
     <string name="appsettings_preference_units_speed_default_value">KilometersPerHourSpeedConverter</string>
     <string name="appsettings_preference_units_energy_default_value">KilocalorieEnergyConverter</string>
     <string name="appsettings_preference_notifications_vibrate_on_background_stop_default_value">true</string>
-    <string name="appsettings_preference_default_met_activity_code_default_value">01015</string>
-    <string name="appsettings_preference_app_ui_locale_default_value">de</string>
     <string name="appsettings_preference_enable_auto_pause_on_still_default_value">true</string>
     <string name="appsettings_preference_enable_live_location_default_value">false</string>
     <string name="appsettings_preference_keep_screen_on_default_value">false</string>
@@ -110,7 +106,8 @@
     <string name="app_navigation_action_signin_label">Sign in</string>
     <string name="app_navigation_action_settings_label">Settings</string>
     <string name="app_navigation_action_user_profile_label">My profile</string>
-    <string name="app_navigation_action_tracklist_label">My tracks</string>
+    <string name="app_navigation_action_activityhistory_label">History</string>
+    <string name="app_navigation_action_activity_label">Activity</string>
     <string name="app_navigation_action_playground_label">Playground</string>
     <string name="app_navigation_action_about_label">About</string>
 
@@ -173,8 +170,8 @@
         <item>17160</item>
     </string-array>
     <integer-array name="met_activity_code_drawables">
-        <item>@drawable/ic_directions_bike_bright_24dp</item>
-        <item>@drawable/ic_directions_run_bright_24dp</item>
-        <item>@drawable/ic_directions_run_bright_24dp</item>
+        <item>@drawable/ic_directions_bike_24dp</item>
+        <item>@drawable/ic_directions_run_24dp</item>
+        <item>@drawable/ic_directions_run_24dp</item>
     </integer-array>
 </resources>

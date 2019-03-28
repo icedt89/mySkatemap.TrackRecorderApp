@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.janhafner.myskatemap.apps.trackrecorder">
+    package="com.janhafner.myskatemap.apps.activityrecorder">
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,18 +13,18 @@
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
     <application
         android:supportsRtl="false"
-        android:name=".TrackRecorderApplication"
+        android:name="com.janhafner.myskatemap.apps.activityrecorder.TrackRecorderApplication"
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:configChanges="locale|orientation"
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_home_screen_icon"
         android:icon="@drawable/ic_home_screen_icon"
-        android:theme="@style/MySkatemap.TrackRecorder.AppTheme.AppCompat">
+        android:theme="@style/App.Theme">
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <activity
-            android:name=".views.activities.SplashscreenActivity"
-            android:theme="@style/MySkatemap.TrackRecorder.SplashscreenActivityTheme">
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.views.activities.SplashscreenActivity"
+            android:theme="@style/App.SplashscreenActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
@@ -32,32 +32,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".views.activities.playground.PlaygroundActivity"
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.views.activities.playground.PlaygroundActivity"
             android:label="Playground">
         </activity>
         <activity
-            android:name=".views.activities.trackrecorder.TrackRecorderActivity"
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.views.activities.activityrecorder.ActivityRecorderActivity"
             android:launchMode="singleTask"
-            android:label="@string/trackrecorderactivity_title"
+            android:label="@string/activityrecorderactivity_title"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
-            android:name=".views.activities.viewfinishedtrack.ViewFinishedTrackActivity"
-            android:label="@string/viewfinishedtrackactivity_title" />
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.views.activities.viewfinishedactivity.ViewFinishedActivityActivity"
+            android:label="@string/viewfinishedactivityactivity_title" />
         <activity
-            android:name=".views.activities.tracklist.TrackListActivity"
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.views.activities.activityhistory.ActivityHistoryActivity"
             android:launchMode="singleTask"
             android:label="@string/tracklistactivity_title" />
         <activity
-            android:name=".views.activities.userprofilesettings.UserProfileSettingsActivity"
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.views.activities.userprofilesettings.UserProfileSettingsActivity"
             android:launchMode="singleTask"
             android:label="@string/userprofilesettingsactivity_title" />
         <activity
-            android:name=".views.activities.appsettings.AppSettingsActivity"
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.views.activities.appsettings.AppSettingsActivity"
             android:launchMode="singleTask"
             android:label="@string/settingsactivity_title" />
         <activity
-            android:name=".views.activities.about.AboutActivity"
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.views.activities.about.AboutActivity"
             android:launchMode="singleTask"
             android:label="@string/aboutactivity_title" />
 
@@ -69,7 +69,7 @@
             android:value="@integer/google_play_services_version" />
 
         <service
-            android:name=".services.trackrecorder.TrackRecorderService"
+            android:name="com.janhafner.myskatemap.apps.activityrecorder.services.activityrecorder.ActivityRecorderService"
             android:exported="false" />
     </application>
 </manifest>

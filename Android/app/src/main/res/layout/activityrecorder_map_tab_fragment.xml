@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fragment_track_recorder_map"
+        class="com.janhafner.myskatemap.apps.activityrecorder.map.google.GoogleTrackRecorderMapFragment" />
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp"
+        android:layout_gravity="top|end">
+        <com.janhafner.myskatemap.apps.activityrecorder.views.CheckableFloatingActionButton
+            android:theme="@style/App.SecondaryFab"
+            android:id="@+id/fragment_track_recorder_map_show_my_position_on_map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_my_location_24dp"
+            app:fabSize="mini"
+            app:checkedTint="@android:color/white"
+            app:checkedBackgroundTint="@color/appBlue"
+            app:checkable="true" />
+        <com.janhafner.myskatemap.apps.activityrecorder.views.CheckableFloatingActionButton
+            android:theme="@style/App.SecondaryFab"
+            android:id="@+id/fragment_track_recorder_map_show_positions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:focusable="true"
+            android:clickable="true"
+            android:src="@drawable/ic_adjust_24dp"
+            app:fabSize="mini"
+            app:checkedTint="@android:color/white"
+            app:checkedBackgroundTint="@color/appBlue"
+            app:checkable="true" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
