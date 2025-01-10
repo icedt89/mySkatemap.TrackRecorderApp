@@ -1,4 +1,11 @@
-#Getting Started
+# Info
+
+This project is no longer actively maintained by me!
+Some features may be incomplete and/or buggy.
+
+Feel free to fork, bugfix, extend and use it.
+
+# Getting Started
 1. npm install
 2. ionic cordova prepare
 3. cordova plugin add https://github.com/mapsplugin/cordova-plugin-googlemaps-sdk --nofetch
@@ -13,7 +20,7 @@ AND/OR
 cordova.system.library.1=com.google.android.gms:play-services-maps:+
 cordova.system.library.2=com.google.android.gms:play-services-location:+
 
-#Run
+# Run
 Run the following command to run the app locally:
 ```
 > ionic serve
